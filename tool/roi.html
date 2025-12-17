@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Industrial ROI Calculator</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.png" type="image/png">
+
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+      extend: {
+        colors: {
+          slate: { 850: '#151e2e', 900: '#0f172a', 950: '#020617' }
+        },
+        animation: {
+            'float-slow': 'float 8s ease-in-out infinite',
+            'spin-slow': 'spin 20s linear infinite',
+            'blob': 'blob 20s infinite',
+        },
+        keyframes: {
+            float: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-10px)' },
+            },
+            blob: {
+                '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                '100%': { transform: 'translate(0px, 0px) scale(1)' },
+            }
+        }
+      }
+    }
+  }
+</script>
+<style>
+  /* Scrollbar & General */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+  html { scroll-behavior: smooth; }
+  
+  /* Background (Always Dark) */
+  body { 
+    background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%);
+    background-attachment: fixed; color: #f1f5f9; overflow-x: hidden;
+  }
+
+  /* Glassmorphism Cards */
+  .glass-card { 
+      transition: all 0.3s ease;
+      background-color: rgba(30, 41, 59, 0.4); 
+      backdrop-filter: blur(16px); 
+      border: 1px solid rgba(255, 255, 255, 0.08); 
+  }
+
+  /* Inputs */
+  .glass-input { 
+      transition: all 0.2s; border-radius: 0.75rem; padding: 0.75rem; width: 100%; 
+      background-color: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); color: white;
+  }
+  .glass-input:focus { outline: none; border-color: #6366f1; background-color: rgba(15, 23, 42, 0.8); }
+  
+  /* Background Glows */
+  .bg-grid { background-size: 60px 60px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px); mask-image: radial-gradient(circle at center, black 40%, transparent 80%); pointer-events: none; }
+
+  /* Print Styles */
+  @media print {
+    @page { margin: 0; size: A4; }
+    body { background: white !important; color: black !important; overflow: visible !important; }
+    #app-layer, .bg-grid, .blob-bg { display: none !important; }
+    #print-area { display: block !important; }
+    .print-page { width: 210mm; height: 296mm; position: relative; page-break-after: always; overflow: hidden; background: white; }
+    .print-page:last-child { page-break-after: auto; }
+    .cover-bg { background-color: #0f172a; color: white; }
+    .cover-accent { position: absolute; top: 0; right: 0; width: 60%; height: 100%; background: #1e293b; clip-path: polygon(25% 0, 100% 0, 100% 100%, 0% 100%); z-index: 0; }
+    .cover-content { position: relative; z-index: 10; height: 100%; padding: 20mm; display: flex; flex-direction: column; justify-content: center; }
+    .audit-table th { background-color: #f1f5f9; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 8px; padding: 5px; border-bottom: 2px solid #e2e8f0; }
+    .audit-table td { border-bottom: 1px solid #e2e8f0; padding: 5px; font-size: 9px; color: #334155; vertical-align: middle; }
+    .audit-table tr:nth-child(even) { background-color: #f8fafc; }
+  }
+  #print-area { display: none; }
+</style>
+</head>
+<body class="antialiased selection:bg-indigo-500/30 selection:text-white" onload="initApp()">
+
+<div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+    <div class="absolute inset-0 bg-grid"></div>
+    <div class="blob-bg absolute top-0 -left-1/4 w-[900px] h-[900px] bg-indigo-600/20 rounded-full blur-[120px] animate-blob mix-blend-screen"></div>
+    <div class="blob-bg absolute bottom-0 -right-1/4 w-[900px] h-[900px] bg-purple-600/10 rounded-full blur-[120px] animate-blob mix-blend-screen" style="animation-delay: 5s;"></div>
+</div>
+
+<div id="app-layer" class="relative z-10 flex flex-col min-h-screen">
+  
+    <nav class="sticky top-0 z-50 glass-card !bg-slate-900/80 !border-x-0 !border-t-0 !rounded-none border-b border-white/10 backdrop-blur-xl">
+      <div class="container mx-auto px-6 h-16 flex items-center justify-between">
+          <a href="../index.html" class="flex items-center gap-3 group">
+              <div>
+                  <h1 class="text-lg font-bold text-white tracking-wide">Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-orange-400">.App</span></h1>
+              </div>
+          </a>
+          
+          <div class="flex items-center gap-3">
+              <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/50 border border-slate-700/50 text-xs text-slate-300">
+                  <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                  <span id="fxVal" class="font-bold text-white">...</span>
+                  <button onclick="getFx()"><i data-lucide="refresh-cw" class="w-3 h-3 ml-1 hover:animate-spin text-slate-400 hover:text-white"></i></button>
+              </div>
+
+              <button onclick="toggleLanguage()" class="p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition"><span class="lang-flag text-lg">🇬🇧</span></button>
+              
+              <button onclick="printRep()" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition shadow-lg shadow-indigo-600/20 active:scale-95 ml-2">
+                  <i data-lucide="printer" class="w-4 h-4"></i> <span data-i18n="btn_report">Report</span>
+              </button>
+          </div>
+      </div>
+    </nav>
+
+    <main class="flex-1 container mx-auto p-6 lg:p-8">
+      
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="glass-card p-6 relative overflow-hidden group rounded-2xl">
+               <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110"><i data-lucide="timer" class="w-24 h-24 text-indigo-500"></i></div>
+               <div class="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-2" data-i18n="dash_roi">Avg. ROI</div>
+               <div class="text-4xl font-bold text-white tracking-tight" id="dashRoi">---</div>
+               <div class="mt-4 h-1 w-full bg-slate-700/50 rounded-full overflow-hidden"><div id="barRoi" class="h-full bg-indigo-500 w-0 transition-all duration-1000 shadow-[0_0_10px_rgba(99,102,241,0.5)]"></div></div>
+            </div>
+            
+            <div class="glass-card p-6 relative overflow-hidden group rounded-2xl">
+               <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition"><i data-lucide="wallet" class="w-24 h-24 text-green-500"></i></div>
+               <div class="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-2" data-i18n="dash_save">Annual Savings</div>
+               <div class="text-3xl font-bold text-green-400 tracking-tight" id="dashSave">0</div>
+            </div>
+            
+            <div class="glass-card p-6 relative overflow-hidden rounded-2xl">
+               <div class="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-2" data-i18n="dash_inv">Total Investment</div>
+               <div class="text-3xl font-bold text-white tracking-tight" id="dashInv">0</div>
+            </div>
+            
+            <div class="glass-card p-6 !bg-gradient-to-br from-slate-800 to-slate-900 border-orange-500/20 rounded-2xl">
+               <div class="flex items-center justify-between">
+                  <div>
+                      <div class="text-orange-400 text-[10px] font-bold uppercase tracking-wider mb-1" data-i18n="dash_co2">CO2 Reduction</div>
+                      <div class="text-3xl font-bold text-white" id="dashCo2">0 <span class="text-sm font-normal text-slate-500">Ton</span></div>
+                  </div>
+                  <div class="p-3 bg-orange-500/10 rounded-xl text-orange-500 border border-orange-500/20"><i data-lucide="leaf" class="w-6 h-6"></i></div>
+               </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+            
+            <div class="xl:col-span-4 space-y-6">
+                
+                <div class="glass-card p-6 rounded-2xl">
+                   <h3 class="text-indigo-400 text-xs font-bold uppercase mb-4 flex items-center gap-2"><i data-lucide="briefcase" class="w-4 h-4"></i> <span data-i18n="lbl_proj">Project Details</span></h3>
+                   <div class="space-y-4">
+                       <div>
+                           <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block" data-i18n="lbl_prep">Prepared By</label>
+                           <div class="grid gap-2"><input type="text" id="pName" class="glass-input text-xs" data-i18n="ph_firm" placeholder="Firm"><input type="text" id="pEng" class="glass-input text-xs" data-i18n="ph_eng" placeholder="Engineer"></div>
+                       </div>
+                       <div class="h-px bg-white/5 my-3"></div>
+                       <div>
+                           <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block" data-i18n="lbl_cust">Customer Info</label>
+                           <div class="grid gap-2"><input type="text" id="cName" class="glass-input text-xs" data-i18n="ph_cust_firm" placeholder="Client Firm"><input type="text" id="cEng" class="glass-input text-xs" data-i18n="ph_dept" placeholder="Contact / Dept"></div>
+                       </div>
+                   </div>
+                </div>
+
+                <div class="glass-card p-6 rounded-2xl">
+                    <h3 class="text-orange-400 text-xs font-bold uppercase mb-4 flex items-center gap-2"><i data-lucide="flame" class="w-4 h-4"></i> <span data-i18n="lbl_env">Environment & Energy</span></h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="text-[10px] text-slate-400 mb-1 block" data-i18n="lbl_temp">Amb. Temp (°C)</label><input type="number" id="tAmb" class="glass-input text-xs" value="25"></div>
+                        <div><label class="text-[10px] text-slate-400 mb-1 block" data-i18n="lbl_wind">Wind (m/s)</label><input type="number" id="vWind" class="glass-input text-xs" value="1" step="0.5"></div>
+                    </div>
+                    <div class="mt-4">
+                        <label class="text-[10px] text-slate-400 mb-1 block" data-i18n="lbl_fuel">Fuel Type & Eff.</label>
+                        <div class="flex gap-2">
+                             <select id="fuel" class="glass-input flex-1 text-xs"><option value="gas" data-i18n="fuel_gas">Natural Gas (m³)</option><option value="elec" data-i18n="fuel_elec">Electricity (kWh)</option><option value="lng" data-i18n="fuel_lng">LNG (kg)</option><option value="fueloil" data-i18n="fuel_oil">Fuel Oil (kg)</option><option value="coal" data-i18n="fuel_coal">Coal (kg)</option></select>
+                             <input type="number" id="eff" class="glass-input w-16 text-center text-xs" value="85" title="Eff %">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <label class="text-[10px] text-slate-400 mb-1 block" data-i18n="lbl_price">Unit Price</label>
+                            <div class="flex gap-1"><input type="number" id="price" class="glass-input text-xs" value="0.15"><select id="energyCurr" class="glass-input !px-1 w-14 text-center text-xs"><option value="USD">$</option><option value="EUR">€</option><option value="GBP">£</option><option value="TL">₺</option></select></div>
+                        </div>
+                        <div><label class="text-[10px] text-slate-400 mb-1 block" data-i18n="lbl_hours">Annual Hours</label><input type="number" id="hours" class="glass-input text-xs" value="8000"></div>
+                    </div>
+                </div>
+
+                <div class="glass-card p-6 border-indigo-500/30 shadow-[0_0_20px_rgba(99,102,241,0.1)] rounded-2xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none"></div>
+                    
+                    <h3 class="text-white text-sm font-bold uppercase mb-4 flex items-center gap-2 relative z-10"><i data-lucide="plus-circle" class="w-4 h-4 text-indigo-400"></i> <span data-i18n="lbl_add">Add New Item</span></h3>
+                    
+                    <div class="flex bg-slate-900/50 rounded-lg p-1 mb-4 border border-white/5 relative z-10">
+                        <button onclick="setType('valve')" id="btn-valve" class="flex-1 py-1.5 text-xs font-medium rounded text-white bg-slate-700 shadow transition-all" data-i18n="btn_v">Valve</button>
+                        <button onclick="setType('pipe')" id="btn-pipe" class="flex-1 py-1.5 text-xs font-medium rounded text-slate-400 hover:text-white transition-all" data-i18n="btn_p">Pipe</button>
+                        <button onclick="setType('tank')" id="btn-tank" class="flex-1 py-1.5 text-xs font-medium rounded text-slate-400 hover:text-white transition-all" data-i18n="btn_t">Flat</button>
+                    </div>
+                    <select id="type" class="hidden"><option value="valve">Valve</option><option value="pipe">Pipe</option><option value="tank">Flat</option></select>
+                    
+                    <div id="g-valve" class="space-y-3 relative z-10">
+                        <select id="valveType" class="glass-input text-xs">
+                            <optgroup label="Valves" data-i18n="grp_valves"><option value="gate" data-i18n="val_gate">Gate Valve</option><option value="globe" data-i18n="val_globe">Globe Valve</option><option value="ball" data-i18n="val_ball_fl">Ball Valve</option><option value="butterfly" data-i18n="val_butterfly">Butterfly Valve</option><option value="check" data-i18n="val_check">Check Valve</option><option value="strainer" data-i18n="val_strainer">Strainer</option></optgroup>
+                        </select>
+                        <select id="vDN" class="glass-input text-xs"></select>
+                    </div>
+                    <div id="g-pipe" class="hidden grid grid-cols-2 gap-3 relative z-10"><select id="pDN" class="glass-input text-xs"></select><input type="number" id="pLen" class="glass-input text-xs" placeholder="Length (m)" data-i18n="ph_len" value="1"></div>
+                    <div id="g-tank" class="hidden grid grid-cols-2 gap-3 relative z-10"><input type="number" id="tA" class="glass-input text-xs" placeholder="Width (m)" data-i18n="ph_width" value="1"><input type="number" id="tB" class="glass-input text-xs" placeholder="Height (m)" data-i18n="ph_height" value="1"></div>
+                    
+                    <div class="grid grid-cols-2 gap-3 mt-4 relative z-10">
+                        <div><label class="text-[10px] text-slate-400 mb-1 block" data-i18n="lbl_st">Process Temp</label><div class="relative"><input type="number" id="tProc" class="glass-input pl-8 text-xs" value="160"><i data-lucide="thermometer" class="w-3 h-3 text-red-400 absolute left-2.5 top-2.5"></i></div></div>
+                        <div><label class="text-[10px] text-slate-400 mb-1 block" data-i18n="lbl_qty">Quantity</label><input type="number" id="qty" class="glass-input text-center font-bold text-xs" value="1"></div>
+                    </div>
+                    
+                    <div class="mt-4 relative z-10">
+                        <input type="file" id="imgInp" class="hidden" accept="image/*" onchange="readImg(this)">
+                        <div onclick="document.getElementById('imgInp').click()" class="border border-dashed border-slate-600 rounded-lg p-3 text-center cursor-pointer hover:border-indigo-500 hover:bg-slate-800/50 transition group"><i data-lucide="camera" class="w-4 h-4 text-slate-500 mx-auto group-hover:text-indigo-400 mb-1"></i><span class="text-[10px] text-slate-400 block" data-i18n="lbl_photo">Select Thermal Photo</span></div>
+                        <img id="prevImg" class="hidden w-full h-24 object-cover rounded-lg mt-2 border border-slate-600">
+                    </div>
+
+                    <div class="bg-slate-900/50 rounded-lg p-3 mt-4 border border-white/5 relative z-10">
+                        <label class="text-[10px] text-green-400 font-bold uppercase mb-2 block" data-i18n="lbl_spec">Insulation Specs</label>
+                        <div class="mb-2"><select id="calcStd" class="glass-input text-[10px] !py-1 !h-7 text-slate-300"><option value="iso" data-i18n="std_iso">ISO 12241 (Standard)</option><option value="astm" data-i18n="std_astm">ASTM C680 (USA)</option><option value="vdi" data-i18n="std_vdi">VDI 2055 (German)</option></select></div>
+                        <select id="matSelect" class="glass-input text-xs mb-2">
+                            <option value="rockwool" data-i18n="mat_rock">Rockwool</option><option value="glasswool" data-i18n="mat_glass">Needled Glass Fiber</option> <option value="rubber" data-i18n="mat_rubber">Elastomeric Rubber</option><option value="aerogel" data-i18n="mat_aerogel">Aerogel</option><option value="ceramic" data-i18n="mat_ceramic">Ceramic Fiber</option><option value="bare" class="font-bold text-red-400" data-i18n="mat_bare">⚠️ Bare Surface</option>
+                        </select>
+                        <div class="grid grid-cols-2 gap-2 mt-2">
+                            <input type="number" id="thk" class="glass-input text-xs" value="50" placeholder="Thick. (mm)" data-i18n="ph_thk"><input type="number" id="inv" class="glass-input text-xs" placeholder="Invest. Cost" data-i18n="ph_inv">
+                        </div>
+                        <div class="mt-2 text-right"><select id="curr" class="glass-input text-[10px] !w-20 inline-block !py-1 !h-7"><option value="USD">$ USD</option><option value="EUR">€ EUR</option><option value="GBP">£ GBP</option><option value="TL">₺ TL</option></select></div>
+                    </div>
+
+                    <div id="btn-group" class="mt-4 relative z-10">
+                        <button id="btnAdd" onclick="calc()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-600/20 transition active:scale-95 flex items-center justify-center gap-2 text-sm"><i data-lucide="plus" class="w-4 h-4"></i> <span data-i18n="btn_calc">Calculate & Add</span></button>
+                        <button id="btnUpdate" onclick="finishUpdate()" class="hidden w-full bg-orange-500 hover:bg-orange-400 text-white font-bold py-3 rounded-xl shadow-lg shadow-orange-500/20 transition active:scale-95 flex items-center justify-center gap-2 text-sm"><i data-lucide="check" class="w-4 h-4"></i> Finish Edit</button>
+                    </div>
+                </div>
+
+                <div class="glass-card p-4 rounded-xl border-l-4 border-l-yellow-500/50 bg-yellow-500/5">
+                    <div class="flex gap-3">
+                        <i data-lucide="info" class="w-5 h-5 text-yellow-500 shrink-0 mt-0.5"></i>
+                        <p class="text-[10px] text-slate-400 leading-relaxed text-justify" data-i18n="legal_body">
+                            This software provides theoretical thermal simulations based on ISO 12241 & ASTM C680. Results are estimates only. Professional audit recommended.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="xl:col-span-8">
+                <div class="glass-card p-0 overflow-hidden min-h-[600px] flex flex-col rounded-2xl">
+                    <div class="p-4 border-b border-white/5 flex justify-between items-center bg-slate-900/30">
+                        <h3 class="font-bold text-white flex items-center gap-2"><i data-lucide="list" class="w-4 h-4 text-green-400"></i> <span data-i18n="lbl_list">Calculation List</span></h3>
+                        <button onclick="clearAll()" class="text-xs text-red-400 hover:text-red-300 transition" data-i18n="btn_clear">Clear All</button>
+                    </div>
+                    <div class="overflow-x-auto flex-1">
+                        <table class="w-full text-left text-sm" id="grid">
+                        <thead class="bg-slate-900/80 text-[10px] uppercase text-slate-400 font-semibold sticky top-0 backdrop-blur-md">
+                            <tr>
+                            <th class="px-6 py-3" data-i18n="th_img">Img</th><th class="px-6 py-3" data-i18n="th_comp">Component</th><th class="px-6 py-3" data-i18n="th_det">Detail</th><th class="px-6 py-3 text-center" data-i18n="th_qty">Qty</th>
+                            <th class="px-6 py-3 text-right text-red-400" data-i18n="th_loss">Loss</th><th class="px-6 py-3 text-right" data-i18n="th_inv">Invest</th><th class="px-6 py-3 text-right text-green-400" data-i18n="th_gain">Savings</th>
+                            <th class="px-6 py-3 text-right">ROI</th><th class="px-6 py-3 text-right" data-i18n="th_act">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-700/50" id="gridBody">
+                            <tr><td colspan="9" class="px-6 py-20 text-center text-slate-500"><i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-20"></i><span id="emptyMsg" data-i18n="msg_no_calc">No calculation added yet.</span></td></tr>
+                        </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div id="print-area">
+    <div class="print-page cover-bg">
+        <div class="cover-accent"></div>
+        <div class="cover-content">
+            <div class="text-sm tracking-[5px] text-green-400 uppercase mb-4 opacity-90" id="rep_title_top">Energy Efficiency Audit</div>
+            <h1 class="text-6xl font-black leading-tight mb-10 text-white relative z-10" id="rep_title_main">INDUSTRIAL <br><span class="text-green-500">INSULATION</span> <br>REPORT</h1>
+            <div class="border-l-4 border-green-500 pl-8 mt-12 relative z-10">
+                <div class="text-xs uppercase opacity-60 mb-1" id="rep_client_lbl">Client</div><div class="text-3xl font-bold mb-8" id="covClient">CLIENT COMPANY</div>
+                <div class="text-xs uppercase opacity-60 mb-1" id="rep_prep_lbl">Prepared By</div><div class="text-xl font-bold" id="covProv">PROVIDER</div>
+            </div>
+             <div class="mt-auto text-right relative z-10"><div class="text-[120px] font-black text-green-500 leading-none" id="covRoi">---</div><div class="text-2xl font-medium tracking-wide" id="rep_roi_month">MONTH PAYBACK</div></div>
+            <div class="absolute bottom-4 left-8 text-xs text-white/20 font-bold uppercase tracking-widest">POWERED BY OPTIMIZI.APP</div>
+        </div>
+    </div>
+    
+    <div class="print-page p-12">
+        <div class="flex justify-between items-center border-b-2 border-slate-900 pb-4 mb-8"><h2 class="text-xl font-black text-slate-900 uppercase" id="rep_p2_title">Detailed Analysis</h2><div class="text-xs text-slate-500" id="rDate">...</div></div>
+        <table class="w-full audit-table mb-8"><thead><tr id="rep_table_head"></tr></thead><tbody id="rTable"></tbody></table>
+        <div class="mt-auto pt-8 border-t border-slate-200 text-center text-[10px] text-slate-400">Page 2 / 3</div>
+    </div>
+    
+    <div class="print-page p-12 flex flex-col h-full">
+        <h2 class="text-2xl font-black text-slate-900 uppercase mb-8 border-b-2 border-slate-900 pb-4" id="rep_p3_title">Executive Summary</h2>
+        <div class="grid grid-cols-3 gap-6 mb-8">
+            <div class="bg-red-50 border border-red-200 rounded-xl p-6"><div class="text-xs font-bold text-red-400 uppercase tracking-widest mb-1" id="rep_risk_card">CURRENT ANNUAL LOSS</div><div class="text-4xl font-black text-red-600 tracking-tight" id="sumLoss">0</div><div class="text-[9px] text-red-800 mt-2 font-bold opacity-70" id="rep_risk_desc">Loss if no action taken.</div></div>
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-6"><div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1" id="rep_cost_card">TOTAL INVESTMENT</div><div class="text-4xl font-black text-slate-800 tracking-tight" id="tabInv">0</div></div>
+            <div class="bg-green-50 border border-green-200 rounded-xl p-6"><div class="text-xs font-bold text-green-400 uppercase tracking-widest mb-1" id="rep_opp_card">NET SAVINGS (ANNUAL)</div><div class="text-4xl font-black text-green-600 tracking-tight" id="sumSave">0</div></div>
+        </div>
+        <div class="mb-8"><h3 class="text-sm font-bold text-slate-900 uppercase mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-4 h-4"></i> <span id="rep_proj_title">Financial Projection</span></h3><table class="w-full text-xs text-right border-collapse"><thead><tr class="bg-slate-100 text-slate-500"><th class="p-2 text-left" id="rep_scen">Scenario</th><th class="p-2" id="th_y1">Year 1</th><th class="p-2" id="th_y2">Year 2</th><th class="p-2" id="th_y3">Year 3</th><th class="p-2" id="th_y4">Year 4</th><th class="p-2" id="th_y5">Year 5</th><th class="p-2 font-black" id="th_total">TOTAL</th></tr></thead><tbody class="font-mono" id="projTable"></tbody></table></div>
+        <div class="flex gap-8 mb-8">
+             <div class="flex-1 bg-blue-50 border border-blue-100 rounded-xl p-6 flex flex-col justify-center"><span class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-1" id="rep_roi_card">ROI</span><div class="text-4xl font-black text-blue-600" id="txtRoi">---</div><div class="h-2 bg-blue-200 rounded-full overflow-hidden mt-2 w-full"><div id="visualBar" class="h-full bg-blue-600 w-0 transition-all"></div></div></div>
+             <div class="flex-1 bg-emerald-900 rounded-xl p-6 text-white flex items-center justify-between relative overflow-hidden">
+                  <div class="absolute right-0 bottom-0 opacity-10 pointer-events-none translate-x-4 translate-y-4"><i data-lucide="sprout" class="w-32 h-32 text-white"></i></div>
+                 <div class="z-10"><div class="text-[10px] text-emerald-300 font-bold uppercase tracking-widest" id="rep_env_title">CARBON FOOTPRINT</div><div class="text-3xl font-black mt-1"><span id="sumCo2">0</span> Ton</div></div>
+                 <div class="text-right z-10 border-l border-emerald-700 pl-6"><div class="text-3xl font-black"><span id="sumTrees">0</span></div><div class="text-[9px] text-emerald-400 mt-1" id="rep_tree_desc">Trees</div></div>
+             </div>
+         </div>
+        <div class="mt-auto border-t-2 border-slate-100 pt-4"><p class="text-[10px] text-slate-400 text-center font-medium leading-relaxed" id="rep_legal">...</p></div>
+    </div>
+</div>
+
+<script>
+    // System Init (Login kaldırıldı, direkt başla)
+    async function initApp(){
+        document.documentElement.classList.add('dark'); // Force Dark
+        try{
+            const rsp=await fetch('https://ipapi.co/json/');
+            const data=await rsp.json();
+            if(data.country_code==='TR') setLang('tr'); else setLang('en');
+        }catch(e){
+            const userLang=navigator.language||navigator.userLanguage;
+            if(userLang.startsWith('tr')) setLang('tr'); else setLang('en');
+        }
+        init(); 
+    }
+
+    const TRANSLATIONS={tr:{legal_body:"Bu yazılım, ISO 12241 & ASTM C680 mühendislik standartlarına dayalı teorik termal simülasyonlar sunar. Sonuçlar tahmin amaçlıdır, garanti niteliği taşımaz. Yatırım öncesi profesyonel etüd önerilir.",page_title:"Yalıtım Simülasyonu",page_subtitle:"Termal Analiz & ROI",btn_report:"Rapor Al",dash_roi:"Ort. Amortisman",dash_save:"Yıllık Kazanç",dash_inv:"Toplam Yatırım",dash_co2:"CO2 Azaltım",lbl_proj:"Proje Detayları",lbl_prep:"Hazırlayan",ph_firm:"Firma Adı",ph_eng:"Mühendis Adı",lbl_cust:"Müşteri Bilgileri",ph_cust_firm:"Müşteri Firma",ph_dept:"İlgili Kişi",lbl_env:"Ortam & Enerji",lbl_temp:"Ortam Sıc. (°C)",lbl_wind:"Rüzgar (m/s)",lbl_fuel:"Yakıt & Verim",fuel_gas:"Doğalgaz (m³)",fuel_elec:"Elektrik (kWh)",fuel_lng:"LNG (kg)",fuel_oil:"Fuel Oil (kg)",fuel_coal:"Kömür (kg)",lbl_price:"Birim Fiyat",lbl_hours:"Yıllık Saat",lbl_add:"Yeni Ölçüm Ekle",btn_v:"Armatür",btn_p:"Boru",btn_t:"Tank / Düz",lbl_st:"İşletme Sıc. (°C)",lbl_qty:"Adet",lbl_photo:"Termal Foto Seç",lbl_spec:"İzolasyon Spekleri",btn_calc:"Hesapla & Ekle",lbl_list:"Hesaplama Listesi",msg_no_calc:"Henüz hesaplama eklenmedi.",btn_clear:"Temizle",th_img:"Görsel",th_comp:"Ekipman",th_det:"Detay",th_qty:"Adet",th_loss:"Mevcut Kayıp",th_inv:"Yatırım",th_gain:"Kazanç",th_act:"İşlem",tool_title:"Birim Çevirici",tool_desc:"Yapım aşamasında...",grp_valves:"Vanalar",val_gate:"Sürgülü Vana",val_globe:"Glob Vana",val_ball_fl:"Küresel Vana",val_butterfly:"Kelebek Vana",val_check:"Çekvalf",val_strainer:"Pislik Tutucu",std_iso:"ISO 12241 (Standart)",std_astm:"ASTM C680 (ABD)",std_vdi:"VDI 2055 (Alman)",mat_rock:"Taş Yünü (Sanayi)",mat_rubber:"Elastomerik Kauçuk",mat_aerogel:"Aerogel",mat_glass:"İğnelenmiş Cam Elyaf",mat_ceramic:"Seramik Yünü",mat_bare:"⚠️ Yalıtımsız (Çıplak)",unit_month:"Ay",rep_title_top:"Enerji Verimliliği Etüdü",rep_title_main:"ENDÜSTRİYEL <br><span class='text-green-500'>YALITIM</span> <br>RAPORU",rep_client_lbl:"Müşteri",rep_prep_lbl:"Hazırlayan",rep_roi_month:"AY AMORTİSMAN SÜRESİ",rep_p2_title:"Detaylı Analiz Dökümü",rep_th_loss:"Mevcut Kayıp",rep_th_inv:"Yatırım",rep_th_gain:"Net Kazanç",rep_p3_title:"Yönetici Özeti",rep_risk_card:"MEVCUT YILLIK KAYIP",rep_risk_desc:"Müdahale edilmezse kaybedilecek tutar.",rep_cost_card:"TOPLAM YATIRIM",rep_opp_card:"NET KAZANÇ (YILLIK)",rep_proj_title:"Finansal Projeksiyon (5 Yıl)",rep_scen:"Senaryo",rep_scen_loss:"Mevcut Durum (Kümülatif Kayıp)",rep_scen_gain:"Yatırım Sonrası (Kümülatif Kazanç)",rep_roi_card:"Yatırım Geri Dönüş (ROI)",rep_env_title:"KARBON AYAK İZİ",rep_tree_desc:"Ağaç Eşdeğeri",rep_legal:"Hesaplamalar ISO 12241 mühendislik standartlarına göre simüle edilmiştir.",ph_inv:"Yatırım Tutarı",ph_thk:"Kalınlık (mm)",ph_len:"Uzunluk (m)",ph_width:"Genişlik (m)",ph_height:"Yükseklik (m)",th_y1:"Yıl 1",th_y2:"Yıl 2",th_y3:"Yıl 3",th_y4:"Year 4",th_y5:"Year 5",th_total:"TOPLAM"},en:{legal_body:"This software provides theoretical thermal simulations based on ISO 12241 & ASTM C680. Results are estimates only. Professional audit recommended.",page_title:"Insulation Simulation",page_subtitle:"Thermal Analysis & ROI",btn_report:"Get Report",dash_roi:"Avg. ROI",dash_save:"Annual Savings",dash_inv:"Total Investment",dash_co2:"CO2 Reduction",lbl_proj:"Project Details",lbl_prep:"Prepared By",ph_firm:"Company",ph_eng:"Engineer",lbl_cust:"Customer Info",ph_cust_firm:"Client Company",ph_dept:"Contact",lbl_env:"Environment & Energy",lbl_temp:"Amb. Temp (°C)",lbl_wind:"Wind (m/s)",lbl_fuel:"Fuel Type & Eff.",fuel_gas:"Natural Gas (m³)",fuel_elec:"Electricity (kWh)",fuel_lng:"LNG (kg)",fuel_oil:"Fuel Oil (kg)",fuel_coal:"Coal (kg)",lbl_price:"Unit Price",lbl_hours:"Annual Hours",lbl_add:"Add New Item",btn_v:"Valve",btn_p:"Pipe",btn_t:"Tank / Flat",lbl_st:"Process Temp (°C)",lbl_qty:"Qty",lbl_photo:"Select Thermal Photo",lbl_spec:"Insulation Specs",btn_calc:"Calculate & Add",lbl_list:"Calculation List",msg_no_calc:"No calculation added yet.",btn_clear:"Clear All",th_img:"Img",th_comp:"Component",th_det:"Detail",th_qty:"Qty",th_loss:"Loss",th_inv:"Invest",th_gain:"Savings",th_act:"Action",tool_title:"Unit Converter",tool_desc:"Under construction...",grp_valves:"Valves",val_gate:"Gate Valve",val_globe:"Globe Valve",val_ball_fl:"Ball Valve",val_butterfly:"Butterfly Valve",val_check:"Check Valve",val_strainer:"Strainer",std_iso:"ISO 12241 (Standard)",std_astm:"ASTM C680 (USA)",std_vdi:"VDI 2055 (German)",mat_rock:"Rock Wool",mat_rubber:"Elastomeric Rubber",mat_aerogel:"Aerogel",mat_glass:"Needled Glass Fiber",mat_ceramic:"Ceramic Fiber",mat_bare:"⚠️ Uninsulated (Bare)",unit_month:"Months",rep_title_top:"Energy Efficiency Audit",rep_title_main:"INDUSTRIAL <br><span class='text-green-500'>INSULATION</span> <br>REPORT",rep_client_lbl:"Client",rep_prep_lbl:"Prepared By",rep_roi_month:"MONTH PAYBACK",rep_p2_title:"Detailed Analysis",rep_th_loss:"Current Loss",rep_th_inv:"Investment",rep_th_gain:"Net Savings",rep_p3_title:"Executive Summary",rep_risk_card:"CURRENT ANNUAL LOSS",rep_risk_desc:"Loss if no action taken.",rep_cost_card:"TOTAL INVESTMENT",rep_opp_card:"NET SAVINGS (ANNUAL)",rep_proj_title:"Financial Projection",rep_scen:"Scenario",rep_scen_loss:"Current State (Loss)",rep_scen_gain:"Post-Investment (Gain)",rep_roi_card:"ROI",rep_env_title:"CARBON FOOTPRINT",rep_tree_desc:"Trees",rep_legal:"Calculations simulated according to ISO 12241 standards.",ph_inv:"Invest. Cost",ph_thk:"Thick. (mm)",ph_len:"Length (m)",ph_width:"Width (m)",ph_height:"Height (m)",th_y1:"Year 1",th_y2:"Year 2",th_y3:"Year 3",th_y4:"Year 4",th_y5:"Year 5",th_total:"TOTAL"}};let currentLang='en';
+    function toggleLanguage(){setLang(currentLang==='tr'?'en':'tr');}
+    function setLang(code){currentLang=code;const isEn=currentLang==='en';document.querySelectorAll('.lang-flag').forEach(el=>el.innerText=isEn?'🇬🇧':'🇹🇷');document.querySelectorAll('[data-i18n]').forEach(el=>{const key=el.getAttribute('data-i18n');if(TRANSLATIONS[currentLang][key]){if(el.tagName==='INPUT'||el.tagName==='TEXTAREA')el.placeholder=TRANSLATIONS[currentLang][key];else if(el.tagName==='OPTGROUP')el.label=TRANSLATIONS[currentLang][key];else if(el.tagName==='OPTION')el.innerText=TRANSLATIONS[currentLang][key];else el.innerText=TRANSLATIONS[currentLang][key];}});if(document.getElementById('th_y1')){document.getElementById('th_y1').innerText=TRANSLATIONS[currentLang].th_y1;document.getElementById('th_y2').innerText=TRANSLATIONS[currentLang].th_y2;document.getElementById('th_y3').innerText=TRANSLATIONS[currentLang].th_y3;document.getElementById('th_y4').innerText=TRANSLATIONS[currentLang].th_y4;document.getElementById('th_y5').innerText=TRANSLATIONS[currentLang].th_y5;}if(code==='tr'){if(document.getElementById('energyCurr'))document.getElementById('energyCurr').value='TL';if(document.getElementById('curr'))document.getElementById('curr').value='TL';}else{if(document.getElementById('energyCurr'))document.getElementById('energyCurr').value='EUR';if(document.getElementById('curr'))document.getElementById('curr').value='EUR';}render();}
+    function setType(t){['valve','pipe','tank'].forEach(x=>{document.getElementById('g-'+x).classList.add('hidden');});document.getElementById('g-'+t).classList.remove('hidden');document.getElementById('type').value=t;const buttons={valve:document.getElementById('btn-valve'),pipe:document.getElementById('btn-pipe'),tank:document.getElementById('btn-tank')};const activeClass="bg-white text-slate-900 shadow";const inactiveClass="text-slate-400 hover:text-white";Object.values(buttons).forEach(btn=>{btn.className="flex-1 py-1.5 text-xs font-medium rounded transition-all "+inactiveClass;});buttons[t].className="flex-1 py-1.5 text-xs font-medium rounded transition-all "+activeClass;}
+    const PIPES={15:21.3,20:26.7,25:33.4,32:42.2,40:48.3,50:60.3,65:73.0,80:88.9,100:114.3,125:141.3,150:168.3,200:219.1,250:273.0,300:323.9,350:355.6,400:406.4};const MATS={rockwool:{a:0.035,b:0.00017,c:0},glasswool:{a:0.025,b:0.00015,c:0},ceramic:{a:0.025,b:0.00012,c:1.2e-7},aerogel:{a:0.019,b:0.00004,c:5e-8},rubber:{a:0.034,b:0.000075,c:0},bare:{a:25,b:0,c:0}};const VALVE_FACTORS={gate:1.2,globe:1.4,butterfly:0.6,ball:1.0,strainer:1.5,check:0.9};const FUELS={gas:10.64,elec:1.0,lng:13.8,fueloil:11.8,coal:7.5};let LIST=[],FX={USD:34.50,EUR:36.50,GBP:43.20,TL:1.0},currImg=null,editingIndex=null;
+    function getK(matKey,T){if(!MATS[matKey])return 0.04;const m=MATS[matKey];return m.a+(m.b*T)+((m.c||0)*T*T);}
+    function getSurfaceCoeff(std,vWind,Ts,Ta,D_out,isFlat){const dT=Math.abs(Ts-Ta);const sigma=5.67e-8,eps=0.9;let h_rad=eps*sigma*(Math.pow(Ts+273.15,4)-Math.pow(Ta+273.15,4))/(dT||1);if(dT<0.1)h_rad=5;let h_cv=0;if(std==='astm'){if(vWind<0.1){if(isFlat)h_cv=1.95*Math.pow(dT,0.25);else h_cv=1.32*Math.pow(dT/(D_out||1),0.25);}else{h_cv=10.0*Math.pow(vWind,0.6)/Math.pow((D_out||1),0.4);}}else if(std==='vdi'){if(vWind<0.1)h_cv=3.5+0.05*dT;else h_cv=3.9*Math.pow(vWind,0.7)/Math.pow((D_out||1),0.3);}else{if(vWind<0.5){if(isFlat)h_cv=2.2*Math.pow(dT,0.25);else h_cv=1.4*Math.pow(dT/(D_out||1),0.25);}else{h_cv=4+4*vWind;}}if(h_cv<1)h_cv=1;return h_rad+h_cv;}
+    function getCalculationResult(){const qty=parseFloat(document.getElementById('qty').value)||1;const type=document.getElementById('type').value;const tProc=parseFloat(document.getElementById('tProc').value)||0;const tAmb=parseFloat(document.getElementById('tAmb').value)||25;const vWind=parseFloat(document.getElementById('vWind').value)||0;const matKey=document.getElementById('matSelect').value;const thk=parseFloat(document.getElementById('thk').value)||0;const standard=document.getElementById('calcStd').value;const invRaw=parseFloat(document.getElementById('inv').value)||0;const curr=document.getElementById('curr').value;const invRate=curr==='TL'?1:(FX[curr]||1);const inv=invRaw*invRate;const eff=(parseFloat(document.getElementById('eff').value)||85)/100;const priceRaw=parseFloat(document.getElementById('price').value)||0;const energyCurr=document.getElementById('energyCurr').value;const price=priceRaw*(FX[energyCurr]||1);const hours=parseFloat(document.getElementById('hours').value)||8000;let isFlat=(type==='tank');let dPipe=0,multiplier=1,D_ext=0,Name="";if(isFlat){const A=parseFloat(document.getElementById('tA').value)||1;const B=parseFloat(document.getElementById('tB').value)||1;multiplier=A*B;dPipe=1.0;D_ext=1.0;Name=`Flat/Tank (${A}x${B}m)`;}else{const dn=(type==='valve')?document.getElementById('vDN').value:document.getElementById('pDN').value;const mm=parseFloat(dn)||100;dPipe=mm/1000;D_ext=dPipe;const pLen=parseFloat(document.getElementById('pLen').value)||1;if(type==='valve'){const vType=document.getElementById('valveType').value;const factor=VALVE_FACTORS[vType]||1.2;multiplier=1;Name=`Valve (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`;}else{multiplier=pLen;Name=`Pipe (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`;}}const thkM=thk/1000;let minTs=tAmb,maxTs=tProc,Ts=(minTs+maxTs)/2;if(matKey==='bare'){for(let i=0;i<100;i++){let D_out=isFlat?1.0:dPipe;const h_total=getSurfaceCoeff(standard,vWind,tProc,tAmb,D_out,isFlat);Ts=tProc;break;}}else{for(let i=0;i<100;i++){const Tm=(tProc+Ts)/2;const k1=getK(matKey,Tm);let R1=isFlat?thkM/k1:Math.log((dPipe+2*thkM)/dPipe)/(2*Math.PI*k1);const Q_cond=(tProc-Ts)/R1;let D_out=isFlat?1.0:dPipe+2*thkM;const h_total=getSurfaceCoeff(standard,vWind,Ts,tAmb,D_out,isFlat);let A_surf=isFlat?1:2*Math.PI*(D_out/2);const Q_conv=h_total*A_surf*(Ts-tAmb);if(Q_cond>Q_conv)minTs=Ts;else maxTs=Ts;Ts=(minTs+maxTs)/2;}}const finalTs=Ts;let D_out_final=isFlat?1.0:dPipe+(matKey==='bare'?0:2*thkM);const h_final=getSurfaceCoeff(standard,vWind,finalTs,tAmb,D_out_final,isFlat);let A_outer_unit=isFlat?1:Math.PI*D_out_final;const Q_unit=h_final*A_outer_unit*(finalTs-tAmb);let Q_total_watts=0;if(type==='valve'){const vType=document.getElementById('valveType').value;const factor=VALVE_FACTORS[vType]||1.2;Q_total_watts=Q_unit*factor*qty;}else{Q_total_watts=Q_unit*multiplier*qty;}let h_bare=getSurfaceCoeff(standard,vWind,tProc,tAmb,dPipe,isFlat);let A_bare_unit=isFlat?1:Math.PI*dPipe;let Q_bare_unit=h_bare*A_bare_unit*(tProc-tAmb);let Q_bare_total=0;if(type==='valve'){const vType=document.getElementById('valveType').value;const factor=VALVE_FACTORS[vType]||1.2;Q_bare_total=Q_bare_unit*factor*qty;}else{Q_bare_total=Q_bare_unit*multiplier*qty;}const LHV=FUELS[document.getElementById('fuel').value]||10;const loss_money_insulated=(Q_total_watts*hours/1000/(LHV*eff))*price;const loss_money_bare=(Q_bare_total*hours/1000/(LHV*eff))*price;const save_money=(matKey==='bare')?0:(loss_money_bare-loss_money_insulated);const annual_loss=(matKey==='bare')?loss_money_bare:loss_money_insulated;const inputs={type,qty,tProc,tAmb,matKey,thk,inv,standard,vDN:document.getElementById('vDN').value,pDN:document.getElementById('pDN').value,img:currImg};const matName=document.getElementById('matSelect').options[document.getElementById('matSelect').selectedIndex].text;return{name:Name,desc:matKey==='bare'?"No Insulation":`${thk}mm ${matName}`,qty,inv:inv*qty,save:save_money,loss:annual_loss,co2:(matKey==='bare'?0:(Q_bare_total-Q_total_watts)*hours/1000*0.4/1000),Ts:finalTs.toFixed(1),Tins:finalTs.toFixed(1),qBare:Q_bare_unit,qIns:Q_unit,img:currImg,inputs};}
+    function toggleTheme(){const isDark=document.documentElement.classList.toggle('dark');localStorage.setItem('theme',isDark?'dark':'light');lucide.createIcons();}
+    function loadTheme(){const theme=localStorage.getItem('theme');if(theme==='dark'||(!theme&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark');}else document.documentElement.classList.remove('dark');lucide.createIcons();}
+    function init(){fillDN('vDN');fillDN('pDN');getFx();lucide.createIcons();}
+    function fillDN(id){const el=document.getElementById(id);el.innerHTML='';for(const[k,v]of Object.entries(PIPES)){let o=document.createElement('option');o.value=v;o.text=`DN ${k}`;el.add(o);}if(id==='vDN')el.value=60.3;if(id==='pDN')el.value=88.9;}
+    function readImg(i){if(i.files&&i.files[0]){const r=new FileReader();r.onload=e=>{currImg=e.target.result;document.getElementById('prevImg').src=currImg;document.getElementById('prevImg').classList.remove('hidden');};r.readAsDataURL(i.files[0]);}}
+    async function getFx(){try{const r=await fetch('https://api.frankfurter.app/latest?from=USD&to=TRY');const d=await r.json();FX.USD=d.rates.TRY;const r2=await fetch('https://api.frankfurter.app/latest?from=EUR&to=TRY');const d2=await r2.json();FX.EUR=d2.rates.TRY;const r3=await fetch('https://api.frankfurter.app/latest?from=GBP&to=TRY');const d3=await r3.json();FX.GBP=d3.rates.TRY;document.getElementById('fxVal').innerText=FX.USD.toFixed(2);}catch(e){}}
+    function calc(){LIST.push(getCalculationResult());resetForm();render();}
+    function finishUpdate(){if(editingIndex!==null)LIST[editingIndex]=getCalculationResult();editingIndex=null;document.getElementById('btnAdd').classList.remove('hidden');document.getElementById('btnUpdate').classList.add('hidden');resetForm();render();}
+    function edit(i){editingIndex=i;const d=LIST[i].inputs;document.getElementById('qty').value=d.qty;document.getElementById('tProc').value=d.tProc;document.getElementById('matSelect').value=d.matKey;document.getElementById('thk').value=d.thk;document.getElementById('inv').value=d.inv;document.getElementById('btnAdd').classList.add('hidden');document.getElementById('btnUpdate').classList.remove('hidden');setType(d.type);}
+    function del(i){if(confirm('Delete?')){LIST.splice(i,1);render();}}
+    function resetForm(){currImg=null;document.getElementById('prevImg').classList.add('hidden');document.getElementById('qty').value=1;}
+    function clearAll(){if(confirm('Clear all?')){LIST=[];render();}}
+    function render(){const tb=document.getElementById('gridBody');tb.innerHTML='';let gInv=0,gSave=0,gCo2=0;LIST.forEach((i,x)=>{if(i.inputs.matKey!=='bare'){gInv+=i.inv;gSave+=i.save;gCo2+=i.co2;}const roiSuffix=TRANSLATIONS[currentLang].unit_month;const roi=i.save>0?(i.inv/i.save*12).toFixed(1)+" "+roiSuffix:"-";const imgTag=i.img?`<img src="${i.img}" class="w-10 h-10 object-cover rounded">`:`<div class="w-10 h-10 bg-slate-800 rounded flex items-center justify-center text-xs text-slate-500">-</div>`;tb.insertAdjacentHTML('beforeend',`<tr class="hover:bg-slate-800/30 transition border-b border-slate-700/50 ${x===editingIndex?'bg-indigo-900/20':''}"><td class="px-6 py-4">${imgTag}</td><td class="px-6 py-4 font-bold text-white">${i.name}</td><td class="px-6 py-4 text-slate-400">${i.desc}</td><td class="px-6 py-4 text-center text-white">${i.qty}</td><td class="px-6 py-4 text-right text-red-400">-${Math.round(i.loss).toLocaleString()}</td><td class="px-6 py-4 text-right text-slate-300">${Math.round(i.inv).toLocaleString()}</td><td class="px-6 py-4 text-right text-green-400">${i.inputs.matKey!=='bare'?'+'+Math.round(i.save).toLocaleString():'-'}</td><td class="px-6 py-4 text-right font-bold text-indigo-400">${roi}</td><td class="px-6 py-4 text-right"><button onclick="edit(${x})" class="text-indigo-400 mr-2 hover:text-white"><i data-lucide="pencil" class="w-4 h-4"></i></button><button onclick="del(${x})" class="text-red-400 hover:text-white"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td></tr>`);});if(LIST.length===0)tb.innerHTML=`<tr><td colspan="9" class="px-6 py-20 text-center text-slate-500"><i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-20"></i><span id="emptyMsg" data-i18n="msg_no_calc">${TRANSLATIONS[currentLang].msg_no_calc}</span></td></tr>`;const currSymVal=document.getElementById('curr')?document.getElementById('curr').value:'TL';const currSymMap={'USD':'$','EUR':'€','GBP':'£','TL':'₺'};const currSym=currSymMap[currSymVal]||'';document.getElementById('dashInv').innerText=currSym+Math.round(gInv).toLocaleString();document.getElementById('dashSave').innerText=currSym+Math.round(gSave).toLocaleString();document.getElementById('dashCo2').innerHTML=gCo2.toFixed(1)+' Ton';const roiSuffix=TRANSLATIONS[currentLang].unit_month;const totalRoi=gSave>0?(gInv/gSave*12):0;document.getElementById('dashRoi').innerHTML=totalRoi>0?totalRoi.toFixed(1)+` <span class="text-lg text-slate-500 font-normal">${roiSuffix}</span>`:'---';document.getElementById('barRoi').style.width=totalRoi>0?Math.min((totalRoi/24)*100,100)+'%':'0%';lucide.createIcons();}
+    function printRep(){try{const T=TRANSLATIONS[currentLang];const d=new Date().toLocaleDateString(currentLang==='tr'?'tr-TR':'en-US');let gInv=0,gSave=0,gCo2=0,gLoss=0;const tb=document.getElementById('rTable');tb.innerHTML='';const currSymVal=document.getElementById('curr').value;const currSymMap={'USD':'$','EUR':'€','GBP':'£','TL':'₺'};const currSym=currSymMap[currSymVal]||'';const yTx=currentLang==='tr'?'Yıl':'Year';document.getElementById('rep_table_head').innerHTML=`<th class="w-6">#</th><th class="w-24 text-center">${T.th_img}</th><th class="text-left">${T.th_comp}</th><th class="text-center w-20">${T.lbl_temp}</th><th class="text-center">W/m</th><th class="text-center w-8">${T.th_qty}</th><th class="text-right text-red-600 font-black">${T.rep_th_loss}</th><th class="text-right text-slate-700">${T.rep_th_inv}</th><th class="text-right text-green-600 font-black">${T.rep_th_gain}</th><th class="text-right w-10">ROI</th>`;LIST.forEach((i,x)=>{if(i.inputs.matKey!=='bare'){gInv+=i.inv;gSave+=i.save;gCo2+=i.co2;}gLoss+=i.loss;const roi=i.save>0?(i.inv/i.save*12).toFixed(1):"-";
+    // *** GÖRSEL BOYUTU BURADA BÜYÜTÜLDÜ (w-24 h-24) ***
+    const imgTag=i.img?`<img src="${i.img}" class="w-24 h-24 object-cover rounded mx-auto border border-slate-200">`:`<div class="w-8 h-8 bg-slate-100 rounded mx-auto flex items-center justify-center text-[8px]">-</div>`;
+    tb.innerHTML+=`<tr><td class="text-center font-bold text-slate-400">${x+1}</td><td class="text-center">${imgTag}</td><td class="font-bold text-slate-800">${i.name}<div class="text-[9px] text-slate-500 font-normal">${i.desc}</div></td><td class="text-center font-mono text-[9px]"><span class="text-blue-500 font-bold">${i.Ts}°C</span></td><td class="text-center font-mono text-[9px]"><span class="text-red-500">${Math.round(i.qBare)}</span> / <span class="text-blue-500">${Math.round(i.qIns)}</span></td><td class="text-center">${i.qty}</td><td class="text-right font-mono text-[10px] text-red-600 font-bold">-${Math.round(i.loss).toLocaleString()}</td><td class="text-right font-mono text-[10px] text-slate-700">${Math.round(i.inv).toLocaleString()}</td><td class="text-right font-mono text-[10px] text-green-600 font-bold">${i.inputs.matKey!=='bare'?'+'+Math.round(i.save).toLocaleString():'-'}</td><td class="text-right font-bold text-blue-600 text-[10px]">${roi}</td></tr>`;});const totalRoi=gSave>0?(gInv/gSave*12):0;document.getElementById('rep_title_top').innerText=T.rep_title_top;document.getElementById('rep_title_main').innerHTML=T.rep_title_main;document.getElementById('rep_client_lbl').innerText=T.rep_client_lbl;document.getElementById('rep_prep_lbl').innerText=T.rep_prep_lbl;document.getElementById('rep_roi_month').innerText=T.rep_roi_month;document.getElementById('rep_p2_title').innerText=T.rep_p2_title;document.getElementById('rep_p3_title').innerText=T.rep_p3_title;document.getElementById('rep_risk_card').innerText=T.rep_risk_card;document.getElementById('rep_risk_desc').innerText=T.rep_risk_desc;document.getElementById('rep_cost_card').innerText=T.rep_cost_card;document.getElementById('rep_opp_card').innerText=T.rep_opp_card;document.getElementById('rep_proj_title').innerText=T.rep_proj_title;document.getElementById('rep_scen').innerText=T.rep_scen;document.getElementById('rep_roi_card').innerText=T.rep_roi_card;document.getElementById('rep_env_title').innerText=T.rep_env_title;document.getElementById('rep_tree_desc').innerText=T.rep_tree_desc;document.getElementById('rep_legal').innerHTML=T.rep_legal;document.getElementById('covClient').innerText=document.getElementById('cName').value||"CLIENT";document.getElementById('covProv').innerText=document.getElementById('pName').value||"OPTIMIZI INC.";document.getElementById('covRoi').innerText=totalRoi>0?totalRoi.toFixed(1):"---";document.getElementById('rDate').innerText=d;document.getElementById('sumLoss').innerText=currSym+Math.round(gLoss).toLocaleString();document.getElementById('sumSave').innerText=currSym+Math.round(gSave).toLocaleString();document.getElementById('tabInv').innerText=currSym+Math.round(gInv).toLocaleString();document.getElementById('txtRoi').innerText=totalRoi>0?totalRoi.toFixed(1)+" "+T.unit_month:"---";document.getElementById('visualBar').style.width=totalRoi>0?Math.min((totalRoi/24)*100,100)+'%':'0%';document.getElementById('sumCo2').innerText=gCo2.toFixed(1);document.getElementById('sumTrees').innerText=Math.round(gCo2*50).toLocaleString();const pt=document.getElementById('projTable');pt.innerHTML='';let rowL=`<tr class="border-b border-slate-200"><td class="p-2 text-left font-bold text-red-600">${T.rep_scen_loss}</td>`;let tL=0;for(let y=1;y<=5;y++){tL+=gLoss;rowL+=`<td class="p-2 text-red-500">-${Math.round(tL).toLocaleString()}</td>`;}rowL+=`<td class="p-2 font-black text-red-700">-${Math.round(tL).toLocaleString()}</td></tr>`;let rowG=`<tr><td class="p-2 text-left font-bold text-green-600">${T.rep_scen_gain}</td>`;let tG=-gInv;for(let y=1;y<=5;y++){tG+=gSave;rowG+=`<td class="p-2 ${tG>=0?'text-green-600':'text-red-400'}">${Math.round(tG).toLocaleString()}</td>`;}rowG+=`<td class="p-2 font-black ${tG>=0?'text-green-700':'text-red-700'}">${tG>0?'+':''}${Math.round(tG).toLocaleString()}</td></tr>`;pt.innerHTML=rowL+rowG;setTimeout(()=>{lucide.createIcons();window.print();},100);}catch(e){alert('Report Error');console.log(e);}}
+</script>
+</body>
+</html>

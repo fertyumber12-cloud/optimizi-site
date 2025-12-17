@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" href="favicon.png" type="image/png">
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                extend: {
+                    colors: { slate: { 850: '#151e2e', 900: '#0f172a', 950: '#020617' } },
+                    animation: {
+                        'float-slow': 'float 8s ease-in-out infinite',
+                        'blob': 'blob 20s infinite',
+                        'gradient-x': 'gradientX 8s ease infinite',
+                    },
+                    keyframes: {
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-20px)' } },
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        },
+                        gradientX: { '0%, 100%': { 'background-position': '0% 50%' }, '50%': { 'background-position': '100% 50%' } }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        body { 
+            background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%);
+            background-attachment: fixed; color: #f1f5f9; overflow-x: hidden;
+        }
+        
+        .glass-nav { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .glass-card { 
+            transition: all 0.3s ease;
+            background-color: rgba(30, 41, 59, 0.4); 
+            backdrop-filter: blur(16px); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+        }
+        .glass-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.2); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); }
+
+        .glass-input { 
+            transition: all 0.2s; border-radius: 0.75rem; padding: 1rem; width: 100%; 
+            background-color: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); color: white;
+        }
+        .glass-input:focus { outline: none; border-color: #6366f1; background-color: rgba(15, 23, 42, 0.8); box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2); }
+
+        .bg-grid { background-size: 60px 60px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px); mask-image: radial-gradient(circle at center, black 40%, transparent 80%); }
+        .text-gradient { background: linear-gradient(to right, #818cf8, #c084fc, #fb923c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* Sidebar Transitions */
+        #sidebar { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .sidebar-link { position: relative; overflow: hidden; }
+        .sidebar-link::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 1px; background: linear-gradient(90deg, transparent, #818cf8, transparent); transition: width 0.3s ease; }
+        .sidebar-link:hover::after { width: 100%; }
+    </style>
+</head>
+<body class="antialiased selection:bg-indigo-500/30 selection:text-white" onload="initApp()">
+
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div class="absolute inset-0 bg-grid"></div>
+        <div class="absolute top-0 -left-1/4 w-[900px] h-[900px] bg-indigo-600/20 rounded-full blur-[120px] animate-blob mix-blend-screen"></div>
+        <div class="absolute bottom-0 -right-1/4 w-[900px] h-[900px] bg-orange-600/20 rounded-full blur-[120px] animate-blob animation-delay-2000 mix-blend-screen" style="animation-delay: 5s;"></div>
+    </div>
+
+    <div id="backdrop" onclick="toggleMenu()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] hidden transition-opacity duration-300"></div>
+    <aside id="sidebar" class="fixed top-0 left-0 h-full w-80 bg-slate-900/90 backdrop-filter backdrop-blur-xl border-r border-white/10 z-[100] transform -translate-x-full shadow-2xl">
+        <div class="p-8 flex flex-col h-full">
+            <div class="flex items-center justify-between mb-12">
+                <div class="flex items-center gap-3">
+                    <img src="icon.jpg" alt="Icon" class="w-8 h-8 rounded-lg shadow-lg shadow-indigo-500/20" onerror="this.style.display='none'">
+                    <div class="font-bold text-lg text-white">Optimizi.App</div>
+                </div>
+                <button onclick="toggleMenu()" class="p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            
+            <nav class="flex flex-col gap-6">
+                <a href="index.html" class="sidebar-link text-2xl font-bold text-slate-300 hover:text-white transition group flex items-center gap-4">
+                    <span class="w-1 h-8 bg-blue-500 rounded-full scale-y-0 group-hover:scale-y-100 transition duration-300"></span>
+                    <span data-i18n="nav_home">Ana Sayfa</span>
+                </a>
+
+                <a href="contact.html" class="sidebar-link text-2xl font-bold text-slate-300 hover:text-white transition group flex items-center gap-4">
+                    <span class="w-1 h-8 bg-indigo-500 rounded-full scale-y-0 group-hover:scale-y-100 transition duration-300"></span>
+                    <span data-i18n="nav_contact">İletişim</span>
+                </a>
+                
+                <a href="blog.html" class="sidebar-link text-2xl font-bold text-slate-300 hover:text-white transition group flex items-center gap-4">
+                    <span class="w-1 h-8 bg-orange-500 rounded-full scale-y-0 group-hover:scale-y-100 transition duration-300"></span>
+                    <span data-i18n="nav_blog">Blog</span>
+                </a>
+            </nav>
+
+            <div class="mt-auto pt-8 border-t border-white/10">
+                <div class="text-xs text-slate-500 mb-4 uppercase tracking-wider font-bold" data-i18n="nav_social">Sosyal Medya</div>
+                <div class="flex gap-4">
+                    <a href="https://www.linkedin.com/company/optimizi-app/" target="_blank" class="p-2 bg-white/5 rounded-lg hover:bg-indigo-600 hover:text-white transition text-slate-400"><i data-lucide="linkedin" class="w-5 h-5"></i></a>
+                    <a href="mailto:contact@optimizi.app" class="p-2 bg-white/5 rounded-lg hover:bg-red-500 hover:text-white transition text-slate-400"><i data-lucide="mail" class="w-5 h-5"></i></a>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <nav class="fixed w-full z-50 glass-nav transition-all duration-300">
+        <div class="container mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-6">
+                <button onclick="toggleMenu()" class="group p-2 -ml-2 rounded-lg hover:bg-white/5 transition">
+                    <div class="space-y-1.5">
+                        <span class="block w-6 h-0.5 bg-slate-300 group-hover:bg-white transition-all group-hover:w-5 ml-auto"></span>
+                        <span class="block w-6 h-0.5 bg-slate-300 group-hover:bg-white transition-all"></span>
+                        <span class="block w-6 h-0.5 bg-slate-300 group-hover:bg-white transition-all group-hover:w-4 ml-0"></span>
+                    </div>
+                </button>
+
+                <a href="index.html" class="flex items-center gap-3 group">
+                    <div>
+                        <h1 class="text-lg font-bold text-white tracking-wide">Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-orange-400">.App</span></h1>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button onclick="toggleLang()" class="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800/80 hover:bg-slate-700 text-white transition border border-slate-600 shadow-lg shadow-black/20">
+                    <span id="langFlag" class="text-base">🇬🇧</span><span id="langText" class="text-xs font-bold hidden sm:inline">EN</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="relative z-10 pt-36 pb-20 container mx-auto px-6 min-h-screen flex flex-col items-center justify-center">
+        
+        <div class="text-center max-w-3xl mb-16 animate-float-slow">
+            <h1 class="text-5xl md:text-6xl font-black mb-6 leading-tight tracking-tight text-white">
+                <span data-i18n="hero_t1">Bizimle</span> <br>
+                <span class="text-gradient" data-i18n="hero_t2">İletişime Geçin</span>
+            </h1>
+            <p class="text-slate-300 text-lg leading-relaxed max-w-xl mx-auto" data-i18n="hero_desc">
+                Sorularınız, iş birlikleri veya teknik destek için bize ulaşın. Size en kısa sürede dönüş yapacağız.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 w-full max-w-6xl items-start">
+            
+            <div class="space-y-6">
+                <div class="glass-card p-8 rounded-3xl relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110">
+                        <i data-lucide="mail" class="w-32 h-32 text-indigo-500"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-6" data-i18n="card_info_title">İletişim Bilgileri</h3>
+                    
+                    <div class="space-y-6 relative z-10">
+                        <a href="mailto:contact@optimizi.app" class="flex items-center gap-4 group/item hover:bg-white/5 p-4 rounded-xl transition -mx-4">
+                            <div class="w-12 h-12 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center group-hover/item:scale-110 transition">
+                                <i data-lucide="mail" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1" data-i18n="lbl_email">E-Posta</div>
+                                <div class="text-lg font-medium text-white">contact@optimizi.app</div>
+                            </div>
+                        </a>
+
+                        <a href="https://www.linkedin.com/company/optimizi-app/" target="_blank" class="flex items-center gap-4 group/item hover:bg-white/5 p-4 rounded-xl transition -mx-4">
+                            <div class="w-12 h-12 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center group-hover/item:scale-110 transition">
+                                <i data-lucide="linkedin" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1" data-i18n="lbl_social">Sosyal Medya</div>
+                                <div class="text-lg font-medium text-white">Optimizi.App</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="glass-card p-8 rounded-3xl bg-slate-900/50 border-slate-800">
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center shrink-0">
+                            <i data-lucide="clock" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-white font-bold mb-2" data-i18n="card_support_title">Hızlı Destek</h4>
+                            <p class="text-sm text-slate-400 leading-relaxed" data-i18n="card_support_desc">
+                                E-postalarınıza genellikle 24 saat içinde dönüş yapıyoruz. Acil durumlar için konu başlığına "ACİL" yazabilirsiniz.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card p-8 md:p-10 rounded-3xl border-indigo-500/20 shadow-2xl shadow-indigo-900/20">
+                <h3 class="text-2xl font-bold text-white mb-6" data-i18n="form_title">Bize Mesaj Gönderin</h3>
+                
+                <form id="contact-form" class="space-y-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-slate-300 ml-1" data-i18n="lbl_name">Adınız Soyadınız</label>
+                            <input type="text" name="user_name" class="glass-input" data-i18n-ph="ph_name" placeholder="Ad Soyad" required>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-slate-300 ml-1" data-i18n="lbl_company">Firma Adı</label>
+                            <input type="text" name="user_company" class="glass-input" data-i18n-ph="ph_company" placeholder="Şirketiniz (Opsiyonel)">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium text-slate-300 ml-1" data-i18n="lbl_form_email">E-Posta Adresiniz</label>
+                        <input type="email" name="user_email" class="glass-input" data-i18n-ph="ph_email" placeholder="ornek@sirket.com" required>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium text-slate-300 ml-1" data-i18n="lbl_subject">Konu</label>
+                        <select name="subject" class="glass-input text-slate-300">
+                            <option data-i18n="opt_general">Genel Bilgi</option>
+                            <option data-i18n="opt_support">Teknik Destek</option>
+                            <option data-i18n="opt_collab">İş Birliği</option>
+                            <option data-i18n="opt_other">Diğer</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium text-slate-300 ml-1" data-i18n="lbl_message">Mesajınız</label>
+                        <textarea name="message" rows="4" class="glass-input resize-none" data-i18n-ph="ph_message" placeholder="Mesajınızı buraya yazın..." required></textarea>
+                    </div>
+
+                    <button type="submit" id="submit-btn" class="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold shadow-lg shadow-indigo-500/25 transition active:scale-95 flex items-center justify-center gap-2 group">
+                        <span id="btn-text" data-i18n="btn_send">Gönder</span>
+                        <i data-lucide="send" class="w-4 h-4 group-hover:translate-x-1 transition"></i>
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="py-12 border-t border-white/5 backdrop-blur-md relative z-10">
+        <div class="container mx-auto px-6 text-center">
+            <div class="text-sm text-slate-500" data-i18n="footer">© 2025 Optimizi Inc. Tüm hakları saklıdır.</div>
+        </div>
+    </footer>
+
+    <script>
+        // --- SIDEBAR TOGGLE ---
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('backdrop');
+            
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                backdrop.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                backdrop.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // --- İLETİŞİM FORMU AYARLARI ---
+        const EMAILJS_PUBLIC_KEY = "pw2q143Fm8tCUXptD"; 
+        const EMAILJS_SERVICE_ID = "service_7ofowl8";
+        const EMAILJS_TEMPLATE_ID = "template_dn0y5tp";
+
+        document.getElementById('contact-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const btn = document.getElementById('submit-btn');
+            const btnText = document.getElementById('btn-text');
+            const originalText = currentLang === 'tr' ? 'Gönder' : 'Send Message';
+
+            btn.disabled = true;
+            btnText.innerText = currentLang === 'tr' ? 'Gönderiliyor...' : 'Sending...';
+
+            // EmailJS Gönderim
+            emailjs.sendForm(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, this)
+                .then(function() {
+                    btnText.innerText = currentLang === 'tr' ? 'Gönderildi! ✓' : 'Sent! ✓';
+                    btn.classList.replace('from-indigo-600', 'bg-green-600');
+                    btn.classList.replace('to-purple-600', 'bg-green-600');
+                    
+                    setTimeout(() => {
+                        document.getElementById('contact-form').reset();
+                        btnText.innerText = currentLang === 'tr' ? 'Gönder' : 'Send Message';
+                        btn.disabled = false;
+                        btn.classList.remove('bg-green-600');
+                        btn.classList.add('from-indigo-600', 'to-purple-600');
+                    }, 3000);
+                }, function(error) {
+                    console.log('FAILED...', error);
+                    btnText.innerText = currentLang === 'tr' ? 'Hata Oluştu' : 'Error';
+                    alert(currentLang === 'tr' ? 'Mesaj gönderilemedi. Lütfen ayarlarınızı kontrol edin.' : 'Failed to send message. Please check your configuration.');
+                    btn.disabled = false;
+                    btnText.innerText = originalText;
+                });
+        });
+
+        // --- ÇEVİRİLER ---
+        const TRANSLATIONS = {
+            tr: {
+                nav_home: "Ana Sayfa", nav_contact: "İletişim", nav_blog: "Blog", nav_social: "Sosyal Medya",
+                hero_t1: "Bizimle",
+                hero_t2: "İletişime Geçin",
+                hero_desc: "Sorularınız, iş birlikleri veya teknik destek için bize ulaşın. Size en kısa sürede dönüş yapacağız.",
+                card_info_title: "İletişim Bilgileri",
+                lbl_email: "E-POSTA",
+                lbl_social: "SOSYAL MEDYA",
+                card_support_title: "Hızlı Destek",
+                card_support_desc: "E-postalarınıza genellikle 24 saat içinde dönüş yapıyoruz. Acil durumlar için konu başlığına 'ACİL' yazabilirsiniz.",
+                form_title: "Bize Mesaj Gönderin",
+                lbl_name: "Adınız Soyadınız", ph_name: "Ad Soyad",
+                lbl_company: "Firma Adı", ph_company: "Şirketiniz (Opsiyonel)",
+                lbl_form_email: "E-Posta Adresiniz", ph_email: "ornek@sirket.com",
+                lbl_subject: "Konu",
+                opt_general: "Genel Bilgi", opt_support: "Teknik Destek", opt_collab: "İş Birliği", opt_other: "Diğer",
+                lbl_message: "Mesajınız", ph_message: "Mesajınızı buraya yazın...",
+                btn_send: "Gönder",
+                footer: "© 2025 Optimizi Inc. Tüm hakları saklıdır."
+            },
+            en: {
+                nav_home: "Home", nav_contact: "Contact", nav_blog: "Blog", nav_social: "Social Media",
+                hero_t1: "Get in",
+                hero_t2: "Touch With Us",
+                hero_desc: "Contact us for questions, collaborations, or technical support. We will get back to you as soon as possible.",
+                card_info_title: "Contact Info",
+                lbl_email: "E-MAIL",
+                lbl_social: "SOCIAL MEDIA",
+                card_support_title: "Quick Support",
+                card_support_desc: "We usually respond to emails within 24 hours. For urgent matters, you can write 'URGENT' in the subject line.",
+                form_title: "Send Us a Message",
+                lbl_name: "Full Name", ph_name: "Full Name",
+                lbl_company: "Company Name", ph_company: "Your Company (Optional)",
+                lbl_form_email: "Email Address", ph_email: "example@company.com",
+                lbl_subject: "Subject",
+                opt_general: "General Info", opt_support: "Technical Support", opt_collab: "Collaboration", opt_other: "Other",
+                lbl_message: "Your Message", ph_message: "Write your message here...",
+                btn_send: "Send Message",
+                footer: "© 2025 Optimizi Inc. All rights reserved."
+            }
+        };
+
+        let currentLang = 'tr';
+
+        function initApp() {
+            document.documentElement.classList.add('dark');
+            
+            // EmailJS Başlatma
+            emailjs.init(EMAILJS_PUBLIC_KEY);
+
+            // Otomatik Dil Algılama
+            try {
+                fetch('https://ipapi.co/json/')
+                    .then(res => res.json())
+                    .then(data => {
+                        if(data.country_code === 'TR') setLang('tr'); else setLang('en');
+                    })
+                    .catch(() => {
+                        const browserLang = navigator.language || navigator.userLanguage;
+                        setLang(browserLang.startsWith('tr') ? 'tr' : 'en');
+                    });
+            } catch(e) {
+                setLang('en');
+            }
+
+            if(typeof lucide !== 'undefined') { lucide.createIcons(); }
+        }
+
+        function toggleLang() { 
+            currentLang = currentLang === 'tr' ? 'en' : 'tr'; 
+            setLang(currentLang); 
+        }
+
+        function setLang(lang) {
+            currentLang = lang;
+            const isTr = currentLang === 'tr';
+            document.getElementById('langFlag').innerText = isTr ? '🇬🇧' : '🇹🇷'; 
+            document.getElementById('langText').innerText = isTr ? 'EN' : 'TR';
+            
+            // Text İçeriklerini Güncelle
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (TRANSLATIONS[currentLang][key]) {
+                    el.innerText = TRANSLATIONS[currentLang][key];
+                }
+            });
+
+            // Placeholderları Güncelle
+            document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+                const key = el.getAttribute('data-i18n-ph');
+                if (TRANSLATIONS[currentLang][key]) {
+                    el.placeholder = TRANSLATIONS[currentLang][key];
+                }
+            });
+        }
+    </script>
+</body>
+</html>

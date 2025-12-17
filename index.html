@@ -1,0 +1,413 @@
+
+<!doctype html>
+<html lang="tr" class="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Optimizi.App | Endüstriyel Hesaplama Platformu</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.png">
+
+<script>
+  tailwind.config = {
+    darkMode: 'class', 
+    theme: {
+      fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+      container: {
+        center: true,
+        padding: {
+          DEFAULT: '1.5rem',
+          sm: '2rem',
+          lg: '4rem',
+          xl: '5rem',
+          '2xl': '6rem',
+        },
+      },
+      extend: {
+        colors: { slate: { 850: '#151e2e', 900: '#0f172a', 950: '#020617' } },
+        animation: {
+            'float-slow': 'float 8s ease-in-out infinite',
+            'float-med': 'float 6s ease-in-out infinite',
+            'float-fast': 'float 4s ease-in-out infinite',
+            'pulse-glow': 'pulseGlow 3s infinite',
+            'blob': 'blob 20s infinite',
+            'gradient-x': 'gradientX 8s ease infinite',
+            'shimmer': 'shimmer 2s infinite',
+            'scan': 'scan 3s cubic-bezier(0.4, 0, 0.2, 1) infinite',
+            'spin-slow': 'spin 30s linear infinite', 
+            'wander-smooth': 'wanderSmooth 25s ease-in-out infinite',
+        },
+        keyframes: {
+            float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-20px)' } },
+            pulseGlow: { '0%, 100%': { opacity: 0.6, transform: 'scale(1)' }, '50%': { opacity: 1, transform: 'scale(1.05)' } },
+            blob: {
+                '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                '100%': { transform: 'translate(0px, 0px) scale(1)' },
+            },
+            gradientX: { '0%, 100%': { 'background-position': '0% 50%' }, '50%': { 'background-position': '100% 50%' } },
+            shimmer: { '0%': { transform: 'translateX(-100%)' }, '100%': { transform: 'translateX(100%)' } },
+            scan: { '0%': { top: '0%', opacity: 0 }, '10%': { opacity: 1 }, '90%': { opacity: 1 }, '100%': { top: '100%', opacity: 0 } },
+            wanderSmooth: {
+                '0%': { transform: 'translate(-50%, -50%) translate(0px, 0px)' },
+                '25%': { transform: 'translate(-50%, -50%) translate(-15vw, -10vh)' },
+                '50%': { transform: 'translate(-50%, -50%) translate(10vw, 15vh)' },
+                '75%': { transform: 'translate(-50%, -50%) translate(15vw, -15vh)' },
+                '100%': { transform: 'translate(-50%, -50%) translate(0px, 0px)' } 
+            }
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  html { scroll-behavior: smooth; }
+  body { 
+    background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%);
+    background-attachment: fixed; color: #f1f5f9; overflow-x: hidden;
+  }
+  .glass-nav { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .glass-card { transition: all 0.4s ease; backdrop-filter: blur(16px); background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.5) 100%); border: 1px solid rgba(255,255,255,0.08); }
+  .glass-card:hover { transform: translateY(-5px); border-color: rgba(249, 115, 22, 0.3); box-shadow: 0 0 30px -5px rgba(99, 102, 241, 0.2); }
+  
+  .spotlight-card {
+      background-color: rgba(15, 23, 42, 0.6); position: relative; overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 1.5rem; transition: transform 0.3s ease;
+      --mouse-x: 0px; --mouse-y: 0px;
+  }
+  .spotlight-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.2); }
+  .spotlight-card::before {
+      content: ""; position: absolute; height: 100%; width: 100%; top: 0; left: 0;
+      background: radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.08), transparent 40%);
+      opacity: 0; transition: opacity 0.5s; pointer-events: none; z-index: 2;
+  }
+  .spotlight-card:hover::before { opacity: 1; }
+  .spotlight-border {
+      position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+      background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(99, 102, 241, 0.6), transparent 40%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0; transition: opacity 0.5s; pointer-events: none; z-index: 3;
+  }
+  .spotlight-card:hover .spotlight-border { opacity: 1; }
+
+  .scan-line { position: absolute; left: 0; width: 100%; height: 2px; background: #818cf8; box-shadow: 0 0 10px #818cf8, 0 0 20px #818cf8; animation: scan 3s cubic-bezier(0.4, 0, 0.2, 1) infinite; z-index: 20; }
+  .scan-overlay { position: absolute; top: 0; left: 0; width: 100%; background: linear-gradient(to bottom, transparent, rgba(99, 102, 241, 0.15)); animation: scan 3s cubic-bezier(0.4, 0, 0.2, 1) infinite; height: 40px; }
+  .bg-grid { background-size: 60px 60px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px); mask-image: radial-gradient(circle at center, black 40%, transparent 80%); }
+  .text-gradient-dynamic { background: linear-gradient(to right, #818cf8, #c084fc, #fb923c, #ef4444); background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: gradientX 8s ease infinite; }
+
+  /* Sidebar Transitions */
+  #sidebar { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+  .sidebar-link { position: relative; overflow: hidden; }
+  .sidebar-link::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 1px; background: linear-gradient(90deg, transparent, #818cf8, transparent); transition: width 0.3s ease; }
+  .sidebar-link:hover::after { width: 100%; }
+</style>
+</head>
+<body class="antialiased selection:bg-indigo-500/30 selection:text-white" onload="initApp()">
+
+<div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+    <div class="absolute inset-0 bg-grid"></div>
+    <div class="absolute top-1/2 left-1/2 z-0 opacity-20 mix-blend-screen pointer-events-none animate-wander-smooth">
+        <svg width="800" height="800" viewBox="0 0 100 100" class="drop-shadow-3xl shadow-indigo-500/20 animate-spin-slow">
+            <defs><linearGradient id="iconGradHuge" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#39ff14" /><stop offset="100%" stop-color="#ff6b00" /></linearGradient></defs>
+            <circle cx="50" cy="50" r="35" fill="none" stroke="url(#iconGradHuge)" stroke-width="15" stroke-linecap="round" />
+        </svg>
+    </div>
+    <div class="absolute top-0 -left-1/4 w-[900px] h-[900px] bg-indigo-600/20 rounded-full blur-[120px] animate-blob mix-blend-screen"></div>
+    <div class="absolute bottom-0 -right-1/4 w-[900px] h-[900px] bg-orange-600/20 rounded-full blur-[120px] animate-blob animation-delay-2000 mix-blend-screen" style="animation-delay: 5s;"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-red-600/10 rounded-full blur-[120px] animate-blob animation-delay-4000 mix-blend-screen" style="animation-delay: 10s;"></div>
+</div>
+
+<div id="backdrop" onclick="toggleMenu()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] hidden transition-opacity duration-300"></div>
+<aside id="sidebar" class="fixed top-0 left-0 h-full w-80 bg-slate-900/90 backdrop-filter backdrop-blur-xl border-r border-white/10 z-[100] transform -translate-x-full shadow-2xl">
+    <div class="p-8 flex flex-col h-full">
+        <div class="flex items-center justify-between mb-12">
+            <div class="flex items-center gap-3">
+                <img src="icon.jpg" alt="Icon" class="w-8 h-8 rounded-lg shadow-lg shadow-indigo-500/20" onerror="this.style.display='none'">
+                <div class="font-bold text-lg text-white">Optimizi.App</div>
+            </div>
+            <button onclick="toggleMenu()" class="p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition"><i data-lucide="x" class="w-6 h-6"></i></button>
+        </div>
+        
+        <nav class="flex flex-col gap-6">
+            <a href="contact.html" class="sidebar-link text-2xl font-bold text-slate-300 hover:text-white transition group flex items-center gap-4">
+    <span class="w-1 h-8 bg-indigo-500 rounded-full scale-y-0 group-hover:scale-y-100 transition duration-300"></span>
+    <span data-i18n="nav_contact">İletişim</span>
+</a>
+            <a href="#blog" onclick="toggleMenu()" class="sidebar-link text-2xl font-bold text-slate-300 hover:text-white transition group flex items-center gap-4">
+                <span class="w-1 h-8 bg-orange-500 rounded-full scale-y-0 group-hover:scale-y-100 transition duration-300"></span>
+                <span data-i18n="nav_blog">Blog</span>
+            </a>
+        </nav>
+
+        <div class="mt-auto pt-8 border-t border-white/10">
+            <div class="text-xs text-slate-500 mb-4 uppercase tracking-wider font-bold" data-i18n="nav_social">Sosyal Medya</div>
+            <div class="flex gap-4">
+                <a href="https://www.linkedin.com/company/optimizi-app/" target="_blank" class="p-2 bg-white/5 rounded-lg hover:bg-indigo-600 hover:text-white transition text-slate-400"><i data-lucide="linkedin" class="w-5 h-5"></i></a>
+                <a href="mailto:contact@optimizi.app" class="p-2 bg-white/5 rounded-lg hover:bg-red-500 hover:text-white transition text-slate-400"><i data-lucide="mail" class="w-5 h-5"></i></a>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<div id="videoModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden px-4">
+    <div class="absolute inset-0 bg-black/90 backdrop-blur-sm transition-opacity" onclick="closeVideo()"></div>
+    <div class="relative z-10 w-full max-w-4xl aspect-video bg-slate-900 rounded-2xl overflow-hidden shadow-2xl shadow-orange-500/20 border border-white/10 animate-float-slow">
+        <button onclick="closeVideo()" class="absolute top-4 right-4 z-20 p-2 bg-black/50 hover:bg-black/80 text-white rounded-full transition"><i data-lucide="x" class="w-6 h-6"></i></button>
+        <iframe width="100%" height="100%" src="https://www.youtube.com/embed/dQw4w9WgXcQ?si=PlaceholderVideoId" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen class="absolute inset-0"></iframe>
+    </div>
+</div>
+
+<nav class="fixed w-full z-50 glass-nav transition-all duration-300">
+    <div class="container h-20 flex items-center justify-between">
+        
+        <div class="flex items-center gap-6">
+            <button onclick="toggleMenu()" class="group p-2 -ml-2 rounded-lg hover:bg-white/5 transition">
+                <div class="space-y-1.5">
+                    <span class="block w-6 h-0.5 bg-slate-300 group-hover:bg-white transition-all group-hover:w-5 ml-auto"></span>
+                    <span class="block w-6 h-0.5 bg-slate-300 group-hover:bg-white transition-all"></span>
+                    <span class="block w-6 h-0.5 bg-slate-300 group-hover:bg-white transition-all group-hover:w-4 ml-0"></span>
+                </div>
+            </button>
+
+            <div class="flex items-center gap-3">
+                <img src="icon.jpg" alt="Icon" class="w-10 h-10 rounded-xl shadow-lg shadow-indigo-500/20" onerror="this.style.display='none'">
+                <div class="leading-none">
+                    <div class="font-bold text-xl tracking-tight text-white">Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-orange-400">.App</span></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            <button onclick="toggleLang()" class="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800/80 hover:bg-slate-700 text-white transition border border-slate-600 shadow-lg shadow-black/20">
+                <span id="langFlag" class="text-base">🇬🇧</span><span id="langText" class="text-xs font-bold hidden sm:inline">EN</span>
+            </button>
+            <a href="tools.html" class="hidden sm:flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-orange-500 hover:from-indigo-500 hover:to-orange-400 text-white rounded-full font-bold transition shadow-lg shadow-indigo-500/25 active:scale-95">
+                <span data-i18n="btn_tools">Araçları İncele</span><i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
+        </div>
+    </div>
+</nav>
+
+<header class="relative pt-36 pb-16 lg:pt-48 lg:pb-24 container z-10">
+    <div class="grid lg:grid-cols-2 gap-16 items-center">
+        <div class="text-center lg:text-left">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold tracking-wider uppercase mb-6">
+                <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span> <span data-i18n="hero_badge">Enerji Verimliliği Hesaplamaları</span>
+            </div>
+            <h1 class="text-5xl lg:text-7xl font-black tracking-tight mb-8 leading-[1.1] text-white">
+                <span data-i18n="hero_t1">Görünmez Kayıpları</span> <br> <span class="text-gradient-dynamic" data-i18n="hero_t2">Görünür Kılın.</span>
+            </h1>
+            <p class="text-lg text-slate-300 max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed" data-i18n="hero_desc">Endüstriyel tesislerdeki ısı kayıplarını, verimsiz hatları ve gereksiz maliyetleri mühendislik standartlarıyla analiz eden yeni nesil platform.</p>
+            <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                <button onclick="openVideo()" class="w-full sm:w-auto px-8 py-4 glass-card rounded-xl font-bold text-white transition hover:bg-white/10 hover:border-orange-500/30 flex items-center justify-center gap-2 group">
+                    <i data-lucide="play-circle" class="w-5 h-5 text-orange-400 group-hover:scale-110 transition"></i><span data-i18n="btn_learn">Nasıl Çalışır?</span>
+                </button>
+            </div>
+            <div class="mt-10 flex items-center justify-center lg:justify-start gap-6 opacity-60 grayscale hover:grayscale-0 transition duration-500">
+                <span class="text-xs font-bold text-slate-500">STANDARDS:</span><span class="text-sm font-black text-slate-300">ISO 12241</span><span class="text-sm font-black text-slate-300">ASTM C680</span><span class="text-sm font-black text-slate-300">VDI 2055</span>
+            </div>
+        </div>
+        <div class="relative lg:h-[600px] flex items-center justify-center">
+            <div class="absolute w-[500px] h-[500px] bg-gradient-to-tr from-indigo-600/30 via-purple-600/30 to-orange-500/30 rounded-full mix-blend-screen filter blur-3xl animate-pulse-glow"></div>
+            
+            <div class="relative z-10 w-full max-w-md">
+                <div class="glass-card rounded-2xl p-6 w-full animate-float-slow bg-slate-900/80 border-slate-700/50 relative z-20">
+                    <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+                        <div class="flex gap-2"><div class="w-3 h-3 rounded-full bg-red-500"></div><div class="w-3 h-3 rounded-full bg-yellow-500"></div><div class="w-3 h-3 rounded-full bg-green-500"></div></div>
+                        <div class="text-[10px] text-slate-400 font-mono">energy_audit_final.pdf</div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-end">
+                            <div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1" data-i18n="mc_loss">Yıllık Kayıp</div><div class="text-3xl font-bold text-white">$42,500</div></div>
+                            <div class="text-right"><div class="text-xs text-indigo-200 font-bold bg-indigo-500/20 px-2 py-1 rounded animate-pulse" data-i18n="mc_status">Analiz Tamamlandı</div></div>
+                        </div>
+                        <div class="h-32 flex items-end gap-2 pt-4 border-t border-white/5">
+                            <div class="w-1/5 bg-slate-700 h-[40%] rounded-t opacity-40"></div><div class="w-1/5 bg-slate-600 h-[60%] rounded-t opacity-40"></div><div class="w-1/5 bg-slate-500 h-[30%] rounded-t opacity-40"></div>
+                            <div class="w-1/5 bg-gradient-to-t from-indigo-600 via-purple-500 to-orange-500 h-[80%] rounded-t relative group shadow-[0_0_15px_rgba(249,115,22,0.4)]"><div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-white text-black text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition" data-i18n="mc_pot">Potansiyel</div></div>
+                            <div class="w-1/5 bg-slate-600 h-[55%] rounded-t opacity-40"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="absolute -right-4 -top-24 glass-card p-4 rounded-xl animate-float-med z-10 w-40" style="animation-delay: 1s;">
+                    <div class="flex items-center gap-3"><div class="p-2 bg-green-500/20 rounded-lg text-green-400"><i data-lucide="leaf" class="w-5 h-5"></i></div><div><div class="text-[10px] text-slate-400 uppercase" data-i18n="bdg_co2">CO2 Azaltımı</div><div class="text-sm font-bold text-white">128 Ton</div></div></div>
+                </div>
+
+                <div class="absolute -left-4 -bottom-24 glass-card p-4 rounded-xl animate-float-fast z-10 w-40" style="animation-delay: 0.5s;">
+                    <div class="flex items-center gap-3"><div class="p-2 bg-purple-500/20 rounded-lg text-purple-400"><i data-lucide="zap" class="w-5 h-5"></i></div><div><div class="text-[10px] text-slate-400 uppercase" data-i18n="bdg_eff">Verimlilik</div><div class="text-sm font-bold text-white">%18 <span class="text-green-400">▲</span></div></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<section id="visuals" class="py-24 relative z-10 overflow-hidden">
+    <div class="container mx-auto px-6 relative">
+        <div class="text-center mb-16"><h2 class="text-3xl md:text-4xl font-black mb-4 text-white" data-i18n="sec_vis_title">Veriyi Sanata Dönüştürün</h2><p class="text-slate-300 max-w-2xl mx-auto" data-i18n="sec_vis_desc">Sadece hesaplama yapmayın. Sonuçları görselleştirin, raporlayın ve ikna edin. Karmaşık termal denklemlerin arkasındaki basit gerçeği görün.</p></div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[320px]">
+            <div class="spotlight-card rounded-3xl md:col-span-2 group">
+                <div class="spotlight-border"></div><div class="absolute inset-0 bg-gradient-to-br from-slate-900/50 to-slate-950/80 z-0"></div>
+                <div class="absolute inset-0 z-10 p-10 flex flex-col justify-between w-full md:w-1/2">
+                    <div><div class="inline-flex items-center gap-2 px-2 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded text-[10px] font-bold text-indigo-400 mb-3 tracking-wider" data-i18n="lbl_auto">OTOMASYON</div><h3 class="text-3xl font-bold text-white mb-2" data-i18n="card_pdf_title">PDF Raporlama</h3><p class="text-sm text-slate-400 leading-relaxed" data-i18n="card_pdf_desc">Hesaplamalarınızı tek tıkla, görsellerle zenginleştirilmiş kurumsal raporlara dönüştürün.</p></div>
+                    <div class="flex items-center gap-4 mt-4"><div class="w-12 h-12 rounded-full bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition duration-300"><i data-lucide="download" class="w-5 h-5"></i></div><span class="text-xs font-mono text-indigo-400/70 group-hover:text-indigo-400 transition">export_audit_v2.pdf</span></div>
+                </div>
+                <div class="absolute right-0 top-1/2 -translate-y-1/2 w-1/2 h-full hidden md:flex items-center justify-center perspective-1000 z-20">
+                    <div class="relative w-48 h-64 bg-slate-800 rounded-lg border border-slate-600 shadow-2xl transform rotate-y-[-15deg] rotate-x-[10deg] group-hover:rotate-y-[0deg] group-hover:rotate-x-[0deg] transition duration-700 ease-out overflow-hidden">
+                        <div class="scan-line"></div><div class="scan-overlay"></div>
+                        <div class="p-5 space-y-3 opacity-80"><div class="flex items-center gap-2 mb-4"><div class="w-8 h-8 rounded-full bg-indigo-500/30"></div><div class="h-2 w-20 bg-slate-600 rounded"></div></div><div class="h-2 w-full bg-slate-700/50 rounded"></div><div class="h-2 w-5/6 bg-slate-700/50 rounded"></div><div class="h-2 w-full bg-slate-700/50 rounded"></div><div class="flex items-end gap-1 h-16 mt-4 pt-2 border-t border-slate-700/50"><div class="w-1/4 bg-indigo-500/40 h-[40%] rounded-t"></div><div class="w-1/4 bg-indigo-500/60 h-[70%] rounded-t"></div><div class="w-1/4 bg-indigo-500/80 h-[50%] rounded-t"></div><div class="w-1/4 bg-indigo-500 h-[90%] rounded-t"></div></div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="spotlight-card rounded-3xl p-8 group flex flex-col justify-between relative">
+                <div class="spotlight-border"></div><svg class="absolute bottom-0 left-0 w-full h-32 opacity-20 group-hover:opacity-40 transition duration-500 z-0" viewBox="0 0 100 40" preserveAspectRatio="none"><path d="M0 40 L0 30 Q 20 35, 40 15 T 100 5 V 40 Z" fill="url(#gradRoi)" /><defs><linearGradient id="gradRoi" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#10b981" /><stop offset="100%" stop-color="transparent" /></linearGradient></defs></svg>
+                <div class="relative z-10"><div class="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/20 text-green-500 flex items-center justify-center mb-4 group-hover:scale-110 transition duration-300"><i data-lucide="trending-up" class="w-6 h-6"></i></div><h3 class="text-xl font-bold text-white mb-2" data-i18n="card_roi_title">ROI Hesaplayıcı</h3><p class="text-xs text-slate-400" data-i18n="card_roi_desc">Yatırımınızın geri dönüş süresini hesaplayın.</p></div>
+                <div class="relative z-10 text-right"><div class="text-3xl font-black text-white group-hover:text-green-400 transition font-mono"><span class="text-sm text-slate-500 font-sans font-normal align-middle mr-1">ort.</span>6.2 <span class="text-xs font-sans font-bold" data-i18n="unit_month">Ay</span></div></div>
+            </div>
+            <div class="spotlight-card rounded-3xl p-8 group relative flex flex-col justify-between">
+                <div class="spotlight-border"></div><div class="absolute inset-0 bg-gradient-to-b from-transparent to-orange-900/10 z-0"></div>
+                <div class="relative z-10 flex justify-between items-start"><div><div class="flex items-center gap-2 mb-2"><i data-lucide="thermometer" class="w-5 h-5 text-orange-500 animate-pulse"></i><span class="text-[10px] font-bold text-orange-500 border border-orange-500/30 px-2 py-0.5 rounded-full bg-orange-500/10">ASTM C680</span></div><h3 class="text-xl font-bold text-white" data-i18n="card_heat_title">Isı Kaybı</h3></div></div>
+                <div class="relative z-10 mt-6"><div class="flex justify-between text-[10px] text-slate-400 mb-1 uppercase font-bold tracking-wider"><span data-i18n="lbl_uninsulated">Yalıtımsız</span><span class="text-orange-500 animate-pulse" data-i18n="lbl_critical">Kritik</span></div><div class="h-2 w-full bg-slate-700/50 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-yellow-500 via-orange-500 to-red-600 w-[85%] relative"><div class="absolute inset-0 bg-white/30 w-full animate-[shimmer_2s_infinite]"></div></div></div><div class="mt-2 text-right"><div class="text-2xl font-bold text-white font-mono">165<span class="text-orange-500">°C</span></div></div></div>
+            </div>
+            <div class="spotlight-card rounded-3xl md:col-span-2 p-8 group relative flex items-center justify-between overflow-hidden">
+                <div class="spotlight-border"></div><div class="absolute right-0 top-0 w-64 h-64 bg-green-500/10 rounded-full blur-3xl group-hover:bg-green-500/20 transition duration-700 z-0"></div>
+                <div class="relative z-10 max-w-md"><div class="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 flex items-center justify-center mb-4"><i data-lucide="leaf" class="w-6 h-6"></i></div><h3 class="text-2xl font-bold text-white mb-2" data-i18n="card_co2_title">Karbon Ayak İzi</h3><p class="text-sm text-slate-400" data-i18n="card_co2_desc">Enerji verimliliği projelerinizin kaç ağaca bedel olduğunu görün.</p></div>
+                <div class="relative z-10 hidden md:block"><div class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-green-300 to-emerald-600 drop-shadow-lg">CO<sub class="text-3xl">2</sub></div></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="standards" class="py-24 relative z-10 border-y border-white/5">
+    <div class="container mx-auto px-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="glass-card p-10 rounded-3xl group cursor-default"><div class="w-14 h-14 rounded-2xl bg-blue-500/20 text-blue-400 flex items-center justify-center mb-6 shadow-lg shadow-blue-500/10 group-hover:scale-110 transition duration-300"><i data-lucide="shield-check" class="w-7 h-7"></i></div><h3 class="text-xl font-bold text-white mb-3" data-i18n="feat_1_t">Güvenilir Standartlar</h3><p class="text-slate-400 text-sm leading-relaxed" data-i18n="feat_1_d">Tüm hesaplamalar ISO 12241, ASTM C680 ve VDI 2055 mühendislik normlarına %100 uygun olarak simüle edilir.</p></div>
+            <div class="glass-card p-10 rounded-3xl group cursor-default"><div class="w-14 h-14 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center mb-6 shadow-lg shadow-purple-500/10 group-hover:scale-110 transition duration-300"><i data-lucide="cloud" class="w-7 h-7"></i></div><h3 class="text-xl font-bold text-white mb-3" data-i18n="feat_2_t">Bulut Tabanlı</h3><p class="text-slate-400 text-sm leading-relaxed" data-i18n="feat_2_d">Kurulum yok, güncelleme derdi yok. Bilgisayar, tablet veya telefonunuzdan anında erişin ve hesaplamaya başlayın.</p></div>
+            <div class="glass-card p-10 rounded-3xl group cursor-default"><div class="w-14 h-14 rounded-2xl bg-orange-500/20 text-orange-400 flex items-center justify-center mb-6 shadow-lg shadow-orange-500/10 group-hover:scale-110 transition duration-300"><i data-lucide="lock" class="w-7 h-7"></i></div><h3 class="text-xl font-bold text-white mb-3" data-i18n="feat_3_t">Gizlilik Odaklı</h3><p class="text-slate-400 text-sm leading-relaxed" data-i18n="feat_3_d">Verileriniz tarayıcınızda işlenir. Sunucularımıza hassas proje verileri gönderilmez, tamamen yerel çalışır.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="py-32 relative z-10 text-center">
+    <div class="container mx-auto px-6">
+        <div class="glass-card max-w-4xl mx-auto rounded-3xl p-12 md:p-20 relative overflow-hidden border-white/10">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-orange-500"></div>
+            <div class="relative z-10">
+                <h2 class="text-4xl md:text-5xl font-black mb-6 text-white" data-i18n="cta_title">Analize Başlamaya Hazır Mısınız?</h2>
+                <p class="text-lg text-slate-300 mb-10 max-w-xl mx-auto" data-i18n="cta_desc">Ücretsiz araçlarımızı kullanarak tesisinizdeki potansiyeli keşfedin.</p>
+                <a href="tools.html" class="inline-flex items-center gap-3 px-10 py-5 bg-white text-slate-900 hover:bg-slate-200 rounded-full font-bold text-lg transition shadow-xl shadow-white/10 hover:scale-105 active:scale-95">
+                    <span data-i18n="cta_btn">Araçlara Git</span><i data-lucide="arrow-right" class="w-5 h-5 text-indigo-600"></i>
+                </a>
+            </div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-3xl pointer-events-none mix-blend-screen"></div>
+        </div>
+    </div>
+</section>
+
+<footer class="py-12 border-t border-white/5 backdrop-blur-md relative z-10">
+    <div class="container mx-auto px-6">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-2"><img src="icon.jpg" class="w-8 h-8 rounded-lg shadow-sm shadow-indigo-500/20" onerror="this.style.display='none'"><span class="font-bold text-white">Optimizi.App</span></div>
+            <div class="text-sm text-slate-400" data-i18n="footer_copy">&copy; 2025 Optimizi Inc. Tüm hakları saklıdır.</div>
+            <div class="flex gap-4"><a href="https://www.linkedin.com/company/optimizi-app/" target="_blank" class="text-slate-400 hover:text-white transition"><i data-lucide="linkedin" class="w-5 h-5"></i></a><a href="mailto:contact@optimizi.app" class="text-slate-400 hover:text-white transition"><i data-lucide="mail" class="w-5 h-5"></i></a></div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    function openVideo() {
+        const modal = document.getElementById('videoModal');
+        if(modal) { modal.classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+    }
+    function closeVideo() {
+        const modal = document.getElementById('videoModal');
+        if(modal) { modal.classList.add('hidden'); document.body.style.overflow = 'auto'; const iframe = modal.querySelector('iframe'); if(iframe) iframe.src = iframe.src; }
+    }
+
+    function toggleMenu() {
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.getElementById('backdrop');
+        
+        if (sidebar.classList.contains('-translate-x-full')) {
+            sidebar.classList.remove('-translate-x-full');
+            backdrop.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        } else {
+            sidebar.classList.add('-translate-x-full');
+            backdrop.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+    }
+
+    document.addEventListener('mousemove', (e) => {
+        const cards = document.getElementsByClassName("spotlight-card");
+        for(const card of cards) {
+            const rect = card.getBoundingClientRect();
+            if(rect.top < window.innerHeight && rect.bottom > 0) {
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty("--mouse-x", `${x}px`);
+                card.style.setProperty("--mouse-y", `${y}px`);
+            }
+        }
+    });
+
+    const TRANSLATIONS = {
+        tr: {
+            nav_contact: "İletişim", nav_blog: "Blog", nav_social: "Sosyal Medya",
+            btn_tools: "Araçları İncele", hero_badge: "Enerji Verimliliği Hesaplamaları", hero_t1: "Görünmez Kayıpları", hero_t2: "Görünür Kılın.", hero_desc: "Endüstriyel tesislerdeki ısı kayıplarını, verimsiz hatları ve gereksiz maliyetleri mühendislik standartlarıyla analiz eden yeni nesil platform.",
+            btn_learn: "Nasıl Çalışır?", sec_vis_title: "Veriyi Sanata Dönüştürün", sec_vis_desc: "Sadece hesaplama yapmayın. Sonuçları görselleştirin, raporlayın ve ikna edin. Karmaşık termal denklemlerin arkasındaki basit gerçeği görün.",
+            feat_1_t: "Güvenilir Standartlar", feat_1_d: "Tüm hesaplamalar ISO 12241, ASTM C680 ve VDI 2055 mühendislik normlarına %100 uygun olarak simüle edilir.",
+            feat_2_t: "Bulut Tabanlı", feat_2_d: "Kurulum yok, güncelleme derdi yok. Bilgisayar, tablet veya telefonunuzdan anında erişin ve hesaplamaya başlayın.",
+            feat_3_t: "Gizlilik Odaklı", feat_3_d: "Verileriniz tarayıcınızda işlenir. Sunucularımıza hassas proje verileri gönderilmez, tamamen yerel çalışır.",
+            cta_title: "Analize Başlamaya Hazır Mısınız?", cta_desc: "Ücretsiz araçlarımızı kullanarak tesisinizdeki potansiyeli keşfedin.", cta_btn: "Araçlara Git",
+            lbl_auto: "OTOMASYON", card_pdf_title: "PDF Raporlama", card_pdf_desc: "Hesaplamalarınızı tek tıkla, görsellerle zenginleştirilmiş kurumsal raporlara dönüştürün.",
+            card_roi_title: "ROI Hesaplayıcı", card_roi_desc: "Yatırımınızın geri dönüş süresini hesaplayın.", card_heat_title: "Isı Kaybı",
+            card_co2_title: "Karbon Ayak İzi", card_co2_desc: "Enerji verimliliği projelerinizin kaç ağaca bedel olduğunu görün.",
+            mc_loss: "Yıllık Kayıp", mc_status: "Analiz Tamamlandı", mc_pot: "Potansiyel", bdg_co2: "CO2 Azaltımı", bdg_eff: "Verimlilik",
+            footer_copy: "&copy; 2025 Optimizi Inc. Tüm hakları saklıdır.", lbl_uninsulated: "Yalıtımsız", lbl_critical: "Kritik", unit_month: "Ay"
+        },
+        en: {
+            nav_contact: "Contact", nav_blog: "Blog", nav_social: "Social Media",
+            btn_tools: "Explore Tools", hero_badge: "Energy Efficiency Calculations", hero_t1: "Make Invisible Losses", hero_t2: "Visible.", hero_desc: "Next-gen platform analyzing heat losses, inefficient lines, and unnecessary costs in industrial facilities with engineering standards.",
+            btn_learn: "How it Works?", sec_vis_title: "Turn Data into Art", sec_vis_desc: "Don't just calculate. Visualize, report, and persuade with results. See the simple truth behind complex thermal equations.",
+            feat_1_t: "Reliable Standards", feat_1_d: "All calculations are simulated 100% compliant with ISO 12241, ASTM C680, and VDI 2055 engineering norms.",
+            feat_2_t: "Cloud Based", feat_2_d: "No installation, no updates. Access instantly from computer, tablet, or phone and start calculating.",
+            feat_3_t: "Privacy Focused", feat_3_d: "Your data is processed in your browser. Sensitive project data is not sent to our servers, it works entirely locally.",
+            cta_title: "Ready to Analyze?", cta_desc: "Discover the potential in your facility using our free tools.", cta_btn: "Go to Tools",
+            lbl_auto: "AUTOMATION", card_pdf_title: "PDF Reporting", card_pdf_desc: "Convert your calculations into corporate reports enriched with visuals in a single click.",
+            card_roi_title: "ROI Calculator", card_roi_desc: "Calculate exactly how many months it will take for your investment to pay off.",
+            card_heat_title: "Heat Loss", card_co2_title: "Carbon Footprint", card_co2_desc: "See how many trees your energy efficiency projects are worth.",
+            mc_loss: "Annual Loss", mc_status: "Analysis Complete", mc_pot: "Potential", bdg_co2: "CO2 Reduction", bdg_eff: "Efficiency",
+            footer_copy: "&copy; 2025 Optimizi Inc. All rights reserved.", lbl_uninsulated: "Uninsulated", lbl_critical: "Critical", unit_month: "Months"
+        }
+    };
+    
+    let currentLang = 'tr';
+    
+    function initApp() {
+        document.documentElement.classList.add('dark');
+        const storedLang = localStorage.getItem('lang');
+        if (storedLang) { currentLang = storedLang; } else {
+            const browserLang = navigator.language || navigator.userLanguage;
+            currentLang = browserLang.startsWith('tr') ? 'tr' : 'en';
+            localStorage.setItem('lang', currentLang);
+        }
+        updateLang();
+        if(typeof lucide !== 'undefined') { lucide.createIcons(); } else { setTimeout(() => { if(typeof lucide !== 'undefined') lucide.createIcons(); }, 500); }
+        document.addEventListener('keydown', function(e) { if(e.key === 'Escape') { closeVideo(); } });
+    }
+
+    function toggleLang() { currentLang = currentLang === 'tr' ? 'en' : 'tr'; localStorage.setItem('lang', currentLang); updateLang(); }
+    function updateLang() {
+        const isTr = currentLang === 'tr';
+        document.getElementById('langFlag').innerText = isTr ? '🇬🇧' : '🇹🇷'; document.getElementById('langText').innerText = isTr ? 'EN' : 'TR';
+        document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if(TRANSLATIONS[currentLang][key]) { el.innerHTML = TRANSLATIONS[currentLang][key]; } });
+    }
+</script>
+</body>
+</html>
