@@ -188,20 +188,29 @@
                 </div>
             </a>
 
-            <div class="spotlight-card p-8 group relative grayscale opacity-60 hover:opacity-80 hover:grayscale-0 transition-all duration-500">
+            <a href="tool/air.html" class="spotlight-card p-8 group cursor-pointer block h-full flex flex-col justify-between">
                 <div class="spotlight-border"></div>
-                <div class="absolute top-4 right-4 bg-slate-800/80 backdrop-blur text-slate-400 text-[10px] font-bold px-3 py-1 rounded-full border border-slate-700 uppercase tracking-wider" data-i18n="badge_soon">YAKINDA</div>
-                
                 <div class="relative z-10">
-                    <div class="w-14 h-14 rounded-2xl bg-slate-800 text-slate-500 flex items-center justify-center mb-6 border border-slate-700 group-hover:border-slate-600 transition">
-                        <i data-lucide="wind" class="w-7 h-7"></i>
+                    <div class="absolute top-0 right-0 p-2 opacity-20 group-hover:opacity-40 transition-opacity">
+                        <i data-lucide="wind" class="w-24 h-24 text-indigo-500"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-2 text-slate-300 group-hover:text-white transition" data-i18n="card_2_title">Basınçlı Hava Kaçağı</h3>
-                    <p class="text-sm text-slate-500 group-hover:text-slate-400 transition" data-i18n="card_2_desc">
+                    
+                    <div class="w-16 h-16 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white transition-all duration-300 border border-indigo-500/30 shadow-lg shadow-indigo-500/10">
+                        <i data-lucide="wind" class="w-8 h-8"></i>
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold mb-3 text-white group-hover:text-indigo-400 transition-colors" data-i18n="card_2_title">Basınçlı Hava Kaçağı</h3>
+                    <p class="text-sm text-slate-400 mb-8 leading-relaxed group-hover:text-slate-300 transition-colors" data-i18n="card_2_desc">
                         Kompresör sistemlerindeki hava kaçaklarının yıllık maliyet analizi.
                     </p>
                 </div>
-            </div>
+                
+                <div class="relative z-10">
+                    <div class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40">
+                        <span data-i18n="btn_calc">HESAPLA</span> <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </div>
+                </div>
+            </a>
 
             <a href="tool/thickness.html" class="spotlight-card p-8 group cursor-pointer block h-full flex flex-col justify-between">
                 <div class="spotlight-border"></div>
@@ -332,4 +341,5 @@
         }
     </script>
 </body>
+
 </html>
