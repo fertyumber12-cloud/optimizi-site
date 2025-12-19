@@ -44,7 +44,7 @@
   .glass-input:focus { outline: none; border-color: #3b82f6; background-color: rgba(15, 23, 42, 0.8); }
   .glass-nav { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.08); }
 
-  /* SIDEBAR STİLLERİ (Tools.html ile Birebir) */
+  /* SIDEBAR STİLLERİ */
   #sidebar { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
   .sidebar-link { position: relative; overflow: hidden; }
   .sidebar-link::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 1px; background: linear-gradient(90deg, transparent, #818cf8, transparent); transition: width 0.3s ease; }
@@ -60,45 +60,23 @@
 
   /* YAZDIRMA (REPORT) ÖZEL AYARLARI */
   @media print {
-      /* Kenar boşluklarını sıfırla ki tarayıcı header/footer basamasın */
-      @page { size: A4 portrait; margin: 0; }
-      
-      body { 
-          background: white !important; 
-          color: black !important; 
-          -webkit-print-color-adjust: exact; 
-          print-color-adjust: exact; 
-          margin: 0; 
-          padding: 0; 
-          height: 100%; 
-          overflow: hidden; 
-      }
-      
-      /* Ekranda görünen her şeyi gizle */
+      @page { margin: 0; size: A4 portrait; }
+      body { background: white !important; color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; height: 100%; margin: 0; padding: 0; overflow: hidden; }
       .no-print, nav, #sidebar, #backdrop, .glass-card, button, input, .fixed, .absolute, footer, main { display: none !important; }
-      
-      /* Sadece Print alanını göster */
       #print-area { 
           display: block !important; 
-          width: 210mm; /* A4 Genişlik */
-          min-height: 297mm; /* A4 Yükseklik */
-          position: absolute;
-          top: 0;
-          left: 0;
-          background: white;
-          color: #1e293b;
-          font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
-          z-index: 99999;
-          padding: 20mm; /* İçerik için güvenli alan */
-          box-sizing: border-box;
+          width: 210mm; min-height: 297mm; 
+          position: absolute; top: 0; left: 0; 
+          background: white; color: #1e293b; 
+          font-family: 'Segoe UI', Helvetica, Arial, sans-serif; 
+          z-index: 99999; padding: 20mm; box-sizing: border-box;
       }
-      
       .print-section { page-break-inside: avoid; break-inside: avoid; }
   }
-  #print-area { display: none; } /* Normalde gizli */
+  #print-area { display: none; }
 </style>
 </head>
-<body class="antialiased selection:bg-indigo-500/30 selection:text-white" onload="initPage()">
+<body class="antialiased selection:bg-indigo-500/30 selection:text-white" onload="initApp()">
 
 <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden no-print">
     <div class="absolute inset-0 bg-grid"></div>
@@ -120,24 +98,24 @@
         <nav class="flex flex-col gap-6">
             <a href="../index.html" class="sidebar-link text-2xl font-bold text-slate-300 hover:text-white transition group flex items-center gap-4">
                 <span class="w-1 h-8 bg-blue-500 rounded-full scale-y-0 group-hover:scale-y-100 transition duration-300"></span>
-                <span>Ana Sayfa</span>
+                <span data-i18n="nav_home">Ana Sayfa</span>
             </a>
             <a href="../tools.html" class="sidebar-link text-2xl font-bold text-slate-300 hover:text-white transition group flex items-center gap-4">
                 <span class="w-1 h-8 bg-indigo-500 rounded-full scale-y-0 group-hover:scale-y-100 transition duration-300"></span>
-                <span>Hesaplama Araçları</span>
+                <span data-i18n="nav_tools">Hesaplama Araçları</span>
             </a>
             <a href="../contact.html" class="sidebar-link text-2xl font-bold text-slate-300 hover:text-white transition group flex items-center gap-4">
                 <span class="w-1 h-8 bg-indigo-500 rounded-full scale-y-0 group-hover:scale-y-100 transition duration-300"></span>
-                <span>İletişim</span>
+                <span data-i18n="nav_contact">İletişim</span>
             </a>
             <a href="../blog.html" class="sidebar-link text-2xl font-bold text-slate-300 hover:text-white transition group flex items-center gap-4">
                 <span class="w-1 h-8 bg-orange-500 rounded-full scale-y-0 group-hover:scale-y-100 transition duration-300"></span>
-                <span>Blog</span>
+                <span data-i18n="nav_blog">Blog</span>
             </a>
         </nav>
 
         <div class="mt-auto pt-8 border-t border-white/10">
-            <div class="text-xs text-slate-500 mb-4 uppercase tracking-wider font-bold">Sosyal Medya</div>
+            <div class="text-xs text-slate-500 mb-4 uppercase tracking-wider font-bold" data-i18n="nav_social">Sosyal Medya</div>
             <div class="flex gap-4">
                 <a href="https://www.linkedin.com/company/optimizi-app/" target="_blank" class="p-2 bg-white/5 rounded-lg hover:bg-indigo-600 hover:text-white transition text-slate-400"><i data-lucide="linkedin" class="w-5 h-5"></i></a>
                 <a href="mailto:contact@optimizi.app" class="p-2 bg-white/5 rounded-lg hover:bg-red-500 hover:text-white transition text-slate-400"><i data-lucide="mail" class="w-5 h-5"></i></a>
@@ -165,8 +143,8 @@
                 </a>
             </div>
             <div class="flex items-center gap-3">
-                <button class="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800/80 hover:bg-slate-700 text-white transition border border-slate-600 shadow-lg shadow-black/20">
-                    <span class="text-base">🇹🇷</span><span class="text-xs font-bold hidden sm:inline">TR</span>
+                <button onclick="toggleLang()" class="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800/80 hover:bg-slate-700 text-white transition border border-slate-600 shadow-lg shadow-black/20">
+                    <span id="langFlag" class="text-base">🇬🇧</span><span id="langText" class="text-xs font-bold hidden sm:inline">EN</span>
                 </button>
             </div>
         </div>
@@ -177,11 +155,11 @@
             
             <div class="w-full lg:w-1/3 space-y-6">
                 <div class="glass-card p-6 rounded-2xl border-t-4 border-t-cyan-500">
-                    <h3 class="text-cyan-400 text-xs font-bold uppercase mb-6 flex items-center gap-2"><i data-lucide="sliders" class="w-4 h-4"></i> <span>Kaçak Parametreleri</span></h3>
+                    <h3 class="text-cyan-400 text-xs font-bold uppercase mb-6 flex items-center gap-2"><i data-lucide="sliders" class="w-4 h-4"></i> <span data-i18n="param_title">Kaçak Parametreleri</span></h3>
                     
                     <div class="space-y-5">
                         <div>
-                            <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Delik Çapı (mm)</label>
+                            <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block" data-i18n="label_dia">Delik Çapı (mm)</label>
                             <input type="range" id="diaRange" min="0.5" max="10" step="0.5" value="1" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer mb-2 accent-cyan-500">
                             <div class="relative">
                                 <input type="number" id="dia" value="1" step="0.1" min="0.1" class="glass-input text-lg font-bold text-cyan-400 pl-3">
@@ -190,7 +168,7 @@
                         </div>
 
                         <div>
-                            <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Hat Basıncı (bar)</label>
+                            <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block" data-i18n="label_bar">Hat Basıncı (bar)</label>
                             <div class="relative">
                                 <input type="number" id="bar" value="7" step="0.1" class="glass-input text-lg font-bold text-white pl-3">
                                 <div class="absolute right-3 top-3 text-xs text-slate-600">bar (g)</div>
@@ -199,11 +177,11 @@
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Çalışma Saati</label>
+                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block" data-i18n="label_hours">Çalışma Saati</label>
                                 <input type="number" id="hours" value="8000" class="glass-input text-sm">
                             </div>
                             <div>
-                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Enerji Fiyatı</label>
+                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block" data-i18n="label_price">Enerji Fiyatı</label>
                                 <div class="flex">
                                     <input type="number" id="price" value="3.5" step="0.01" class="glass-input text-sm rounded-r-none border-r-0">
                                     <select id="curr" class="bg-slate-800 text-white text-xs border border-slate-700 rounded-r-lg px-2 focus:outline-none">
@@ -219,12 +197,12 @@
                     <div class="flex items-start gap-3">
                         <i data-lucide="info" class="w-5 h-5 text-slate-400 mt-0.5"></i>
                         <div>
-                            <p class="text-[10px] text-slate-400 leading-relaxed italic">
+                            <p class="text-[10px] text-slate-400 leading-relaxed italic" data-i18n="info_text">
                                 "Bu sonuçlar mühendislik tahminleridir. Kesin veri için sahada ultrasonik debimetre ölçümü önerilir."
                             </p>
                             <button onclick="openModal()" class="mt-3 text-[10px] font-bold text-cyan-500 hover:text-cyan-400 flex items-center gap-1 transition">
                                 <i data-lucide="book-open" class="w-3 h-3"></i>
-                                Teknik Metodolojiyi İncele
+                                <span data-i18n="btn_method">Teknik Metodolojiyi İncele</span>
                             </button>
                         </div>
                     </div>
@@ -239,7 +217,7 @@
                     <div class="mb-12 relative z-10 w-full">
                         <div class="flex items-center justify-center gap-2 text-cyan-400 mb-3">
                             <i data-lucide="gauge-circle" class="w-5 h-5"></i>
-                            <span class="text-sm font-bold uppercase tracking-[0.2em]">ANLIK HAVA KAÇAĞI</span>
+                            <span class="text-sm font-bold uppercase tracking-[0.2em]" data-i18n="res_title">ANLIK HAVA KAÇAĞI</span>
                         </div>
                         <div class="flex items-baseline justify-center gap-3 bg-slate-900/30 p-6 rounded-3xl border border-cyan-500/20 shadow-[0_0_50px_-12px_rgba(6,182,212,0.3)] max-w-2xl mx-auto w-full">
                             <span class="text-6xl md:text-7xl lg:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-cyan-100 tracking-tighter truncate" id="resFlow">0.00</span>
@@ -252,30 +230,30 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-4xl mb-10 relative z-10">
                         <div class="bg-slate-900/40 p-5 rounded-2xl border border-white/5 flex flex-col justify-center">
-                            <div class="text-xs font-bold uppercase text-slate-400 mb-2">Ekstra Güç</div>
+                            <div class="text-xs font-bold uppercase text-slate-400 mb-2" data-i18n="res_power">Ekstra Güç</div>
                             <div class="text-2xl md:text-3xl font-black text-orange-400 truncate"><span id="resPower">0.0</span> <span class="text-lg font-bold text-slate-500">kW</span></div>
                         </div>
                         
                         <div class="bg-slate-900/40 p-5 rounded-2xl border border-white/5 flex flex-col justify-center">
-                            <div class="text-xs font-bold uppercase text-slate-400 mb-2">Yıllık Kayıp</div>
+                            <div class="text-xs font-bold uppercase text-slate-400 mb-2" data-i18n="res_vol">Yıllık Kayıp</div>
                             <div class="text-2xl md:text-3xl font-black text-blue-400 truncate"><span id="resVol">0</span> <span class="text-lg font-bold text-slate-500">m³</span></div>
                         </div>
                         
                         <div class="bg-slate-900/40 p-5 rounded-2xl border border-white/5 flex flex-col justify-center relative overflow-hidden group">
-                             <div class="text-xs font-bold uppercase text-slate-400 mb-2">Ağaç Eşleniği</div>
+                             <div class="text-xs font-bold uppercase text-slate-400 mb-2" data-i18n="res_trees">Ağaç Eşleniği</div>
                              <div class="flex items-center gap-2">
                                 <i data-lucide="tree-deciduous" class="w-6 h-6 text-green-500"></i>
                                 <div class="text-2xl md:text-3xl font-black text-green-400 truncate" id="resTrees">0</div>
                              </div>
-                             <div class="text-[10px] text-slate-500 mt-1">Adet/Yıl Kurtarılan</div>
+                             <div class="text-[10px] text-slate-500 mt-1" data-i18n="res_trees_unit">Adet/Yıl Kurtarılan</div>
                         </div>
                     </div>
 
                     <div class="w-full max-w-4xl bg-gradient-to-br from-red-950/40 to-slate-900/50 border-2 border-red-500/40 p-6 md:p-8 rounded-3xl relative overflow-hidden z-10">
                         <div class="relative flex flex-col md:flex-row items-center justify-between gap-6">
                             <div class="text-center md:text-left shrink-0">
-                                <div class="text-sm font-bold uppercase tracking-widest text-red-400 mb-1">YILLIK MALİYET</div>
-                                <div class="text-xs text-red-300/70">Bu deliğin faturanıza etkisi.</div>
+                                <div class="text-sm font-bold uppercase tracking-widest text-red-400 mb-1" data-i18n="card_cost_title">YILLIK MALİYET</div>
+                                <div class="text-xs text-red-300/70" data-i18n="card_cost_desc">Bu deliğin faturanıza etkisi.</div>
                             </div>
                             <div class="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tighter truncate w-full text-center md:text-right" id="resMoney">0 ₺</div>
                         </div>
@@ -284,7 +262,7 @@
                     <div class="mt-8 flex justify-center w-full max-w-3xl">
                         <button onclick="printReport()" class="flex items-center justify-center gap-3 px-12 py-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold backdrop-blur-md transition shadow-lg hover:border-white/20 w-full sm:w-auto">
                             <i data-lucide="printer" class="w-5 h-5 text-slate-300"></i>
-                            <span>Detaylı Rapor Al</span>
+                            <span data-i18n="btn_report">Detaylı Rapor Al</span>
                         </button>
                     </div>
                 </div>
@@ -297,16 +275,16 @@
     <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeModal()"></div>
     <div class="bg-[#0f172a] border border-white/10 w-full max-w-2xl rounded-2xl relative z-10 modal-content shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         <div class="p-6 border-b border-white/5 flex justify-between items-center bg-white/5">
-            <h3 class="text-white font-bold flex items-center gap-2"><i data-lucide="book-open-check" class="w-5 h-5 text-cyan-400"></i> Hesaplama Metodolojisi</h3>
+            <h3 class="text-white font-bold flex items-center gap-2"><i data-lucide="book-open-check" class="w-5 h-5 text-cyan-400"></i> <span data-i18n="modal_title">Hesaplama Metodolojisi</span></h3>
             <button onclick="closeModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
         </div>
         <div class="p-8 overflow-y-auto text-slate-300 text-sm leading-relaxed space-y-6">
-            <p>Bu hesaplama aracı, endüstriyel basınçlı hava sistemlerindeki kaçak debisini belirlemek için <strong class="text-white">Termodinamik Sıkıştırılabilir Akış</strong> prensiplerini kullanır. Referans alınan standartlar: <strong>ISO 1217</strong> ve <strong>CAGI</strong>.</p>
+            <p data-i18n="modal_text_1">Bu hesaplama aracı, endüstriyel basınçlı hava sistemlerindeki kaçak debisini belirlemek için <strong class="text-white">Termodinamik Sıkıştırılabilir Akış</strong> prensiplerini kullanır. Referans alınan standartlar: <strong>ISO 1217</strong> ve <strong>CAGI</strong>.</p>
             <div class="bg-slate-900 p-4 rounded-lg border border-cyan-900/30 font-mono text-center text-cyan-300 text-xs">Q ≈ Cᵈ · A · (Pᵍᵃᵘᵍᵉ + Pᵃᵗᵐ) · Kₜ</div>
-            <p class="text-xs text-slate-500 mt-2 text-center">Hesaplamalar Cd=0.61 (Keskin Kenar) ve 20°C standart koşullara göre yapılır.</p>
+            <p class="text-xs text-slate-500 mt-2 text-center" data-i18n="modal_text_2">Hesaplamalar Cd=0.61 (Keskin Kenar) ve 20°C standart koşullara göre yapılır.</p>
         </div>
         <div class="p-4 border-t border-white/5 bg-white/5 text-center">
-            <button onclick="closeModal()" class="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold rounded-lg transition">Kapat</button>
+            <button onclick="closeModal()" class="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold rounded-lg transition" data-i18n="btn_close">Kapat</button>
         </div>
     </div>
 </div>
@@ -317,56 +295,56 @@
         <div style="border-bottom: 3px solid #0891b2; padding-bottom: 15px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end;">
             <div>
                 <h1 style="font-size: 28px; font-weight: 800; margin: 0; color: #0f172a; letter-spacing: -1px;">Optimizi<span style="color: #0891b2;">.App</span></h1>
-                <p style="font-size: 13px; color: #64748b; margin-top: 5px;">Yeni Nesil Mühendislik Hesaplamaları</p>
+                <p style="font-size: 13px; color: #64748b; margin-top: 5px;" data-i18n="report_subtitle">Yeni Nesil Mühendislik Hesaplamaları</p>
             </div>
             <div style="text-align: right;">
-                <h2 style="font-size: 16px; font-weight: bold; margin: 0; text-transform: uppercase; color: #334155;">Basınçlı Hava Kaçak Raporu</h2>
-                <p style="font-size: 12px; color: #94a3b8; margin-top: 5px;">Tarih: <span id="printDate"></span></p>
+                <h2 style="font-size: 16px; font-weight: bold; margin: 0; text-transform: uppercase; color: #334155;" data-i18n="report_title">Basınçlı Hava Kaçak Raporu</h2>
+                <p style="font-size: 12px; color: #94a3b8; margin-top: 5px;"><span data-i18n="report_date">Tarih</span>: <span id="printDate"></span></p>
             </div>
         </div>
 
         <div style="display: flex; gap: 15px; margin-bottom: 30px;">
             <div style="flex:1; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 10px;">
-                <div style="font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase;">Yıllık Kayıp</div>
+                <div style="font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase;" data-i18n="report_card_loss">Yıllık Kayıp</div>
                 <div style="font-size: 20px; font-weight: 800; color: #dc2626; margin-top: 5px;" id="printMoney">0 TL</div>
             </div>
             <div style="flex:1; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 10px;">
-                <div style="font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase;">Kaçak Debisi</div>
+                <div style="font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase;" data-i18n="report_card_flow">Kaçak Debisi</div>
                 <div style="font-size: 20px; font-weight: 800; color: #0891b2; margin-top: 5px;" id="printFlow">0.00</div>
             </div>
             <div style="flex:1; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 10px;">
-                <div style="font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase;">CO₂ Salınımı</div>
+                <div style="font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase;" data-i18n="report_card_co2">CO₂ Salınımı</div>
                 <div style="font-size: 20px; font-weight: 800; color: #16a34a; margin-top: 5px;" id="printCo2">0 ton</div>
             </div>
             <div style="flex:1; background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 15px; border-radius: 10px;">
-                <div style="font-size: 10px; font-weight: bold; color: #166534; text-transform: uppercase;">Ağaç Eşleniği</div>
+                <div style="font-size: 10px; font-weight: bold; color: #166534; text-transform: uppercase;" data-i18n="report_card_trees">Ağaç Eşleniği</div>
                 <div style="font-size: 20px; font-weight: 800; color: #15803d; margin-top: 5px;" id="printTrees">0</div>
-                <div style="font-size: 9px; color: #166534;">Adet/Yıl</div>
+                <div style="font-size: 9px; color: #166534;" data-i18n="res_trees_unit">Adet/Yıl</div>
             </div>
         </div>
 
         <div style="margin-bottom: 40px;" class="print-section">
-            <h3 style="font-size: 14px; font-weight: bold; color: #334155; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">Teknik Parametreler</h3>
+            <h3 style="font-size: 14px; font-weight: bold; color: #334155; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;" data-i18n="report_tech_title">Teknik Parametreler</h3>
             <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
                 <tbody>
                     <tr style="border-bottom: 1px solid #e2e8f0;">
-                        <td style="padding: 10px 0; color: #64748b;">Tespit Edilen Delik Çapı</td>
+                        <td style="padding: 10px 0; color: #64748b;" data-i18n="report_row_dia">Tespit Edilen Delik Çapı</td>
                         <td style="padding: 10px 0; font-weight: bold; text-align: right; color: #0f172a;" id="printDia">0 mm</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #e2e8f0;">
-                        <td style="padding: 10px 0; color: #64748b;">Sistem Hat Basıncı</td>
+                        <td style="padding: 10px 0; color: #64748b;" data-i18n="report_row_bar">Sistem Hat Basıncı</td>
                         <td style="padding: 10px 0; font-weight: bold; text-align: right; color: #0f172a;" id="printBar">0 bar</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #e2e8f0;">
-                        <td style="padding: 10px 0; color: #64748b;">Yıllık Operasyon Süresi</td>
+                        <td style="padding: 10px 0; color: #64748b;" data-i18n="report_row_hours">Yıllık Operasyon Süresi</td>
                         <td style="padding: 10px 0; font-weight: bold; text-align: right; color: #0f172a;" id="printHours">0 saat</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #e2e8f0;">
-                        <td style="padding: 10px 0; color: #64748b;">Kompresör Ekstra Yükü</td>
+                        <td style="padding: 10px 0; color: #64748b;" data-i18n="report_row_power">Kompresör Ekstra Yükü</td>
                         <td style="padding: 10px 0; font-weight: bold; text-align: right; color: #0f172a;" id="printPower">0 kW</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #e2e8f0;">
-                        <td style="padding: 10px 0; color: #64748b;">Yıllık Toplam Hava Kaybı</td>
+                        <td style="padding: 10px 0; color: #64748b;" data-i18n="report_row_vol">Yıllık Toplam Hava Kaybı</td>
                         <td style="padding: 10px 0; font-weight: bold; text-align: right; color: #0f172a;" id="printVol">0 m³</td>
                     </tr>
                 </tbody>
@@ -374,7 +352,7 @@
         </div>
 
         <div style="margin-top: 50px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center;" class="print-section">
-            <p style="font-size: 10px; color: #94a3b8; line-height: 1.5;">
+            <p style="font-size: 10px; color: #94a3b8; line-height: 1.5;" data-i18n="report_disclaimer">
                 <strong>Yasal Uyarı:</strong> Bu rapor, ISO 1217 ve CAGI standartlarına atıfta bulunarak Keskin Kenarlı Orifis (Cd=0.61) modeli ile oluşturulmuştur. Sonuçlar teorik mühendislik projeksiyonlarıdır.
             </p>
             <p style="font-size: 10px; color: #cbd5e1; margin-top: 5px;">
@@ -387,11 +365,86 @@
 <script>
     lucide.createIcons();
     
+    // --- ÇEVİRİ SÖZLÜĞÜ ---
+    const TRANSLATIONS = {
+        tr: {
+            nav_home: "Ana Sayfa", nav_tools: "Hesaplama Araçları", nav_contact: "İletişim", nav_blog: "Blog", nav_social: "Sosyal Medya",
+            param_title: "Kaçak Parametreleri", label_dia: "Delik Çapı (mm)", label_bar: "Hat Basıncı (bar)", label_hours: "Çalışma Saati", label_price: "Enerji Fiyatı",
+            info_text: "\"Bu sonuçlar mühendislik tahminleridir. Kesin veri için sahada ultrasonik debimetre ölçümü önerilir.\"",
+            btn_method: "Teknik Metodolojiyi İncele",
+            res_title: "ANLIK HAVA KAÇAĞI", res_power: "Ekstra Güç", res_vol: "Yıllık Kayıp", res_trees: "Ağaç Eşleniği", res_trees_unit: "Adet/Yıl Kurtarılan",
+            card_cost_title: "YILLIK MALİYET", card_cost_desc: "Bu deliğin faturanıza etkisi.",
+            btn_report: "Detaylı Rapor Al",
+            modal_title: "Hesaplama Metodolojisi",
+            modal_text_1: "Bu hesaplama aracı, endüstriyel basınçlı hava sistemlerindeki kaçak debisini belirlemek için <strong class=\"text-white\">Termodinamik Sıkıştırılabilir Akış</strong> prensiplerini kullanır. Referans alınan standartlar: <strong>ISO 1217</strong> ve <strong>CAGI</strong>.",
+            modal_text_2: "Hesaplamalar Cd=0.61 (Keskin Kenar) ve 20°C standart koşullara göre yapılır.",
+            btn_close: "Kapat",
+            report_subtitle: "Yeni Nesil Mühendislik Hesaplamaları", report_title: "Basınçlı Hava Kaçak Raporu", report_date: "Tarih",
+            report_card_loss: "Yıllık Kayıp", report_card_flow: "Kaçak Debisi", report_card_co2: "CO₂ Salınımı", report_card_trees: "Ağaç Eşleniği",
+            report_tech_title: "Teknik Parametreler", report_row_dia: "Tespit Edilen Delik Çapı", report_row_bar: "Sistem Hat Basıncı", report_row_hours: "Yıllık Operasyon Süresi",
+            report_row_power: "Kompresör Ekstra Yükü", report_row_vol: "Yıllık Toplam Hava Kaybı",
+            report_disclaimer: "<strong>Yasal Uyarı:</strong> Bu rapor, ISO 1217 ve CAGI standartlarına atıfta bulunarak Keskin Kenarlı Orifis (Cd=0.61) modeli ile oluşturulmuştur. Sonuçlar teorik mühendislik projeksiyonlarıdır."
+        },
+        en: {
+            nav_home: "Home", nav_tools: "Calculators", nav_contact: "Contact", nav_blog: "Blog", nav_social: "Social Media",
+            param_title: "Leak Parameters", label_dia: "Hole Diameter (mm)", label_bar: "Line Pressure (bar)", label_hours: "Operating Hours", label_price: "Energy Price",
+            info_text: "\"These results are engineering estimates. For exact data, on-site measurement with an ultrasonic flow meter is recommended.\"",
+            btn_method: "View Methodology",
+            res_title: "INSTANT AIR LEAK", res_power: "Extra Power", res_vol: "Annual Loss", res_trees: "Tree Equivalent", res_trees_unit: "Trees/Year Saved",
+            card_cost_title: "ANNUAL COST", card_cost_desc: "Impact of this leak on your bill.",
+            btn_report: "Get Detailed Report",
+            modal_title: "Calculation Methodology",
+            modal_text_1: "This tool uses <strong class=\"text-white\">Thermodynamic Compressible Flow</strong> principles to determine leak flow in industrial compressed air systems. Referenced standards: <strong>ISO 1217</strong> and <strong>CAGI</strong>.",
+            modal_text_2: "Calculations are based on Cd=0.61 (Sharp Edge) and 20°C standard conditions.",
+            btn_close: "Close",
+            report_subtitle: "Next Gen Engineering Calculations", report_title: "Compressed Air Leak Report", report_date: "Date",
+            report_card_loss: "Annual Cost", report_card_flow: "Leak Flow", report_card_co2: "CO₂ Emissions", report_card_trees: "Tree Equivalent",
+            report_tech_title: "Technical Parameters", report_row_dia: "Detected Hole Diameter", report_row_bar: "System Line Pressure", report_row_hours: "Annual Operating Hours",
+            report_row_power: "Compressor Extra Load", report_row_vol: "Annual Total Air Loss",
+            report_disclaimer: "<strong>Disclaimer:</strong> This report is generated using the Sharp-Edged Orifice (Cd=0.61) model referencing ISO 1217 and CAGI standards. Results are theoretical engineering projections."
+        }
+    };
+
+    let currentLang = 'tr';
+
+    function initApp() {
+        // Dil kontrolü
+        const storedLang = localStorage.getItem('lang');
+        if (storedLang) { currentLang = storedLang; }
+        else {
+            const browserLang = navigator.language || navigator.userLanguage;
+            currentLang = browserLang.startsWith('tr') ? 'tr' : 'en';
+        }
+        updateLang();
+        
+        // Hesaplama başlat
+        calculate();
+    }
+
+    function toggleLang() {
+        currentLang = currentLang === 'tr' ? 'en' : 'tr';
+        localStorage.setItem('lang', currentLang);
+        updateLang();
+        calculate(); // Birimleri güncellemek için tekrar hesapla
+    }
+
+    function updateLang() {
+        const isTr = currentLang === 'tr';
+        document.getElementById('langFlag').innerText = isTr ? '🇬🇧' : '🇹🇷';
+        document.getElementById('langText').innerText = isTr ? 'EN' : 'TR';
+
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (TRANSLATIONS[currentLang][key]) {
+                el.innerHTML = TRANSLATIONS[currentLang][key]; // innerHTML kullandık ki <strong> tagları çalışsın
+            }
+        });
+    }
+
     // Sidebar Kontrolü
     function toggleMenu() {
         const sidebar = document.getElementById('sidebar');
         const backdrop = document.getElementById('backdrop');
-        
         if (sidebar.classList.contains('-translate-x-full')) {
             sidebar.classList.remove('-translate-x-full');
             backdrop.classList.remove('hidden');
@@ -416,8 +469,6 @@
     diaRange.addEventListener('input', (e) => { diaInput.value = e.target.value; calculate(); });
     ['bar', 'hours', 'price', 'curr'].forEach(id => document.getElementById(id).addEventListener('input', calculate));
 
-    function initPage() { calculate(); }
-
     function calculate() {
         const d = parseFloat(diaInput.value) || 0;
         const p = parseFloat(document.getElementById('bar').value) || 0;
@@ -432,7 +483,7 @@
         let annualVol = flow * 60 * h;
         let annualCost = powerLoss * h * price;
         let co2 = (powerLoss * h * 0.44) / 1000;
-        let trees = Math.round((co2 * 1000) / 20); // 1 Ağaç ≈ 20kg CO2
+        let trees = Math.round((co2 * 1000) / 20);
 
         // Ekrana Yaz
         if(document.getElementById('resFlow')) document.getElementById('resFlow').innerText = flow.toFixed(2);
@@ -442,8 +493,10 @@
         if(document.getElementById('resCo2')) document.getElementById('resCo2').innerText = co2.toFixed(2);
         if(document.getElementById('resTrees')) document.getElementById('resTrees').innerText = trees.toLocaleString();
 
-        // Rapora Yaz (ZORUNLU GÜNCELLEME)
-        if(document.getElementById('printDate')) document.getElementById('printDate').innerText = new Date().toLocaleDateString('tr-TR');
+        // Rapora Yaz (Dil desteği ile tarih formatı)
+        const dateLocale = currentLang === 'tr' ? 'tr-TR' : 'en-US';
+        if(document.getElementById('printDate')) document.getElementById('printDate').innerText = new Date().toLocaleDateString(dateLocale);
+        
         if(document.getElementById('printMoney')) document.getElementById('printMoney').innerText = currSym + " " + Math.round(annualCost).toLocaleString();
         if(document.getElementById('printFlow')) document.getElementById('printFlow').innerText = flow.toFixed(2) + " m³/dk";
         if(document.getElementById('printCo2')) document.getElementById('printCo2').innerText = co2.toFixed(2) + " ton";
@@ -451,20 +504,15 @@
         
         if(document.getElementById('printDia')) document.getElementById('printDia').innerText = d + " mm";
         if(document.getElementById('printBar')) document.getElementById('printBar').innerText = p + " bar";
-        if(document.getElementById('printHours')) document.getElementById('printHours').innerText = h + " saat";
+        if(document.getElementById('printHours')) document.getElementById('printHours').innerText = h + (currentLang === 'tr' ? " saat" : " hours");
         if(document.getElementById('printPower')) document.getElementById('printPower').innerText = powerLoss.toFixed(1) + " kW";
         if(document.getElementById('printVol')) document.getElementById('printVol').innerText = Math.round(annualVol).toLocaleString() + " m³";
     }
 
-    // RAPOR BUTONU İÇİN KRİTİK FONKSİYON
     function printReport() {
-        calculate(); // YAZDIRMADAN ÖNCE HESAPLAMAYI ZORLA
-        // Kısa bir gecikme ver ki DOM güncellensin
-        setTimeout(() => {
-            window.print();
-        }, 100);
+        calculate(); 
+        setTimeout(() => { window.print(); }, 100);
     }
 </script>
 </body>
-
 </html>
