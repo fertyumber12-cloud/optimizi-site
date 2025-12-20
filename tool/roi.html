@@ -1,22 +1,29 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="tr" class="dark">
 <head>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KD7DLCNS');</script>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
+
 <title>Industrial ROI Calculator</title>
 <meta name="description" content="ISO 12241 standardına göre boru, vana ve tank yüzeylerinden ısı kaybını hesaplayın. Yalıtım yatırımının geri dönüş süresini (ROI) analiz edin.">
 <meta name="keywords" content="boru ısı kaybı hesabı, vana ceketi tasarrufu, izolasyon roi hesabı, iso 12241, yüzey ısı kaybı, yalıtım amortismanı">
+<meta name="author" content="Optimizi.App">
 
 <meta property="og:title" content="Termal İzolasyon ve ROI Hesaplama Aracı | Optimizi">
 <meta property="og:description" content="Yalıtımsız yüzeylerin maliyetini görün, yalıtım sonrası tasarrufu ve amortisman süresini saniyeler içinde hesaplayın.">
 <meta property="og:image" content="https://www.optimizi.app/icon.jpg">
 <meta property="og:url" content="https://www.optimizi.app/tool/roi.html">
 <meta property="og:type" content="article">
-  
+
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="icon" href="favicon.png" type="image/png">
+<link rel="icon" href="../favicon.png" type="image/png">
 
 <script>
   tailwind.config = {
@@ -76,21 +83,47 @@
       background-color: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); color: white;
   }
   .glass-input:focus { outline: none; border-color: #6366f1; background-color: rgba(15, 23, 42, 0.8); }
+  .glass-input:disabled { opacity: 0.5; cursor: not-allowed; background-color: rgba(15, 23, 42, 0.3); }
   
   /* Background Glows */
   .bg-grid { background-size: 60px 60px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px); mask-image: radial-gradient(circle at center, black 40%, transparent 80%); pointer-events: none; }
 
-  /* Print Styles */
+  /* Print Styles - MOBİL VE MASAÜSTÜ UYUMLU */
   @media print {
     @page { margin: 0; size: A4; }
-    body { background: white !important; color: black !important; overflow: visible !important; }
-    #app-layer, .bg-grid, .blob-bg { display: none !important; }
+    
+    html, body {
+        width: 210mm;
+        height: 297mm;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: white !important;
+        color: black !important;
+        overflow: visible !important;
+        -webkit-print-color-adjust: exact; 
+        print-color-adjust: exact;
+    }
+
+    /* Ekranda görünenleri gizle */
+    #app-layer, .bg-grid, .blob-bg, nav, .glass-card, button, input { display: none !important; }
+    
+    /* Rapor alanını göster */
     #print-area { display: block !important; }
-    .print-page { width: 210mm; height: 296mm; position: relative; page-break-after: always; overflow: hidden; background: white; }
+    
+    .print-page { 
+        width: 210mm; 
+        height: 296mm; 
+        position: relative; 
+        page-break-after: always; 
+        overflow: hidden; 
+        background: white; 
+    }
     .print-page:last-child { page-break-after: auto; }
+    
     .cover-bg { background-color: #0f172a; color: white; }
     .cover-accent { position: absolute; top: 0; right: 0; width: 60%; height: 100%; background: #1e293b; clip-path: polygon(25% 0, 100% 0, 100% 100%, 0% 100%); z-index: 0; }
     .cover-content { position: relative; z-index: 10; height: 100%; padding: 20mm; display: flex; flex-direction: column; justify-content: center; }
+    
     .audit-table th { background-color: #f1f5f9; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 8px; padding: 5px; border-bottom: 2px solid #e2e8f0; }
     .audit-table td { border-bottom: 1px solid #e2e8f0; padding: 5px; font-size: 9px; color: #334155; vertical-align: middle; }
     .audit-table tr:nth-child(even) { background-color: #f8fafc; }
@@ -100,6 +133,8 @@
 </head>
 <body class="antialiased selection:bg-indigo-500/30 selection:text-white" onload="initApp()">
 
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KD7DLCNS"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
     <div class="absolute inset-0 bg-grid"></div>
     <div class="blob-bg absolute top-0 -left-1/4 w-[900px] h-[900px] bg-indigo-600/20 rounded-full blur-[120px] animate-blob mix-blend-screen"></div>
@@ -189,13 +224,18 @@
                         <div><label class="text-[10px] text-slate-400 mb-1 block" data-i18n="lbl_temp">Amb. Temp (°C)</label><input type="number" id="tAmb" class="glass-input text-xs" value="25"></div>
                         <div><label class="text-[10px] text-slate-400 mb-1 block" data-i18n="lbl_wind">Wind (m/s)</label><input type="number" id="vWind" class="glass-input text-xs" value="1" step="0.5"></div>
                     </div>
-                    <div class="mt-4">
-                        <label class="text-[10px] text-slate-400 mb-1 block" data-i18n="lbl_fuel">Fuel Type & Eff.</label>
-                        <div class="flex gap-2">
-                             <select id="fuel" class="glass-input flex-1 text-xs"><option value="gas" data-i18n="fuel_gas">Natural Gas (m³)</option><option value="elec" data-i18n="fuel_elec">Electricity (kWh)</option><option value="lng" data-i18n="fuel_lng">LNG (kg)</option><option value="fueloil" data-i18n="fuel_oil">Fuel Oil (kg)</option><option value="coal" data-i18n="fuel_coal">Coal (kg)</option></select>
-                             <input type="number" id="eff" class="glass-input w-16 text-center text-xs" value="85" title="Eff %">
-                        </div>
+                    
+                    <div class="mt-4 grid grid-cols-3 gap-3">
+                         <div class="col-span-2">
+                             <label class="text-[10px] text-slate-400 mb-1 block" data-i18n="lbl_fuel">Fuel Type</label>
+                             <select id="fuel" class="glass-input text-xs"><option value="gas" data-i18n="fuel_gas">Natural Gas (m³)</option><option value="elec" data-i18n="fuel_elec">Electricity (kWh)</option><option value="lng" data-i18n="fuel_lng">LNG (kg)</option><option value="fueloil" data-i18n="fuel_oil">Fuel Oil (kg)</option><option value="coal" data-i18n="fuel_coal">Coal (kg)</option></select>
+                         </div>
+                         <div>
+                             <label class="text-[10px] text-slate-400 mb-1 block" data-i18n="lbl_eff">Boiler Eff. %</label>
+                             <input type="number" id="eff" class="glass-input text-center text-xs" value="85">
+                         </div>
                     </div>
+
                     <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
                             <label class="text-[10px] text-slate-400 mb-1 block" data-i18n="lbl_price">Unit Price</label>
@@ -334,9 +374,8 @@
 </div>
 
 <script>
-    // System Init (Login kaldırıldı, direkt başla)
     async function initApp(){
-        document.documentElement.classList.add('dark'); // Force Dark
+        document.documentElement.classList.add('dark');
         try{
             const rsp=await fetch('https://ipapi.co/json/');
             const data=await rsp.json();
@@ -348,10 +387,58 @@
         init(); 
     }
 
-    const TRANSLATIONS={tr:{legal_body:"Bu yazılım, ISO 12241 & ASTM C680 mühendislik standartlarına dayalı teorik termal simülasyonlar sunar. Sonuçlar tahmin amaçlıdır, garanti niteliği taşımaz. Yatırım öncesi profesyonel etüd önerilir.",page_title:"Yalıtım Simülasyonu",page_subtitle:"Termal Analiz & ROI",btn_report:"Rapor Al",dash_roi:"Ort. Amortisman",dash_save:"Yıllık Kazanç",dash_inv:"Toplam Yatırım",dash_co2:"CO2 Azaltım",lbl_proj:"Proje Detayları",lbl_prep:"Hazırlayan",ph_firm:"Firma Adı",ph_eng:"Mühendis Adı",lbl_cust:"Müşteri Bilgileri",ph_cust_firm:"Müşteri Firma",ph_dept:"İlgili Kişi",lbl_env:"Ortam & Enerji",lbl_temp:"Ortam Sıc. (°C)",lbl_wind:"Rüzgar (m/s)",lbl_fuel:"Yakıt & Verim",fuel_gas:"Doğalgaz (m³)",fuel_elec:"Elektrik (kWh)",fuel_lng:"LNG (kg)",fuel_oil:"Fuel Oil (kg)",fuel_coal:"Kömür (kg)",lbl_price:"Birim Fiyat",lbl_hours:"Yıllık Saat",lbl_add:"Yeni Ölçüm Ekle",btn_v:"Armatür",btn_p:"Boru",btn_t:"Tank / Düz",lbl_st:"İşletme Sıc. (°C)",lbl_qty:"Adet",lbl_photo:"Termal Foto Seç",lbl_spec:"İzolasyon Spekleri",btn_calc:"Hesapla & Ekle",lbl_list:"Hesaplama Listesi",msg_no_calc:"Henüz hesaplama eklenmedi.",btn_clear:"Temizle",th_img:"Görsel",th_comp:"Ekipman",th_det:"Detay",th_qty:"Adet",th_loss:"Mevcut Kayıp",th_inv:"Yatırım",th_gain:"Kazanç",th_act:"İşlem",tool_title:"Birim Çevirici",tool_desc:"Yapım aşamasında...",grp_valves:"Vanalar",val_gate:"Sürgülü Vana",val_globe:"Glob Vana",val_ball_fl:"Küresel Vana",val_butterfly:"Kelebek Vana",val_check:"Çekvalf",val_strainer:"Pislik Tutucu",std_iso:"ISO 12241 (Standart)",std_astm:"ASTM C680 (ABD)",std_vdi:"VDI 2055 (Alman)",mat_rock:"Taş Yünü (Sanayi)",mat_rubber:"Elastomerik Kauçuk",mat_aerogel:"Aerogel",mat_glass:"İğnelenmiş Cam Elyaf",mat_ceramic:"Seramik Yünü",mat_bare:"⚠️ Yalıtımsız (Çıplak)",unit_month:"Ay",rep_title_top:"Enerji Verimliliği Etüdü",rep_title_main:"ENDÜSTRİYEL <br><span class='text-green-500'>YALITIM</span> <br>RAPORU",rep_client_lbl:"Müşteri",rep_prep_lbl:"Hazırlayan",rep_roi_month:"AY AMORTİSMAN SÜRESİ",rep_p2_title:"Detaylı Analiz Dökümü",rep_th_loss:"Mevcut Kayıp",rep_th_inv:"Yatırım",rep_th_gain:"Net Kazanç",rep_p3_title:"Yönetici Özeti",rep_risk_card:"MEVCUT YILLIK KAYIP",rep_risk_desc:"Müdahale edilmezse kaybedilecek tutar.",rep_cost_card:"TOPLAM YATIRIM",rep_opp_card:"NET KAZANÇ (YILLIK)",rep_proj_title:"Finansal Projeksiyon (5 Yıl)",rep_scen:"Senaryo",rep_scen_loss:"Mevcut Durum (Kümülatif Kayıp)",rep_scen_gain:"Yatırım Sonrası (Kümülatif Kazanç)",rep_roi_card:"Yatırım Geri Dönüş (ROI)",rep_env_title:"KARBON AYAK İZİ",rep_tree_desc:"Ağaç Eşdeğeri",rep_legal:"Hesaplamalar ISO 12241 mühendislik standartlarına göre simüle edilmiştir.",ph_inv:"Yatırım Tutarı",ph_thk:"Kalınlık (mm)",ph_len:"Uzunluk (m)",ph_width:"Genişlik (m)",ph_height:"Yükseklik (m)",th_y1:"Yıl 1",th_y2:"Yıl 2",th_y3:"Yıl 3",th_y4:"Year 4",th_y5:"Year 5",th_total:"TOPLAM"},en:{legal_body:"This software provides theoretical thermal simulations based on ISO 12241 & ASTM C680. Results are estimates only. Professional audit recommended.",page_title:"Insulation Simulation",page_subtitle:"Thermal Analysis & ROI",btn_report:"Get Report",dash_roi:"Avg. ROI",dash_save:"Annual Savings",dash_inv:"Total Investment",dash_co2:"CO2 Reduction",lbl_proj:"Project Details",lbl_prep:"Prepared By",ph_firm:"Company",ph_eng:"Engineer",lbl_cust:"Customer Info",ph_cust_firm:"Client Company",ph_dept:"Contact",lbl_env:"Environment & Energy",lbl_temp:"Amb. Temp (°C)",lbl_wind:"Wind (m/s)",lbl_fuel:"Fuel Type & Eff.",fuel_gas:"Natural Gas (m³)",fuel_elec:"Electricity (kWh)",fuel_lng:"LNG (kg)",fuel_oil:"Fuel Oil (kg)",fuel_coal:"Coal (kg)",lbl_price:"Unit Price",lbl_hours:"Annual Hours",lbl_add:"Add New Item",btn_v:"Valve",btn_p:"Pipe",btn_t:"Tank / Flat",lbl_st:"Process Temp (°C)",lbl_qty:"Qty",lbl_photo:"Select Thermal Photo",lbl_spec:"Insulation Specs",btn_calc:"Calculate & Add",lbl_list:"Calculation List",msg_no_calc:"No calculation added yet.",btn_clear:"Clear All",th_img:"Img",th_comp:"Component",th_det:"Detail",th_qty:"Qty",th_loss:"Loss",th_inv:"Invest",th_gain:"Savings",th_act:"Action",tool_title:"Unit Converter",tool_desc:"Under construction...",grp_valves:"Valves",val_gate:"Gate Valve",val_globe:"Globe Valve",val_ball_fl:"Ball Valve",val_butterfly:"Butterfly Valve",val_check:"Check Valve",val_strainer:"Strainer",std_iso:"ISO 12241 (Standard)",std_astm:"ASTM C680 (USA)",std_vdi:"VDI 2055 (German)",mat_rock:"Rock Wool",mat_rubber:"Elastomeric Rubber",mat_aerogel:"Aerogel",mat_glass:"Needled Glass Fiber",mat_ceramic:"Ceramic Fiber",mat_bare:"⚠️ Uninsulated (Bare)",unit_month:"Months",rep_title_top:"Energy Efficiency Audit",rep_title_main:"INDUSTRIAL <br><span class='text-green-500'>INSULATION</span> <br>REPORT",rep_client_lbl:"Client",rep_prep_lbl:"Prepared By",rep_roi_month:"MONTH PAYBACK",rep_p2_title:"Detailed Analysis",rep_th_loss:"Current Loss",rep_th_inv:"Investment",rep_th_gain:"Net Savings",rep_p3_title:"Executive Summary",rep_risk_card:"CURRENT ANNUAL LOSS",rep_risk_desc:"Loss if no action taken.",rep_cost_card:"TOTAL INVESTMENT",rep_opp_card:"NET SAVINGS (ANNUAL)",rep_proj_title:"Financial Projection",rep_scen:"Scenario",rep_scen_loss:"Current State (Loss)",rep_scen_gain:"Post-Investment (Gain)",rep_roi_card:"ROI",rep_env_title:"CARBON FOOTPRINT",rep_tree_desc:"Trees",rep_legal:"Calculations simulated according to ISO 12241 standards.",ph_inv:"Invest. Cost",ph_thk:"Thick. (mm)",ph_len:"Length (m)",ph_width:"Width (m)",ph_height:"Height (m)",th_y1:"Year 1",th_y2:"Year 2",th_y3:"Year 3",th_y4:"Year 4",th_y5:"Year 5",th_total:"TOTAL"}};let currentLang='en';
+    const TRANSLATIONS={
+        tr:{
+            legal_body:"Bu yazılım, ISO 12241 & ASTM C680 mühendislik standartlarına dayalı teorik termal simülasyonlar sunar. Sonuçlar tahmin amaçlıdır, garanti niteliği taşımaz. Yatırım öncesi profesyonel etüd önerilir.",
+            page_title:"Yalıtım Simülasyonu",page_subtitle:"Termal Analiz & ROI",btn_report:"Rapor Al",dash_roi:"Ort. Amortisman",dash_save:"Yıllık Kazanç",dash_inv:"Toplam Yatırım",dash_co2:"CO2 Azaltım",lbl_proj:"Proje Detayları",lbl_prep:"Hazırlayan",ph_firm:"Firma Adı",ph_eng:"Mühendis Adı",lbl_cust:"Müşteri Bilgileri",ph_cust_firm:"Müşteri Firma",ph_dept:"İlgili Kişi",lbl_env:"Ortam & Enerji",lbl_temp:"Ortam Sıc. (°C)",lbl_wind:"Rüzgar (m/s)",
+            
+            // YENİ VE GÜNCELLENENLER
+            lbl_fuel:"Yakıt Tipi", // Sadece Yakıt Tipi
+            lbl_eff: "Kazan Verimi %", // Yeni Verim Etiketi
+            
+            fuel_gas:"Doğalgaz (m³)",fuel_elec:"Elektrik (kWh)",fuel_lng:"LNG (kg)",fuel_oil:"Fuel Oil (kg)",fuel_coal:"Kömür (kg)",lbl_price:"Birim Fiyat",lbl_hours:"Yıllık Saat",lbl_add:"Yeni Ölçüm Ekle",btn_v:"Armatür",btn_p:"Boru",btn_t:"Tank / Düz",lbl_st:"İşletme Sıc. (°C)",lbl_qty:"Adet",lbl_photo:"Termal Foto Seç",lbl_spec:"İzolasyon Spekleri",btn_calc:"Hesapla & Ekle",lbl_list:"Hesaplama Listesi",msg_no_calc:"Henüz hesaplama eklenmedi.",btn_clear:"Temizle",th_img:"Görsel",th_comp:"Ekipman",th_det:"Detay",th_qty:"Adet",th_loss:"Mevcut Kayıp",th_inv:"Yatırım",th_gain:"Kazanç",th_act:"İşlem",tool_title:"Birim Çevirici",tool_desc:"Yapım aşamasında...",grp_valves:"Vanalar",val_gate:"Sürgülü Vana",val_globe:"Glob Vana",val_ball_fl:"Küresel Vana",val_butterfly:"Kelebek Vana",val_check:"Çekvalf",val_strainer:"Pislik Tutucu",std_iso:"ISO 12241 (Standart)",std_astm:"ASTM C680 (ABD)",std_vdi:"VDI 2055 (Alman)",mat_rock:"Taş Yünü (Sanayi)",mat_rubber:"Elastomerik Kauçuk",mat_aerogel:"Aerogel",mat_glass:"İğnelenmiş Cam Elyaf",mat_ceramic:"Seramik Yünü",mat_bare:"⚠️ Yalıtımsız (Çıplak)",unit_month:"Ay",rep_title_top:"Enerji Verimliliği Etüdü",rep_title_main:"ENDÜSTRİYEL <br><span class='text-green-500'>YALITIM</span> <br>RAPORU",rep_client_lbl:"Müşteri",rep_prep_lbl:"Hazırlayan",rep_roi_month:"AY AMORTİSMAN SÜRESİ",rep_p2_title:"Detaylı Analiz Dökümü",rep_th_loss:"Mevcut Kayıp",rep_th_inv:"Yatırım",rep_th_gain:"Net Kazanç",rep_p3_title:"Yönetici Özeti",rep_risk_card:"MEVCUT YILLIK KAYIP",rep_risk_desc:"Müdahale edilmezse kaybedilecek tutar.",rep_cost_card:"TOPLAM YATIRIM",rep_opp_card:"NET KAZANÇ (YILLIK)",rep_proj_title:"Finansal Projeksiyon (5 Yıl)",rep_scen:"Senaryo",rep_scen_loss:"Mevcut Durum (Kümülatif Kayıp)",rep_scen_gain:"Yatırım Sonrası (Kümülatif Kazanç)",rep_roi_card:"Yatırım Geri Dönüş (ROI)",rep_env_title:"KARBON AYAK İZİ",rep_tree_desc:"Ağaç Eşdeğeri",rep_legal:"Hesaplamalar ISO 12241 mühendislik standartlarına göre simüle edilmiştir.",ph_inv:"Yatırım Tutarı",ph_thk:"Kalınlık (mm)",ph_len:"Uzunluk (m)",ph_width:"Genişlik (m)",ph_height:"Yükseklik (m)",th_y1:"Yıl 1",th_y2:"Yıl 2",th_y3:"Yıl 3",th_y4:"Year 4",th_y5:"Year 5",th_total:"TOPLAM",
+            th_proc: "İşletme Sıc.",
+            th_surf: "Yüzey Sıc."
+        },
+        en:{
+            legal_body:"This software provides theoretical thermal simulations based on ISO 12241 & ASTM C680. Results are estimates only. Professional audit recommended.",page_title:"Insulation Simulation",page_subtitle:"Thermal Analysis & ROI",btn_report:"Get Report",dash_roi:"Avg. ROI",dash_save:"Annual Savings",dash_inv:"Total Investment",dash_co2:"CO2 Reduction",lbl_proj:"Project Details",lbl_prep:"Prepared By",ph_firm:"Company",ph_eng:"Engineer",lbl_cust:"Customer Info",ph_cust_firm:"Client Company",ph_dept:"Contact",lbl_env:"Environment & Energy",lbl_temp:"Amb. Temp (°C)",lbl_wind:"Wind (m/s)",
+            
+            // NEW AND UPDATED
+            lbl_fuel:"Fuel Type",
+            lbl_eff: "Boiler Eff. %",
+
+            fuel_gas:"Natural Gas (m³)",fuel_elec:"Electricity (kWh)",fuel_lng:"LNG (kg)",fuel_oil:"Fuel Oil (kg)",fuel_coal:"Coal (kg)",lbl_price:"Unit Price",lbl_hours:"Annual Hours",lbl_add:"Add New Item",btn_v:"Valve",btn_p:"Pipe",btn_t:"Tank / Flat",lbl_st:"Process Temp (°C)",lbl_qty:"Qty",lbl_photo:"Select Thermal Photo",lbl_spec:"Insulation Specs",btn_calc:"Calculate & Add",lbl_list:"Calculation List",msg_no_calc:"No calculation added yet.",btn_clear:"Clear All",th_img:"Img",th_comp:"Component",th_det:"Detail",th_qty:"Qty",th_loss:"Loss",th_inv:"Invest",th_gain:"Savings",th_act:"Action",tool_title:"Unit Converter",tool_desc:"Under construction...",grp_valves:"Valves",val_gate:"Gate Valve",val_globe:"Globe Valve",val_ball_fl:"Ball Valve",val_butterfly:"Butterfly Valve",val_check:"Check Valve",val_strainer:"Strainer",std_iso:"ISO 12241 (Standard)",std_astm:"ASTM C680 (USA)",std_vdi:"VDI 2055 (German)",mat_rock:"Rock Wool",mat_rubber:"Elastomeric Rubber",mat_aerogel:"Aerogel",mat_glass:"Needled Glass Fiber",mat_ceramic:"Ceramic Fiber",mat_bare:"⚠️ Uninsulated (Bare)",unit_month:"Months",rep_title_top:"Energy Efficiency Audit",rep_title_main:"INDUSTRIAL <br><span class='text-green-500'>INSULATION</span> <br>REPORT",rep_client_lbl:"Client",rep_prep_lbl:"Prepared By",rep_roi_month:"MONTH PAYBACK",rep_p2_title:"Detailed Analysis",rep_th_loss:"Current Loss",rep_th_inv:"Investment",rep_th_gain:"Net Savings",rep_p3_title:"Executive Summary",rep_risk_card:"CURRENT ANNUAL LOSS",rep_risk_desc:"Loss if no action taken.",rep_cost_card:"TOTAL INVESTMENT",rep_opp_card:"NET SAVINGS (ANNUAL)",rep_proj_title:"Financial Projection",rep_scen:"Scenario",rep_scen_loss:"Current State (Loss)",rep_scen_gain:"Post-Investment (Gain)",rep_roi_card:"ROI",rep_env_title:"CARBON FOOTPRINT",rep_tree_desc:"Trees",rep_legal:"Calculations simulated according to ISO 12241 standards.",ph_inv:"Invest. Cost",ph_thk:"Thick. (mm)",ph_len:"Length (m)",ph_width:"Width (m)",ph_height:"Height (m)",th_y1:"Year 1",th_y2:"Year 2",th_y3:"Year 3",th_y4:"Year 4",th_y5:"Year 5",th_total:"TOTAL",
+            th_proc: "Process Temp",
+            th_surf: "Surf. Temp"
+        }
+    };
+
+    let currentLang='en';
     function toggleLanguage(){setLang(currentLang==='tr'?'en':'tr');}
     function setLang(code){currentLang=code;const isEn=currentLang==='en';document.querySelectorAll('.lang-flag').forEach(el=>el.innerText=isEn?'🇬🇧':'🇹🇷');document.querySelectorAll('[data-i18n]').forEach(el=>{const key=el.getAttribute('data-i18n');if(TRANSLATIONS[currentLang][key]){if(el.tagName==='INPUT'||el.tagName==='TEXTAREA')el.placeholder=TRANSLATIONS[currentLang][key];else if(el.tagName==='OPTGROUP')el.label=TRANSLATIONS[currentLang][key];else if(el.tagName==='OPTION')el.innerText=TRANSLATIONS[currentLang][key];else el.innerText=TRANSLATIONS[currentLang][key];}});if(document.getElementById('th_y1')){document.getElementById('th_y1').innerText=TRANSLATIONS[currentLang].th_y1;document.getElementById('th_y2').innerText=TRANSLATIONS[currentLang].th_y2;document.getElementById('th_y3').innerText=TRANSLATIONS[currentLang].th_y3;document.getElementById('th_y4').innerText=TRANSLATIONS[currentLang].th_y4;document.getElementById('th_y5').innerText=TRANSLATIONS[currentLang].th_y5;}if(code==='tr'){if(document.getElementById('energyCurr'))document.getElementById('energyCurr').value='TL';if(document.getElementById('curr'))document.getElementById('curr').value='TL';}else{if(document.getElementById('energyCurr'))document.getElementById('energyCurr').value='EUR';if(document.getElementById('curr'))document.getElementById('curr').value='EUR';}render();}
-    function setType(t){['valve','pipe','tank'].forEach(x=>{document.getElementById('g-'+x).classList.add('hidden');});document.getElementById('g-'+t).classList.remove('hidden');document.getElementById('type').value=t;const buttons={valve:document.getElementById('btn-valve'),pipe:document.getElementById('btn-pipe'),tank:document.getElementById('btn-tank')};const activeClass="bg-white text-slate-900 shadow";const inactiveClass="text-slate-400 hover:text-white";Object.values(buttons).forEach(btn=>{btn.className="flex-1 py-1.5 text-xs font-medium rounded transition-all "+inactiveClass;});buttons[t].className="flex-1 py-1.5 text-xs font-medium rounded transition-all "+activeClass;}
+    
+    // --- GÜNCELLENEN TYPE FONKSİYONU ---
+    function setType(t){
+        ['valve','pipe','tank'].forEach(x=>{document.getElementById('g-'+x).classList.add('hidden');});
+        document.getElementById('g-'+t).classList.remove('hidden');
+        document.getElementById('type').value=t;
+        
+        const buttons={valve:document.getElementById('btn-valve'),pipe:document.getElementById('btn-pipe'),tank:document.getElementById('btn-tank')};
+        const activeClass="bg-white text-slate-900 shadow";
+        const inactiveClass="text-slate-400 hover:text-white";
+        Object.values(buttons).forEach(btn=>{btn.className="flex-1 py-1.5 text-xs font-medium rounded transition-all "+inactiveClass;});
+        buttons[t].className="flex-1 py-1.5 text-xs font-medium rounded transition-all "+activeClass;
+
+        // --- YENİ ADET (QUANTITY) KİLİTLEME MANTIĞI ---
+        const qtyInput = document.getElementById('qty');
+        if(t === 'pipe') {
+            qtyInput.value = 1;
+            qtyInput.disabled = true; // Boruysa kilitle
+        } else {
+            qtyInput.disabled = false; // Diğerleriyse aç
+        }
+    }
+
     const PIPES={15:21.3,20:26.7,25:33.4,32:42.2,40:48.3,50:60.3,65:73.0,80:88.9,100:114.3,125:141.3,150:168.3,200:219.1,250:273.0,300:323.9,350:355.6,400:406.4};const MATS={rockwool:{a:0.035,b:0.00017,c:0},glasswool:{a:0.025,b:0.00015,c:0},ceramic:{a:0.025,b:0.00012,c:1.2e-7},aerogel:{a:0.019,b:0.00004,c:5e-8},rubber:{a:0.034,b:0.000075,c:0},bare:{a:25,b:0,c:0}};const VALVE_FACTORS={gate:1.2,globe:1.4,butterfly:0.6,ball:1.0,strainer:1.5,check:0.9};const FUELS={gas:10.64,elec:1.0,lng:13.8,fueloil:11.8,coal:7.5};let LIST=[],FX={USD:34.50,EUR:36.50,GBP:43.20,TL:1.0},currImg=null,editingIndex=null;
     function getK(matKey,T){if(!MATS[matKey])return 0.04;const m=MATS[matKey];return m.a+(m.b*T)+((m.c||0)*T*T);}
     function getSurfaceCoeff(std,vWind,Ts,Ta,D_out,isFlat){const dT=Math.abs(Ts-Ta);const sigma=5.67e-8,eps=0.9;let h_rad=eps*sigma*(Math.pow(Ts+273.15,4)-Math.pow(Ta+273.15,4))/(dT||1);if(dT<0.1)h_rad=5;let h_cv=0;if(std==='astm'){if(vWind<0.1){if(isFlat)h_cv=1.95*Math.pow(dT,0.25);else h_cv=1.32*Math.pow(dT/(D_out||1),0.25);}else{h_cv=10.0*Math.pow(vWind,0.6)/Math.pow((D_out||1),0.4);}}else if(std==='vdi'){if(vWind<0.1)h_cv=3.5+0.05*dT;else h_cv=3.9*Math.pow(vWind,0.7)/Math.pow((D_out||1),0.3);}else{if(vWind<0.5){if(isFlat)h_cv=2.2*Math.pow(dT,0.25);else h_cv=1.4*Math.pow(dT/(D_out||1),0.25);}else{h_cv=4+4*vWind;}}if(h_cv<1)h_cv=1;return h_rad+h_cv;}
@@ -369,11 +456,95 @@
     function resetForm(){currImg=null;document.getElementById('prevImg').classList.add('hidden');document.getElementById('qty').value=1;}
     function clearAll(){if(confirm('Clear all?')){LIST=[];render();}}
     function render(){const tb=document.getElementById('gridBody');tb.innerHTML='';let gInv=0,gSave=0,gCo2=0;LIST.forEach((i,x)=>{if(i.inputs.matKey!=='bare'){gInv+=i.inv;gSave+=i.save;gCo2+=i.co2;}const roiSuffix=TRANSLATIONS[currentLang].unit_month;const roi=i.save>0?(i.inv/i.save*12).toFixed(1)+" "+roiSuffix:"-";const imgTag=i.img?`<img src="${i.img}" class="w-10 h-10 object-cover rounded">`:`<div class="w-10 h-10 bg-slate-800 rounded flex items-center justify-center text-xs text-slate-500">-</div>`;tb.insertAdjacentHTML('beforeend',`<tr class="hover:bg-slate-800/30 transition border-b border-slate-700/50 ${x===editingIndex?'bg-indigo-900/20':''}"><td class="px-6 py-4">${imgTag}</td><td class="px-6 py-4 font-bold text-white">${i.name}</td><td class="px-6 py-4 text-slate-400">${i.desc}</td><td class="px-6 py-4 text-center text-white">${i.qty}</td><td class="px-6 py-4 text-right text-red-400">-${Math.round(i.loss).toLocaleString()}</td><td class="px-6 py-4 text-right text-slate-300">${Math.round(i.inv).toLocaleString()}</td><td class="px-6 py-4 text-right text-green-400">${i.inputs.matKey!=='bare'?'+'+Math.round(i.save).toLocaleString():'-'}</td><td class="px-6 py-4 text-right font-bold text-indigo-400">${roi}</td><td class="px-6 py-4 text-right"><button onclick="edit(${x})" class="text-indigo-400 mr-2 hover:text-white"><i data-lucide="pencil" class="w-4 h-4"></i></button><button onclick="del(${x})" class="text-red-400 hover:text-white"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td></tr>`);});if(LIST.length===0)tb.innerHTML=`<tr><td colspan="9" class="px-6 py-20 text-center text-slate-500"><i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-20"></i><span id="emptyMsg" data-i18n="msg_no_calc">${TRANSLATIONS[currentLang].msg_no_calc}</span></td></tr>`;const currSymVal=document.getElementById('curr')?document.getElementById('curr').value:'TL';const currSymMap={'USD':'$','EUR':'€','GBP':'£','TL':'₺'};const currSym=currSymMap[currSymVal]||'';document.getElementById('dashInv').innerText=currSym+Math.round(gInv).toLocaleString();document.getElementById('dashSave').innerText=currSym+Math.round(gSave).toLocaleString();document.getElementById('dashCo2').innerHTML=gCo2.toFixed(1)+' Ton';const roiSuffix=TRANSLATIONS[currentLang].unit_month;const totalRoi=gSave>0?(gInv/gSave*12):0;document.getElementById('dashRoi').innerHTML=totalRoi>0?totalRoi.toFixed(1)+` <span class="text-lg text-slate-500 font-normal">${roiSuffix}</span>`:'---';document.getElementById('barRoi').style.width=totalRoi>0?Math.min((totalRoi/24)*100,100)+'%':'0%';lucide.createIcons();}
-    function printRep(){try{const T=TRANSLATIONS[currentLang];const d=new Date().toLocaleDateString(currentLang==='tr'?'tr-TR':'en-US');let gInv=0,gSave=0,gCo2=0,gLoss=0;const tb=document.getElementById('rTable');tb.innerHTML='';const currSymVal=document.getElementById('curr').value;const currSymMap={'USD':'$','EUR':'€','GBP':'£','TL':'₺'};const currSym=currSymMap[currSymVal]||'';const yTx=currentLang==='tr'?'Yıl':'Year';document.getElementById('rep_table_head').innerHTML=`<th class="w-6">#</th><th class="w-24 text-center">${T.th_img}</th><th class="text-left">${T.th_comp}</th><th class="text-center w-20">${T.lbl_temp}</th><th class="text-center">W/m</th><th class="text-center w-8">${T.th_qty}</th><th class="text-right text-red-600 font-black">${T.rep_th_loss}</th><th class="text-right text-slate-700">${T.rep_th_inv}</th><th class="text-right text-green-600 font-black">${T.rep_th_gain}</th><th class="text-right w-10">ROI</th>`;LIST.forEach((i,x)=>{if(i.inputs.matKey!=='bare'){gInv+=i.inv;gSave+=i.save;gCo2+=i.co2;}gLoss+=i.loss;const roi=i.save>0?(i.inv/i.save*12).toFixed(1):"-";
-    // *** GÖRSEL BOYUTU BURADA BÜYÜTÜLDÜ (w-24 h-24) ***
-    const imgTag=i.img?`<img src="${i.img}" class="w-24 h-24 object-cover rounded mx-auto border border-slate-200">`:`<div class="w-8 h-8 bg-slate-100 rounded mx-auto flex items-center justify-center text-[8px]">-</div>`;
-    tb.innerHTML+=`<tr><td class="text-center font-bold text-slate-400">${x+1}</td><td class="text-center">${imgTag}</td><td class="font-bold text-slate-800">${i.name}<div class="text-[9px] text-slate-500 font-normal">${i.desc}</div></td><td class="text-center font-mono text-[9px]"><span class="text-blue-500 font-bold">${i.Ts}°C</span></td><td class="text-center font-mono text-[9px]"><span class="text-red-500">${Math.round(i.qBare)}</span> / <span class="text-blue-500">${Math.round(i.qIns)}</span></td><td class="text-center">${i.qty}</td><td class="text-right font-mono text-[10px] text-red-600 font-bold">-${Math.round(i.loss).toLocaleString()}</td><td class="text-right font-mono text-[10px] text-slate-700">${Math.round(i.inv).toLocaleString()}</td><td class="text-right font-mono text-[10px] text-green-600 font-bold">${i.inputs.matKey!=='bare'?'+'+Math.round(i.save).toLocaleString():'-'}</td><td class="text-right font-bold text-blue-600 text-[10px]">${roi}</td></tr>`;});const totalRoi=gSave>0?(gInv/gSave*12):0;document.getElementById('rep_title_top').innerText=T.rep_title_top;document.getElementById('rep_title_main').innerHTML=T.rep_title_main;document.getElementById('rep_client_lbl').innerText=T.rep_client_lbl;document.getElementById('rep_prep_lbl').innerText=T.rep_prep_lbl;document.getElementById('rep_roi_month').innerText=T.rep_roi_month;document.getElementById('rep_p2_title').innerText=T.rep_p2_title;document.getElementById('rep_p3_title').innerText=T.rep_p3_title;document.getElementById('rep_risk_card').innerText=T.rep_risk_card;document.getElementById('rep_risk_desc').innerText=T.rep_risk_desc;document.getElementById('rep_cost_card').innerText=T.rep_cost_card;document.getElementById('rep_opp_card').innerText=T.rep_opp_card;document.getElementById('rep_proj_title').innerText=T.rep_proj_title;document.getElementById('rep_scen').innerText=T.rep_scen;document.getElementById('rep_roi_card').innerText=T.rep_roi_card;document.getElementById('rep_env_title').innerText=T.rep_env_title;document.getElementById('rep_tree_desc').innerText=T.rep_tree_desc;document.getElementById('rep_legal').innerHTML=T.rep_legal;document.getElementById('covClient').innerText=document.getElementById('cName').value||"CLIENT";document.getElementById('covProv').innerText=document.getElementById('pName').value||"OPTIMIZI INC.";document.getElementById('covRoi').innerText=totalRoi>0?totalRoi.toFixed(1):"---";document.getElementById('rDate').innerText=d;document.getElementById('sumLoss').innerText=currSym+Math.round(gLoss).toLocaleString();document.getElementById('sumSave').innerText=currSym+Math.round(gSave).toLocaleString();document.getElementById('tabInv').innerText=currSym+Math.round(gInv).toLocaleString();document.getElementById('txtRoi').innerText=totalRoi>0?totalRoi.toFixed(1)+" "+T.unit_month:"---";document.getElementById('visualBar').style.width=totalRoi>0?Math.min((totalRoi/24)*100,100)+'%':'0%';document.getElementById('sumCo2').innerText=gCo2.toFixed(1);document.getElementById('sumTrees').innerText=Math.round(gCo2*50).toLocaleString();const pt=document.getElementById('projTable');pt.innerHTML='';let rowL=`<tr class="border-b border-slate-200"><td class="p-2 text-left font-bold text-red-600">${T.rep_scen_loss}</td>`;let tL=0;for(let y=1;y<=5;y++){tL+=gLoss;rowL+=`<td class="p-2 text-red-500">-${Math.round(tL).toLocaleString()}</td>`;}rowL+=`<td class="p-2 font-black text-red-700">-${Math.round(tL).toLocaleString()}</td></tr>`;let rowG=`<tr><td class="p-2 text-left font-bold text-green-600">${T.rep_scen_gain}</td>`;let tG=-gInv;for(let y=1;y<=5;y++){tG+=gSave;rowG+=`<td class="p-2 ${tG>=0?'text-green-600':'text-red-400'}">${Math.round(tG).toLocaleString()}</td>`;}rowG+=`<td class="p-2 font-black ${tG>=0?'text-green-700':'text-red-700'}">${tG>0?'+':''}${Math.round(tG).toLocaleString()}</td></tr>`;pt.innerHTML=rowL+rowG;setTimeout(()=>{lucide.createIcons();window.print();},100);}catch(e){alert('Report Error');console.log(e);}}
+    
+    function printRep(){
+        try{
+            const T=TRANSLATIONS[currentLang];
+            const d=new Date().toLocaleDateString(currentLang==='tr'?'tr-TR':'en-US');
+            let gInv=0,gSave=0,gCo2=0,gLoss=0;
+            const tb=document.getElementById('rTable');
+            tb.innerHTML='';
+            const currSymVal=document.getElementById('curr').value;
+            const currSymMap={'USD':'$','EUR':'€','GBP':'£','TL':'₺'};
+            const currSym=currSymMap[currSymVal]||'';
+            
+            document.getElementById('rep_table_head').innerHTML=`
+                <th class="w-6">#</th>
+                <th class="w-24 text-center">${T.th_img}</th>
+                <th class="text-left">${T.th_comp}</th>
+                <th class="text-center w-16 text-xs text-red-500">${T.th_proc}</th>
+                <th class="text-center w-16 text-xs text-blue-500">${T.th_surf}</th>
+                <th class="text-center w-8">${T.th_qty}</th>
+                <th class="text-right text-red-600 font-black">${T.rep_th_loss}</th>
+                <th class="text-right text-slate-700">${T.rep_th_inv}</th>
+                <th class="text-right text-green-600 font-black">${T.rep_th_gain}</th>
+                <th class="text-right w-10">ROI</th>`;
+                
+            LIST.forEach((i,x)=>{
+                if(i.inputs.matKey!=='bare'){gInv+=i.inv;gSave+=i.save;gCo2+=i.co2;}
+                gLoss+=i.loss;
+                const roi=i.save>0?(i.inv/i.save*12).toFixed(1):"-";
+                const imgTag=i.img?`<img src="${i.img}" class="w-24 h-24 object-cover rounded mx-auto border border-slate-200">`:`<div class="w-8 h-8 bg-slate-100 rounded mx-auto flex items-center justify-center text-[8px]">-</div>`;
+                
+                tb.innerHTML+=`<tr>
+                    <td class="text-center font-bold text-slate-400">${x+1}</td>
+                    <td class="text-center">${imgTag}</td>
+                    <td class="font-bold text-slate-800">${i.name}<div class="text-[9px] text-slate-500 font-normal">${i.desc}</div></td>
+                    <td class="text-center font-mono text-[9px] font-bold text-red-500">${i.inputs.tProc}°C</td>
+                    <td class="text-center font-mono text-[9px] font-bold text-blue-500">${i.Ts}°C</td>
+                    <td class="text-center">${i.qty}</td>
+                    <td class="text-right font-mono text-[10px] text-red-600 font-bold">-${Math.round(i.loss).toLocaleString()}</td>
+                    <td class="text-right font-mono text-[10px] text-slate-700">${Math.round(i.inv).toLocaleString()}</td>
+                    <td class="text-right font-mono text-[10px] text-green-600 font-bold">${i.inputs.matKey!=='bare'?'+'+Math.round(i.save).toLocaleString():'-'}</td>
+                    <td class="text-right font-bold text-blue-600 text-[10px]">${roi}</td>
+                </tr>`;
+            });
+
+            const totalRoi=gSave>0?(gInv/gSave*12):0;
+            document.getElementById('rep_title_top').innerText=T.rep_title_top;
+            document.getElementById('rep_title_main').innerHTML=T.rep_title_main;
+            document.getElementById('rep_client_lbl').innerText=T.rep_client_lbl;
+            document.getElementById('rep_prep_lbl').innerText=T.rep_prep_lbl;
+            document.getElementById('rep_roi_month').innerText=T.rep_roi_month;
+            document.getElementById('rep_p2_title').innerText=T.rep_p2_title;
+            document.getElementById('rep_p3_title').innerText=T.rep_p3_title;
+            document.getElementById('rep_risk_card').innerText=T.rep_risk_card;
+            document.getElementById('rep_risk_desc').innerText=T.rep_risk_desc;
+            document.getElementById('rep_cost_card').innerText=T.rep_cost_card;
+            document.getElementById('rep_opp_card').innerText=T.rep_opp_card;
+            document.getElementById('rep_proj_title').innerText=T.rep_proj_title;
+            document.getElementById('rep_scen').innerText=T.rep_scen;
+            document.getElementById('rep_roi_card').innerText=T.rep_roi_card;
+            document.getElementById('rep_env_title').innerText=T.rep_env_title;
+            document.getElementById('rep_tree_desc').innerText=T.rep_tree_desc;
+            document.getElementById('rep_legal').innerHTML=T.rep_legal;
+            document.getElementById('covClient').innerText=document.getElementById('cName').value||"CLIENT";
+            document.getElementById('covProv').innerText=document.getElementById('pName').value||"OPTIMIZI INC.";
+            document.getElementById('covRoi').innerText=totalRoi>0?totalRoi.toFixed(1):"---";
+            document.getElementById('rDate').innerText=d;
+            document.getElementById('sumLoss').innerText=currSym+Math.round(gLoss).toLocaleString();
+            document.getElementById('sumSave').innerText=currSym+Math.round(gSave).toLocaleString();
+            document.getElementById('tabInv').innerText=currSym+Math.round(gInv).toLocaleString();
+            document.getElementById('txtRoi').innerText=totalRoi>0?totalRoi.toFixed(1)+" "+T.unit_month:"---";
+            document.getElementById('visualBar').style.width=totalRoi>0?Math.min((totalRoi/24)*100,100)+'%':'0%';
+            document.getElementById('sumCo2').innerText=gCo2.toFixed(1);
+            document.getElementById('sumTrees').innerText=Math.round(gCo2*50).toLocaleString();
+            
+            const pt=document.getElementById('projTable');
+            pt.innerHTML='';
+            let rowL=`<tr class="border-b border-slate-200"><td class="p-2 text-left font-bold text-red-600">${T.rep_scen_loss}</td>`;
+            let tL=0;for(let y=1;y<=5;y++){tL+=gLoss;rowL+=`<td class="p-2 text-red-500">-${Math.round(tL).toLocaleString()}</td>`;}
+            rowL+=`<td class="p-2 font-black text-red-700">-${Math.round(tL).toLocaleString()}</td></tr>`;
+            let rowG=`<tr><td class="p-2 text-left font-bold text-green-600">${T.rep_scen_gain}</td>`;
+            let tG=-gInv;for(let y=1;y<=5;y++){tG+=gSave;rowG+=`<td class="p-2 ${tG>=0?'text-green-600':'text-red-400'}">${Math.round(tG).toLocaleString()}</td>`;}
+            rowG+=`<td class="p-2 font-black ${tG>=0?'text-green-700':'text-red-700'}">${tG>0?'+':''}${Math.round(tG).toLocaleString()}</td></tr>`;
+            pt.innerHTML=rowL+rowG;
+            
+            setTimeout(()=>{lucide.createIcons();window.print();},100);
+        }catch(e){
+            alert('Report Error');console.log(e);
+        }
+    }
 </script>
 </body>
-
 </html>
