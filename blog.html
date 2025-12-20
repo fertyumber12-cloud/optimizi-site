@@ -9,8 +9,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-<title>Optimizi.App | Blog</title>
-<meta name="description" content="Endüstriyel enerji verimliliği, yalıtım standartları ve mühendislik hesaplamaları üzerine teknik makaleler.">
+<title data-i18n="page_title">Optimizi.App | Blog</title>
+<meta name="description" data-i18n="page_desc" content="Endüstriyel enerji verimliliği, yalıtım standartları ve mühendislik hesaplamaları üzerine teknik makaleler.">
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
@@ -69,7 +69,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="flex items-center justify-between mb-12">
             <div class="leading-none">
                 <div class="font-bold text-xl text-white">Optimizi.App</div>
-                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Blog</div>
+                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1" data-i18n="blog_badge">Blog</div>
             </div>
             <button onclick="toggleMenu()" class="p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition"><i data-lucide="x" class="w-6 h-6"></i></button>
         </div>
@@ -77,24 +77,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <nav class="flex flex-col gap-6">
             <a href="index.html" class="sidebar-link text-lg font-bold text-slate-400 hover:text-white transition group flex items-center gap-4">
                 <span class="w-1 h-6 bg-slate-500 rounded-full scale-y-0 group-hover:scale-y-100 transition duration-300"></span>
-                Ana Sayfa
+                <span data-i18n="nav_home">Ana Sayfa</span>
             </a>
             <a href="tools.html" class="sidebar-link text-lg font-bold text-slate-400 hover:text-white transition group flex items-center gap-4">
                 <span class="w-1 h-6 bg-indigo-500 rounded-full scale-y-0 group-hover:scale-y-100 transition duration-300"></span>
-                Hesaplama Araçları
+                <span data-i18n="nav_tools">Hesaplama Araçları</span>
             </a>
             <a href="contact.html" class="sidebar-link text-lg font-bold text-slate-400 hover:text-white transition group flex items-center gap-4">
                 <span class="w-1 h-6 bg-indigo-500 rounded-full scale-y-0 group-hover:scale-y-100 transition duration-300"></span>
-                İletişim
+                <span data-i18n="nav_contact">İletişim</span>
             </a>
             <a href="blog.html" class="sidebar-link text-lg font-bold text-white transition group flex items-center gap-4">
                 <span class="w-1 h-6 bg-orange-500 rounded-full transition duration-300"></span>
-                Blog
+                <span data-i18n="nav_blog">Blog</span>
             </a>
         </nav>
 
         <div class="mt-auto pt-8 border-t border-white/10">
-            <div class="text-xs text-slate-500 mb-4 uppercase tracking-wider font-bold">Sosyal Medya</div>
+            <div class="text-xs text-slate-500 mb-4 uppercase tracking-wider font-bold" data-i18n="social_media">Sosyal Medya</div>
             <div class="flex gap-4">
                 <a href="#" class="p-2 bg-white/5 rounded-lg hover:bg-indigo-600 hover:text-white transition text-slate-400"><i data-lucide="linkedin" class="w-5 h-5"></i></a>
                 <a href="mailto:contact@optimizi.app" class="p-2 bg-white/5 rounded-lg hover:bg-red-500 hover:text-white transition text-slate-400"><i data-lucide="mail" class="w-5 h-5"></i></a>
@@ -118,13 +118,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 
                 <a href="index.html" class="leading-none group">
                     <div class="font-bold text-xl tracking-tight text-white group-hover:text-indigo-300 transition">Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-orange-400">.App</span></div>
-                    <div class="text-[10px] text-slate-400 font-bold tracking-widest uppercase mt-0.5">Blog</div>
+                    <div class="text-[10px] text-slate-400 font-bold tracking-widest uppercase mt-0.5" data-i18n="blog_badge">Blog</div>
                 </a>
             </div>
 
-            <div class="flex gap-4">
-                <a href="tools.html" class="px-5 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-sm font-bold transition flex items-center gap-2">
-                    <i data-lucide="calculator" class="w-4 h-4 text-indigo-400"></i> Hesaplama Araçları
+            <div class="flex gap-4 items-center">
+                <button onclick="toggleLanguage()" class="px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-sm font-bold transition flex items-center gap-2 text-slate-300 hover:text-white">
+                    <i data-lucide="globe" class="w-4 h-4"></i>
+                    <span id="current-lang">TR</span>
+                </button>
+
+                <a href="tools.html" class="hidden md:flex px-5 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-sm font-bold transition items-center gap-2">
+                    <i data-lucide="calculator" class="w-4 h-4 text-indigo-400"></i> <span data-i18n="nav_tools">Hesaplama Araçları</span>
                 </a>
             </div>
         </div>
@@ -134,9 +139,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <header class="text-center mb-16 max-w-2xl mx-auto">
             <h1 class="text-4xl lg:text-5xl font-black text-white tracking-tight mb-6">
-                Mühendislik <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">Kütüphanesi</span>
+                <span data-i18n="header_title_1">Mühendislik</span> <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400" data-i18n="header_title_2">Kütüphanesi</span>
             </h1>
-            <p class="text-lg text-slate-400 leading-relaxed">
+            <p class="text-lg text-slate-400 leading-relaxed" data-i18n="header_desc">
                 Endüstriyel enerji verimliliği, ISO standartları ve teknik hesaplama yöntemleri üzerine hazırladığımız rehberler.
             </p>
         </header>
@@ -148,21 +153,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <div class="absolute inset-0 bg-[url('https://plus.unsplash.com/premium_photo-1716078757653-64b1f3db17c8?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')] bg-cover bg-center opacity-60 group-hover:scale-105 transition duration-500"></div>
                     <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
                     <div class="absolute bottom-4 left-4">
-                        <span class="px-3 py-1 rounded-full bg-indigo-500/80 backdrop-blur text-[10px] font-bold uppercase text-white tracking-wide border border-white/10 shadow-lg">Metodoloji</span>
+                        <span class="px-3 py-1 rounded-full bg-indigo-500/80 backdrop-blur text-[10px] font-bold uppercase text-white tracking-wide border border-white/10 shadow-lg" data-i18n="tag_methodology">Metodoloji</span>
                     </div>
                 </div>
                 <div class="p-6 flex flex-col flex-1">
                     <div class="flex items-center gap-2 text-xs text-slate-500 mb-3 font-medium">
-                        <i data-lucide="calendar" class="w-3 h-3"></i> 20 Ara 2025
+                        <i data-lucide="calendar" class="w-3 h-3"></i> <span data-i18n="date_1">20 Ara 2025</span>
                         <span class="w-1 h-1 rounded-full bg-slate-600"></span>
-                        4 Dk Okuma
+                        <span data-i18n="read_time_1">4 Dk Okuma</span>
                     </div>
-                    <h3 class="text-xl font-bold text-white mb-3 group-hover:text-indigo-400 transition">Endüstriyel Enerji Kayıpları Nasıl Hesaplanır?</h3>
-                    <p class="text-sm text-slate-400 line-clamp-3 mb-6 flex-1">
+                    <h3 class="text-xl font-bold text-white mb-3 group-hover:text-indigo-400 transition" data-i18n="card_title_1">Endüstriyel Enerji Kayıpları Nasıl Hesaplanır?</h3>
+                    <p class="text-sm text-slate-400 line-clamp-3 mb-6 flex-1" data-i18n="card_desc_1">
                         Isı ve kaçak kayıplarının mühendislik standartlarına (ISO 12241) göre nasıl hesaplandığını ve varsayımların önemini inceliyoruz.
                     </p>
                     <div class="flex items-center gap-2 text-sm font-bold text-indigo-400 group-hover:translate-x-1 transition">
-                        İncele <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        <span data-i18n="btn_read">İncele</span> <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     </div>
                 </div>
             </a>
@@ -173,12 +178,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         <i data-lucide="lock" class="w-8 h-8 text-slate-600"></i>
                     </div>
                     <div class="absolute bottom-4 left-4">
-                        <span class="px-3 py-1 rounded-full bg-slate-700/80 backdrop-blur text-[10px] font-bold uppercase text-slate-300 tracking-wide">Çok Yakında</span>
+                        <span class="px-3 py-1 rounded-full bg-slate-700/80 backdrop-blur text-[10px] font-bold uppercase text-slate-300 tracking-wide" data-i18n="tag_soon">Çok Yakında</span>
                     </div>
                 </div>
                 <div class="p-6 flex flex-col flex-1">
-                    <h3 class="text-xl font-bold text-slate-300 mb-3">Vana Ceketleri ile %90 Tasarruf Mümkün mü?</h3>
-                    <p class="text-sm text-slate-500 mb-6 flex-1">
+                    <h3 class="text-xl font-bold text-slate-300 mb-3" data-i18n="card_title_2">Vana Ceketleri ile %90 Tasarruf Mümkün mü?</h3>
+                    <p class="text-sm text-slate-500 mb-6 flex-1" data-i18n="card_desc_2">
                         Vana ve armatürlerdeki yalıtım eksikliğinin maliyeti ve tekstil bazlı yalıtım ceketlerinin geri dönüş süreleri.
                     </p>
                 </div>
@@ -190,12 +195,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         <i data-lucide="lock" class="w-8 h-8 text-slate-600"></i>
                     </div>
                     <div class="absolute bottom-4 left-4">
-                        <span class="px-3 py-1 rounded-full bg-slate-700/80 backdrop-blur text-[10px] font-bold uppercase text-slate-300 tracking-wide">Çok Yakında</span>
+                        <span class="px-3 py-1 rounded-full bg-slate-700/80 backdrop-blur text-[10px] font-bold uppercase text-slate-300 tracking-wide" data-i18n="tag_soon">Çok Yakında</span>
                     </div>
                 </div>
                 <div class="p-6 flex flex-col flex-1">
-                    <h3 class="text-xl font-bold text-slate-300 mb-3">Basınçlı Hava: En Pahalı Enerji Kaynağı</h3>
-                    <p class="text-sm text-slate-500 mb-6 flex-1">
+                    <h3 class="text-xl font-bold text-slate-300 mb-3" data-i18n="card_title_3">Basınçlı Hava: En Pahalı Enerji Kaynağı</h3>
+                    <p class="text-sm text-slate-500 mb-6 flex-1" data-i18n="card_desc_3">
                         Kompresör sistemlerindeki kaçakların tespit edilmesi ve ultrasonik ölçüm tekniklerinin önemi.
                     </p>
                 </div>
@@ -207,8 +212,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <footer class="border-t border-white/10 mt-auto bg-slate-900/50 py-12">
         <div class="container mx-auto px-6 text-center">
             <div class="font-bold text-2xl text-white mb-4">Optimizi<span class="text-indigo-500">.App</span></div>
-            <p class="text-slate-500 text-sm mb-8 max-w-md mx-auto">Mühendisler için pratik, hızlı ve güvenilir hesaplama araçları.</p>
-            <div class="text-xs text-slate-600">&copy; 2025 Optimizi.App - Tüm hakları saklıdır.</div>
+            <p class="text-slate-500 text-sm mb-8 max-w-md mx-auto" data-i18n="footer_desc">Mühendisler için pratik, hızlı ve güvenilir hesaplama araçları.</p>
+            <div class="text-xs text-slate-600" data-i18n="footer_copy">&copy; 2025 Optimizi.App - Tüm hakları saklıdır.</div>
         </div>
     </footer>
 </div>
@@ -230,6 +235,121 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             document.body.style.overflow = 'auto';
         }
     }
+
+    /* --- ÇOK DİLLİ DESTEK SİSTEMİ (TR-EN) --- */
+    
+    const translations = {
+        tr: {
+            page_title: "Optimizi.App | Blog",
+            page_desc: "Endüstriyel enerji verimliliği, yalıtım standartları ve mühendislik hesaplamaları üzerine teknik makaleler.",
+            blog_badge: "Blog",
+            nav_home: "Ana Sayfa",
+            nav_tools: "Hesaplama Araçları",
+            nav_contact: "İletişim",
+            nav_blog: "Blog",
+            social_media: "Sosyal Medya",
+            header_title_1: "Mühendislik",
+            header_title_2: "Kütüphanesi",
+            header_desc: "Endüstriyel enerji verimliliği, ISO standartları ve teknik hesaplama yöntemleri üzerine hazırladığımız rehberler.",
+            tag_methodology: "Metodoloji",
+            date_1: "20 Ara 2025",
+            read_time_1: "4 Dk Okuma",
+            card_title_1: "Endüstriyel Enerji Kayıpları Nasıl Hesaplanır?",
+            card_desc_1: "Isı ve kaçak kayıplarının mühendislik standartlarına (ISO 12241) göre nasıl hesaplandığını ve varsayımların önemini inceliyoruz.",
+            btn_read: "İncele",
+            tag_soon: "Çok Yakında",
+            card_title_2: "Vana Ceketleri ile %90 Tasarruf Mümkün mü?",
+            card_desc_2: "Vana ve armatürlerdeki yalıtım eksikliğinin maliyeti ve tekstil bazlı yalıtım ceketlerinin geri dönüş süreleri.",
+            card_title_3: "Basınçlı Hava: En Pahalı Enerji Kaynağı",
+            card_desc_3: "Kompresör sistemlerindeki kaçakların tespit edilmesi ve ultrasonik ölçüm tekniklerinin önemi.",
+            footer_desc: "Mühendisler için pratik, hızlı ve güvenilir hesaplama araçları.",
+            footer_copy: "© 2025 Optimizi.App - Tüm hakları saklıdır."
+        },
+        en: {
+            page_title: "Optimizi.App | Blog",
+            page_desc: "Technical articles on industrial energy efficiency, insulation standards, and engineering calculations.",
+            blog_badge: "Blog",
+            nav_home: "Home",
+            nav_tools: "Calculation Tools",
+            nav_contact: "Contact",
+            nav_blog: "Blog",
+            social_media: "Social Media",
+            header_title_1: "Engineering",
+            header_title_2: "Library",
+            header_desc: "Guides on industrial energy efficiency, ISO standards, and technical calculation methods.",
+            tag_methodology: "Methodology",
+            date_1: "Dec 20, 2025",
+            read_time_1: "4 Min Read",
+            card_title_1: "How to Calculate Industrial Energy Losses?",
+            card_desc_1: "We examine how heat and leakage losses are calculated according to engineering standards (ISO 12241) and the importance of assumptions.",
+            btn_read: "Read",
+            tag_soon: "Coming Soon",
+            card_title_2: "Is 90% Savings Possible with Valve Jackets?",
+            card_desc_2: "The cost of lack of insulation in valves and fittings and the payback periods of textile-based insulation jackets.",
+            card_title_3: "Compressed Air: The Most Expensive Energy Source",
+            card_desc_3: "Detection of leaks in compressor systems and the importance of ultrasonic measurement techniques.",
+            footer_desc: "Practical, fast, and reliable calculation tools for engineers.",
+            footer_copy: "© 2025 Optimizi.App - All rights reserved."
+        }
+    };
+
+    let currentLanguage = 'tr'; // Varsayılan dil
+
+    function setLanguage(lang) {
+        currentLanguage = lang;
+        const btnText = document.getElementById('current-lang');
+        if (btnText) btnText.innerText = lang.toUpperCase();
+        
+        document.documentElement.lang = lang; // HTML lang tag'ini güncelle
+
+        const elements = document.querySelectorAll('[data-i18n]');
+        elements.forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (translations[lang][key]) {
+                el.innerText = translations[lang][key];
+            }
+        });
+        
+        // LocalStorage'a kaydet (isteğe bağlı ama kullanıcı deneyimi için iyi)
+        localStorage.setItem('optimizi_lang', lang);
+    }
+
+    function toggleLanguage() {
+        setLanguage(currentLanguage === 'tr' ? 'en' : 'tr');
+    }
+
+    // IP Bazlı Dil Algılama (Sayfa Yüklendiğinde)
+    async function detectLocationAndSetLang() {
+        // Önce kaydedilmiş tercih var mı?
+        const savedLang = localStorage.getItem('optimizi_lang');
+        if (savedLang) {
+            setLanguage(savedLang);
+            return;
+        }
+
+        // Yoksa IP kontrolü yap
+        try {
+            // Ücretsiz ve CORS dostu bir IP servisi kullanıyoruz.
+            const response = await fetch('https://ipapi.co/json/');
+            const data = await response.json();
+            
+            if (data.country_code && data.country_code !== 'TR') {
+                console.log("Yurt dışı ziyareti algılandı (" + data.country_code + "), İngilizce'ye geçiliyor.");
+                setLanguage('en');
+            } else {
+                console.log("Türkiye ziyareti algılandı, Türkçe devam.");
+                setLanguage('tr');
+            }
+        } catch (error) {
+            console.warn("Konum algılanamadı, varsayılan (TR) kullanılıyor.", error);
+            // Hata durumunda (adblock vb.) varsayılan TR kalır, gerekirse browser diline de bakılabilir:
+            // if (!navigator.language.startsWith('tr')) setLanguage('en');
+        }
+    }
+
+    // Başlat
+    detectLocationAndSetLang();
+
 </script>
 
 </body>
