@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="tr" class="dark">
+<head>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KD7DLCNS');</script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+
+<title>Endüstriyel Enerji Kayıpları Nasıl Hesaplanır? | Optimizi Blog</title>
+<meta name="description" content="Endüstriyel tesislerdeki gizli maliyetler: Isı yalıtımı ve hava kaçaklarının ISO standartlarına göre analizi ve ROI hesaplama yöntemleri.">
+<meta name="keywords" content="enerji etüdü, iso 12241, vana ceketi, basınçlı hava kaçağı, enerji verimliliği hesaplama, sanayi ısı yalıtımı">
+<meta name="author" content="Optimizi.App">
+
+<meta property="og:title" content="Endüstriyel Enerji Kayıpları: Görünmeyen Giderler">
+<meta property="og:description" content="Tesisinizdeki 1 adet yalıtımsız vananın size maliyetini biliyor musunuz? Mühendislik yaklaşımıyla kayıpları hesaplıyoruz.">
+<meta property="og:image" content="https://www.optimizi.app/icon.jpg">
+<meta property="og:type" content="article">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="icon" href="../favicon.png" type="image/png">
+
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] },
+      extend: {
+        colors: { slate: { 850: '#151e2e', 900: '#0f172a', 950: '#020617' } },
+        animation: { 'blob': 'blob 20s infinite', 'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite' },
+        keyframes: {
+            blob: {
+                '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                '100%': { transform: 'translate(0px, 0px) scale(1)' },
+            }
+        }
+      }
+    }
+  }
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { 
+    background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%);
+    background-attachment: fixed; color: #f1f5f9; overflow-x: hidden;
+  }
+  .glass-nav { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .glass-card { background-color: rgba(30, 41, 59, 0.4); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+  .bg-grid { background-size: 60px 60px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px); mask-image: radial-gradient(circle at center, black 40%, transparent 80%); pointer-events: none; }
+  
+  /* Blog Typography */
+  article h2 { font-size: 1.6rem; font-weight: 700; color: #fff; margin-top: 3rem; margin-bottom: 1.5rem; letter-spacing: -0.02em; border-left: 4px solid #6366f1; padding-left: 1rem; }
+  article p { margin-bottom: 1.5rem; line-height: 1.8; color: #cbd5e1; font-size: 1.1rem; }
+  article ul { margin-bottom: 1.5rem; }
+  article li { margin-bottom: 0.5rem; display: flex; align-items: flex-start; gap: 0.75rem; color: #cbd5e1; }
+  article strong { color: #38bdf8; font-weight: 600; }
+  
+  /* Image Styles */
+  .blog-img-container { margin: 2rem 0; border-radius: 1rem; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); background: #1e293b; }
+  .blog-img { width: 100%; height: auto; object-fit: cover; transition: transform 0.7s ease; min-height: 250px; } /* Min-height ekledim ki resim yokken de yer kaplasın */
+  .blog-img:hover { transform: scale(1.03); }
+  figcaption { text-align: center; font-size: 0.8rem; color: #94a3b8; padding: 0.75rem; background: rgba(15,23,42,0.8); border-top: 1px solid rgba(255,255,255,0.05); }
+</style>
+</head>
+<body class="antialiased selection:bg-indigo-500/30 selection:text-white">
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KD7DLCNS"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+    <div class="absolute inset-0 bg-grid"></div>
+    <div class="absolute top-0 -left-1/4 w-[900px] h-[900px] bg-indigo-600/20 rounded-full blur-[120px] animate-blob mix-blend-screen"></div>
+</div>
+
+<nav class="sticky top-0 z-50 glass-nav transition-all duration-300">
+    <div class="container mx-auto px-6 h-20 flex items-center justify-between">
+        <a href="../index.html" class="flex flex-col justify-center group leading-none">
+            <div class="font-bold text-xl tracking-tight text-white">Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-orange-400">.App</span></div>
+            <div class="text-[10px] text-slate-400 font-bold tracking-widest uppercase mt-0.5">Blog</div>
+        </a>
+        
+        <a href="../tools.html" class="px-5 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-sm font-bold transition flex items-center gap-2">
+            <i data-lucide="calculator" class="w-4 h-4 text-indigo-400"></i> Hesaplama Araçları
+        </a>
+    </div>
+</nav>
+
+<main class="relative z-10 container mx-auto px-6 py-12 lg:py-20">
+    
+    <header class="max-w-4xl mx-auto text-center mb-16">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-bold uppercase tracking-wider mb-6">
+            <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span> Mühendislik & Analiz
+        </div>
+        <h1 class="text-4xl lg:text-6xl font-black text-white tracking-tight mb-6 leading-tight">
+            Endüstriyel Enerji Kayıpları: <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">Görünmeyen Giderler</span>
+        </h1>
+        <p class="text-xl text-slate-400 leading-relaxed max-w-2xl mx-auto">
+            Tesisinizdeki "görünmez delikleri" kapatmak, satış yapmaktan daha kolay bir kârlılık yöntemidir. İşte işin matematiği.
+        </p>
+        
+        <div class="flex items-center justify-center gap-6 mt-8 text-sm text-slate-500 font-medium border-t border-white/5 pt-8">
+            <div class="flex items-center gap-2"><i data-lucide="calendar" class="w-4 h-4"></i> 20 Aralık 2025</div>
+            <div class="flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4"></i> 5 Dk Okuma</div>
+            <div class="flex items-center gap-2"><i data-lucide="user" class="w-4 h-4"></i> Optimizi Ekibi</div>
+        </div>
+    </header>
+
+    <article class="max-w-4xl mx-auto relative">
+        <div class="absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-indigo-500/50 to-transparent -ml-8 hidden lg:block"></div>
+
+        <p class="first-letter:text-5xl first-letter:font-bold first-letter:text-indigo-400 first-letter:float-left first-letter:mr-3">
+            Endüstriyel tesislerde kârlılığı artırmanın en kestirme yolu, üretimi artırmak değil, kayıpları önlemektir. Bir fabrikanın enerji faturası, genellikle hammadde ve işçilikten sonraki en büyük gider kalemidir.
+        </p>
+        
+        <figure class="lg:float-right lg:ml-10 lg:w-[45%] blog-img-container mb-8">
+            <img src="BURAYA_RESIM_LINKI_1.jpg" alt="Mühendis Saha Analizi" class="blog-img"> 
+            <figcaption>Sahadaki verilerin dijital ortamda analiz edilmesi.</figcaption>
+        </figure>
+
+        <p>
+            Ancak çoğu tesiste ısı kayıpları ve hava kaçakları, işletme körlüğü nedeniyle kanıksanır. Oysa ki <strong>yalıtımsız bir vana</strong> veya <strong>tıslayan bir hava tabancası</strong>, şirket kasasından her saniye nakit para çalan bir hırsız gibidir.
+        </p>
+        <p>
+            Bu kayıpları yönetmek için modern mühendislik yaklaşımları, sadece faturaya bakmayı değil; ekipman bazlı <strong>Steady-State (Kararlı Durum)</strong> analizleri yapmayı gerektirir. Ölçüm, analiz ve raporlama üçgeni, tasarrufun temelini oluşturur.
+        </p>
+        <div class="clear-both"></div>
+
+        <div class="glass-card p-8 rounded-2xl my-10 border-l-4 border-indigo-500">
+            <h3 class="text-sm font-bold uppercase text-slate-400 mb-6 flex items-center gap-2"><i data-lucide="activity" class="w-4 h-4"></i> Hesaplama Metodolojisi</h3>
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4 text-center">
+                <div class="bg-slate-900/50 p-4 rounded-xl border border-white/5 w-full">
+                    <div class="text-indigo-400 font-bold mb-1">Standartlar</div>
+                    <div class="text-[10px] text-slate-500">ISO 12241 & ISO 11011</div>
+                </div>
+                <i data-lucide="arrow-right" class="w-6 h-6 text-slate-600 hidden md:block"></i>
+                <div class="bg-slate-900/50 p-4 rounded-xl border border-white/5 w-full relative overflow-hidden">
+                    <div class="absolute inset-0 bg-indigo-500/5 animate-pulse-slow"></div>
+                    <div class="text-white font-bold mb-1">Analiz</div>
+                    <div class="text-[10px] text-slate-500">Steady-State Simülasyon</div>
+                </div>
+                <i data-lucide="arrow-right" class="w-6 h-6 text-slate-600 hidden md:block"></i>
+                <div class="bg-slate-900/50 p-4 rounded-xl border border-white/5 w-full">
+                    <div class="text-green-400 font-bold mb-1">Sonuç</div>
+                    <div class="text-[10px] text-slate-500">Net Kazanç & ROI</div>
+                </div>
+            </div>
+        </div>
+
+        <h2>Isı Yalıtımı: Basit Bir Vana Ne Kadar Kaybettirir?</h2>
+        <p>
+            Yalıtım dünyasında bilinen bir mühendislik kuralı vardır: <strong>"Yalıtımsız bir vana, aynı çaptaki yaklaşık 2 metre çıplak boru kadar ısı kaybeder."</strong>
+        </p>
+        
+        <figure class="lg:float-left lg:mr-10 lg:w-[45%] blog-img-container mb-8">
+            <img src="BURAYA_RESIM_LINKI_2.jpg" alt="Endüstriyel Boru Yalıtımı" class="blog-img">
+            <figcaption>Doğru yalıtılmış hatlar enerji maliyetini %90 düşürür.</figcaption>
+        </figure>
+
+        <p>
+            Örneğin, 160°C sıcaklıkta çalışan DN100 (4 inç) bir glob vanayı ele alalım. Bu vana yalıtımsız bırakıldığında, yüzeyinden ortama sürekli enerji yayar. Bu kayıp sadece "sıcaklık düşüşü" değildir; kazanın bu sıcaklığı korumak için yaktığı ekstra doğalgaz veya fuel-oildir.
+        </p>
+        <p>
+            ISO 12241 standartlarına göre yapılan hesaplamalar, bu tek vananın yalıtılmasıyla (örneğin vana ceketi ile) yıllık yüzlerce dolar tasarruf edilebileceğini ve yatırımın <strong>3-6 ay gibi kısa bir sürede</strong> geri döndüğünü (ROI) kanıtlamaktadır.
+        </p>
+        <div class="clear-both"></div>
+
+        <div class="glass-card p-8 rounded-2xl my-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-8 opacity-10"><i data-lucide="thermometer" class="w-32 h-32"></i></div>
+            <h3 class="text-sm font-bold uppercase text-slate-400 mb-6">Termal Kayıp Modeli</h3>
+            <div class="flex flex-col md:flex-row gap-8 items-center">
+                <div class="relative w-40 h-40 shrink-0 mx-auto">
+                    <div class="absolute inset-0 rounded-full border-4 border-blue-400/30 animate-pulse-slow"></div>
+                    <div class="absolute inset-4 rounded-full border-8 border-slate-600 bg-slate-800 flex items-center justify-center">
+                        <div class="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center text-red-500 font-bold text-xs">Akışkan</div>
+                    </div>
+                    <div class="absolute -right-4 top-1/2 w-8 h-0.5 bg-orange-500"></div>
+                    <div class="absolute -right-6 top-1/2 -mt-3 text-[10px] text-orange-400 font-bold rotate-90">Q (Isı)</div>
+                </div>
+                <div class="space-y-3 w-full">
+                    <div class="flex justify-between text-xs border-b border-white/5 pb-2">
+                        <span class="text-slate-400">Yüzey Sıcaklığı (Ts)</span>
+                        <span class="text-white font-mono">İş güvenliği ve kayıp hesabı için kritik.</span>
+                    </div>
+                    <div class="flex justify-between text-xs border-b border-white/5 pb-2">
+                        <span class="text-slate-400">Rüzgar Etkisi</span>
+                        <span class="text-white font-mono">Dış ortamda kayıpları %30 artırabilir.</span>
+                    </div>
+                    <div class="flex justify-between text-xs border-b border-white/5 pb-2">
+                        <span class="text-slate-400">Yalıtım Malzemesi</span>
+                        <span class="text-white font-mono">Taşyünü, Seramik veya Aerogel seçimi.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2>Basınçlı Hava: Fabrikanın En Pahalı Enerjisi</h2>
+        
+        <figure class="blog-img-container mb-8">
+            <img src="BURAYA_RESIM_LINKI_3.jpg" alt="Basınç Göstergeleri" class="blog-img h-[400px] w-full object-cover">
+            <figcaption>Hava kaçakları, kompresörlerin boşa çalışmasına neden olan en büyük etkendir.</figcaption>
+        </figure>
+
+        <p>
+            Basınçlı hava, elektriğin mekanik enerjiye dönüştürülmüş ve depolanmış halidir. Ancak bu dönüşüm verimsizdir; 1 birim basınçlı hava üretmek için yaklaşık 7-8 birim elektrik harcanır.
+        </p>
+        <p>
+            Bu nedenle, basınçlı hava hattındaki <strong>1 mm'lik küçücük bir delik bile</strong>, 7 bar basınçta yılda yaklaşık 3.000 - 5.000 TL (elektrik birim fiyatına göre) havaya savrulması demektir. Tesis genelinde bu deliklerden onlarca olduğu düşünüldüğünde, maliyet ürkütücü boyutlara ulaşır.
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+            <div class="bg-slate-900/50 p-4 rounded-lg border border-white/5">
+                <div class="text-cyan-400 font-bold text-lg mb-1">Görünmez Kayıp</div>
+                <div class="text-xs text-slate-500">Hava kaçakları kokmaz, leke bırakmaz ama kompresörü boşuna çalıştırır.</div>
+            </div>
+            <div class="bg-slate-900/50 p-4 rounded-lg border border-white/5">
+                <div class="text-cyan-400 font-bold text-lg mb-1">Maliyet Çarpanı</div>
+                <div class="text-xs text-slate-500">Basıncı 1 bar artırmak, enerji tüketimini %7 artırır. Kaçakları onarmak basıncı düşürmenizi sağlar.</div>
+            </div>
+        </div>
+        <p>
+            <strong>ISO 11011</strong> standardı, bu kaçakların tespit edilmesi, debisinin hesaplanması ve raporlanması için gereken çerçeveyi çizer.
+        </p>
+
+        <h2>Sonuç: "Ölçemediğinizi Yönetemezsiniz"</h2>
+        <p>
+            Enerji verimliliği soyut bir kavram değil, tamamen matematiksel bir süreçtir. Optimizi.App üzerinde sunduğumuz araçlar, karmaşık termodinamik formülleri (ISO standartlarını) saniyeler içinde işleyerek size karar vermeniz için gereken veriyi sunar.
+        </p>
+
+        <div class="mt-12 p-8 rounded-3xl bg-gradient-to-r from-indigo-900/40 to-slate-900/40 border border-indigo-500/30 text-center relative overflow-hidden group">
+            <div class="absolute inset-0 bg-grid opacity-30"></div>
+            <div class="relative z-10">
+                <h3 class="text-2xl font-bold text-white mb-3">Hesaplamaya Başlayın</h3>
+                <p class="text-slate-400 mb-6 max-w-lg mx-auto">
+                    Aşağıdaki araçları kullanarak tesisinizdeki potansiyel tasarrufu hemen, ücretsiz ve üyeliksiz hesaplayın.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="../tool/roi.html" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition shadow-lg shadow-indigo-500/20">
+                        Isı Yalıtım Hesabı
+                    </a>
+                    <a href="../tool/air.html" class="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-bold transition border border-white/10">
+                        Hava Kaçağı Hesabı
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </article>
+</main>
+
+<footer class="border-t border-white/10 mt-20 bg-slate-900/50 py-12 relative z-10">
+    <div class="container mx-auto px-6 text-center">
+        <div class="font-bold text-2xl text-white mb-4">Optimizi<span class="text-indigo-500">.App</span></div>
+        <p class="text-slate-500 text-sm mb-8 max-w-md mx-auto">Endüstriyel hesaplamalar için yeni nesil, hızlı ve güvenilir mühendislik platformu.</p>
+        <div class="flex justify-center gap-6 mb-8">
+            <a href="https://www.linkedin.com/company/optimizi-app/" target="_blank" class="p-2 bg-white/5 rounded-lg hover:bg-indigo-600 hover:text-white transition text-slate-400">
+                <i data-lucide="linkedin" class="w-5 h-5"></i>
+            </a>
+            <a href="mailto:contact@optimizi.app" class="p-2 bg-white/5 rounded-lg hover:bg-red-500 hover:text-white transition text-slate-400">
+                <i data-lucide="mail" class="w-5 h-5"></i>
+            </a>
+        </div>
+        <div class="text-xs text-slate-600">&copy; 2025 Optimizi.App - Tüm hakları saklıdır.</div>
+    </div>
+</footer>
+
+<script>
+    lucide.createIcons();
+</script>
+
+</body>
+</html>
