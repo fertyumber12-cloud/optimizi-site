@@ -137,8 +137,15 @@
     document.getElementById('prdName').innerText = product;
     document.getElementById('prdSerial').innerText = serial;
     
-    const dObj = new Date(dateStr);
-    document.getElementById('installDate').innerText = dObj.toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
+    // --- TARİH DÜZELTME (YEREL SAAT FIX) ---
+    // Gelen tarih stringini (YYYY-MM-DD) parçalayıp yerel saatle 00:00 yapıyoruz.
+    const parts = dateStr.split('-');
+    // Not: Ay indeksi 0'dan başlar (Ocak=0)
+    const startDate = new Date(parts[0], parts[1] - 1, parts[2], 0, 0, 0).getTime();
+    
+    // Ekranda güzel gözüksün
+    const displayDate = new Date(startDate);
+    document.getElementById('installDate').innerText = displayDate.toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
 
     if(client) {
         document.getElementById('clientBox').classList.remove('hidden');
@@ -147,7 +154,6 @@
 
     // Sayaç Motoru
     const perMs = yearlySave / 31536000000; 
-    const startDate = dObj.getTime();
 
     function updateCounter() {
         const now = new Date().getTime();
@@ -160,15 +166,31 @@
             return;
         }
 
+        // Para Hesabı
         const currentMoney = diff * perMs;
         document.getElementById('liveMoney').innerText = currentMoney.toLocaleString('tr-TR', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
 
+        // --- AKILLI ZAMAN GÖSTERİMİ (SENİN İSTEDİĞİN GİBİ) ---
         const seconds = Math.floor((diff / 1000) % 60);
         const minutes = Math.floor((diff / (1000 * 60)) % 60);
         const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         
-        document.getElementById('runTime').innerText = `${days}g ${hours}s ${minutes}d ${seconds}sn`;
+        let timeString = "";
+        
+        if (days > 0) {
+            // Eğer 1 günden fazlaysa: "3 Gün 5 Saat"
+            timeString = `${days} Gün ${hours} Saat`;
+        } else {
+            // Eğer daha gün dolmadıysa: "15 Saat 20 Dakika"
+            timeString = `${hours} Saat ${minutes} Dakika`;
+        }
+        
+        // Saniyeyi de çok minik ekleyelim ki canlı olduğu belli olsun
+        // İstersen silebiliriz ama hareket katıyor.
+        timeString += ` <span class="text-[9px] opacity-50">(${seconds}sn)</span>`;
+
+        document.getElementById('runTime').innerHTML = timeString;
 
         requestAnimationFrame(updateCounter);
     }
