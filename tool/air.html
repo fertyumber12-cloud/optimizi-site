@@ -53,11 +53,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .glass-nav { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.08); }
   .bg-grid { background-size: 60px 60px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px); mask-image: radial-gradient(circle at center, black 40%, transparent 80%); pointer-events: none; }
 
-  /* Print Styles */
+  /* Print Styles - Rapor Tasarımı */
   @media print {
     @page { margin: 0; size: A4; }
     html, body { width: 210mm; height: 297mm; margin: 0 !important; padding: 0 !important; background: white !important; color: black !important; overflow: visible !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    #app-layer, .bg-grid, .blob-bg, nav { display: none !important; }
+    #app-layer, .bg-grid, .blob-bg, nav, #methodModal { display: none !important; }
     #print-area { display: block !important; }
     .print-page { width: 210mm; height: 296mm; position: relative; page-break-after: always; overflow: hidden; background: white; }
     .print-page:last-child { page-break-after: auto; }
@@ -100,7 +100,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
               <button onclick="toggleLanguage()" class="p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition"><span class="lang-flag text-lg">🇬🇧</span></button>
               
-              <button onclick="printRep()" class="flex items-center gap-2 bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition shadow-lg shadow-cyan-600/20 active:scale-95 ml-2">
+              <button onclick="generateReport()" class="flex items-center gap-2 bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition shadow-lg shadow-cyan-600/20 active:scale-95 ml-2 cursor-pointer">
                   <i data-lucide="printer" class="w-4 h-4"></i> <span data-i18n="btn_report">Rapor Al</span>
               </button>
           </div>
@@ -187,7 +187,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <div class="space-y-4 relative z-10">
                         <div>
                             <label class="text-[10px] text-slate-400 mb-1 block" data-i18n="lbl_loc">Konum / Etiket</label>
-                            <input type="text" id="loc" class="glass-input text-xs font-bold text-white" placeholder="Örn: Kompresör Dairesi, Hat 1...">
+                            <input type="text" id="loc" class="glass-input text-xs font-bold text-white" data-i18n="ph_loc" placeholder="Örn: Kompresör Dairesi, Hat 1...">
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
@@ -270,7 +270,48 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="print-page p-12">
         <div class="flex justify-between items-center border-b-2 border-slate-900 pb-4 mb-8"><h2 class="text-xl font-black text-slate-900 uppercase" id="rep_p2_title">Kaçak Listesi ve Analiz</h2><div class="text-xs text-slate-500" id="rDate">...</div></div>
         <table class="w-full audit-table mb-8"><thead><tr id="rep_table_head"></tr></thead><tbody id="rTable"></tbody></table>
-        <div class="mt-auto pt-8 border-t border-slate-200 text-center text-[10px] text-slate-400">Page 2 / 2</div>
+        <div class="mt-auto pt-8 border-t border-slate-200 text-center text-[10px] text-slate-400">Page 2 / 3</div>
+    </div>
+
+    <div class="print-page p-12 flex flex-col h-full">
+        <h2 class="text-2xl font-black text-slate-900 uppercase mb-8 border-b-2 border-slate-900 pb-4" data-i18n="rep_p3_title">Yönetici Özeti</h2>
+        
+        <div class="grid grid-cols-2 gap-6 mb-8">
+            <div class="bg-red-50 border border-red-200 rounded-xl p-6">
+                <div class="text-xs font-bold text-red-400 uppercase tracking-widest mb-1" data-i18n="rep_lbl_loss">TOPLAM YILLIK KAYIP</div>
+                <div class="text-5xl font-black text-red-600 tracking-tight" id="sumLoss">0</div>
+                <div class="text-[9px] text-red-800 mt-2 font-bold opacity-70" data-i18n="rep_desc_loss">Kaçaklar onarılmazsa kaybedilecek tutar.</div>
+            </div>
+            <div class="bg-cyan-50 border border-cyan-200 rounded-xl p-6">
+                <div class="text-xs font-bold text-cyan-600 uppercase tracking-widest mb-1" data-i18n="rep_lbl_flow">TOPLAM KAÇAK DEBİSİ</div>
+                <div class="text-5xl font-black text-cyan-700 tracking-tight" id="sumFlow">0</div>
+                <div class="text-[9px] text-cyan-800 mt-2 font-bold opacity-70" data-i18n="rep_desc_flow">m³/dk (Serbest Hava Eşdeğeri)</div>
+            </div>
+        </div>
+
+        <div class="flex gap-8 mb-8">
+             <div class="flex-1 bg-emerald-900 rounded-xl p-8 text-white flex items-center justify-between relative overflow-hidden">
+                  <div class="absolute right-0 bottom-0 opacity-10 pointer-events-none translate-x-4 translate-y-4"><i data-lucide="sprout" class="w-48 h-48 text-white"></i></div>
+                 <div class="z-10">
+                     <div class="text-xs text-emerald-300 font-bold uppercase tracking-widest mb-2" data-i18n="rep_env_title">ÇEVRESEL AYAK İZİ</div>
+                     <div class="text-5xl font-black mt-1 mb-2"><span id="sumCo2">0</span> <span class="text-2xl font-medium">Ton CO₂</span></div>
+                     <div class="text-sm opacity-80" data-i18n="rep_desc_co2">Bu kaçaklar nedeniyle atmosfere salınan fazladan karbon miktarı.</div>
+                 </div>
+                 <div class="text-right z-10 border-l border-emerald-700 pl-8">
+                     <div class="text-5xl font-black"><span id="sumTrees">0</span></div>
+                     <div class="text-xs text-emerald-400 mt-1 font-bold uppercase tracking-widest" data-i18n="rep_lbl_trees">Kesilen Ağaç Eşdeğeri</div>
+                 </div>
+             </div>
+         </div>
+
+        <div class="mt-auto border-t-2 border-slate-100 pt-6">
+            <p class="text-[10px] text-slate-400 text-justify font-medium leading-relaxed" data-i18n="rep_disclaimer">
+                <strong>Yasal Uyarı / Disclaimer:</strong> Bu rapor, ISO 1217 ve ISO 11011 standartlarına atıfta bulunarak, kullanıcı tarafından girilen veriler (delik çapı, basınç vb.) ve termodinamik akış formülleri (Keskin Kenarlı Orifis Modeli Cd=0.61) kullanılarak oluşturulmuş teorik bir simülasyondur. Sonuçlar mühendislik tahminleridir ve garanti niteliği taşımaz. Gerçek tasarruf miktarı; sistem dinamiklerine, kompresör verimine ve saha koşullarına göre değişiklik gösterebilir. Yatırım kararı almadan önce profesyonel ultrasonik debi ölçümü yapılması önerilir.
+            </p>
+            <p class="text-[10px] text-slate-300 text-center mt-4">
+                &copy; 2025 Optimizi.App - Tüm hakları saklıdır.
+            </p>
+        </div>
     </div>
 </div>
 
@@ -293,21 +334,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             page_title:"Basınçlı Hava Kaçak Analizi", btn_report:"Rapor Al", dash_flow:"Toplam Kaçak", dash_power:"Kayıp Güç", dash_cost:"Yıllık Zarar", dash_co2:"CO2 Salınımı",
             lbl_proj:"Proje Detayları", lbl_prep:"Hazırlayan", ph_firm:"Firma Adı", ph_eng:"Mühendis Adı", lbl_cust:"Müşteri", ph_cust_firm:"Müşteri Firma", ph_dept:"İlgili Kişi",
             lbl_sys:"Sistem Ayarları", lbl_hours:"Yıllık Saat", lbl_price:"Birim Fiyat", lbl_spec_pow:"Özgül Güç (kW/m³/dk)",
-            lbl_add:"Kaçak Ekle", lbl_loc:"Konum / Etiket", lbl_dia:"Delik Çapı (mm)", lbl_bar:"Basınç (bar)", lbl_photo:"Kaçak Fotoğrafı Ekle", btn_calc:"Listeye Ekle", btn_update:"Güncelle",
+            lbl_add:"Kaçak Ekle", lbl_loc:"Konum / Etiket", ph_loc:"Örn: Kompresör Dairesi, Hat 1...", lbl_dia:"Delik Çapı (mm)", lbl_bar:"Basınç (bar)", lbl_photo:"Kaçak Fotoğrafı Ekle", btn_calc:"Listeye Ekle", btn_update:"Güncelle",
             lbl_list:"Tespit Edilen Kaçaklar", btn_clear:"Tümünü Sil", msg_empty:"Henüz kaçak eklenmedi.",
             th_img:"Görsel", th_loc:"Konum", th_det:"Detay", th_flow:"Debi", th_cost:"Maliyet", th_act:"İşlem",
             rep_title_top:"Enerji Verimliliği Etüdü", rep_title_main:"BASINÇLI HAVA <br><span class='text-cyan-500'>KAÇAK TESPİT</span> <br>RAPORU",
-            rep_client_lbl:"Müşteri", rep_prep_lbl:"Hazırlayan", rep_p2_title:"Kaçak Listesi ve Analiz"
+            rep_client_lbl:"Müşteri", rep_prep_lbl:"Hazırlayan", rep_p2_title:"Kaçak Listesi ve Analiz",
+            rep_p3_title:"Yönetici Özeti", rep_env_title:"ÇEVRESEL AYAK İZİ",
+            rep_lbl_loss: "TOPLAM YILLIK KAYIP", rep_desc_loss: "Kaçaklar onarılmazsa kaybedilecek tutar.",
+            rep_lbl_flow: "TOPLAM KAÇAK DEBİSİ", rep_desc_flow: "m³/dk (Serbest Hava Eşdeğeri)",
+            rep_desc_co2: "Bu kaçaklar nedeniyle atmosfere salınan fazladan karbon miktarı.",
+            rep_lbl_trees: "Kesilen Ağaç Eşdeğeri",
+            rep_disclaimer: "<strong>Yasal Uyarı / Disclaimer:</strong> Bu rapor, ISO 1217 ve ISO 11011 standartlarına atıfta bulunarak, kullanıcı tarafından girilen veriler ve termodinamik akış formülleri (Keskin Kenarlı Orifis Modeli Cd=0.61) kullanılarak oluşturulmuş teorik bir simülasyondur. Sonuçlar mühendislik tahminleridir ve garanti niteliği taşımaz. Gerçek tasarruf miktarı; sistem dinamiklerine, kompresör verimine ve saha koşullarına göre değişiklik gösterebilir. Yatırım kararı almadan önce profesyonel ultrasonik debi ölçümü yapılması önerilir."
         },
         en:{
             page_title:"Compressed Air Leak Analysis", btn_report:"Get Report", dash_flow:"Total Leak Flow", dash_power:"Power Loss", dash_cost:"Annual Cost", dash_co2:"CO2 Emissions",
             lbl_proj:"Project Details", lbl_prep:"Prepared By", ph_firm:"Company", ph_eng:"Engineer", lbl_cust:"Customer", ph_cust_firm:"Client Company", ph_dept:"Contact / Dept",
             lbl_sys:"System Settings", lbl_hours:"Annual Hours", lbl_price:"Unit Price", lbl_spec_pow:"Specific Power (kW/m³/min)",
-            lbl_add:"Add Leak", lbl_loc:"Location / Tag", lbl_dia:"Hole Diameter (mm)", lbl_bar:"Pressure (bar)", lbl_photo:"Add Leak Photo", btn_calc:"Add to List", btn_update:"Update",
+            lbl_add:"Add Leak", lbl_loc:"Location / Tag", ph_loc:"Ex: Compressor Room, Line 1...", lbl_dia:"Hole Diameter (mm)", lbl_bar:"Pressure (bar)", lbl_photo:"Add Leak Photo", btn_calc:"Add to List", btn_update:"Update",
             lbl_list:"Detected Leaks", btn_clear:"Clear All", msg_empty:"No leaks added yet.",
             th_img:"Image", th_loc:"Location", th_det:"Detail", th_flow:"Flow", th_cost:"Cost", th_act:"Action",
             rep_title_top:"Energy Efficiency Audit", rep_title_main:"COMPRESSED AIR <br><span class='text-cyan-500'>LEAK DETECTION</span> <br>REPORT",
-            rep_client_lbl:"Client", rep_prep_lbl:"Prepared By", rep_p2_title:"Leak List & Analysis"
+            rep_client_lbl:"Client", rep_prep_lbl:"Prepared By", rep_p2_title:"Leak List & Analysis",
+            rep_p3_title:"Executive Summary", rep_env_title:"ENVIRONMENTAL FOOTPRINT",
+            rep_lbl_loss: "TOTAL ANNUAL LOSS", rep_desc_loss: "Loss incurred if no action taken.",
+            rep_lbl_flow: "TOTAL LEAK FLOW", rep_desc_flow: "m³/min (Free Air Delivery equivalent)",
+            rep_desc_co2: "Excess carbon released due to these leaks.",
+            rep_lbl_trees: "Equivalent Trees Cut",
+            rep_disclaimer: "<strong>Legal Warning / Disclaimer:</strong> This report is a theoretical simulation generated based on ISO 1217 and ISO 11011 standards, using user-input data and thermodynamic flow formulas (Sharp-Edged Orifice Model Cd=0.61). The results are engineering estimates and do not constitute a guarantee. Actual savings may vary depending on system dynamics, compressor efficiency, and site conditions. Professional ultrasonic flow measurement is recommended before making investment decisions."
         }
     };
 
@@ -341,8 +394,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function init(){ 
         getFx(); 
         lucide.createIcons();
-        
-        // Slider Sync
         const dIn = document.getElementById('dia');
         const dRn = document.getElementById('diaRange');
         dIn.addEventListener('input', ()=>{dRn.value=dIn.value;});
@@ -369,35 +420,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
 
     function getCalculation(dia, bar, hours, price, specPower, curr) {
-        // ISO 1217 FORMÜLÜ: Q = 0.0071 * d^2 * (p + 1) -> (Yaklaşık formül)
-        // Daha hassas yaklaşım için katsayılar kullanılabilir ama bu yeterli.
-        
-        // 1. Debi (m3/dk)
-        const flow = 0.0071 * (dia * dia) * (bar + 1); // Basitleştirilmiş
-        
-        // 2. Güç Kaybı (kW) -> Debi * Özgül Güç
+        const flow = 0.0071 * (dia * dia) * (bar + 1); 
         const power = flow * specPower;
-        
-        // 3. Yıllık Enerji (kWh)
         const energy = power * hours;
-        
-        // 4. Maliyet
-        // Kur çevrimi: Eğer seçili kur TL ise ve fiyat TL ise sorun yok.
-        // Fiyatı her zaman seçili kur cinsinden kabul ediyoruz.
         const cost = energy * price;
-        
-        // 5. CO2 (Türkiye şebeke ortalaması ~0.44 kg/kWh)
-        const co2 = (energy * 0.44) / 1000; // Ton
+        const co2 = (energy * 0.44) / 1000; 
+        const trees = (co2 * 1000) / 20; // 1 Ağaç ≈ 20kg CO2
 
-        return { flow, power, cost, co2 };
+        return { flow, power, cost, co2, trees };
     }
 
     function addLeak(){
         const loc = document.getElementById('loc').value || (currentLang==='tr'?'Bilinmeyen Konum':'Unknown Loc');
         const dia = parseFloat(document.getElementById('dia').value) || 1;
         const bar = parseFloat(document.getElementById('bar').value) || 7;
-        
-        // Global değerleri al (hesaplama anındaki değerler)
         const hours = parseFloat(document.getElementById('hours').value) || 8000;
         const price = parseFloat(document.getElementById('price').value) || 3.5;
         const specPower = parseFloat(document.getElementById('specPower').value) || 6.5;
@@ -408,8 +444,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         const item = {
             id: Date.now(),
             loc, dia, bar, img: currImg,
-            res: res, // Sonuçları sakla
-            inputs: { hours, price, specPower, curr } // Girdileri sakla
+            res: res, 
+            inputs: { hours, price, specPower, curr }
         };
 
         LIST.push(item);
@@ -419,12 +455,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function finishUpdate(){
         if(editingIndex!==null) {
-            // Mevcut inputlarla güncelle
             const loc = document.getElementById('loc').value;
             const dia = parseFloat(document.getElementById('dia').value);
             const bar = parseFloat(document.getElementById('bar').value);
-            
-            // Global değerleri de güncelle
             const hours = parseFloat(document.getElementById('hours').value);
             const price = parseFloat(document.getElementById('price').value);
             const specPower = parseFloat(document.getElementById('specPower').value);
@@ -450,13 +483,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function edit(index){
         editingIndex = index;
         const item = LIST[index];
-        
         document.getElementById('loc').value = item.loc;
         document.getElementById('dia').value = item.dia;
         document.getElementById('diaRange').value = item.dia;
         document.getElementById('bar').value = item.bar;
-        
-        // Resmi geri yükle
         currImg = item.img;
         if(currImg) {
             document.getElementById('prevImg').src = currImg;
@@ -464,7 +494,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         } else {
             document.getElementById('prevImg').classList.add('hidden');
         }
-
         document.getElementById('btnAdd').classList.add('hidden');
         document.getElementById('btnUpdate').classList.remove('hidden');
     }
@@ -528,7 +557,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             tb.innerHTML = `<tr><td colspan="6" class="px-6 py-20 text-center text-slate-500"><i data-lucide="wind" class="w-12 h-12 mx-auto mb-3 opacity-20"></i><span>${TRANSLATIONS[currentLang].msg_empty}</span></td></tr>`;
         }
 
-        // Dashboard Update
         document.getElementById('dashFlow').innerText = tFlow.toFixed(2);
         document.getElementById('dashPower').innerText = tPower.toFixed(1);
         document.getElementById('dashCost').innerText = currSym + " " + Math.round(tCost).toLocaleString();
@@ -537,74 +565,79 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         lucide.createIcons();
     }
 
-    function printRep(){
-        const T = TRANSLATIONS[currentLang];
-        const d = new Date().toLocaleDateString(currentLang==='tr'?'tr-TR':'en-US');
-        
-        let tCost = 0;
-        const tb = document.getElementById('rTable');
-        tb.innerHTML = '';
-        
-        // Başlıklar
-        document.getElementById('rep_table_head').innerHTML = `
-            <th class="w-8">#</th>
-            <th class="w-24 text-center">${T.th_img}</th>
-            <th class="text-left">${T.th_loc}</th>
-            <th class="text-center w-24">${T.lbl_dia}</th>
-            <th class="text-center w-24">${T.lbl_bar}</th>
-            <th class="text-right text-cyan-600">${T.th_flow} (m³/dk)</th>
-            <th class="text-right text-red-600 font-black">${T.th_cost}</th>
-        `;
+    function generateReport(){
+        try {
+            const T = TRANSLATIONS[currentLang];
+            const d = new Date().toLocaleDateString(currentLang==='tr'?'tr-TR':'en-US');
+            
+            let tCost = 0;
+            let tFlow = 0;
+            let tCo2 = 0;
+            let tTrees = 0;
 
-        LIST.forEach((item, i) => {
-            tCost += item.res.cost;
-            const imgHtml = item.img 
-                ? `<img src="${item.img}" class="w-20 h-20 object-cover rounded border border-slate-200 mx-auto">` 
-                : `<div class="w-8 h-8 bg-slate-100 rounded mx-auto flex items-center justify-center text-[8px]">-</div>`;
-
-            tb.innerHTML += `
-                <tr>
-                    <td class="text-center font-bold text-slate-400">${i+1}</td>
-                    <td class="text-center py-2">${imgHtml}</td>
-                    <td class="font-bold text-slate-800 align-middle">${item.loc}</td>
-                    <td class="text-center font-mono text-slate-600 align-middle">${item.dia} mm</td>
-                    <td class="text-center font-mono text-slate-600 align-middle">${item.bar} bar</td>
-                    <td class="text-right font-mono text-cyan-600 font-bold align-middle">${item.res.flow.toFixed(2)}</td>
-                    <td class="text-right font-mono text-red-600 font-black align-middle text-lg">${Math.round(item.res.cost).toLocaleString()}</td>
-                </tr>
+            const tb = document.getElementById('rTable');
+            if(!tb) return;
+            tb.innerHTML = '';
+            
+            document.getElementById('rep_table_head').innerHTML = `
+                <th class="w-8">#</th>
+                <th class="w-24 text-center">${T.th_img}</th>
+                <th class="text-left">${T.th_loc}</th>
+                <th class="text-center w-24">${T.lbl_dia}</th>
+                <th class="text-center w-24">${T.lbl_bar}</th>
+                <th class="text-right text-cyan-600">${T.th_flow} (m³/dk)</th>
+                <th class="text-right text-red-600 font-black">${T.th_cost}</th>
             `;
-        });
 
-        // Kapak Bilgileri
-        document.getElementById('rep_title_top').innerHTML = T.rep_title_top;
-        document.getElementById('rep_title_main').innerHTML = T.rep_title_main;
-        document.getElementById('rep_client_lbl').innerText = T.rep_client_lbl;
-        document.getElementById('rep_prep_lbl').innerText = T.rep_prep_lbl;
-        document.getElementById('rep_p2_title').innerText = T.rep_p2_title;
-        
-        document.getElementById('covClient').innerText = document.getElementById('cName').value || "CLIENT";
-        document.getElementById('covProv').innerText = document.getElementById('pName').value || "OPTIMIZI INC.";
-        document.getElementById('rDate').innerText = d;
-        
-        const currSym = document.getElementById('curr').value;
-        document.getElementById('covTotalCost').innerText = Math.round(tCost).toLocaleString();
-        document.getElementById('covCurr').innerText = currSym + " / " + (currentLang==='tr'?'YIL KAYIP':'YEAR LOSS');
+            LIST.forEach((item, i) => {
+                tCost += item.res.cost;
+                tFlow += item.res.flow;
+                tCo2 += item.res.co2;
+                tTrees += item.res.trees;
 
-        setTimeout(() => { window.print(); }, 200);
-    }
+                const imgHtml = item.img 
+                    ? `<img src="${item.img}" class="w-20 h-20 object-cover rounded border border-slate-200 mx-auto">` 
+                    : `<div class="w-8 h-8 bg-slate-100 rounded mx-auto flex items-center justify-center text-[8px]">-</div>`;
 
-    // Sidebar Toggle
-    function toggleMenu() {
-        const sidebar = document.getElementById('sidebar');
-        const backdrop = document.getElementById('backdrop');
-        if (sidebar.classList.contains('-translate-x-full')) {
-            sidebar.classList.remove('-translate-x-full');
-            backdrop.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        } else {
-            sidebar.classList.add('-translate-x-full');
-            backdrop.classList.add('hidden');
-            document.body.style.overflow = 'auto';
+                tb.innerHTML += `
+                    <tr>
+                        <td class="text-center font-bold text-slate-400">${i+1}</td>
+                        <td class="text-center py-2">${imgHtml}</td>
+                        <td class="font-bold text-slate-800 align-middle">${item.loc}</td>
+                        <td class="text-center font-mono text-slate-600 align-middle">${item.dia} mm</td>
+                        <td class="text-center font-mono text-slate-600 align-middle">${item.bar} bar</td>
+                        <td class="text-right font-mono text-cyan-600 font-bold align-middle">${item.res.flow.toFixed(2)}</td>
+                        <td class="text-right font-mono text-red-600 font-black align-middle text-lg">${Math.round(item.res.cost).toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+
+            // GÜVENLİ DOM GÜNCELLEMESİ
+            if(document.getElementById('rep_title_top')) document.getElementById('rep_title_top').innerHTML = T.rep_title_top;
+            if(document.getElementById('rep_title_main')) document.getElementById('rep_title_main').innerHTML = T.rep_title_main;
+            if(document.getElementById('rep_client_lbl')) document.getElementById('rep_client_lbl').innerText = T.rep_client_lbl;
+            if(document.getElementById('rep_prep_lbl')) document.getElementById('rep_prep_lbl').innerText = T.rep_prep_lbl;
+            if(document.getElementById('rep_p2_title')) document.getElementById('rep_p2_title').innerText = T.rep_p2_title;
+            if(document.getElementById('rep_p3_title')) document.getElementById('rep_p3_title').innerText = T.rep_p3_title;
+            if(document.getElementById('rep_env_title')) document.getElementById('rep_env_title').innerText = T.rep_env_title;
+            
+            document.getElementById('covClient').innerText = document.getElementById('cName').value || "CLIENT";
+            document.getElementById('covProv').innerText = document.getElementById('pName').value || "OPTIMIZI INC.";
+            document.getElementById('rDate').innerText = d;
+            
+            const currSym = document.getElementById('curr').value;
+            document.getElementById('covTotalCost').innerText = Math.round(tCost).toLocaleString();
+            document.getElementById('covCurr').innerText = currSym + " / " + (currentLang==='tr'?'YIL KAYIP':'YEAR LOSS');
+
+            document.getElementById('sumLoss').innerText = currSym + " " + Math.round(tCost).toLocaleString();
+            document.getElementById('sumFlow').innerText = tFlow.toFixed(2);
+            document.getElementById('sumCo2').innerText = tCo2.toFixed(1);
+            document.getElementById('sumTrees').innerText = Math.round(tTrees).toLocaleString();
+
+            setTimeout(() => { window.print(); }, 200);
+        } catch(e) {
+            console.error("Rapor oluşturma hatası:", e);
+            alert("Rapor oluşturulurken bir hata oluştu. Lütfen tüm alanların dolduğundan emin olun.");
         }
     }
 </script>
