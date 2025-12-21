@@ -24,8 +24,8 @@
 <style>
   body { background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%); color: #f1f5f9; min-height: 100vh; overflow-x: hidden; }
   .glass-card { background-color: rgba(30, 41, 59, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
-  .glass-input { border-radius: 0.5rem; padding: 0.75rem; width: 100%; background-color: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 0.9rem; transition: all 0.2s; }
-  .glass-input:focus { border-color: #6366f1; outline: none; background-color: rgba(15, 23, 42, 1); box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2); }
+  .glass-input { border-radius: 0.75rem; padding: 0.75rem; width: 100%; background-color: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 0.75rem; transition: all 0.2s; }
+  .glass-input:focus { outline: none; border-color: #6366f1; background-color: rgba(15, 23, 42, 0.8); }
   
   select.glass-input { appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.75rem center; background-repeat: no-repeat; background-size: 1.2em 1.2em; padding-right: 2.5rem; }
 
@@ -100,7 +100,7 @@
 
 </style>
 </head>
-<body class="custom-scroll">
+<body class="custom-scroll" onload="updateUI()">
 
     <div id="qr-engine" style="position:fixed; left:-9999px; top:0;"></div>
 
@@ -121,41 +121,63 @@
             </div>
         </div>
 
-        <div class="glass-card p-6 rounded-2xl border-t-4 border-t-indigo-500">
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div class="glass-card p-6 rounded-2xl">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 
                 <div class="lg:col-span-1 space-y-4 border-r border-white/5 pr-6">
-                    <h3 class="text-xs font-bold text-indigo-400 uppercase mb-2 flex items-center gap-2"><i data-lucide="folder-open"></i> Proje Bilgileri</h3>
+                    <h3 class="text-indigo-400 text-xs font-bold uppercase mb-4 flex items-center gap-2"><i data-lucide="folder-open" class="w-4 h-4"></i> Proje Bilgileri</h3>
                     <div>
-                        <label class="text-[10px] text-slate-400 block mb-1 font-bold">Müşteri / Firma Adı</label>
-                        <input type="text" id="cName" class="glass-input" placeholder="Firma Adı Giriniz...">
+                        <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Müşteri / Firma Adı</label>
+                        <input type="text" id="cName" class="glass-input text-xs" placeholder="Firma Adı Giriniz...">
                     </div>
                     <div>
-                        <label class="text-[10px] text-slate-400 block mb-1 font-bold">Ürün Etiketi (Lokasyon)</label>
-                        <input type="text" id="pName" class="glass-input font-bold text-yellow-400" placeholder="Örn: Kazan Vana-1">
+                        <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Ürün Etiketi (Lokasyon)</label>
+                        <input type="text" id="pName" class="glass-input text-xs font-bold text-yellow-400" placeholder="Örn: Kazan Vana-1">
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="text-[10px] text-slate-400 block mb-1 font-bold">Tarih</label>
-                            <input type="date" id="iDate" class="glass-input">
+                            <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Tarih</label>
+                            <input type="date" id="iDate" class="glass-input text-xs">
                         </div>
                         <div>
-                            <label class="text-[10px] text-slate-400 block mb-1 font-bold">Seri No</label>
-                            <input type="text" id="startSerial" class="glass-input" value="1001">
+                            <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Seri No</label>
+                            <input type="text" id="startSerial" class="glass-input text-xs" value="1001">
                         </div>
                     </div>
                 </div>
 
                 <div class="lg:col-span-3">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xs font-bold text-orange-400 uppercase flex items-center gap-2"><i data-lucide="calculator"></i> Enerji & ROI Hesabı (ISO 12241)</h3>
+                        <h3 class="text-indigo-400 text-xs font-bold uppercase flex items-center gap-2"><i data-lucide="calculator" class="w-4 h-4"></i> Enerji & ROI Hesabı (ISO 12241)</h3>
                     </div>
                     
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                        <div class="space-y-4">
+                        
+                        <div class="space-y-3">
                             <div>
-                                <label class="text-[10px] text-slate-400 block mb-1 font-bold">Çap (DN)</label>
-                                <select id="dn" class="glass-input font-mono">
+                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Ekipman Tipi</label>
+                                <select id="equipType" onchange="updateUI()" class="glass-input text-xs">
+                                    <option value="valve">Vana / Armatür</option>
+                                    <option value="pipe">Boru Hattı</option>
+                                    <option value="flat">Düz Yüzey / Tank</option>
+                                </select>
+                            </div>
+
+                            <div id="rowValveType" class="hidden">
+                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Vana Tipi</label>
+                                <select id="valveType" class="glass-input text-xs" onchange="updateLiveCalc()">
+                                    <option value="gate">Sürgülü Vana</option>
+                                    <option value="globe">Globe Vana</option>
+                                    <option value="butterfly">Kelebek Vana</option>
+                                    <option value="ball">Küresel Vana</option>
+                                    <option value="strainer">Pislik Tutucu</option>
+                                    <option value="check">Çekvalf</option>
+                                </select>
+                            </div>
+
+                            <div id="rowDn">
+                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Çap (DN)</label>
+                                <select id="dn" class="glass-input text-xs font-mono">
                                     <option value="15">DN15</option><option value="20">DN20</option>
                                     <option value="25">DN25</option><option value="32">DN32</option>
                                     <option value="40">DN40</option><option value="50">DN50</option>
@@ -166,14 +188,11 @@
                                     <option value="350">DN350</option><option value="400">DN400</option>
                                 </select>
                             </div>
-                            <div>
-                                <label class="text-[10px] text-slate-400 block mb-1 font-bold">Yalıtım (mm)</label>
-                                <input type="number" id="thk" class="glass-input" value="50">
-                            </div>
                         </div>
-                        <div class="space-y-4">
+
+                        <div class="space-y-3">
                             <div>
-                                <label class="text-[10px] text-slate-400 block mb-1 font-bold">Yalıtım Tipi</label>
+                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Yalıtım Tipi</label>
                                 <select id="mat" class="glass-input text-xs">
                                     <option value="needlemat" selected>İğnelenmiş Cam Elyaf</option>
                                     <option value="rockwool">Taşyünü (Sanayi)</option>
@@ -182,13 +201,21 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="text-[10px] text-slate-400 block mb-1 font-bold">Yüzey Sıc. (°C)</label>
-                                <input type="number" id="temp" class="glass-input text-red-400 font-bold" value="160">
+                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Yalıtım (mm)</label>
+                                <input type="number" id="thk" class="glass-input text-xs" value="50">
                             </div>
                         </div>
-                        <div class="space-y-4">
+
+                        <div class="space-y-3">
                             <div>
-                                <label class="text-[10px] text-slate-400 block mb-1 font-bold">Yakıt Tipi</label>
+                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Yüzey Sıc. (°C)</label>
+                                <div class="relative">
+                                    <input type="number" id="temp" class="glass-input text-xs pl-8 text-red-400 font-bold" value="160">
+                                    <i data-lucide="thermometer" class="w-3 h-3 text-red-400 absolute left-2.5 top-2.5"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Yakıt Tipi</label>
                                 <select id="fuel" class="glass-input text-xs" onchange="updateFuelUnit()">
                                     <option value="gas">Doğalgaz</option>
                                     <option value="elec">Elektrik</option>
@@ -197,33 +224,34 @@
                                     <option value="coal">Kömür</option>
                                 </select>
                             </div>
-                            <div>
-                                <label class="text-[10px] text-slate-400 block mb-1 font-bold">Birim Fiyat <span id="uUnit" class="text-slate-500 font-normal">(TL)</span></label>
-                                <input type="number" id="price" class="glass-input" value="10">
-                            </div>
                         </div>
-                        <div class="space-y-4">
+
+                        <div class="space-y-3">
                             <div>
-                                <label class="text-[10px] text-slate-400 block mb-1 font-bold">Kazan Verim (%)</label>
-                                <input type="number" id="eff" class="glass-input" value="85">
+                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Birim Fiyat <span id="uUnit" class="text-slate-500 font-normal ml-1 normal-case">(TL)</span></label>
+                                <input type="number" id="price" class="glass-input text-xs" value="10">
                             </div>
                             <div>
-                                <label class="text-[10px] text-slate-400 block mb-1 font-bold">Saat/Yıl</label>
-                                <input type="number" id="hours" class="glass-input" value="8000">
+                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Kazan Verim (%)</label>
+                                <input type="number" id="eff" class="glass-input text-xs" value="85">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Saat/Yıl</label>
+                                <input type="number" id="hours" class="glass-input text-xs" value="8000">
                             </div>
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-4 bg-slate-800/50 p-4 rounded-xl border border-white/5">
+                    <div class="flex items-center gap-4 bg-slate-900/50 p-4 rounded-xl border border-white/5">
                         <div class="flex-1">
-                            <div class="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Hesaplanan Yıllık Kazanç</div>
-                            <div class="text-3xl font-black text-green-400 tracking-tight"><span id="liveSave">0</span> <span class="text-sm font-medium text-slate-500">TL / Yıl</span></div>
+                            <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Hesaplanan Yıllık Kazanç</div>
+                            <div class="text-3xl font-black text-indigo-400 tracking-tight"><span id="liveSave">0</span> <span class="text-sm font-medium text-slate-500">TL / Yıl</span></div>
                         </div>
-                        <button onclick="addToQueue()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 px-10 rounded-xl transition shadow-lg shadow-indigo-500/30 flex items-center gap-2 active:scale-95 cursor-pointer">
-                            <i data-lucide="plus-circle" class="w-6 h-6"></i>
+                        <button onclick="addToQueue()" class="bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold py-4 px-10 rounded-xl transition shadow-lg shadow-indigo-600/20 flex items-center gap-2 active:scale-95 cursor-pointer">
+                            <i data-lucide="plus-circle" class="w-5 h-5"></i>
                             <div class="text-left leading-none">
                                 <div class="text-[10px] opacity-80 font-normal">ONAYLA</div>
-                                <div class="text-base">Listeye Ekle</div>
+                                <div class="text-sm">Listeye Ekle</div>
                             </div>
                         </button>
                     </div>
@@ -290,6 +318,16 @@
         300:323.9, 350:355.6, 400:406.4 
     };
 
+    // Thickness.html'den gelen Vana Katsayıları
+    const VALVE_FACTORS = { 
+        gate: 1.2, 
+        globe: 1.4, 
+        butterfly: 0.6, 
+        ball: 1.0, 
+        strainer: 1.5, 
+        check: 0.9 
+    };
+
     const MATS = {
         needlemat: {a:0.033, b:0.00018}, 
         rockwool: {a:0.035, b:0.00017}, 
@@ -307,6 +345,24 @@
         el.addEventListener('input', updateLiveCalc);
     });
 
+    function updateUI() {
+        const type = document.getElementById('equipType').value;
+        const rowValve = document.getElementById('rowValveType');
+        const rowDn = document.getElementById('rowDn');
+
+        // Reset
+        rowValve.classList.add('hidden');
+        rowDn.classList.remove('hidden');
+
+        if(type === 'valve') {
+            rowValve.classList.remove('hidden');
+        } else if (type === 'flat') {
+            rowDn.classList.add('hidden');
+        }
+        
+        updateLiveCalc();
+    }
+
     function updateFuelUnit() {
         const f = document.getElementById('fuel').value;
         const uMap = {gas:'TL/m³', elec:'TL/kWh', lng:'TL/kg', fueloil:'TL/kg', coal:'TL/kg'};
@@ -320,6 +376,7 @@
     }
 
     function calculateSavings() {
+        const equipType = document.getElementById('equipType').value;
         const dn = document.getElementById('dn').value;
         const mm = PIPES[dn] || 114.3;
         const dPipe = mm / 1000;
@@ -346,9 +403,30 @@
         const Q_ins = (tProc - tAmb) / (R_ins + R_surf);
 
         const Q_save_meter = Q_bare - Q_ins;
-        const valveFactor = 1.5; 
         
-        const Energy_Saved_kWh = (Q_save_meter * valveFactor * hours) / 1000;
+        // --- MULTIPLIER MANTIĞI ---
+        let multiplier = 1.0;
+        
+        if (equipType === 'valve') {
+            const vType = document.getElementById('valveType').value;
+            multiplier = VALVE_FACTORS[vType] || 1.2;
+        } else if (equipType === 'pipe') {
+            multiplier = 1.0; // 1 metre boru kabulü (Etiket genelde birim başınadır)
+        } else if (equipType === 'flat') {
+            // Düz yüzeyde Q_save_meter boru formülünden geldiği için hatalı olur.
+            // Düz yüzey için basitleştirilmiş bir yaklaşım (W/m2):
+            const Q_flat_bare = h_bare * (tProc - tAmb); // W/m2
+            const R_flat_ins = thk / k;
+            const Q_flat_ins = (tProc - tAmb) / (R_flat_ins + (1/h_out));
+            const Q_save_m2 = Q_flat_bare - Q_flat_ins;
+            // Düz yüzey seçildiyse hesaplanan değeri buradaki m2 kazancına eşitliyoruz
+            // (pipe logic'i bypass edip)
+            const Energy_Saved_kWh_Flat = (Q_save_m2 * hours) / 1000;
+            const Fuel_Saved_Amount = Energy_Saved_kWh_Flat / (LHV * eff);
+            return Math.max(0, Fuel_Saved_Amount * price);
+        }
+
+        const Energy_Saved_kWh = (Q_save_meter * multiplier * hours) / 1000;
         const Fuel_Saved_Amount = Energy_Saved_kWh / (LHV * eff);
         const Money_Saved = Fuel_Saved_Amount * price;
 
@@ -524,7 +602,7 @@
 
     // Başlangıç Ayarları
     updateFuelUnit();
-    updateLiveCalc();
+    updateUI(); // Başlangıçta UI durumunu ayarla
 </script>
 </body>
 </html>
