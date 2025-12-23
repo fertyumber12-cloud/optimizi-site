@@ -160,6 +160,16 @@
                                 </div>
                             </div>
                             <div>
+                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block text-cyan-400">Rüzgar (m/s)</label>
+                                <div class="relative">
+                                    <input type="number" id="wind" class="glass-input text-xs pl-8 text-cyan-400 font-bold border-cyan-500/30" value="0" min="0" step="0.5">
+                                    <i data-lucide="wind" class="w-3 h-3 text-cyan-400 absolute left-2.5 top-2.5"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                             <div>
                                 <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Yakıt Tipi</label>
                                 <select id="fuel" class="glass-input text-xs" onchange="updateFuelUnit()">
                                     <option value="gas">Doğalgaz</option>
@@ -169,20 +179,16 @@
                                     <option value="coal">Kömür</option>
                                 </select>
                             </div>
-                        </div>
-
-                        <div class="space-y-3">
                             <div>
                                 <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Birim Fiyat <span id="uUnit" class="text-slate-500 font-normal ml-1 normal-case">(TL)</span></label>
                                 <input type="number" id="price" class="glass-input text-xs" value="10">
                             </div>
                             <div>
-                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Kazan Verim (%)</label>
-                                <input type="number" id="eff" class="glass-input text-xs" value="85">
-                            </div>
-                            <div>
                                 <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Saat/Yıl</label>
                                 <input type="number" id="hours" class="glass-input text-xs" value="8000">
+                            </div>
+                            <div class="hidden">
+                                <input type="number" id="eff" class="glass-input text-xs" value="85">
                             </div>
                         </div>
                     </div>
@@ -260,8 +266,8 @@
     const MATS = { needlemat: {a:0.033, b:0.00018}, rockwool: {a:0.035, b:0.00017}, glasswool: {a:0.032, b:0.00015}, ceramic: {a:0.06, b:0.0002}, aerogel: {a:0.018, b:0.00005}};
     const FUELS = { gas: 10.64, elec: 1.0, lng: 13.8, fueloil: 11.8, coal: 7.5 };
 
-    // Hesaplama Tetikleyicileri
-    document.querySelectorAll('#dn, #mat, #temp, #thk, #price, #hours, #fuel, #eff, #qty').forEach(el => {
+    // Hesaplama Tetikleyicileri (Wind eklendi)
+    document.querySelectorAll('#dn, #mat, #temp, #thk, #price, #hours, #fuel, #eff, #qty, #wind').forEach(el => {
         el.addEventListener('input', updateLiveCalc);
     });
 
@@ -318,16 +324,26 @@
         const fuelType = document.getElementById('fuel').value;
         const eff = parseFloat(document.getElementById('eff').value) / 100 || 0.85; 
         const LHV = FUELS[fuelType] || 10;
+        
+        // RÜZGAR ETKİSİ
+        const wind = parseFloat(document.getElementById('wind').value) || 0;
+        // Basit yaklaşım: h_static = 10, rüzgar hızı * 3.5 eklendi.
+        const h_base_static = 10;
+        const h_wind_effect = wind * 3.5; 
+        const h_total_coeff = h_base_static + h_wind_effect;
 
-        const h_bare = 10 + (tProc - tAmb) * 0.05; 
-        const A_bare = Math.PI * dPipe; // m2/m
+        // Bare (Çıplak) için h
+        const h_bare = h_total_coeff + (tProc - tAmb) * 0.05; 
+        const A_bare = Math.PI * dPipe; 
         const Q_bare = h_bare * A_bare * (tProc - tAmb);
 
         const T_mean = (tProc + tAmb) / 2;
         const k = getK(mat, T_mean);
         const dOut = dPipe + 2*thk;
         const R_ins = Math.log(dOut / dPipe) / (2 * Math.PI * k);
-        const h_out = 10; 
+        
+        // Yalıtımlı Dış Yüzey için h (Rüzgar burayı da etkiler)
+        const h_out = h_total_coeff; 
         const R_surf = 1 / (h_out * Math.PI * dOut);
         const Q_ins = (tProc - tAmb) / (R_ins + R_surf);
 
@@ -339,7 +355,7 @@
             const vType = document.getElementById('valveType').value;
             multiplier = VALVE_FACTORS[vType] || 1.2;
         } else if (equipType === 'pipe') {
-            multiplier = 1.0; // Metre hesabı
+            multiplier = 1.0; 
         } else if (equipType === 'flat') {
             // Düz yüzey (m2 hesabı)
             const Q_flat_bare = h_bare * (tProc - tAmb); 
@@ -393,31 +409,24 @@
         const pName = document.getElementById('pName').value || "Ürün";
         const cName = document.getElementById('cName').value || "Müşteri";
         const dateStr = document.getElementById('iDate').value;
-        // Sipariş No inputunu alıyoruz ama artırmıyoruz
         const orderNo = document.getElementById('orderNo').value || "1001";
         
         const qty = parseFloat(document.getElementById('qty').value) || 1;
         const type = document.getElementById('equipType').value;
         
-        // Etiket üzerindeki adet metni
         let qtyText = "";
         if(type === 'valve') qtyText = `(${qty} Adet)`;
         else if(type === 'pipe') qtyText = `(${qty} m)`;
         else qtyText = `(${qty} m²)`;
 
-        // Hesaplamalar
         const savingUnit = calculateSavingsUnit();
         const totalSaving = savingUnit * qty; 
         
-        // Benzersiz ID: SiparişNo - (ListeSırası + 1)
-        // Örn: 943-1, 943-2
         const subIndex = STICKER_QUEUE.length + 1;
         const uniqueID = `${orderNo}-${subIndex}`;
 
-        // QR Linki
         const trackUrl = `https://www.optimizi.app/track.html?p=${encodeURIComponent(pName)}&s=${uniqueID}&d=${dateStr}&v=${totalSaving.toFixed(2)}&c=${encodeURIComponent(cName)}`;
 
-        // Butonu Kilitle
         const btn = document.getElementById('btnAdd');
         const oldText = btn.innerHTML;
         btn.disabled = true;
@@ -439,7 +448,6 @@
         
         btn.disabled = false;
         btn.innerHTML = oldText;
-        // Inputtaki Order No'yu artırmıyoruz! 943 ise 943 kalıyor.
     }
 
     // --- LİSTE TOPLAMI İÇİN ÖZEL FONKSİYON ---
@@ -455,7 +463,6 @@
         const orderNo = document.getElementById('orderNo').value || "GENEL";
         const dateStr = document.getElementById('iDate').value;
         
-        // Toplam etiketi için ID: 943-TOTAL
         const uniqueID = `${orderNo}-TOTAL`;
 
         const pName = "SİPARİŞ GENEL TOPLAM";
