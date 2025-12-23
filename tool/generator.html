@@ -1,109 +1,52 @@
 <!doctype html>
 <html lang="tr" class="dark">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Kazanç Takibi & Etiket | Optimizi.App</title>
-<meta name="robots" content="noindex">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Kazanç Takibi & Etiket | Optimizi.App</title>
+    <meta name="robots" content="noindex">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="../favicon.png" type="image/png">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] },
+                extend: { colors: { slate: { 850: '#151e2e', 900: '#0f172a', 950: '#020617' } } }
+            }
+        }
+    </script>
+    <style>
+        body { background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%); color: #f1f5f9; min-height: 100vh; overflow-x: hidden; }
+        .glass-card { background-color: rgba(30, 41, 59, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glass-input { border-radius: 0.75rem; padding: 0.75rem; width: 100%; background-color: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 0.75rem; transition: all 0.2s; }
+        .glass-input:focus { outline: none; border-color: #6366f1; background-color: rgba(15, 23, 42, 0.8); }
+        select.glass-input { appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.75rem center; background-repeat: no-repeat; background-size: 1.2em 1.2em; padding-right: 2.5rem; }
+        
+        /* --- BASKI STİLLERİ --- */
+        @media print {
+            @page { size: A4; margin: 0; }
+            body * { visibility: hidden; }
+            #print-root, #print-root * { visibility: visible !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            #print-root { position: absolute; left: 0; top: 0; width: 210mm; margin: 0; padding: 0; display: block !important; background: white; }
+            #app-container { display: none !important; }
+            body { background: white !important; height: auto !important; }
+            .a4-page { width: 210mm; height: 297mm; page-break-after: always; display: grid; grid-template-columns: repeat(5, 40mm); grid-template-rows: repeat(6, 49.5mm); align-content: start; justify-content: center; padding-top: 10mm; }
+            .sticker { width: 40mm; height: 49.5mm; border: 1px dashed #ccc; box-sizing: border-box; padding: 3mm; display: flex; flex-direction: column; align-items: center; justify-content: space-between; background: white; color: black; overflow: hidden; }
+            img { max-width: 100% !important; display: block !important; visibility: visible !important; }
+        }
 
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-<link rel="icon" href="../favicon.png" type="image/png">
-
-<script>
-  tailwind.config = {
-    darkMode: 'class',
-    theme: {
-      fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] },
-      extend: { colors: { slate: { 850: '#151e2e', 900: '#0f172a', 950: '#020617' } } }
-    }
-  }
-</script>
-<style>
-  body { background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%); color: #f1f5f9; min-height: 100vh; overflow-x: hidden; }
-  .glass-card { background-color: rgba(30, 41, 59, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
-  .glass-input { border-radius: 0.75rem; padding: 0.75rem; width: 100%; background-color: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 0.75rem; transition: all 0.2s; }
-  .glass-input:focus { outline: none; border-color: #6366f1; background-color: rgba(15, 23, 42, 0.8); }
-  
-  select.glass-input { appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.75rem center; background-repeat: no-repeat; background-size: 1.2em 1.2em; padding-right: 2.5rem; }
-
-  /* --- BASKI STİLLERİ (ZORUNLU) --- */
-  @media print {
-    @page { size: A4; margin: 0; }
-    
-    /* Her şeyi gizle */
-    body * { visibility: hidden; }
-    
-    /* Sadece Print Root'u göster */
-    #print-root, #print-root * { 
-        visibility: visible !important;
-        -webkit-print-color-adjust: exact; 
-        print-color-adjust: exact;
-    }
-    
-    #print-root {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 210mm;
-        margin: 0;
-        padding: 0;
-        display: block !important;
-        background: white;
-    }
-
-    /* Gereksizleri uçur */
-    #app-container, .glass-card, nav, header { display: none !important; }
-    
-    body { background: white !important; overflow: visible !important; height: auto !important; }
-    
-    .a4-page {
-        width: 210mm;
-        height: 297mm;
-        page-break-after: always;
-        display: grid;
-        grid-template-columns: repeat(5, 40mm);
-        grid-template-rows: repeat(6, 49.5mm);
-        align-content: start;
-        justify-content: center;
-        padding-top: 10mm;
-    }
-
-    .sticker {
-        width: 40mm;
-        height: 49.5mm;
-        border: 1px dashed #ccc;
-        box-sizing: border-box;
-        padding: 3mm;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: space-between;
-        background: white;
-        color: black;
-        overflow: hidden;
-    }
-    
-    /* Resimlerin (QR Kodların) görünürlüğünü zorla */
-    img { max-width: 100% !important; display: block !important; visibility: visible !important; }
-  }
-
-  /* Ekranda Gizli */
-  #print-root { display: none; }
-  
-  /* Önizleme */
-  #preview-wrapper { transform: scale(0.65); transform-origin: top center; width: 100%; display: flex; flex-direction: column; alignItems: center; }
-  .a4-page { width: 210mm; height: 297mm; background: white; display: grid; grid-template-columns: repeat(5, 40mm); grid-template-rows: repeat(6, 49.5mm); box-shadow: 0 0 50px rgba(0,0,0,0.5); margin-bottom: 20px; }
-  .sticker { width: 40mm; height: 49.5mm; border: 1px solid #e2e8f0; padding: 3mm; display: flex; flex-direction: column; align-items: center; justify-content: space-between; background: white; color: black; }
-
-</style>
+        #print-root { display: none; }
+        #preview-wrapper { transform: scale(0.65); transform-origin: top center; width: 100%; display: flex; flex-direction: column; alignItems: center; }
+        .a4-page { width: 210mm; height: 297mm; background: white; display: grid; grid-template-columns: repeat(5, 40mm); grid-template-rows: repeat(6, 49.5mm); box-shadow: 0 0 50px rgba(0,0,0,0.5); margin-bottom: 20px; }
+        .sticker { width: 40mm; height: 49.5mm; border: 1px solid #e2e8f0; padding: 3mm; display: flex; flex-direction: column; align-items: center; justify-content: space-between; background: white; color: black; }
+    </style>
 </head>
 <body class="custom-scroll" onload="updateUI()">
-
     <div id="qr-engine" style="position:fixed; left:-9999px; top:0;"></div>
-
     <div id="app-container" class="max-w-7xl mx-auto flex flex-col gap-8 pb-20 p-6 no-print">
         
         <div class="flex items-center justify-between">
@@ -114,7 +57,6 @@
                 <div class="h-6 w-px bg-white/10"></div>
                 <div class="text-lg font-bold text-indigo-400 tracking-wide uppercase">Kazanç Takibi</div>
             </div>
-            
             <div class="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 rounded-lg border border-white/5">
                 <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                 <span class="text-xs font-bold text-slate-300">SİSTEM AKTİF</span>
@@ -140,8 +82,8 @@
                             <input type="date" id="iDate" class="glass-input text-xs">
                         </div>
                         <div>
-                            <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Seri No</label>
-                            <input type="text" id="startSerial" class="glass-input text-xs" value="1001">
+                            <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block text-indigo-300">Sipariş / İş No</label>
+                            <input type="text" id="orderNo" class="glass-input text-xs font-bold text-white border-indigo-500/50" value="943">
                         </div>
                     </div>
                 </div>
@@ -152,8 +94,12 @@
                     </div>
                     
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                        
                         <div class="space-y-3">
+                            <div>
+                                <label id="lblQty" class="text-[10px] text-slate-500 font-bold uppercase mb-1 block text-green-400">Adet</label>
+                                <input type="number" id="qty" class="glass-input text-xs font-bold text-white border-green-500/30" value="1" min="1" oninput="updateLiveCalc()">
+                            </div>
+                            
                             <div>
                                 <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Ekipman Tipi</label>
                                 <select id="equipType" onchange="updateUI()" class="glass-input text-xs">
@@ -174,7 +120,9 @@
                                     <option value="check">Çekvalf</option>
                                 </select>
                             </div>
+                        </div>
 
+                        <div class="space-y-3">
                             <div id="rowDn">
                                 <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Çap (DN)</label>
                                 <select id="dn" class="glass-input text-xs font-mono">
@@ -188,9 +136,6 @@
                                     <option value="350">DN350</option><option value="400">DN400</option>
                                 </select>
                             </div>
-                        </div>
-
-                        <div class="space-y-3">
                             <div>
                                 <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Yalıtım Tipi</label>
                                 <select id="mat" class="glass-input text-xs">
@@ -200,13 +145,13 @@
                                     <option value="aerogel">Aerogel</option>
                                 </select>
                             </div>
+                        </div>
+
+                        <div class="space-y-3">
                             <div>
                                 <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Yalıtım (mm)</label>
                                 <input type="number" id="thk" class="glass-input text-xs" value="50">
                             </div>
-                        </div>
-
-                        <div class="space-y-3">
                             <div>
                                 <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Yüzey Sıc. (°C)</label>
                                 <div class="relative">
@@ -244,14 +189,14 @@
 
                     <div class="flex items-center gap-4 bg-slate-900/50 p-4 rounded-xl border border-white/5">
                         <div class="flex-1">
-                            <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Hesaplanan Yıllık Kazanç</div>
+                            <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Hesaplanan Toplam Yıllık Kazanç</div>
                             <div class="text-3xl font-black text-indigo-400 tracking-tight"><span id="liveSave">0</span> <span class="text-sm font-medium text-slate-500">TL / Yıl</span></div>
                         </div>
-                        <button onclick="addToQueue()" class="bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold py-4 px-10 rounded-xl transition shadow-lg shadow-indigo-600/20 flex items-center gap-2 active:scale-95 cursor-pointer">
+                        <button onclick="addToQueue()" id="btnAdd" class="bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold py-4 px-10 rounded-xl transition shadow-lg shadow-indigo-600/20 flex items-center gap-2 active:scale-95 cursor-pointer">
                             <i data-lucide="plus-circle" class="w-5 h-5"></i>
                             <div class="text-left leading-none">
                                 <div class="text-[10px] opacity-80 font-normal">ONAYLA</div>
-                                <div class="text-sm">Listeye Ekle</div>
+                                <div class="text-sm">Listeye Ekle (Tek Etiket)</div>
                             </div>
                         </button>
                     </div>
@@ -260,20 +205,25 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
             <div class="lg:col-span-1">
                 <div class="glass-card rounded-xl overflow-hidden flex flex-col h-[600px] border-t-4 border-t-slate-500">
                     <div class="p-4 border-b border-white/10 bg-slate-800/80 flex justify-between items-center">
                         <h3 class="text-xs font-bold text-white uppercase flex items-center gap-2"><i data-lucide="list"></i> Liste</h3>
                         <button onclick="clearList()" class="text-[10px] text-red-400 hover:text-white transition">Temizle</button>
                     </div>
+                    
                     <div class="flex-1 overflow-y-auto p-2 space-y-2 custom-scroll bg-slate-900/50" id="queueList">
                         <div class="flex flex-col items-center justify-center h-full text-slate-500 opacity-50">
                             <i data-lucide="box" class="w-12 h-12 mb-2"></i>
                             <span class="text-xs">Liste Boş</span>
                         </div>
                     </div>
-                    <div class="p-4 border-t border-white/10 bg-slate-900">
+
+                    <div class="p-4 border-t border-white/10 bg-slate-900 space-y-2">
+                        <button onclick="addProjectTotalSticker()" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg text-xs transition border border-white/10 flex items-center justify-center gap-2 cursor-pointer">
+                            <i data-lucide="sigma" class="w-4 h-4 text-yellow-400"></i> LİSTE TOPLAMI İÇİN ETİKET EKLE
+                        </button>
+
                         <button onclick="printLabels()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl text-sm transition shadow-lg shadow-green-500/20 flex items-center justify-center gap-2 cursor-pointer">
                             <i data-lucide="printer" class="w-5 h-5"></i> ETİKETLERİ YAZDIR
                         </button>
@@ -287,21 +237,16 @@
                         <h3 class="text-xs font-bold text-white uppercase flex items-center gap-2"><i data-lucide="eye"></i> Baskı Önizleme (A4)</h3>
                     </div>
                     <div class="flex-1 overflow-auto bg-slate-700/50 p-8 flex justify-center items-start custom-scroll">
-                        
                         <div id="preview-wrapper">
                             <div class="text-slate-400 text-sm mt-20 text-center opacity-50">
                                 Listeye ürün eklediğinizde<br>etiketler burada görünecek.
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
-
         </div>
-
     </div>
-
     <div id="print-root"></div>
 
 <script>
@@ -310,38 +255,13 @@
 
     let STICKER_QUEUE = [];
     
-    // Vana dış çapları (ISO/DIN)
-    const PIPES = {
-        15:21.3, 20:26.7, 25:33.4, 32:42.2, 40:48.3, 
-        50:60.3, 65:73.0, 80:88.9, 100:114.3, 125:141.3, 
-        150:168.3, 200:219.1, 250:273.0, 
-        300:323.9, 350:355.6, 400:406.4 
-    };
+    const PIPES = { 15:21.3, 20:26.7, 25:33.4, 32:42.2, 40:48.3, 50:60.3, 65:73.0, 80:88.9, 100:114.3, 125:141.3, 150:168.3, 200:219.1, 250:273.0, 300:323.9, 350:355.6, 400:406.4 };
+    const VALVE_FACTORS = { gate: 1.2, globe: 1.4, butterfly: 0.6, ball: 1.0, strainer: 1.5, check: 0.9 };
+    const MATS = { needlemat: {a:0.033, b:0.00018}, rockwool: {a:0.035, b:0.00017}, glasswool: {a:0.032, b:0.00015}, ceramic: {a:0.06, b:0.0002}, aerogel: {a:0.018, b:0.00005}};
+    const FUELS = { gas: 10.64, elec: 1.0, lng: 13.8, fueloil: 11.8, coal: 7.5 };
 
-    // Thickness.html'den gelen Vana Katsayıları
-    const VALVE_FACTORS = { 
-        gate: 1.2, 
-        globe: 1.4, 
-        butterfly: 0.6, 
-        ball: 1.0, 
-        strainer: 1.5, 
-        check: 0.9 
-    };
-
-    const MATS = {
-        needlemat: {a:0.033, b:0.00018}, 
-        rockwool: {a:0.035, b:0.00017}, 
-        glasswool: {a:0.032, b:0.00015}, 
-        ceramic: {a:0.06, b:0.0002},
-        aerogel: {a:0.018, b:0.00005}
-    };
-
-    const FUELS = {
-        gas: 10.64, elec: 1.0, lng: 13.8, fueloil: 11.8, coal: 7.5
-    };
-
-    // Live Calc Trigger
-    document.querySelectorAll('#dn, #mat, #temp, #thk, #price, #hours, #fuel, #eff').forEach(el => {
+    // Hesaplama Tetikleyicileri
+    document.querySelectorAll('#dn, #mat, #temp, #thk, #price, #hours, #fuel, #eff, #qty').forEach(el => {
         el.addEventListener('input', updateLiveCalc);
     });
 
@@ -349,6 +269,7 @@
         const type = document.getElementById('equipType').value;
         const rowValve = document.getElementById('rowValveType');
         const rowDn = document.getElementById('rowDn');
+        const lblQty = document.getElementById('lblQty');
 
         // Reset
         rowValve.classList.add('hidden');
@@ -356,8 +277,15 @@
 
         if(type === 'valve') {
             rowValve.classList.remove('hidden');
+            lblQty.innerText = "Adet";
+            lblQty.className = "text-[10px] text-slate-500 font-bold uppercase mb-1 block text-green-400";
+        } else if (type === 'pipe') {
+            lblQty.innerText = "Uzunluk (Metre)";
+            lblQty.className = "text-[10px] text-slate-500 font-bold uppercase mb-1 block text-blue-400";
         } else if (type === 'flat') {
             rowDn.classList.add('hidden');
+            lblQty.innerText = "Alan (m²)";
+            lblQty.className = "text-[10px] text-slate-500 font-bold uppercase mb-1 block text-yellow-400";
         }
         
         updateLiveCalc();
@@ -375,7 +303,8 @@
         return m.a + (m.b * T);
     }
 
-    function calculateSavings() {
+    // --- HESAPLAMA MOTORU (Birim Başına) ---
+    function calculateSavingsUnit() {
         const equipType = document.getElementById('equipType').value;
         const dn = document.getElementById('dn').value;
         const mm = PIPES[dn] || 114.3;
@@ -391,7 +320,7 @@
         const LHV = FUELS[fuelType] || 10;
 
         const h_bare = 10 + (tProc - tAmb) * 0.05; 
-        const A_bare = Math.PI * dPipe; 
+        const A_bare = Math.PI * dPipe; // m2/m
         const Q_bare = h_bare * A_bare * (tProc - tAmb);
 
         const T_mean = (tProc + tAmb) / 2;
@@ -404,23 +333,19 @@
 
         const Q_save_meter = Q_bare - Q_ins;
         
-        // --- MULTIPLIER MANTIĞI ---
         let multiplier = 1.0;
         
         if (equipType === 'valve') {
             const vType = document.getElementById('valveType').value;
             multiplier = VALVE_FACTORS[vType] || 1.2;
         } else if (equipType === 'pipe') {
-            multiplier = 1.0; // 1 metre boru kabulü (Etiket genelde birim başınadır)
+            multiplier = 1.0; // Metre hesabı
         } else if (equipType === 'flat') {
-            // Düz yüzeyde Q_save_meter boru formülünden geldiği için hatalı olur.
-            // Düz yüzey için basitleştirilmiş bir yaklaşım (W/m2):
-            const Q_flat_bare = h_bare * (tProc - tAmb); // W/m2
+            // Düz yüzey (m2 hesabı)
+            const Q_flat_bare = h_bare * (tProc - tAmb); 
             const R_flat_ins = thk / k;
             const Q_flat_ins = (tProc - tAmb) / (R_flat_ins + (1/h_out));
             const Q_save_m2 = Q_flat_bare - Q_flat_ins;
-            // Düz yüzey seçildiyse hesaplanan değeri buradaki m2 kazancına eşitliyoruz
-            // (pipe logic'i bypass edip)
             const Energy_Saved_kWh_Flat = (Q_save_m2 * hours) / 1000;
             const Fuel_Saved_Amount = Energy_Saved_kWh_Flat / (LHV * eff);
             return Math.max(0, Fuel_Saved_Amount * price);
@@ -434,57 +359,70 @@
     }
 
     function updateLiveCalc() {
-        const val = calculateSavings();
-        document.getElementById('liveSave').innerText = Math.round(val).toLocaleString();
+        const unitVal = calculateSavingsUnit();
+        const qty = parseFloat(document.getElementById('qty').value) || 1;
+        const totalVal = unitVal * qty;
+
+        document.getElementById('liveSave').innerText = Math.round(totalVal).toLocaleString();
     }
 
-    // --- SİHİRLİ QR OLUŞTURUCU (Resme Çeviren Fonksiyon) ---
+    // --- QR GÖRSEL OLUŞTURUCU ---
     function generateQRImage(text) {
         return new Promise((resolve) => {
-            // Gizli alanı temizle
             const engine = document.getElementById('qr-engine');
             engine.innerHTML = '';
             
-            // 1. QR'ı Çiz
             new QRCode(engine, {
                 text: text,
-                width: 200, // Yüksek kalite
-                height: 200,
-                colorDark : "#000000",
-                colorLight : "#ffffff",
+                width: 200, height: 200,
+                colorDark : "#000000", colorLight : "#ffffff",
                 correctLevel : QRCode.CorrectLevel.M
             });
 
-            // 2. Çizimin bitmesini bekle ve resme çevir
             setTimeout(() => {
                 const canvas = engine.querySelector('canvas');
                 const img = engine.querySelector('img');
-                
-                if(canvas) {
-                    resolve(canvas.toDataURL("image/png"));
-                } else if(img) {
-                    resolve(img.src);
-                } else {
-                    resolve(''); // Hata durumu
-                }
+                if(canvas) resolve(canvas.toDataURL("image/png"));
+                else if(img) resolve(img.src);
+                else resolve(''); 
             }, 100); 
         });
     }
 
     async function addToQueue() {
-        const pName = document.getElementById('pName').value || "Vana Ceketi";
+        const pName = document.getElementById('pName').value || "Ürün";
         const cName = document.getElementById('cName').value || "Müşteri";
         const dateStr = document.getElementById('iDate').value;
-        const saving = calculateSavings();
-        const startSerial = parseInt(document.getElementById('startSerial').value) || 1001;
+        // Sipariş No inputunu alıyoruz ama artırmıyoruz
+        const orderNo = document.getElementById('orderNo').value || "1001";
         
-        const year = new Date().getFullYear();
-        const serialNo = startSerial + STICKER_QUEUE.length;
-        const uniqueID = `INS-${year}-${serialNo}`;
+        const qty = parseFloat(document.getElementById('qty').value) || 1;
+        const type = document.getElementById('equipType').value;
+        
+        // Etiket üzerindeki adet metni
+        let qtyText = "";
+        if(type === 'valve') qtyText = `(${qty} Adet)`;
+        else if(type === 'pipe') qtyText = `(${qty} m)`;
+        else qtyText = `(${qty} m²)`;
 
-        const trackUrl = `https://www.optimizi.app/track.html?p=${encodeURIComponent(pName)}&s=${uniqueID}&d=${dateStr}&v=${saving.toFixed(2)}&c=${encodeURIComponent(cName)}`;
+        // Hesaplamalar
+        const savingUnit = calculateSavingsUnit();
+        const totalSaving = savingUnit * qty; 
+        
+        // Benzersiz ID: SiparişNo - (ListeSırası + 1)
+        // Örn: 943-1, 943-2
+        const subIndex = STICKER_QUEUE.length + 1;
+        const uniqueID = `${orderNo}-${subIndex}`;
 
-        // ÖNCE QR FOTOĞRAFINI OLUŞTUR (Bekle)
+        // QR Linki
+        const trackUrl = `https://www.optimizi.app/track.html?p=${encodeURIComponent(pName)}&s=${uniqueID}&d=${dateStr}&v=${totalSaving.toFixed(2)}&c=${encodeURIComponent(cName)}`;
+
+        // Butonu Kilitle
+        const btn = document.getElementById('btnAdd');
+        const oldText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<div class="animate-spin mr-2">⏳</div> QR Oluşuyor...`;
+
         const qrBase64 = await generateQRImage(trackUrl);
 
         STICKER_QUEUE.push({
@@ -492,18 +430,59 @@
             name: pName,
             client: cName,
             date: dateStr,
-            saving: saving,
-            qrImg: qrBase64 // Resmi listeye kaydet
+            saving: totalSaving, 
+            qtyLabel: qtyText, 
+            qrImg: qrBase64
         });
 
         renderAll();
+        
+        btn.disabled = false;
+        btn.innerHTML = oldText;
+        // Inputtaki Order No'yu artırmıyoruz! 943 ise 943 kalıyor.
+    }
+
+    // --- LİSTE TOPLAMI İÇİN ÖZEL FONKSİYON ---
+    async function addProjectTotalSticker() {
+        if(STICKER_QUEUE.length === 0) { alert("Liste boş, toplanacak bir şey yok!"); return; }
+
+        let grandTotal = 0;
+        STICKER_QUEUE.forEach(item => {
+            if(!item.isSpecial) grandTotal += item.saving;
+        });
+
+        const cName = document.getElementById('cName').value || "GENEL";
+        const orderNo = document.getElementById('orderNo').value || "GENEL";
+        const dateStr = document.getElementById('iDate').value;
+        
+        // Toplam etiketi için ID: 943-TOTAL
+        const uniqueID = `${orderNo}-TOTAL`;
+
+        const pName = "SİPARİŞ GENEL TOPLAM";
+        const trackUrl = `https://www.optimizi.app/track.html?p=${encodeURIComponent(pName)}&s=${uniqueID}&d=${dateStr}&v=${grandTotal.toFixed(2)}&c=${encodeURIComponent(cName)}`;
+        
+        const qrBase64 = await generateQRImage(trackUrl);
+
+        STICKER_QUEUE.push({
+            id: uniqueID,
+            name: pName,
+            client: cName,
+            date: dateStr,
+            saving: grandTotal,
+            qtyLabel: "(TÜM LİSTE)",
+            qrImg: qrBase64,
+            isSpecial: true 
+        });
+
+        renderAll();
+        const listEl = document.getElementById('queueList');
+        listEl.scrollTop = listEl.scrollHeight;
     }
 
     function renderAll() {
         renderQueueList();
-        renderStickers('print-root'); // Baskı alanı
+        renderStickers('print-root'); 
         
-        // Önizlemeyi kopyala (HTML olarak)
         const printRootHTML = document.getElementById('print-root').innerHTML;
         document.getElementById('preview-wrapper').innerHTML = printRootHTML || '<div class="text-slate-400 text-sm mt-20 opacity-50">Liste boş.</div>';
     }
@@ -518,15 +497,18 @@
         }
 
         STICKER_QUEUE.slice().reverse().forEach((item, index) => {
+            const originalIndex = STICKER_QUEUE.length - 1 - index;
+            const bgClass = item.isSpecial ? "bg-indigo-900/40 border-indigo-500/30" : "bg-slate-700/50 border-white/5";
+            
             el.innerHTML += `
-                <div class="flex justify-between items-center bg-slate-700/50 p-2 rounded border border-white/5 text-[10px] group hover:bg-slate-700 transition">
+                <div class="flex justify-between items-center ${bgClass} p-2 rounded border text-[10px] group hover:bg-slate-700 transition">
                     <div>
                         <div class="text-indigo-400 font-mono font-bold">${item.id}</div>
-                        <div class="text-white font-bold truncate w-32">${item.name}</div>
+                        <div class="text-white font-bold truncate w-32">${item.name} <span class="text-slate-400 font-normal">${item.qtyLabel}</span></div>
                     </div>
                     <div class="text-right">
                         <div class="text-green-400 font-bold">${Math.round(item.saving).toLocaleString()} TL</div>
-                        <button onclick="removeItem(${STICKER_QUEUE.length - 1 - index})" class="text-red-400 hover:text-white text-[9px] underline mt-1 cursor-pointer">Sil</button>
+                        <button onclick="removeItem(${originalIndex})" class="text-red-400 hover:text-white text-[9px] underline mt-1 cursor-pointer">Sil</button>
                     </div>
                 </div>
             `;
@@ -540,7 +522,7 @@
     }
 
     function clearList() {
-        if(confirm("Liste temizlensin mi?")) {
+        if(confirm("Tüm listeyi temizlemek istediğine emin misin?")) {
             STICKER_QUEUE = [];
             renderAll();
         }
@@ -549,7 +531,6 @@
     function renderStickers(targetId) {
         const container = document.getElementById(targetId);
         container.innerHTML = ''; 
-
         if (STICKER_QUEUE.length === 0) return;
 
         let page = document.createElement('div');
@@ -557,7 +538,6 @@
         let count = 0;
 
         STICKER_QUEUE.forEach((item) => {
-            
             if (count > 0 && count % 30 === 0) {
                 container.appendChild(page);
                 page = document.createElement('div');
@@ -567,7 +547,6 @@
             const sticker = document.createElement('div');
             sticker.className = 'sticker';
             
-            // DİKKAT: Artık doğrudan oluşturduğumuz resmi (img src=base64) kullanıyoruz.
             sticker.innerHTML = `
                 <div style="width:100%; text-align:center; border-bottom:1px solid #000; padding-bottom:2px; margin-bottom:2px; display:flex; justify-content:space-between; align-items:flex-end;">
                     <div style="font-weight:900; font-size:11px; letter-spacing:0.5px;">INSPRO</div>
@@ -579,7 +558,9 @@
                 </div>
                 
                 <div style="width:100%; text-align:left; font-size:7px; line-height:1.2;">
-                    <div style="font-weight:bold; font-size:8px; overflow:hidden; white-space:nowrap; margin-bottom:1px;">${item.name}</div>
+                    <div style="font-weight:bold; font-size:8px; overflow:hidden; white-space:nowrap; margin-bottom:1px;">
+                        ${item.name} <span style="font-weight:normal;">${item.qtyLabel}</span>
+                    </div>
                     <div style="border-top:1px solid #ccc; padding-top:2px; display:flex; justify-content:space-between;">
                         <span>Ref: ${item.client.substring(0,10)}</span>
                         <span>Date: ${item.date}</span>
@@ -602,7 +583,7 @@
 
     // Başlangıç Ayarları
     updateFuelUnit();
-    updateUI(); // Başlangıçta UI durumunu ayarla
+    updateUI(); 
 </script>
 </body>
 </html>
