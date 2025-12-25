@@ -6,7 +6,7 @@
 <title>Canlı Tasarruf Takibi | Optimizi.App</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
 
 <script>
   tailwind.config = {
@@ -14,12 +14,13 @@
     theme: {
       fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] },
       extend: {
-        colors: { slate: { 850: '#111827', 900: '#0a0f1d', 950: '#02040a' } },
-        animation: { 'neon-glow': 'neon-glow 4s ease-in-out infinite' },
+        animation: { 
+            'neon-pulse-bright': 'neon-pulse-bright 4s ease-in-out infinite'
+        },
         keyframes: {
-            'neon-glow': {
-                '0%, 100%': { 'box-shadow': '0 0 40px rgba(34, 197, 94, 0.15)', 'border-color': 'rgba(34, 197, 94, 0.2)' },
-                '50%': { 'box-shadow': '0 0 80px rgba(34, 197, 94, 0.5), inset 0 0 20px rgba(34, 197, 94, 0.1)', 'border-color': 'rgba(34, 197, 94, 0.8)' }
+            'neon-pulse-bright': {
+                '0%, 100%': { transform: 'scale(1) translate(-50%, -50%)', opacity: '0.4', filter: 'blur(80px)' },
+                '50%': { transform: 'scale(1.3) translate(-40%, -45%)', opacity: '0.8', filter: 'blur(60px)' }
             }
         }
       }
@@ -27,79 +28,90 @@
   }
 </script>
 <style>
-  body { 
-    background: radial-gradient(circle at top, #111827 0%, #02040a 100%);
-    color: #f1f5f9; min-height: 100vh; display: flex; flex-direction: column; overflow: hidden;
-  }
+  body { background: #010409; color: #f1f5f9; min-height: 100vh; display: flex; flex-direction: column; overflow: hidden; position: relative; }
   .glass-card { 
-    background-color: rgba(10, 15, 29, 0.8);
+    background-color: rgba(10, 15, 29, 0.85);
     backdrop-filter: blur(25px); 
-    border: 1px solid rgba(255, 255, 255, 0.05); 
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    z-index: 10;
   }
-  .neon-frame { animation: neon-glow 4s ease-in-out infinite; }
-  .counter-text { font-variant-numeric: tabular-nums; }
-  .bg-grid { background-size: 40px 40px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.01) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.01) 1px, transparent 1px); }
+  /* CAYIR CAYIR YANAN ARKA PLAN NEONU */
+  .bright-neon-blob {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 450px;
+    height: 450px;
+    background: radial-gradient(circle, #22c55e 0%, rgba(34, 197, 94, 0) 70%);
+    border-radius: 50%;
+    z-index: 0;
+    pointer-events: none;
+    animation: neon-pulse-bright 5s ease-in-out infinite;
+  }
+  .bg-grid { background-size: 40px 40px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px); }
 </style>
 </head>
 <body class="antialiased font-sans">
 
-<div class="fixed inset-0 z-0 pointer-events-none bg-grid"></div>
+<div class="fixed inset-0 z-0 bg-grid opacity-20"></div>
+<div class="bright-neon-blob"></div>
 
-<main class="relative z-10 flex-1 flex flex-col items-center justify-center p-4 text-center w-full max-w-md mx-auto">
+<main class="relative z-10 flex-1 flex flex-col items-center justify-center p-4 w-full max-w-md mx-auto">
     
     <div class="mb-6">
-        <h1 class="text-2xl font-black text-white tracking-tight">Optimizi<span class="text-emerald-500">.App</span></h1>
+        <h1 class="text-2xl font-black text-white tracking-tighter uppercase italic">Optimizi<span class="text-green-500">.App</span></h1>
     </div>
 
-    <div class="glass-card neon-frame p-6 rounded-[2.5rem] w-full relative overflow-hidden">
+    <div class="glass-card p-8 rounded-[2.5rem] w-full relative overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)]">
         
-        <div class="absolute top-5 right-6">
-            <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] text-emerald-400 font-bold uppercase">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Aktif
+        <div class="flex justify-between items-start mb-6">
+            <div class="text-left">
+                <div class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Ürün / Lokasyon</div>
+                <h2 class="text-xl font-bold text-white tracking-tight" id="prdName">Yükleniyor...</h2>
+                <div class="text-[10px] text-green-500 font-mono" id="prdSerial">---</div>
             </div>
-        </div>
-
-        <div class="text-left mb-6">
-            <div class="text-[9px] text-slate-500 uppercase font-bold mb-0.5 tracking-widest">Ürün / Konum</div>
-            <h2 class="text-lg font-bold text-white leading-tight" id="prdName">...</h2>
-            <div class="text-[9px] text-emerald-500/60 font-mono">ID: <span id="prdSerial">---</span></div>
+            <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-[10px] text-green-400 font-bold uppercase tracking-tighter">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_#22c55e]"></span> Canlı
+            </div>
         </div>
         
-        <div class="text-center py-6 rounded-2xl bg-black/40 border border-white/5 mb-4">
-            <div class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Toplam Tasarruf</div>
-            <div class="flex items-baseline justify-center gap-1">
-                <span class="text-4xl font-black text-white counter-text" id="liveMoney">0,00</span>
-                <span class="text-lg font-bold text-emerald-500">₺</span>
+        <div class="text-center py-6 rounded-[2rem] bg-black/40 border border-white/5 mb-6">
+            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Toplam Tasarruf</div>
+            <div class="flex items-baseline justify-center gap-1.5">
+                <span class="text-5xl font-black text-white counter-text tracking-tighter" id="liveMoney">0,00</span>
+                <span class="text-2xl font-bold text-green-500">₺</span>
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3 mb-4">
-            <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex flex-col items-center justify-center min-h-[85px]">
-                <div class="text-[8px] font-bold text-emerald-400 uppercase mb-1 flex items-center gap-1">
-                    <i data-lucide="leaf" class="w-3 h-3"></i> CO2 Azaltımı
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/5 text-center">
+                <div class="text-[10px] font-bold text-green-400 uppercase mb-2 flex items-center justify-center gap-1.5">
+                    <i data-lucide="leaf" class="w-3.5 h-3.5"></i> CO2
                 </div>
-                <div class="text-base font-bold text-white"><span id="liveCarbon">0,00</span> <span class="text-[9px] text-slate-500">kg</span></div>
-                <div class="text-[8px] text-emerald-500/70 mt-1 font-bold flex items-center gap-1">
-                    <i data-lucide="tree-pine" class="w-2.5 h-2.5"></i> <span id="liveTree">~0 fidan</span>
+                <div class="text-xl font-bold text-white"><span id="liveCarbon" class="counter-text">0,00</span> <span class="text-[9px] text-slate-500 font-bold uppercase">kg</span></div>
+                <div class="text-[10px] text-green-500/80 mt-2 font-bold flex items-center justify-center gap-1">
+                    <i data-lucide="tree-pine" class="w-3 h-3"></i> <span id="liveTree">0 fidan</span>
                 </div>
             </div>
 
-            <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex flex-col items-center justify-center min-h-[85px]">
-                <div class="text-[8px] font-bold text-orange-400 uppercase mb-1 flex items-center gap-1">
-                    <i data-lucide="flame" class="w-3 h-3"></i> <span id="fuelLabel">Yakıt</span>
+            <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/5 text-center">
+                <div class="text-[10px] font-bold text-orange-400 uppercase mb-2 flex items-center justify-center gap-1.5">
+                    <i data-lucide="flame" class="w-3.5 h-3.5"></i> <span id="fuelLabel">Yakıt</span>
                 </div>
-                <div class="text-base font-bold text-white"><span id="liveFuel">0,00</span> <span id="fuelUnit" class="text-[9px] text-slate-500">m³</span></div>
-                <div class="text-[8px] text-slate-500 mt-1 font-bold italic uppercase tracking-tighter">Verimlilik %100</div>
+                <div class="text-xl font-bold text-white"><span id="liveFuel" class="counter-text">0,00</span> <span id="fuelUnit" class="text-[9px] text-slate-500 font-bold uppercase">m³</span></div>
+                <div class="text-[8px] text-slate-500 mt-2 font-black italic uppercase tracking-tighter text-center">Verimlilik %100</div>
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-2 border-t border-white/5 pt-4 text-[10px]">
-            <div class="text-left text-slate-500 font-bold uppercase">Montaj: <span id="installDate" class="text-white font-mono block">...</span></div>
-            <div class="text-right text-slate-500 font-bold uppercase">Süre: <span id="runTime" class="text-white font-mono block">...</span></div>
-        </div>
-
-        <div class="mt-4 p-3 rounded-xl bg-orange-500/5 border border-orange-500/10 text-[8px] text-slate-500 leading-relaxed italic">
-            <strong>Teknik Not:</strong> Hesaplamalar izolasyonun nominal performans değerleri esas alınarak yapılmaktadır. Zamanla oluşabilecek yıpranmalar tasarruf oranlarında değişkenlik yaratabilir.
+        <div class="grid grid-cols-2 gap-4 border-t border-white/10 pt-6">
+            <div class="font-sans text-left">
+                <div class="text-[10px] text-slate-500 font-bold uppercase mb-1">Montaj Tarihi</div>
+                <div id="installDate" class="text-sm text-white font-bold">...</div>
+            </div>
+            <div class="font-sans text-right">
+                <div class="text-[10px] text-slate-500 font-bold uppercase mb-1">Çalışma Süresi</div>
+                <div id="runTime" class="text-sm text-white font-bold">...</div>
+            </div>
         </div>
     </div>
 </main>
@@ -108,26 +120,28 @@
     lucide.createIcons();
     const params = new URLSearchParams(window.location.search);
     const config = {
-        name: decodeURIComponent(params.get('p') || 'Endüstriyel Yalıtım Ceketi'),
-        sn: params.get('s') || 'DEMO-MODU',
+        name: decodeURIComponent(params.get('p') || 'Yalıtım Ceketi'),
+        sn: params.get('s') || 'SN-OPT-2025',
         start: params.get('d') || new Date().toISOString().split('T')[0],
         save: parseFloat(params.get('v')) || 25000,
-        fuel: params.get('f') || 'dogalgaz',
+        fuel: params.get('f') || 'gas',
         price: parseFloat(params.get('up')) || 15.0
     };
     const fuels = {
-        dogalgaz: { unit: 'm³', co2: 1.9, label: 'Doğalgaz' },
-        komur: { unit: 'kg', co2: 2.7, label: 'Kömür' },
-        elektrik: { unit: 'kWh', co2: 0.45, label: 'Elektrik' }
+        gas: { unit: 'm³', co2: 1.9, label: 'Doğalgaz' },
+        elec: { unit: 'kWh', co2: 0.45, label: 'Elektrik' },
+        lng: { unit: 'kg', co2: 2.8, label: 'LNG' },
+        fueloil: { unit: 'kg', co2: 3.1, label: 'Fuel Oil' },
+        coal: { unit: 'kg', co2: 2.7, label: 'Kömür' }
     };
-    const f = fuels[config.fuel] || fuels.dogalgaz;
+    const f = fuels[config.fuel] || fuels.gas;
     document.getElementById('prdName').innerText = config.name;
-    document.getElementById('prdSerial').innerText = config.sn;
+    document.getElementById('prdSerial').innerText = `ID: ${config.sn}`;
     document.getElementById('fuelUnit').innerText = f.unit;
     document.getElementById('fuelLabel').innerText = f.label;
     const p = config.start.split('-');
     const startDate = new Date(p[0], p[1]-1, p[2]).getTime();
-    document.getElementById('installDate').innerText = new Date(startDate).toLocaleDateString('tr-TR', {day:'2-digit', month:'short', year:'numeric'});
+    document.getElementById('installDate').innerText = new Date(startDate).toLocaleDateString('tr-TR', {day:'2-digit', month:'long', year:'numeric'});
     const savePerMs = config.save / 31536000000;
 
     function update() {
@@ -140,9 +154,9 @@
             document.getElementById('liveMoney').innerText = money.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             document.getElementById('liveFuel').innerText = fuel.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             document.getElementById('liveCarbon').innerText = co2.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            document.getElementById('liveTree').innerText = `~${trees.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} fidan`;
+            document.getElementById('liveTree').innerText = `${trees.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} fidan`;
             const d = Math.floor(diff/86400000), h = Math.floor((diff/3600000)%24), m = Math.floor((diff/60000)%60), s = Math.floor((diff/1000)%60);
-            document.getElementById('runTime').innerHTML = `${d}g ${h}s ${m}dk <span class="opacity-30">(${s}s)</span>`;
+            document.getElementById('runTime').innerHTML = `${d}g ${h}s ${m}d <span class="opacity-30 text-[10px]">(${s}s)</span>`;
         }
         requestAnimationFrame(update);
     }
