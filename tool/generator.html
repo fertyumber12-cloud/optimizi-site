@@ -185,12 +185,12 @@
                              <div>
                                 <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Yakıt Tipi</label>
                                 <select id="fuel" class="glass-input text-xs" onchange="updateFuelUnit()">
-                                    <option value="gas">Doğalgaz (8250 kcal/m³)</option>
-                                    <option value="elec">Elektrik (860 kcal/kWh)</option>
-                                    <option value="lng">LNG (11500 kcal/kg)</option>
-                                    <option value="fueloil">Fuel Oil (9600 kcal/kg)</option>
-                                    <option value="coal_imp">İthal Kömür (6000 kcal/kg)</option>
-                                    <option value="coal_loc">Yerli Kömür (3500 kcal/kg)</option>
+                                    <option value="gas">Doğalgaz</option>
+                                    <option value="elec">Elektrik</option>
+                                    <option value="lng">LNG</option>
+                                    <option value="fueloil">Fuel Oil</option>
+                                    <option value="coal_imp">İthal Kömür</option>
+                                    <option value="coal_loc">Yerli Kömür</option>
                                 </select>
                             </div>
                             <div>
@@ -201,8 +201,9 @@
                                 <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Saat/Yıl</label>
                                 <input type="number" id="hours" class="glass-input text-xs" value="8000">
                             </div>
-                            <div class="hidden">
-                                <input type="number" id="eff" class="glass-input text-xs" value="85">
+                            <div>
+                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block text-orange-400">Kazan Verimi (%)</label>
+                                <input type="number" id="eff" class="glass-input text-xs font-bold text-orange-400 border-orange-500/30" value="85" max="100" min="10">
                             </div>
                         </div>
                     </div>
@@ -288,7 +289,7 @@
 
     const MATS = { needlemat: {a:0.033, b:0.00018}, rockwool: {a:0.035, b:0.00017}, glasswool: {a:0.032, b:0.00015}, ceramic: {a:0.06, b:0.0002}, aerogel: {a:0.018, b:0.00005}};
     
-    // Enerji Değerleri (LHV kWh/Birim) - ROI ile Eşit
+    // Enerji Değerleri (LHV kWh/Birim)
     const FUELS = {
         gas: 9.59, 
         elec: 1.0, 
@@ -454,7 +455,6 @@
         const subIndex = STICKER_QUEUE.length + 1;
         const uniqueID = `${orderNo}-${subIndex}`;
 
-        // QR Linki Oluştururken Yakıt ve Fiyat Bilgisi Ekle
         const fType = document.getElementById('fuel').value; 
         const uPrice = document.getElementById('price').value;
 
