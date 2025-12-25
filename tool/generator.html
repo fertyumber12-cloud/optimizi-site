@@ -28,7 +28,6 @@
     .glass-input:focus { outline: none; border-color: #6366f1; background-color: rgba(15, 23, 42, 0.8); }
     select.glass-input { appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.75rem center; background-repeat: no-repeat; background-size: 1.2em 1.2em; padding-right: 2.5rem; }
     
-    /* --- BASKI STİLLERİ --- */
     @media print {
         @page { size: A4; margin: 0; }
         body * { visibility: hidden; }
@@ -277,34 +276,28 @@
 
     let STICKER_QUEUE = [];
     
-    // --- GÜNCELLENEN SABİTLER (ROI İLE AYNI) ---
+    // --- SABİTLER ---
     const PIPES = { 15:21.3, 20:26.7, 25:33.4, 32:42.2, 40:48.3, 50:60.3, 65:73.0, 80:88.9, 100:114.3, 125:141.3, 150:168.3, 200:219.1, 250:273.0, 300:323.9, 350:355.6, 400:406.4 };
     
-    // Seperatör Alanları (DN'e göre)
     const SEPARATORS = {15:0.15, 20:0.18, 25:0.22, 32:0.28, 40:0.35, 50:0.45, 65:0.60, 80:0.75, 100:1.10, 125:1.45, 150:1.90, 200:2.80};
 
-    // Faktörler (Kondenstoplar eklendi)
     const VALVE_FACTORS = {
         gate: 1.2, globe: 1.4, butterfly: 0.6, ball: 1.0, strainer: 1.5, check: 0.9,
-        trap_float: 1.6,    // Büyük
-        trap_thermo: 0.8,   // Küçük
-        trap_bimetal: 1.0,  // Orta
-        trap_bucket: 1.5    // Büyük
+        trap_float: 1.6, trap_thermo: 0.8, trap_bimetal: 1.0, trap_bucket: 1.5
     };
 
     const MATS = { needlemat: {a:0.033, b:0.00018}, rockwool: {a:0.035, b:0.00017}, glasswool: {a:0.032, b:0.00015}, ceramic: {a:0.06, b:0.0002}, aerogel: {a:0.018, b:0.00005}};
     
-    // Enerji Değerleri (LHV kWh/Birim) - ROI ile Eşitlendi
+    // Enerji Değerleri (LHV kWh/Birim) - ROI ile Eşit
     const FUELS = {
         gas: 9.59, 
         elec: 1.0, 
         lng: 13.37, 
         fueloil: 11.16, 
-        coal_imp: 6.98, // İthal
-        coal_loc: 4.07  // Yerli
+        coal_imp: 6.98,
+        coal_loc: 4.07
     };
 
-    // Hesaplama Tetikleyicileri
     document.querySelectorAll('#dn, #mat, #temp, #thk, #price, #hours, #fuel, #eff, #qty, #wind').forEach(el => {
         el.addEventListener('input', updateLiveCalc);
     });
@@ -315,7 +308,6 @@
         const rowDn = document.getElementById('rowDn');
         const lblQty = document.getElementById('lblQty');
 
-        // Reset
         rowValve.classList.add('hidden');
         rowDn.classList.remove('hidden');
 
@@ -350,7 +342,6 @@
         return m.a + (m.b * T);
     }
 
-    // --- HESAPLAMA MOTORU (ROI ile Eşitlendi) ---
     function calculateSavingsUnit() {
         const equipType = document.getElementById('equipType').value;
         const dn = document.getElementById('dn').value;
@@ -366,13 +357,11 @@
         const eff = parseFloat(document.getElementById('eff').value) / 100 || 0.85; 
         const LHV = FUELS[fuelType] || 10;
         
-        // RÜZGAR ETKİSİ
         const wind = parseFloat(document.getElementById('wind').value) || 0;
         const h_base_static = 10;
         const h_wind_effect = wind * 3.5; 
         const h_total_coeff = h_base_static + h_wind_effect;
 
-        // Bare (Çıplak) için h
         const h_bare = h_total_coeff + (tProc - tAmb) * 0.05; 
         const A_bare = Math.PI * dPipe; 
         const Q_bare = h_bare * A_bare * (tProc - tAmb);
@@ -381,8 +370,6 @@
         const k = getK(mat, T_mean);
         const dOut = dPipe + 2*thk;
         const R_ins = Math.log(dOut / dPipe) / (2 * Math.PI * k);
-        
-        // Yalıtımlı Dış Yüzey için h
         const h_out = h_total_coeff; 
         const R_surf = 1 / (h_out * Math.PI * dOut);
         const Q_ins = (tProc - tAmb) / (R_ins + R_surf);
@@ -393,26 +380,16 @@
         
         if (equipType === 'valve') {
             const vType = document.getElementById('valveType').value;
-            
             if(vType === 'separator') {
-                // Seperatör Alan Hesabı
                 const sepArea = SEPARATORS[dn] || 0.5;
-                // Boru m2'sine oranla basit bir yaklaşım yerine direkt alan çarpanı
-                // Q_save_meter (W/m) -> Bunu alana çevirmek zor.
-                // ROI mantığı: Q_unit * multiplier (metraj veya adet çarpanı)
-                // Burada Q_save_meter 1 metre boru içindir.
-                // 1m boru alanı = Pi * dPipe.
-                // Seperatör alanı / Boru alanı = Çarpan.
                 const pipeAreaPerMeter = Math.PI * dPipe;
                 multiplier = sepArea / pipeAreaPerMeter;
             } else {
                 multiplier = VALVE_FACTORS[vType] || 1.2;
             }
-
         } else if (equipType === 'pipe') {
             multiplier = 1.0; 
         } else if (equipType === 'flat') {
-            // Düz yüzey (m2 hesabı)
             const Q_flat_bare = h_bare * (tProc - tAmb); 
             const R_flat_ins = thk / k;
             const Q_flat_ins = (tProc - tAmb) / (R_flat_ins + (1/h_out));
@@ -433,19 +410,16 @@
         const unitVal = calculateSavingsUnit();
         const qty = parseFloat(document.getElementById('qty').value) || 1;
         const totalVal = unitVal * qty;
-
         document.getElementById('liveSave').innerText = Math.round(totalVal).toLocaleString();
     }
 
-    // --- QR GÖRSEL OLUŞTURUCU ---
     function generateQRImage(text) {
         return new Promise((resolve) => {
             const engine = document.getElementById('qr-engine');
             engine.innerHTML = '';
             
             new QRCode(engine, {
-                text: text,
-                width: 200, height: 200,
+                text: text, width: 200, height: 200,
                 colorDark : "#000000", colorLight : "#ffffff",
                 correctLevel : QRCode.CorrectLevel.M
             });
@@ -480,7 +454,11 @@
         const subIndex = STICKER_QUEUE.length + 1;
         const uniqueID = `${orderNo}-${subIndex}`;
 
-        const trackUrl = `https://www.optimizi.app/track.html?p=${encodeURIComponent(pName)}&s=${uniqueID}&d=${dateStr}&v=${totalSaving.toFixed(2)}&c=${encodeURIComponent(cName)}`;
+        // QR Linki Oluştururken Yakıt ve Fiyat Bilgisi Ekle
+        const fType = document.getElementById('fuel').value; 
+        const uPrice = document.getElementById('price').value;
+
+        const trackUrl = `https://www.optimizi.app/track.html?p=${encodeURIComponent(pName)}&s=${uniqueID}&d=${dateStr}&v=${totalSaving.toFixed(2)}&c=${encodeURIComponent(cName)}&f=${fType}&up=${uPrice}`;
 
         const btn = document.getElementById('btnAdd');
         const oldText = btn.innerHTML;
@@ -490,50 +468,37 @@
         const qrBase64 = await generateQRImage(trackUrl);
 
         STICKER_QUEUE.push({
-            id: uniqueID,
-            name: pName,
-            client: cName,
-            date: dateStr,
-            saving: totalSaving, 
-            qtyLabel: qtyText, 
-            qrImg: qrBase64
+            id: uniqueID, name: pName, client: cName, date: dateStr,
+            saving: totalSaving, qtyLabel: qtyText, qrImg: qrBase64
         });
 
         renderAll();
-        
         btn.disabled = false;
         btn.innerHTML = oldText;
     }
 
-    // --- LİSTE TOPLAMI İÇİN ÖZEL FONKSİYON ---
     async function addProjectTotalSticker() {
-        if(STICKER_QUEUE.length === 0) { alert("Liste boş, toplanacak bir şey yok!"); return; }
+        if(STICKER_QUEUE.length === 0) { alert("Liste boş!"); return; }
 
         let grandTotal = 0;
-        STICKER_QUEUE.forEach(item => {
-            if(!item.isSpecial) grandTotal += item.saving;
-        });
+        STICKER_QUEUE.forEach(item => { if(!item.isSpecial) grandTotal += item.saving; });
 
         const cName = document.getElementById('cName').value || "GENEL";
         const orderNo = document.getElementById('orderNo').value || "GENEL";
         const dateStr = document.getElementById('iDate').value;
-        
         const uniqueID = `${orderNo}-TOTAL`;
-
         const pName = "SİPARİŞ GENEL TOPLAM";
-        const trackUrl = `https://www.optimizi.app/track.html?p=${encodeURIComponent(pName)}&s=${uniqueID}&d=${dateStr}&v=${grandTotal.toFixed(2)}&c=${encodeURIComponent(cName)}`;
+        
+        const fType = document.getElementById('fuel').value; 
+        const uPrice = document.getElementById('price').value;
+
+        const trackUrl = `https://www.optimizi.app/track.html?p=${encodeURIComponent(pName)}&s=${uniqueID}&d=${dateStr}&v=${grandTotal.toFixed(2)}&c=${encodeURIComponent(cName)}&f=${fType}&up=${uPrice}`;
         
         const qrBase64 = await generateQRImage(trackUrl);
 
         STICKER_QUEUE.push({
-            id: uniqueID,
-            name: pName,
-            client: cName,
-            date: dateStr,
-            saving: grandTotal,
-            qtyLabel: "(TÜM LİSTE)",
-            qrImg: qrBase64,
-            isSpecial: true 
+            id: uniqueID, name: pName, client: cName, date: dateStr,
+            saving: grandTotal, qtyLabel: "(TÜM LİSTE)", qrImg: qrBase64, isSpecial: true 
         });
 
         renderAll();
@@ -544,7 +509,6 @@
     function renderAll() {
         renderQueueList();
         renderStickers('print-root'); 
-        
         const printRootHTML = document.getElementById('print-root').innerHTML;
         document.getElementById('preview-wrapper').innerHTML = printRootHTML || '<div class="text-slate-400 text-sm mt-20 opacity-50">Liste boş.</div>';
     }
@@ -554,14 +518,12 @@
         el.innerHTML = '';
         if(STICKER_QUEUE.length === 0) {
             el.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-slate-500 opacity-50"><i data-lucide="box" class="w-12 h-12 mb-2"></i><span class="text-xs">Liste Boş</span></div>';
-            lucide.createIcons();
-            return;
+            lucide.createIcons(); return;
         }
 
         STICKER_QUEUE.slice().reverse().forEach((item, index) => {
             const originalIndex = STICKER_QUEUE.length - 1 - index;
             const bgClass = item.isSpecial ? "bg-indigo-900/40 border-indigo-500/30" : "bg-slate-700/50 border-white/5";
-            
             el.innerHTML += `
                 <div class="flex justify-between items-center ${bgClass} p-2 rounded border text-[10px] group hover:bg-slate-700 transition">
                     <div>
@@ -578,22 +540,12 @@
         lucide.createIcons();
     }
 
-    function removeItem(idx) {
-        STICKER_QUEUE.splice(idx, 1);
-        renderAll();
-    }
-
-    function clearList() {
-        if(confirm("Tüm listeyi temizlemek istediğine emin misin?")) {
-            STICKER_QUEUE = [];
-            renderAll();
-        }
-    }
+    function removeItem(idx) { STICKER_QUEUE.splice(idx, 1); renderAll(); }
+    function clearList() { if(confirm("Temizle?")) { STICKER_QUEUE = []; renderAll(); } }
 
     function renderStickers(targetId) {
         const container = document.getElementById(targetId);
         container.innerHTML = ''; 
-
         if (STICKER_QUEUE.length === 0) return;
 
         let page = document.createElement('div');
@@ -606,24 +558,16 @@
                 page = document.createElement('div');
                 page.className = 'a4-page';
             }
-
             const sticker = document.createElement('div');
             sticker.className = 'sticker';
-            
             sticker.innerHTML = `
                 <div style="width:100%; text-align:center; border-bottom:1px solid #000; padding-bottom:2px; margin-bottom:2px; display:flex; justify-content:space-between; align-items:flex-end;">
                     <div style="font-weight:900; font-size:11px; letter-spacing:0.5px;">INSPRO</div>
                     <div style="font-size:7px; font-weight:bold;">${item.id}</div>
                 </div>
-                
-                <div style="margin:2px 0;">
-                    <img src="${item.qrImg}" style="width:90px; height:90px; display:block;">
-                </div>
-                
+                <div style="margin:2px 0;"><img src="${item.qrImg}" style="width:90px; height:90px; display:block;"></div>
                 <div style="width:100%; text-align:left; font-size:7px; line-height:1.2;">
-                    <div style="font-weight:bold; font-size:8px; overflow:hidden; white-space:nowrap; margin-bottom:1px;">
-                        ${item.name} <span style="font-weight:normal;">${item.qtyLabel}</span>
-                    </div>
+                    <div style="font-weight:bold; font-size:8px; overflow:hidden; white-space:nowrap; margin-bottom:1px;">${item.name} <span style="font-weight:normal;">${item.qtyLabel}</span></div>
                     <div style="border-top:1px solid #ccc; padding-top:2px; display:flex; justify-content:space-between;">
                         <span>Ref: ${item.client.substring(0,10)}</span>
                         <span>Date: ${item.date}</span>
@@ -631,20 +575,14 @@
                     <div style="margin-top:2px; font-weight:bold; text-align:center; background:#eee; padding:1px;">SCAN FOR SAVINGS</div>
                 </div>
             `;
-
             page.appendChild(sticker);
             count++;
         });
-
         container.appendChild(page);
     }
 
-    function printLabels() {
-        if(STICKER_QUEUE.length === 0) { alert("Liste boş!"); return; }
-        window.print();
-    }
+    function printLabels() { if(STICKER_QUEUE.length === 0) { alert("Liste boş!"); return; } window.print(); }
 
-    // Başlangıç Ayarları
     updateFuelUnit();
     updateUI();
 </script>
