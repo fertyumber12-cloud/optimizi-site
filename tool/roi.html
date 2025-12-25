@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="tr" class="dark">
 <head>
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KD7DLCNS');</script>
@@ -133,7 +133,14 @@
                     <div class="mt-4 grid grid-cols-3 gap-3">
                          <div class="col-span-2">
                              <label class="text-[10px] text-slate-400 mb-1 block" data-i18n="lbl_fuel">Fuel Type</label>
-                             <select id="fuel" class="glass-input text-xs"><option value="gas" data-i18n="fuel_gas">Natural Gas (m³)</option><option value="elec" data-i18n="fuel_elec">Electricity (kWh)</option><option value="lng" data-i18n="fuel_lng">LNG (kg)</option><option value="fueloil" data-i18n="fuel_oil">Fuel Oil (kg)</option><option value="coal" data-i18n="fuel_coal">Coal (kg)</option></select>
+                             <select id="fuel" class="glass-input text-xs">
+                                 <option value="gas" data-i18n="fuel_gas">Doğalgaz (8250 kcal/m³)</option>
+                                 <option value="elec" data-i18n="fuel_elec">Elektrik (860 kcal/kWh)</option>
+                                 <option value="lng" data-i18n="fuel_lng">LNG (11500 kcal/kg)</option>
+                                 <option value="fueloil" data-i18n="fuel_oil">Fuel Oil (9600 kcal/kg)</option>
+                                 <option value="coal_imp" data-i18n="fuel_coal_imp">İthal Kömür (6000 kcal/kg)</option>
+                                 <option value="coal_loc" data-i18n="fuel_coal_loc">Yerli Kömür (3500 kcal/kg)</option>
+                             </select>
                          </div>
                          <div><label class="text-[10px] text-slate-400 mb-1 block" data-i18n="lbl_eff">Boiler Eff. %</label><input type="number" id="eff" class="glass-input text-center text-xs" value="85"></div>
                     </div>
@@ -159,7 +166,7 @@
                     
                     <div id="g-valve" class="space-y-3 relative z-10">
                         <select id="valveType" class="glass-input text-xs">
-                            <optgroup label="Valves" data-i18n="grp_valves">
+                            <optgroup label="Vanalar" data-i18n="grp_valves">
                                 <option value="gate" data-i18n="val_gate">Gate Valve</option>
                                 <option value="globe" data-i18n="val_globe">Globe Valve</option>
                                 <option value="ball" data-i18n="val_ball_fl">Ball Valve</option>
@@ -167,6 +174,12 @@
                                 <option value="check" data-i18n="val_check">Check Valve</option>
                                 <option value="strainer" data-i18n="val_strainer">Strainer</option>
                                 <option value="separator" data-i18n="val_sep">Steam Separator</option>
+                            </optgroup>
+                            <optgroup label="Kondenstoplar" data-i18n="grp_traps">
+                                <option value="trap_float" data-i18n="val_trap_float">Şamandıralı Kondenstop</option>
+                                <option value="trap_thermo" data-i18n="val_trap_thermo">Termodinamik Kondenstop</option>
+                                <option value="trap_bimetal" data-i18n="val_trap_bimetal">Bimetalik Kondenstop</option>
+                                <option value="trap_bucket" data-i18n="val_trap_bucket">Ters Kovalı Kondenstop</option>
                             </optgroup>
                         </select>
                         <select id="vDN" class="glass-input text-xs"></select>
@@ -289,11 +302,19 @@
         tr:{
             legal_body:"Bu yazılım, ISO 12241 & ASTM C680 mühendislik standartlarına dayalı teorik termal simülasyonlar sunar.",
             page_title:"Yalıtım Simülasyonu",btn_report:"Rapor Al",dash_roi:"Ort. Amortisman",dash_save:"Yıllık Kazanç",dash_inv:"Toplam Yatırım",dash_co2:"CO2 Azaltım",lbl_proj:"Proje Detayları",lbl_prep:"Hazırlayan",ph_firm:"Firma Adı",ph_eng:"Mühendis Adı",lbl_cust:"Müşteri Bilgileri",ph_cust_firm:"Müşteri Firma",ph_dept:"İlgili Kişi",lbl_env:"Ortam & Enerji",lbl_temp:"Ortam Sıc. (°C)",lbl_wind:"Rüzgar (m/s)",
-            lbl_fuel:"Yakıt Tipi", lbl_eff: "Kazan Verimi %", fuel_gas:"Doğalgaz (m³)",fuel_elec:"Elektrik (kWh)",fuel_lng:"LNG (kg)",fuel_oil:"Fuel Oil (kg)",fuel_coal:"Kömür (kg)",lbl_price:"Birim Fiyat",lbl_hours:"Yıllık Saat",lbl_add:"Yeni Ölçüm Ekle",
+            lbl_fuel:"Yakıt Tipi", lbl_eff: "Kazan Verimi %", 
+            fuel_gas:"Doğalgaz (8250 kcal/m³)",
+            fuel_elec:"Elektrik (860 kcal/kWh)",
+            fuel_lng:"LNG (11500 kcal/kg)",
+            fuel_oil:"Fuel Oil (9600 kcal/kg)",
+            fuel_coal_imp:"İthal Kömür (6000 kcal/kg)",
+            fuel_coal_loc:"Yerli Kömür (3500 kcal/kg)",
+            lbl_price:"Birim Fiyat",lbl_hours:"Yıllık Saat",lbl_add:"Yeni Ölçüm Ekle",
             btn_v:"Armatür",btn_p:"Boru",btn_t:"Tank / Düz",lbl_st:"İşletme Sıc. (°C)",lbl_qty:"Adet",
-            lbl_plen:"Boru Boyu (m)", // YENİ
+            lbl_plen:"Boru Boyu (m)", 
             lbl_photo:"Termal Foto Seç",lbl_spec:"İzolasyon Spekleri",btn_calc:"Hesapla & Ekle",lbl_list:"Hesaplama Listesi",msg_no_calc:"Henüz hesaplama eklenmedi.",btn_clear:"Temizle",th_img:"Görsel",th_comp:"Ekipman",th_det:"Detay",th_qty:"Miktar",th_loss:"Mevcut Kayıp",th_inv:"Yatırım",th_gain:"Kazanç",th_act:"İşlem",
             grp_valves:"Vanalar",val_gate:"Sürgülü Vana",val_globe:"Glob Vana",val_ball_fl:"Küresel Vana",val_butterfly:"Kelebek Vana",val_check:"Çekvalf",val_strainer:"Pislik Tutucu",val_sep:"Buhar Seperatörü",
+            grp_traps:"Kondenstoplar", val_trap_float:"Şamandıralı", val_trap_thermo:"Termodinamik", val_trap_bimetal:"Bimetalik", val_trap_bucket:"Ters Kovalı",
             std_iso:"ISO 12241 (Standart)",std_astm:"ASTM C680 (ABD)",std_vdi:"VDI 2055 (Alman)",mat_rock:"Taş Yünü (Sanayi)",mat_rubber:"Elastomerik Kauçuk",mat_aerogel:"Aerogel",mat_glass:"İğnelenmiş Cam Elyaf",mat_ceramic:"Seramik Yünü",mat_bare:"⚠️ Yalıtımsız (Çıplak)",
             unit_month:"Ay",
             rep_title_top:"Isı Kaybı Kaynaklı Enerji Verimliliği Simülasyonu",
@@ -305,11 +326,19 @@
         en:{
             legal_body:"This software provides theoretical thermal simulations based on ISO 12241 & ASTM C680.",
             page_title:"Insulation Simulation",btn_report:"Get Report",dash_roi:"Avg. ROI",dash_save:"Annual Savings",dash_inv:"Total Investment",dash_co2:"CO2 Reduction",lbl_proj:"Project Details",lbl_prep:"Prepared By",ph_firm:"Company",ph_eng:"Engineer",lbl_cust:"Customer Info",ph_cust_firm:"Client Company",ph_dept:"Contact",lbl_env:"Environment & Energy",lbl_temp:"Amb. Temp (°C)",lbl_wind:"Wind (m/s)",
-            lbl_fuel:"Fuel Type", lbl_eff: "Boiler Eff. %", fuel_gas:"Natural Gas (m³)",fuel_elec:"Electricity (kWh)",fuel_lng:"LNG (kg)",fuel_oil:"Fuel Oil (kg)",fuel_coal:"Coal (kg)",lbl_price:"Unit Price",lbl_hours:"Annual Hours",lbl_add:"Add New Item",
+            lbl_fuel:"Fuel Type", lbl_eff: "Boiler Eff. %", 
+            fuel_gas:"Natural Gas (8250 kcal/m³)",
+            fuel_elec:"Electricity (860 kcal/kWh)",
+            fuel_lng:"LNG (11500 kcal/kg)",
+            fuel_oil:"Fuel Oil (9600 kcal/kg)",
+            fuel_coal_imp:"Imp. Coal (6000 kcal/kg)",
+            fuel_coal_loc:"Loc. Coal (3500 kcal/kg)",
+            lbl_price:"Unit Price",lbl_hours:"Annual Hours",lbl_add:"Add New Item",
             btn_v:"Valve",btn_p:"Pipe",btn_t:"Tank / Flat",lbl_st:"Process Temp (°C)",lbl_qty:"Qty",
             lbl_plen:"Pipe Length (m)",
             lbl_photo:"Select Thermal Photo",lbl_spec:"Insulation Specs",btn_calc:"Calculate & Add",lbl_list:"Calculation List",msg_no_calc:"No calculation added yet.",btn_clear:"Clear All",th_img:"Img",th_comp:"Component",th_det:"Detail",th_qty:"Qty",th_loss:"Loss",th_inv:"Invest",th_gain:"Savings",th_act:"Action",
             grp_valves:"Valves",val_gate:"Gate Valve",val_globe:"Globe Valve",val_ball_fl:"Ball Valve",val_butterfly:"Butterfly Valve",val_check:"Check Valve",val_strainer:"Strainer",val_sep:"Steam Separator",
+            grp_traps:"Steam Traps", val_trap_float:"Float Trap", val_trap_thermo:"Thermodynamic", val_trap_bimetal:"Bimetallic", val_trap_bucket:"Inverted Bucket",
             std_iso:"ISO 12241 (Standard)",std_astm:"ASTM C680 (USA)",std_vdi:"VDI 2055 (German)",mat_rock:"Rock Wool",mat_rubber:"Elastomeric Rubber",mat_aerogel:"Aerogel",mat_glass:"Needled Glass Fiber",mat_ceramic:"Ceramic Fiber",mat_bare:"⚠️ Uninsulated (Bare)",
             unit_month:"Months",
             rep_title_top:"Thermal Loss & Energy Efficiency Simulation",
@@ -355,8 +384,6 @@
         Object.values(buttons).forEach(btn=>{btn.className="flex-1 py-1.5 text-xs font-medium rounded transition-all "+inactiveClass;});
         buttons[t].className="flex-1 py-1.5 text-xs font-medium rounded transition-all "+activeClass;
         
-        // BORU İÇİN ADET KİLİDİ KALDIRILDI VE MANTIK DEĞİŞTİ
-        // Boruda hem pLen (Boy) hem qty (Adet) aktif
         const qtyInput = document.getElementById('qty');
         qtyInput.disabled = false;
         qtyInput.value = 1;
@@ -366,8 +393,32 @@
     const SEPARATORS = {15:0.15, 20:0.18, 25:0.22, 32:0.28, 40:0.35, 50:0.45, 65:0.60, 80:0.75, 100:1.10, 125:1.45, 150:1.90, 200:2.80};
 
     const MATS={rockwool:{a:0.035,b:0.00017,c:0},glasswool:{a:0.025,b:0.00015,c:0},ceramic:{a:0.025,b:0.00012,c:1.2e-7},aerogel:{a:0.019,b:0.00004,c:5e-8},rubber:{a:0.034,b:0.000075,c:0},bare:{a:25,b:0,c:0}};
-    const VALVE_FACTORS={gate:1.2,globe:1.4,butterfly:0.6,ball:1.0,strainer:1.5,check:0.9};
-    const FUELS={gas:10.64,elec:1.0,lng:13.8,fueloil:11.8,coal:7.5};
+    const VALVE_FACTORS={
+        gate:1.2,globe:1.4,butterfly:0.6,ball:1.0,strainer:1.5,check:0.9,
+        // Kondenstop Faktörleri
+        trap_float: 1.6,    // Büyük gövde
+        trap_thermo: 0.8,   // Küçük gövde
+        trap_bimetal: 1.0,  // Orta
+        trap_bucket: 1.5    // Büyük
+    };
+    
+    // --- YAKIT DEĞERLERİ (LHV kWh/Birim) ---
+    // 1 kWh = 860 kcal
+    // Doğalgaz: 8250 kcal/m3 -> 9.59 kWh
+    // Elektrik: 860 kcal/kWh -> 1.0 kWh
+    // LNG: 11500 kcal/kg -> 13.37 kWh
+    // Fuel Oil: 9600 kcal/kg -> 11.16 kWh
+    // İthal Kömür: 6000 kcal/kg -> 6.98 kWh
+    // Yerli Kömür: 3500 kcal/kg -> 4.07 kWh
+    const FUELS={
+        gas: 9.59, 
+        elec: 1.0, 
+        lng: 13.37, 
+        fueloil: 11.16, 
+        coal_imp: 6.98,
+        coal_loc: 4.07
+    };
+    
     let LIST=[],FX={USD:34.50,EUR:36.50,GBP:43.20,TL:1.0},currImg=null,editingIndex=null;
 
     function getK(matKey,T){if(!MATS[matKey])return 0.04;const m=MATS[matKey];return m.a+(m.b*T)+((m.c||0)*T*T);}
@@ -383,27 +434,22 @@
         const thk=parseFloat(document.getElementById('thk').value)||0;
         const standard=document.getElementById('calcStd').value;
         
-        // --- BORU MANTIĞI YENİ ---
-        const pLen = parseFloat(document.getElementById('pLen').value)||1; // Boru parça boyu
+        const pLen = parseFloat(document.getElementById('pLen').value)||1; 
         
         let multiplier=1; 
         if(type==='pipe'){
-            // Boruda "Quantity" adet demektir. Toplam uzunluk = pLen * qty
             multiplier = pLen * qty;
         }
 
-        // YATIRIM MANTIĞI: (Birim Fiyat * Çarpan (Metraj/Adet))
-        // Boru için: Birim Fiyat (m başına) * Toplam Metraj
-        // Vana için: Birim Fiyat (adet başına) * Adet
         const invRaw=parseFloat(document.getElementById('inv').value)||0;
         const curr=document.getElementById('curr').value;
         const invRate=curr==='TL'?1:(FX[curr]||1);
         
         let invTotal = 0;
         if(type==='pipe'){
-            invTotal = invRaw * invRate * multiplier; // Fiyat/m * Toplam Metre
+            invTotal = invRaw * invRate * multiplier; 
         } else {
-            invTotal = invRaw * invRate * qty; // Fiyat/adet * Adet
+            invTotal = invRaw * invRate * qty; 
         }
         
         const eff=(parseFloat(document.getElementById('eff').value)||85)/100;
@@ -418,11 +464,8 @@
         if(isFlat){
             const A=parseFloat(document.getElementById('tA').value)||1;
             const B=parseFloat(document.getElementById('tB').value)||1;
-            multiplier=A*B; // Alan
+            multiplier=A*B; 
             dPipe=1.0; D_ext=1.0; Name=`Flat/Tank (${A}x${B}m)`; unitLabel="Set";
-            // Tank yatırımı m2 üzerinden değil, set üzerinden girildiği varsayılır genelde ama burada adet ile çarpılıyor.
-            // Tank modu için qty 1, multiplier alan. Yatırım genellikle "Paket Fiyat" girilir.
-            // Tutarlılık için tankta invTotal = invRaw * qty diyelim (Set fiyatı).
             invTotal = invRaw * invRate * qty; 
         } else {
             const dn=(type==='valve')?document.getElementById('vDN').value:document.getElementById('pDN').value;
@@ -437,14 +480,19 @@
                      Name=`Steam Separator (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`;
                 } else {
                      multiplier=1; 
-                     Name=`Valve (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`;
+                     const sel = document.getElementById('valveType');
+                     const txt = sel.options[sel.selectedIndex].text;
+                     // Kondenstop adını yakalamak için
+                     if(vType.startsWith('trap_')){
+                         Name=`${txt} (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`;
+                     } else {
+                         Name=`Valve (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`;
+                     }
                 }
                 unitLabel="Adet";
             } else {
-                // Pipe için Name
                 Name=`Pipe (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`;
                 unitLabel="m";
-                // Multiplier yukarıda hesaplandı (Toplam Metraj)
             }
         }
         
@@ -480,7 +528,6 @@
                  Q_total_watts=Q_unit*factor*qty;
              }
         } else if(type==='pipe'){
-             // Q_unit (W/m) * Toplam Metraj (multiplier)
              Q_total_watts=Q_unit*multiplier; 
         } else {
              Q_total_watts=Q_unit*multiplier*qty; 
@@ -511,15 +558,14 @@
         const save_money=(matKey==='bare')?0:(loss_money_bare-loss_money_insulated);
         const annual_loss=(matKey==='bare')?loss_money_bare:loss_money_insulated;
         
-        // INPUTS OBJESİNE HEPSİNİ KAYDET
         const inputs={
-            type,qty,pLen, // pLen Eklendi
+            type,qty,pLen,
             tProc,tAmb,matKey,thk,inv:invRaw,standard,
             vDN:document.getElementById('vDN').value,
             pDN:document.getElementById('pDN').value,
-            valveType: document.getElementById('valveType').value, // Kaydet
-            tA: document.getElementById('tA').value, // Kaydet
-            tB: document.getElementById('tB').value, // Kaydet
+            valveType: document.getElementById('valveType').value,
+            tA: document.getElementById('tA').value,
+            tB: document.getElementById('tB').value,
             img:currImg
         };
         
@@ -528,7 +574,7 @@
         return{
             name:Name,
             desc:matKey==='bare'?"No Insulation":`${thk}mm ${matName}`,
-            qty: (type==='pipe' ? multiplier : qty), // Listede toplam metraj görünsün
+            qty: (type==='pipe' ? multiplier : qty),
             unit: unitLabel,
             inv:invTotal,
             save:save_money,
@@ -550,24 +596,20 @@
     function calc(){LIST.push(getCalculationResult());resetForm();render();}
     function finishUpdate(){if(editingIndex!==null)LIST[editingIndex]=getCalculationResult();editingIndex=null;document.getElementById('btnAdd').classList.remove('hidden');document.getElementById('btnUpdate').classList.add('hidden');resetForm();render();}
     
-    // --- EDIT FONKSİYONU TAMAMEN YENİLENDİ ---
     function edit(i){
         editingIndex=i;
         const d=LIST[i].inputs;
         
-        // Önce tipi ayarla
         setType(d.type);
         
-        // Ortak Alanlar
         document.getElementById('tProc').value = d.tProc;
         document.getElementById('matSelect').value = d.matKey;
         document.getElementById('thk').value = d.thk;
-        document.getElementById('inv').value = d.inv; // Birim Fiyatı geri yükle
+        document.getElementById('inv').value = d.inv;
         document.getElementById('qty').value = d.qty;
         document.getElementById('calcStd').value = d.standard;
         if(d.img){ currImg=d.img; document.getElementById('prevImg').src=currImg; document.getElementById('prevImg').classList.remove('hidden'); }
 
-        // Tip Bazlı Alanlar
         if(d.type === 'valve'){
             document.getElementById('valveType').value = d.valveType || 'gate';
             document.getElementById('vDN').value = d.vDN;
@@ -579,7 +621,6 @@
             document.getElementById('tB').value = d.tB;
         }
         
-        // Butonları ayarla
         document.getElementById('btnAdd').classList.add('hidden');
         document.getElementById('btnUpdate').classList.remove('hidden');
     }
