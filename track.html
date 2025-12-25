@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="tr" class="dark">
+<html lang="tr">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
@@ -12,7 +12,6 @@
 
 <script>
   tailwind.config = {
-    darkMode: 'class',
     theme: {
       fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] },
       extend: {}
@@ -20,44 +19,48 @@
   }
 </script>
 <style>
-  /* MÜHENDİSLİK KAĞIDI ARKA PLANI & SCROLL KİLİDİ */
+  /* AYDINLIK MÜHENDİSLİK KAĞIDI */
   body { 
-      background-color: #0b1121; 
+      background-color: #f8fafc; /* Beyaz/Gri Zemin */
+      
+      /* Mavi/Gri Kareli Desen */
       background-image: 
-          linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-          linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+          linear-gradient(rgba(148, 163, 184, 0.15) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(148, 163, 184, 0.15) 1px, transparent 1px),
+          linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
       background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
       background-position: center center;
-      color: #f1f5f9; 
+      
+      color: #0f172a; /* Koyu Yazı */
       height: 100vh; 
       width: 100vw;
       display: flex; 
       flex-direction: column; 
       align-items: center;
       justify-content: center;
-      overflow: hidden; 
+      overflow-y: auto; /* İçerik taşarsa kayabilsin */
+      overflow-x: hidden;
       position: relative; 
-      touch-action: none; 
   }
   
   .glass-card { 
-      background-color: rgba(15, 23, 42, 0.7); 
-      backdrop-filter: blur(12px); 
-      border: 1px solid rgba(255, 255, 255, 0.1); 
-      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      background-color: rgba(255, 255, 255, 0.7); 
+      backdrop-filter: blur(20px); 
+      border: 1px solid rgba(255, 255, 255, 0.8); 
+      box-shadow: 0 20px 60px -10px rgba(0,0,0,0.1), 0 10px 20px -5px rgba(0,0,0,0.05);
       z-index: 10; 
   }
   
+  /* Arka plan ışık hüzmesi (Aydınlık mod için daha soft) */
   .spotlight {
       position: absolute;
       top: -150px;
       left: 50%;
       transform: translateX(-50%);
-      width: 80%;
-      height: 500px;
-      background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 70%);
+      width: 100%;
+      height: 600px;
+      background: radial-gradient(circle, rgba(34, 197, 94, 0.08) 0%, transparent 70%);
       pointer-events: none;
       z-index: 0;
   }
@@ -69,88 +72,85 @@
 
 <div class="spotlight"></div>
 
-<main class="relative z-10 w-full max-w-md p-6 flex flex-col items-center justify-center h-full">
+<main class="relative z-10 w-full max-w-md p-4 flex flex-col items-center justify-center min-h-[90vh]">
     
-    <div class="mb-8 scale-110 flex flex-col items-center">
+    <div class="mb-6 scale-100 flex flex-col items-center">
         <div class="flex items-center gap-3">
-            <img src="icon.jpg" alt="Logo" class="w-10 h-10 rounded-xl shadow-lg shadow-indigo-500/20" onerror="this.style.display='none'">
-            <h1 class="text-3xl font-black text-white tracking-tight">
-                Optimizi<span class="text-green-500 animate-pulse">.App</span>
+            <img src="icon.jpg" alt="Logo" class="w-10 h-10 rounded-xl shadow-lg shadow-green-500/10" onerror="this.style.display='none'">
+            <h1 class="text-3xl font-black text-slate-800 tracking-tight">
+                Optimizi<span class="text-green-600 animate-pulse">.App</span>
             </h1>
         </div>
         <p class="text-[10px] text-slate-400 uppercase font-bold tracking-[0.3em] mt-2 text-center text-nowrap">Energy Intelligence</p>
     </div>
 
-    <div class="glass-card p-6 md:p-8 rounded-[2rem] w-full relative overflow-hidden border-t border-t-white/10">
+    <div class="glass-card p-6 md:p-8 rounded-[2rem] w-full relative overflow-hidden border-t-4 border-t-green-500">
         
-        <div class="flex justify-between items-start mb-6">
-            <div class="text-left flex-1 pr-4">
-                <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">Ürün / Konum</div>
-                <h2 class="text-xl md:text-2xl font-black text-white leading-tight truncate" id="prdName">Yükleniyor...</h2>
-                <div class="text-[10px] text-slate-500 font-mono mt-1" id="prdSerial">ID: ---</div>
+        <div class="flex flex-col gap-4 mb-6">
+            <div class="flex justify-between items-start">
+                <div class="flex items-center gap-1.5 px-2 py-1 rounded bg-green-100 border border-green-200 text-[10px] text-green-700 font-bold uppercase tracking-wider">
+                    <span class="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse"></span> Canlı İzleme
+                </div>
+                <div class="text-[10px] text-slate-400 font-mono mt-1" id="prdSerial">ID: ---</div>
             </div>
-            <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-[10px] text-green-400 font-bold uppercase tracking-wider shrink-0">
-                <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> Aktif
+
+            <div class="text-left">
+                <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">Ürün / Konum</div>
+                <h2 class="text-xl md:text-2xl font-black text-slate-800 leading-tight" id="prdName">Yükleniyor...</h2>
             </div>
         </div>
         
-        <div class="text-center py-6 md:py-8 rounded-3xl bg-slate-900/60 border border-white/5 mb-6 relative group">
-            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Toplam Kazandırılan Tutar</div>
+        <div class="text-center py-8 rounded-3xl bg-slate-50 border border-slate-200 mb-6 shadow-inner">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Toplam Kazandırılan Tutar</div>
             <div class="flex items-baseline justify-center gap-1 flex-wrap px-2">
-                <span id="liveMoney" class="font-black text-white counter-text tracking-tighter drop-shadow-[0_0_15px_rgba(56,189,248,0.2)] transition-all duration-300 text-4xl md:text-5xl">0,00</span>
-                <span class="text-xl md:text-2xl font-bold text-cyan-400">₺</span>
+                <span id="liveMoney" class="font-black text-slate-800 counter-text tracking-tighter transition-all duration-300 text-5xl">0,00</span>
+                <span class="text-2xl font-bold text-green-600">₺</span>
             </div>
-            <div class="text-[9px] text-slate-500 mt-2 flex items-center justify-center gap-1 opacity-70">
+            <div class="text-[9px] text-slate-400 mt-2 flex items-center justify-center gap-1">
                 <i data-lucide="info" class="w-3 h-3"></i> ISO 12241 standardına göre
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3 md:gap-4 mb-6 md:mb-8">
-            <div class="p-3 md:p-4 rounded-2xl bg-slate-800/30 border border-white/5 text-center">
+        <div class="grid grid-cols-2 gap-3 mb-6">
+            <div class="p-3 rounded-2xl bg-white border border-slate-100 text-center shadow-sm">
                 <div class="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center justify-center gap-1.5">
-                    <i data-lucide="leaf" class="w-3.5 h-3.5 text-green-400"></i> Karbon
+                    <i data-lucide="leaf" class="w-3.5 h-3.5 text-green-500"></i> Karbon
                 </div>
-                <div class="text-base md:text-lg font-bold text-white"><span id="liveCarbon" class="counter-text">0,00</span> <span class="text-[9px] text-slate-500">Ton</span></div>
-                <div class="text-[9px] text-green-400/80 mt-1 font-bold flex items-center justify-center gap-1">
+                <div class="text-lg font-bold text-slate-800"><span id="liveCarbon" class="counter-text">0,00</span> <span class="text-[9px] text-slate-400">Ton</span></div>
+                <div class="text-[9px] text-green-600 mt-1 font-bold flex items-center justify-center gap-1 bg-green-50 rounded-full py-0.5 px-2 mx-auto w-fit">
                     <i data-lucide="sprout" class="w-3 h-3"></i> <span id="liveTree">0 Ağaç</span>
                 </div>
             </div>
 
-            <div class="p-3 md:p-4 rounded-2xl bg-slate-800/30 border border-white/5 text-center">
+            <div class="p-3 rounded-2xl bg-white border border-slate-100 text-center shadow-sm">
                 <div class="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center justify-center gap-1.5">
-                    <i data-lucide="flame" class="w-3.5 h-3.5 text-orange-400"></i> <span id="fuelLabel">Yakıt</span>
+                    <i data-lucide="flame" class="w-3.5 h-3.5 text-orange-500"></i> <span id="fuelLabel">Yakıt</span>
                 </div>
-                <div class="text-base md:text-lg font-bold text-white"><span id="liveFuel" class="counter-text">0,00</span> <span id="fuelUnit" class="text-[9px] text-slate-500">m³</span></div>
-                <div class="text-[9px] text-slate-500 mt-1">Tasarruf</div>
+                <div class="text-lg font-bold text-slate-800"><span id="liveFuel" class="counter-text">0,00</span> <span id="fuelUnit" class="text-[9px] text-slate-400">m³</span></div>
+                <div class="text-[9px] text-orange-600 mt-1 font-bold bg-orange-50 rounded-full py-0.5 px-2 mx-auto w-fit">Tasarruf</div>
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4 border-t border-white/5 pt-4 md:pt-6">
+        <div class="grid grid-cols-2 gap-4 border-t border-slate-100 pt-4">
             <div class="font-sans text-left">
                 <div class="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase mb-1">
-                    <i data-lucide="calendar" class="w-3 h-3 text-cyan-400"></i> Montaj Tarihi
+                    <i data-lucide="calendar" class="w-3 h-3 text-slate-400"></i> Montaj Tarihi
                 </div>
-                <div id="installDate" class="text-xs text-white font-mono">...</div>
+                <div id="installDate" class="text-xs text-slate-700 font-bold">...</div>
             </div>
             <div class="font-sans text-right">
                 <div class="flex items-center justify-end gap-1.5 text-[10px] text-slate-400 font-bold uppercase mb-1">
-                    Çalışma Süresi <i data-lucide="clock" class="w-3 h-3 text-orange-400"></i>
+                    Çalışma Süresi <i data-lucide="clock" class="w-3 h-3 text-slate-400"></i>
                 </div>
-                <div id="runTime" class="text-xs text-white font-mono">...</div>
-            </div>
-        </div>
-        
-        <div id="clientBox" class="mt-6 pt-4 border-t border-white/5 text-center hidden">
-            <div class="inline-flex items-center gap-2 px-3 py-1 bg-slate-800/80 border border-white/5 rounded text-[10px] text-slate-300 font-bold uppercase tracking-wider">
-                <i data-lucide="building-2" class="w-3 h-3 text-indigo-400"></i> <span id="clientName"></span>
+                <div id="runTime" class="text-xs text-slate-700 font-bold">...</div>
             </div>
         </div>
 
     </div>
     
-    <div class="mt-6 md:mt-8 opacity-60 hover:opacity-100 transition">
+    <div class="mt-6 opacity-40 hover:opacity-100 transition">
         <div class="flex items-center justify-center gap-2 text-[10px] text-slate-500 font-medium tracking-widest">
-            <i data-lucide="shield-check" class="w-3 h-3 text-cyan-500"></i> Verified by <span class="text-slate-300 font-bold">Optimizi.App</span>
+            <i data-lucide="shield-check" class="w-3 h-3 text-green-600"></i> Verified by <span class="text-slate-700 font-bold">Optimizi.App</span>
         </div>
     </div>
 </main>
@@ -208,14 +208,14 @@
             const moneyEl = document.getElementById('liveMoney');
             moneyEl.innerText = moneyStr;
 
-            // Auto-Scale Font (Mobil uyumlu boyutlar)
+            // Auto-Scale Font
             const len = moneyStr.length;
             if(len > 13) {
-                moneyEl.className = "font-black text-white counter-text tracking-tighter drop-shadow-[0_0_15px_rgba(56,189,248,0.2)] transition-all duration-300 text-2xl md:text-3xl"; 
+                moneyEl.className = "font-black text-slate-800 counter-text tracking-tighter transition-all duration-300 text-3xl md:text-4xl"; 
             } else if (len > 10) {
-                moneyEl.className = "font-black text-white counter-text tracking-tighter drop-shadow-[0_0_15px_rgba(56,189,248,0.2)] transition-all duration-300 text-3xl md:text-4xl"; 
+                moneyEl.className = "font-black text-slate-800 counter-text tracking-tighter transition-all duration-300 text-4xl md:text-5xl"; 
             } else {
-                moneyEl.className = "font-black text-white counter-text tracking-tighter drop-shadow-[0_0_15px_rgba(56,189,248,0.2)] transition-all duration-300 text-4xl md:text-5xl"; 
+                moneyEl.className = "font-black text-slate-800 counter-text tracking-tighter transition-all duration-300 text-5xl md:text-6xl"; 
             }
 
             document.getElementById('liveFuel').innerText = fuelAmount.toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
