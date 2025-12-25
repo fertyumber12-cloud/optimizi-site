@@ -1,52 +1,56 @@
 <!doctype html>
 <html lang="tr" class="dark">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Kazanç Takibi & Etiket | Optimizi.App</title>
-    <meta name="robots" content="noindex">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="icon" href="../favicon.png" type="image/png">
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] },
-                extend: { colors: { slate: { 850: '#151e2e', 900: '#0f172a', 950: '#020617' } } }
-            }
-        }
-    </script>
-    <style>
-        body { background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%); color: #f1f5f9; min-height: 100vh; overflow-x: hidden; }
-        .glass-card { background-color: rgba(30, 41, 59, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .glass-input { border-radius: 0.75rem; padding: 0.75rem; width: 100%; background-color: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 0.75rem; transition: all 0.2s; }
-        .glass-input:focus { outline: none; border-color: #6366f1; background-color: rgba(15, 23, 42, 0.8); }
-        select.glass-input { appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.75rem center; background-repeat: no-repeat; background-size: 1.2em 1.2em; padding-right: 2.5rem; }
-        
-        /* --- BASKI STİLLERİ --- */
-        @media print {
-            @page { size: A4; margin: 0; }
-            body * { visibility: hidden; }
-            #print-root, #print-root * { visibility: visible !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            #print-root { position: absolute; left: 0; top: 0; width: 210mm; margin: 0; padding: 0; display: block !important; background: white; }
-            #app-container { display: none !important; }
-            body { background: white !important; height: auto !important; }
-            .a4-page { width: 210mm; height: 297mm; page-break-after: always; display: grid; grid-template-columns: repeat(5, 40mm); grid-template-rows: repeat(6, 49.5mm); align-content: start; justify-content: center; padding-top: 10mm; }
-            .sticker { width: 40mm; height: 49.5mm; border: 1px dashed #ccc; box-sizing: border-box; padding: 3mm; display: flex; flex-direction: column; align-items: center; justify-content: space-between; background: white; color: black; overflow: hidden; }
-            img { max-width: 100% !important; display: block !important; visibility: visible !important; }
-        }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Kazanç Takibi & Etiket | Optimizi.App</title>
+<meta name="robots" content="noindex">
 
-        #print-root { display: none; }
-        #preview-wrapper { transform: scale(0.65); transform-origin: top center; width: 100%; display: flex; flex-direction: column; alignItems: center; }
-        .a4-page { width: 210mm; height: 297mm; background: white; display: grid; grid-template-columns: repeat(5, 40mm); grid-template-rows: repeat(6, 49.5mm); box-shadow: 0 0 50px rgba(0,0,0,0.5); margin-bottom: 20px; }
-        .sticker { width: 40mm; height: 49.5mm; border: 1px solid #e2e8f0; padding: 3mm; display: flex; flex-direction: column; align-items: center; justify-content: space-between; background: white; color: black; }
-    </style>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="../favicon.png" type="image/png">
+
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] },
+      extend: { colors: { slate: { 850: '#151e2e', 900: '#0f172a', 950: '#020617' } } }
+    }
+  }
+</script>
+<style>
+    body { background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%); color: #f1f5f9; min-height: 100vh; overflow-x: hidden; }
+    .glass-card { background-color: rgba(30, 41, 59, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .glass-input { border-radius: 0.75rem; padding: 0.75rem; width: 100%; background-color: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 0.75rem; transition: all 0.2s; }
+    .glass-input:focus { outline: none; border-color: #6366f1; background-color: rgba(15, 23, 42, 0.8); }
+    select.glass-input { appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.75rem center; background-repeat: no-repeat; background-size: 1.2em 1.2em; padding-right: 2.5rem; }
+    
+    /* --- BASKI STİLLERİ --- */
+    @media print {
+        @page { size: A4; margin: 0; }
+        body * { visibility: hidden; }
+        #print-root, #print-root * { visibility: visible !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        #print-root { position: absolute; left: 0; top: 0; width: 210mm; margin: 0; padding: 0; display: block !important; background: white; }
+        #app-container { display: none !important; }
+        body { background: white !important; height: auto !important; }
+        .a4-page { width: 210mm; height: 297mm; page-break-after: always; display: grid; grid-template-columns: repeat(5, 40mm); grid-template-rows: repeat(6, 49.5mm); align-content: start; justify-content: center; padding-top: 10mm; }
+        .sticker { width: 40mm; height: 49.5mm; border: 1px dashed #ccc; box-sizing: border-box; padding: 3mm; display: flex; flex-direction: column; align-items: center; justify-content: space-between; background: white; color: black; overflow: hidden; }
+        img { max-width: 100% !important; display: block !important; visibility: visible !important; }
+    }
+
+    #print-root { display: none; }
+    #preview-wrapper { transform: scale(0.65); transform-origin: top center; width: 100%; display: flex; flex-direction: column; alignItems: center; }
+    .a4-page { width: 210mm; height: 297mm; background: white; display: grid; grid-template-columns: repeat(5, 40mm); grid-template-rows: repeat(6, 49.5mm); box-shadow: 0 0 50px rgba(0,0,0,0.5); margin-bottom: 20px; }
+    .sticker { width: 40mm; height: 49.5mm; border: 1px solid #e2e8f0; padding: 3mm; display: flex; flex-direction: column; align-items: center; justify-content: space-between; background: white; color: black; }
+</style>
 </head>
 <body class="custom-scroll" onload="updateUI()">
+
     <div id="qr-engine" style="position:fixed; left:-9999px; top:0;"></div>
+
     <div id="app-container" class="max-w-7xl mx-auto flex flex-col gap-8 pb-20 p-6 no-print">
         
         <div class="flex items-center justify-between">
@@ -57,6 +61,7 @@
                 <div class="h-6 w-px bg-white/10"></div>
                 <div class="text-lg font-bold text-indigo-400 tracking-wide uppercase">Kazanç Takibi</div>
             </div>
+            
             <div class="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 rounded-lg border border-white/5">
                 <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                 <span class="text-xs font-bold text-slate-300">SİSTEM AKTİF</span>
@@ -110,14 +115,23 @@
                             </div>
 
                             <div id="rowValveType" class="hidden">
-                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Vana Tipi</label>
+                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Armatür Tipi</label>
                                 <select id="valveType" class="glass-input text-xs" onchange="updateLiveCalc()">
-                                    <option value="gate">Sürgülü Vana</option>
-                                    <option value="globe">Globe Vana</option>
-                                    <option value="butterfly">Kelebek Vana</option>
-                                    <option value="ball">Küresel Vana</option>
-                                    <option value="strainer">Pislik Tutucu</option>
-                                    <option value="check">Çekvalf</option>
+                                    <optgroup label="Vanalar">
+                                        <option value="gate">Sürgülü Vana</option>
+                                        <option value="globe">Globe Vana</option>
+                                        <option value="butterfly">Kelebek Vana</option>
+                                        <option value="ball">Küresel Vana</option>
+                                        <option value="strainer">Pislik Tutucu</option>
+                                        <option value="check">Çekvalf</option>
+                                        <option value="separator">Buhar Seperatörü</option>
+                                    </optgroup>
+                                    <optgroup label="Kondenstoplar">
+                                        <option value="trap_float">Şamandıralı</option>
+                                        <option value="trap_thermo">Termodinamik</option>
+                                        <option value="trap_bimetal">Bimetalik</option>
+                                        <option value="trap_bucket">Ters Kovalı</option>
+                                    </optgroup>
                                 </select>
                             </div>
                         </div>
@@ -172,11 +186,12 @@
                              <div>
                                 <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Yakıt Tipi</label>
                                 <select id="fuel" class="glass-input text-xs" onchange="updateFuelUnit()">
-                                    <option value="gas">Doğalgaz</option>
-                                    <option value="elec">Elektrik</option>
-                                    <option value="lng">LNG</option>
-                                    <option value="fueloil">Fuel Oil</option>
-                                    <option value="coal">Kömür</option>
+                                    <option value="gas">Doğalgaz (8250 kcal/m³)</option>
+                                    <option value="elec">Elektrik (860 kcal/kWh)</option>
+                                    <option value="lng">LNG (11500 kcal/kg)</option>
+                                    <option value="fueloil">Fuel Oil (9600 kcal/kg)</option>
+                                    <option value="coal_imp">İthal Kömür (6000 kcal/kg)</option>
+                                    <option value="coal_loc">Yerli Kömür (3500 kcal/kg)</option>
                                 </select>
                             </div>
                             <div>
@@ -253,6 +268,7 @@
             </div>
         </div>
     </div>
+
     <div id="print-root"></div>
 
 <script>
@@ -261,12 +277,34 @@
 
     let STICKER_QUEUE = [];
     
+    // --- GÜNCELLENEN SABİTLER (ROI İLE AYNI) ---
     const PIPES = { 15:21.3, 20:26.7, 25:33.4, 32:42.2, 40:48.3, 50:60.3, 65:73.0, 80:88.9, 100:114.3, 125:141.3, 150:168.3, 200:219.1, 250:273.0, 300:323.9, 350:355.6, 400:406.4 };
-    const VALVE_FACTORS = { gate: 1.2, globe: 1.4, butterfly: 0.6, ball: 1.0, strainer: 1.5, check: 0.9 };
-    const MATS = { needlemat: {a:0.033, b:0.00018}, rockwool: {a:0.035, b:0.00017}, glasswool: {a:0.032, b:0.00015}, ceramic: {a:0.06, b:0.0002}, aerogel: {a:0.018, b:0.00005}};
-    const FUELS = { gas: 10.64, elec: 1.0, lng: 13.8, fueloil: 11.8, coal: 7.5 };
+    
+    // Seperatör Alanları (DN'e göre)
+    const SEPARATORS = {15:0.15, 20:0.18, 25:0.22, 32:0.28, 40:0.35, 50:0.45, 65:0.60, 80:0.75, 100:1.10, 125:1.45, 150:1.90, 200:2.80};
 
-    // Hesaplama Tetikleyicileri (Wind eklendi)
+    // Faktörler (Kondenstoplar eklendi)
+    const VALVE_FACTORS = {
+        gate: 1.2, globe: 1.4, butterfly: 0.6, ball: 1.0, strainer: 1.5, check: 0.9,
+        trap_float: 1.6,    // Büyük
+        trap_thermo: 0.8,   // Küçük
+        trap_bimetal: 1.0,  // Orta
+        trap_bucket: 1.5    // Büyük
+    };
+
+    const MATS = { needlemat: {a:0.033, b:0.00018}, rockwool: {a:0.035, b:0.00017}, glasswool: {a:0.032, b:0.00015}, ceramic: {a:0.06, b:0.0002}, aerogel: {a:0.018, b:0.00005}};
+    
+    // Enerji Değerleri (LHV kWh/Birim) - ROI ile Eşitlendi
+    const FUELS = {
+        gas: 9.59, 
+        elec: 1.0, 
+        lng: 13.37, 
+        fueloil: 11.16, 
+        coal_imp: 6.98, // İthal
+        coal_loc: 4.07  // Yerli
+    };
+
+    // Hesaplama Tetikleyicileri
     document.querySelectorAll('#dn, #mat, #temp, #thk, #price, #hours, #fuel, #eff, #qty, #wind').forEach(el => {
         el.addEventListener('input', updateLiveCalc);
     });
@@ -299,7 +337,10 @@
 
     function updateFuelUnit() {
         const f = document.getElementById('fuel').value;
-        const uMap = {gas:'TL/m³', elec:'TL/kWh', lng:'TL/kg', fueloil:'TL/kg', coal:'TL/kg'};
+        const uMap = {
+            gas:'TL/m³', elec:'TL/kWh', lng:'TL/kg', fueloil:'TL/kg', 
+            coal_imp:'TL/kg', coal_loc:'TL/kg'
+        };
         document.getElementById('uUnit').innerText = `(${uMap[f] || 'TL'})`;
         updateLiveCalc();
     }
@@ -309,7 +350,7 @@
         return m.a + (m.b * T);
     }
 
-    // --- HESAPLAMA MOTORU (Birim Başına) ---
+    // --- HESAPLAMA MOTORU (ROI ile Eşitlendi) ---
     function calculateSavingsUnit() {
         const equipType = document.getElementById('equipType').value;
         const dn = document.getElementById('dn').value;
@@ -327,7 +368,6 @@
         
         // RÜZGAR ETKİSİ
         const wind = parseFloat(document.getElementById('wind').value) || 0;
-        // Basit yaklaşım: h_static = 10, rüzgar hızı * 3.5 eklendi.
         const h_base_static = 10;
         const h_wind_effect = wind * 3.5; 
         const h_total_coeff = h_base_static + h_wind_effect;
@@ -342,7 +382,7 @@
         const dOut = dPipe + 2*thk;
         const R_ins = Math.log(dOut / dPipe) / (2 * Math.PI * k);
         
-        // Yalıtımlı Dış Yüzey için h (Rüzgar burayı da etkiler)
+        // Yalıtımlı Dış Yüzey için h
         const h_out = h_total_coeff; 
         const R_surf = 1 / (h_out * Math.PI * dOut);
         const Q_ins = (tProc - tAmb) / (R_ins + R_surf);
@@ -353,7 +393,22 @@
         
         if (equipType === 'valve') {
             const vType = document.getElementById('valveType').value;
-            multiplier = VALVE_FACTORS[vType] || 1.2;
+            
+            if(vType === 'separator') {
+                // Seperatör Alan Hesabı
+                const sepArea = SEPARATORS[dn] || 0.5;
+                // Boru m2'sine oranla basit bir yaklaşım yerine direkt alan çarpanı
+                // Q_save_meter (W/m) -> Bunu alana çevirmek zor.
+                // ROI mantığı: Q_unit * multiplier (metraj veya adet çarpanı)
+                // Burada Q_save_meter 1 metre boru içindir.
+                // 1m boru alanı = Pi * dPipe.
+                // Seperatör alanı / Boru alanı = Çarpan.
+                const pipeAreaPerMeter = Math.PI * dPipe;
+                multiplier = sepArea / pipeAreaPerMeter;
+            } else {
+                multiplier = VALVE_FACTORS[vType] || 1.2;
+            }
+
         } else if (equipType === 'pipe') {
             multiplier = 1.0; 
         } else if (equipType === 'flat') {
@@ -538,6 +593,7 @@
     function renderStickers(targetId) {
         const container = document.getElementById(targetId);
         container.innerHTML = ''; 
+
         if (STICKER_QUEUE.length === 0) return;
 
         let page = document.createElement('div');
@@ -590,7 +646,7 @@
 
     // Başlangıç Ayarları
     updateFuelUnit();
-    updateUI(); 
+    updateUI();
 </script>
 </body>
 </html>
