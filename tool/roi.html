@@ -8,6 +8,7 @@
 <meta name="description" content="ISO 12241 standardına göre boru, vana ve tank yüzeylerinden ısı kaybını hesaplayın.">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="icon" href="../favicon.png" type="image/png">
 <script>
@@ -28,7 +29,7 @@
 </script>
 <style>
   :root {
-      /* LIGHT MODE: Izgaralı Beyaz */
+      /* LIGHT MODE */
       --bg-grad: #ffffff;
       --glass-bg: rgba(255, 255, 255, 0.95);
       --glass-border: rgba(148, 163, 184, 0.4);
@@ -40,7 +41,7 @@
   }
 
   .dark {
-      /* DARK MODE: Orijinal */
+      /* DARK MODE */
       --bg-grad: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%);
       --glass-bg: rgba(30, 41, 59, 0.4);
       --glass-border: rgba(255, 255, 255, 0.08);
@@ -110,6 +111,9 @@
     .audit-table th { background-color: #f1f5f9; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 7px; padding: 4px; border-bottom: 2px solid #e2e8f0; }
     .audit-table td { border-bottom: 1px solid #e2e8f0; padding: 4px; font-size: 8px; color: #334155; vertical-align: middle; }
     .audit-table tr:nth-child(even) { background-color: #f8fafc; }
+    
+    /* QR Section Visibility Logic for Print */
+    body.hide-qr-section #rep_qr_section { display: none !important; }
   }
   #print-area { display: none; }
 </style>
@@ -135,6 +139,12 @@
                   <span id="fxVal" class="font-bold text-slate-800 dark:text-white">...</span> <span class="text-[10px] opacity-70">TL/USD</span>
                   <button onclick="getFx()"><i data-lucide="refresh-cw" class="w-3 h-3 ml-1 hover:animate-spin text-slate-400 hover:text-indigo-500 dark:hover:text-white cursor-pointer"></i></button>
               </div>
+              
+              <label class="flex items-center gap-2 cursor-pointer bg-slate-100 dark:bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700/50 hover:border-green-500 transition select-none">
+                  <span class="text-[10px] font-bold text-slate-500 dark:text-slate-300">QR Ekle</span>
+                  <input type="checkbox" id="toggleQrInput" checked class="w-4 h-4 accent-green-500 cursor-pointer" onchange="toggleQrVisibility()">
+              </label>
+
               <button onclick="toggleTheme()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-400 hover:text-indigo-600 dark:hover:text-white transition cursor-pointer">
                   <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
                   <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
@@ -258,6 +268,11 @@
                         <input type="file" id="imgInp" class="hidden" accept="image/*" onchange="readImg(this)">
                         <div onclick="document.getElementById('imgInp').click()" class="border border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-3 text-center cursor-pointer hover:border-indigo-500 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition group"><i data-lucide="camera" class="w-4 h-4 text-slate-400 dark:text-slate-500 mx-auto group-hover:text-indigo-500 dark:group-hover:text-indigo-400 mb-1"></i><span class="text-[10px] text-slate-400 block" data-i18n="lbl_photo">Select Thermal Photo</span></div>
                         <img id="prevImg" class="hidden w-full h-24 object-cover rounded-lg mt-2 border border-slate-300 dark:border-slate-600">
+                    </div>
+
+                    <div class="mt-4 relative z-10">
+                        <input type="file" id="qrInp" class="hidden" accept="image/*" onchange="readQr(this)">
+                        <div onclick="document.getElementById('qrInp').click()" class="border border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-3 text-center cursor-pointer hover:border-green-500 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition group"><i data-lucide="qr-code" class="w-4 h-4 text-slate-400 dark:text-slate-500 mx-auto group-hover:text-green-500 mb-1"></i><span class="text-[10px] text-slate-400 block" data-i18n="lbl_qr">Rapor QR'ı Yükle</span></div>
                     </div>
 
                     <div class="bg-slate-100 dark:bg-slate-900/50 rounded-lg p-3 mt-4 border border-slate-200 dark:border-white/5 relative z-10">
@@ -402,7 +417,8 @@
         </div>
 
         <div class="mb-8"><h3 class="text-sm font-bold text-slate-900 uppercase mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-4 h-4"></i> <span id="rep_proj_title">Financial Projection</span></h3><table class="w-full text-xs text-right border-collapse"><thead><tr class="bg-slate-100 text-slate-500"><th class="p-2 text-left" id="rep_scen">Scenario</th><th class="p-2" id="th_y1">Year 1</th><th class="p-2" id="th_y2">Year 2</th><th class="p-2" id="th_y3">Year 3</th><th class="p-2" id="th_y4">Year 4</th><th class="p-2" id="th_y5">Year 5</th><th class="p-2 font-black" id="th_total">TOTAL</th></tr></thead><tbody class="font-mono" id="projTable"></tbody></table></div>
-        <div class="flex gap-8 mb-8">
+        
+        <div class="flex gap-8 mb-4">
              <div class="flex-1 bg-blue-50 border border-blue-100 rounded-xl p-6 flex flex-col justify-center"><span class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-1" id="rep_roi_card">ROI</span><div class="text-4xl font-black text-blue-600" id="txtRoi">---</div><div class="h-2 bg-blue-200 rounded-full overflow-hidden mt-2 w-full"><div id="visualBar" class="h-full bg-blue-600 w-0 transition-all"></div></div></div>
              <div class="flex-1 flex flex-col">
                  <div class="flex-1 bg-emerald-900 rounded-xl p-6 text-white flex items-center justify-between relative overflow-hidden h-full">
@@ -413,7 +429,22 @@
                  <div class="text-[8px] text-slate-400 text-right mt-1 italic leading-tight" id="rep_tree_note">...</div>
              </div>
          </div>
-        <div class="mt-auto border-t-2 border-slate-100 pt-4">
+
+         <div id="rep_qr_section" class="mt-auto mb-8 p-6 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between">
+            <div>
+                <h4 class="text-lg font-black text-slate-800 uppercase mb-2 flex items-center gap-2">
+                    VAKİT NAKİTTİR! <i data-lucide="coins" class="w-6 h-6 opacity-30 text-slate-600"></i>
+                </h4>
+                <p class="text-xs text-slate-500 leading-relaxed max-w-md">
+                    Eğer bu yatırımı 1 hafta önce yapmış olsaydınız, bu süre boyunca ne kadar tasarruf sağladığınızı anlık olarak görmek için QR kodu okutarak sayaç bilgilerine ulaşabilirsiniz.
+                </p>
+            </div>
+            <div class="w-24 h-24 bg-white border border-slate-200 p-1 rounded-lg">
+                <img id="repQrCode" src="" class="w-full h-full object-contain opacity-20" alt="QR">
+            </div>
+        </div>
+
+        <div class="border-t-2 border-slate-100 pt-4">
             <p class="text-[10px] text-slate-400 text-center font-medium leading-relaxed" id="rep_legal">...</p>
         </div>
     </div>
@@ -422,6 +453,17 @@
 <script>
     function toggleTheme() {
         document.documentElement.classList.toggle('dark');
+    }
+
+    // QR GİZLEME/GÖSTERME FONKSİYONU
+    function toggleQrVisibility() {
+        const isChecked = document.getElementById('toggleQrInput').checked;
+        const body = document.body;
+        if (!isChecked) {
+            body.classList.add('hide-qr-section');
+        } else {
+            body.classList.remove('hide-qr-section');
+        }
     }
 
     async function initApp(){ try{const r=await fetch('https://ipapi.co/json/');const d=await r.json();if(d.country_code==='TR') setLang('tr'); else setLang('en');}catch(e){setLang('tr');} init(); }
@@ -440,14 +482,14 @@
             lbl_price:"Birim Fiyat",lbl_hours:"Yıllık Saat",lbl_add:"Yeni Ölçüm Ekle",
             btn_v:"Armatür",btn_p:"Boru",btn_t:"Tank / Düz",lbl_st:"İşletme Sıc. (°C)",lbl_qty:"Adet",
             lbl_plen:"Boru Boyu (m)", 
-            lbl_photo:"Termal Foto Seç",lbl_spec:"İzolasyon Özellikleri",btn_calc:"Hesapla & Ekle",lbl_list:"Hesaplama Listesi",msg_no_calc:"Henüz hesaplama eklenmedi.",btn_clear:"Temizle",th_img:"Görsel",th_comp:"Ekipman",th_det:"Detay",th_qty:"Miktar",
+            lbl_photo:"Termal Foto Seç",lbl_qr:"Rapor QR'ı Yükle",lbl_spec:"İzolasyon Özellikleri",btn_calc:"Hesapla & Ekle",lbl_list:"Hesaplama Listesi",msg_no_calc:"Henüz hesaplama eklenmedi.",btn_clear:"Temizle",th_img:"Görsel",th_comp:"Ekipman",th_det:"Detay",th_qty:"Miktar",
             th_bare:"Çıplak Yüzey Sıc.<br><span class='text-[9px] font-normal opacity-70'>(Kayıp kWh)</span>",
             th_ins:"İzolasyonlu Yüzey Sıc.<br><span class='text-[9px] font-normal opacity-70'>(Kayıp kWh)</span>",
             th_gain_kwh:"Enerji Kazancı<br><span class='text-[9px] font-normal opacity-70'>(Fark kWh)</span>",
             th_inv:"Yatırım",th_gain:"Kazanç",th_act:"İşlem",
             grp_valves:"Vanalar",val_gate:"Sürgülü Vana",val_globe:"Glob Vana",val_ball_fl:"Küresel Vana",val_butterfly:"Kelebek Vana",val_check:"Çekvalf",val_strainer:"Pislik Tutucu",val_sep:"Buhar Seperatörü",
             grp_traps:"Kondenstoplar", val_trap_float:"Şamandıralı", val_trap_thermo:"Termodinamik", val_trap_bimetal:"Bimetalik", val_trap_bucket:"Ters Kovalı",
-            std_iso:"ISO 12241 (Standart)",std_astm:"ASTM C680 (ABD)",std_vdi:"VDI 2055 (Alman)",mat_rock:"Taş Yünü (Sanayi)",mat_rubber:"Elastomerik Kauçuk",mat_aerogel:"Aerogel",mat_glass:"İğnelenmiş Cam Elyaf",mat_ceramic:"Seramik Yünü",mat_bare:"⚠️ Yalıtımsız (Çıplak)",
+            std_iso:"ISO 12241 (Standard)",std_astm:"ASTM C680 (ABD)",std_vdi:"VDI 2055 (Alman)",mat_rock:"Taş Yünü (Sanayi)",mat_rubber:"Elastomerik Kauçuk",mat_aerogel:"Aerogel",mat_glass:"İğnelenmiş Cam Elyaf",mat_ceramic:"Seramik Yünü",mat_bare:"⚠️ Yalıtımsız (Çıplak)",
             unit_month:"Ay",
             rep_title_top:"Isı Kaybı Kaynaklı Enerji Verimliliği Simülasyonu",
             rep_title_main:"ENDÜSTRİYEL <br><span class='text-green-600'>YALITIM</span> <br>RAPORU",rep_client_lbl:"Müşteri",rep_prep_lbl:"Hazırlayan",rep_roi_month:"AY AMORTİSMAN SÜRESİ",rep_p2_title:"Detaylı Analiz Dökümü",rep_th_inv:"Yatırım",rep_th_gain:"Net Kazanç",rep_p3_title:"Yönetici Özeti",rep_risk_card:"MEVCUT YILLIK KAYIP",rep_risk_desc:"Müdahale edilmezse kaybedilecek tutar.",rep_cost_card:"TOPLAM YATIRIM",rep_opp_card:"NET KAZANÇ (YILLIK)",rep_proj_title:"Finansal Projeksiyon (5 Yıl)",rep_scen:"Senaryo",rep_scen_loss:"Mevcut Durum (Kümülatif Kayıp)",rep_scen_gain:"Yatırım Sonrası (Kümülatif Kazanç)",rep_roi_card:"Yatırım Geri Dönüş (ROI)",rep_env_title:"KARBON AYAK İZİ",rep_tree_desc:"Ağaç Eşdeğeri",
@@ -469,7 +511,7 @@
             lbl_price:"Unit Price",lbl_hours:"Annual Hours",lbl_add:"Add New Item",
             btn_v:"Valve",btn_p:"Pipe",btn_t:"Tank / Flat",lbl_st:"Process Temp (°C)",lbl_qty:"Qty",
             lbl_plen:"Pipe Length (m)",
-            lbl_photo:"Select Thermal Photo",lbl_spec:"Insulation Specs",btn_calc:"Calculate & Add",lbl_list:"Calculation List",msg_no_calc:"No calculation added yet.",btn_clear:"Clear All",th_img:"Img",th_comp:"Component",th_det:"Detail",th_qty:"Qty",
+            lbl_photo:"Select Thermal Photo",lbl_qr:"Upload Report QR",lbl_spec:"Insulation Specs",btn_calc:"Calculate & Add",lbl_list:"Calculation List",msg_no_calc:"No calculation added yet.",btn_clear:"Clear All",th_img:"Img",th_comp:"Component",th_det:"Detail",th_qty:"Qty",
             th_bare:"Bare Surface Temp<br><span class='text-[9px] font-normal opacity-70'>(Loss kWh)</span>",
             th_ins:"Ins. Surface Temp<br><span class='text-[9px] font-normal opacity-70'>(Loss kWh)</span>",
             th_gain_kwh:"Energy Gain<br><span class='text-[9px] font-normal opacity-70'>(Diff kWh)</span>",
@@ -548,7 +590,7 @@
         coal_loc: 4.07
     };
     
-    let LIST=[],FX={USD:34.50,EUR:36.50,GBP:43.20,TL:1.0},currImg=null,editingIndex=null;
+    let LIST=[],FX={USD:34.50,EUR:36.50,GBP:43.20,TL:1.0},currImg=null,userQrImg=null,editingIndex=null;
 
     function getK(matKey,T){if(!MATS[matKey])return 0.04;const m=MATS[matKey];return m.a+(m.b*T)+((m.c||0)*T*T);}
     function getSurfaceCoeff(std,vWind,Ts,Ta,D_out,isFlat){const dT=Math.abs(Ts-Ta);const sigma=5.67e-8,eps=0.9;let h_rad=eps*sigma*(Math.pow(Ts+273.15,4)-Math.pow(Ta+273.15,4))/(dT||1);if(dT<0.1)h_rad=5;let h_cv=0;if(std==='astm'){if(vWind<0.1){if(isFlat)h_cv=1.95*Math.pow(dT,0.25);else h_cv=1.32*Math.pow(dT/(D_out||1),0.25);}else{h_cv=10.0*Math.pow(vWind,0.6)/Math.pow((D_out||1),0.4);}}else if(std==='vdi'){if(vWind<0.1)h_cv=3.5+0.05*dT;else h_cv=3.9*Math.pow(vWind,0.7)/Math.pow((D_out||1),0.3);}else{if(vWind<0.5){if(isFlat)h_cv=2.2*Math.pow(dT,0.25);else h_cv=1.4*Math.pow(dT/(D_out||1),0.25);}else{h_cv=4+4*vWind;}}if(h_cv<1)h_cv=1;return h_rad+h_cv;}
@@ -747,7 +789,12 @@
 
     function init(){fillDN('vDN');fillDN('pDN');getFx();lucide.createIcons(); setType('valve');}
     function fillDN(id){const el=document.getElementById(id);el.innerHTML='';for(const[k,v]of Object.entries(PIPES)){let o=document.createElement('option');o.value=v;o.text=`DN ${k}`;el.add(o);}if(id==='vDN')el.value=60.3;if(id==='pDN')el.value=88.9;}
+    
+    // FOTOĞRAF VE QR OKUMA FONKSİYONLARI
     function readImg(i){if(i.files&&i.files[0]){const r=new FileReader();r.onload=e=>{currImg=e.target.result;document.getElementById('prevImg').src=currImg;document.getElementById('prevImg').classList.remove('hidden');};r.readAsDataURL(i.files[0]);}}
+    
+    function readQr(i){if(i.files&&i.files[0]){const r=new FileReader();r.onload=e=>{userQrImg=e.target.result;alert("QR Kod yüklendi! Raporun son sayfasında görünecek.");};r.readAsDataURL(i.files[0]);}}
+
     async function getFx(){try{const r=await fetch('https://api.frankfurter.app/latest?from=USD&to=TRY');const d=await r.json();FX.USD=d.rates.TRY;const r2=await fetch('https://api.frankfurter.app/latest?from=EUR&to=TRY');const d2=await r2.json();FX.EUR=d2.rates.TRY;const r3=await fetch('https://api.frankfurter.app/latest?from=GBP&to=TRY');const d3=await r3.json();FX.GBP=d3.rates.TRY;document.getElementById('fxVal').innerText=FX.USD.toFixed(2);}catch(e){}}
     function calc(){LIST.push(getCalculationResult());resetForm();render();}
     function finishUpdate(){if(editingIndex!==null)LIST[editingIndex]=getCalculationResult();editingIndex=null;document.getElementById('btnAdd').classList.remove('hidden');document.getElementById('btnUpdate').classList.add('hidden');resetForm();render();}
@@ -934,6 +981,16 @@
             document.getElementById('sumCo2').innerText=gCo2.toFixed(1);
             document.getElementById('sumTrees').innerText=Math.round(gCo2*40).toLocaleString();
             
+            // QR GÖRSELİNİ GÜNCELLE
+            const qrImgEl = document.getElementById('repQrCode');
+            if (userQrImg) {
+                qrImgEl.src = userQrImg;
+                qrImgEl.classList.remove('opacity-20');
+            } else {
+                qrImgEl.src = "";
+                qrImgEl.classList.add('opacity-20');
+            }
+
             const pt=document.getElementById('projTable');
             pt.innerHTML='';
             let rowL=`<tr class="border-b border-slate-200"><td class="p-2 text-left font-bold text-red-600">${T.rep_scen_loss}</td>`;
