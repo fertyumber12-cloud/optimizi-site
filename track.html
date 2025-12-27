@@ -19,11 +19,8 @@
   }
 </script>
 <style>
-  /* AYDINLIK MÜHENDİSLİK KAĞIDI */
   body { 
-      background-color: #f8fafc; /* Beyaz/Gri Zemin */
-      
-      /* Mavi/Gri Kareli Desen */
+      background-color: #f8fafc; 
       background-image: 
           linear-gradient(rgba(148, 163, 184, 0.15) 1px, transparent 1px),
           linear-gradient(90deg, rgba(148, 163, 184, 0.15) 1px, transparent 1px),
@@ -31,19 +28,17 @@
           linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
       background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
       background-position: center center;
-      
-      color: #0f172a; /* Koyu Yazı */
+      color: #0f172a;
       height: 100vh; 
       width: 100vw;
       display: flex; 
       flex-direction: column; 
       align-items: center;
       justify-content: center;
-      overflow-y: auto; /* İçerik taşarsa kayabilsin */
+      overflow-y: auto;
       overflow-x: hidden;
       position: relative; 
   }
-  
   .glass-card { 
       background-color: rgba(255, 255, 255, 0.7); 
       backdrop-filter: blur(20px); 
@@ -51,8 +46,6 @@
       box-shadow: 0 20px 60px -10px rgba(0,0,0,0.1), 0 10px 20px -5px rgba(0,0,0,0.05);
       z-index: 10; 
   }
-  
-  /* Arka plan ışık hüzmesi (Aydınlık mod için daha soft) */
   .spotlight {
       position: absolute;
       top: -150px;
@@ -64,7 +57,6 @@
       pointer-events: none;
       z-index: 0;
   }
-
   .counter-text { font-variant-numeric: tabular-nums; }
 </style>
 </head>
@@ -94,9 +86,11 @@
                 <div class="text-[10px] text-slate-400 font-mono mt-1" id="prdSerial">ID: ---</div>
             </div>
 
-            <div class="text-left">
-                <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">Ürün / Konum</div>
-                <h2 class="text-xl md:text-2xl font-black text-slate-800 leading-tight" id="prdName">Yükleniyor...</h2>
+            <div class="text-left border-l-2 border-green-500 pl-3">
+                <div id="clientDisplay" class="text-sm font-extrabold text-slate-800 uppercase tracking-tight mb-1"></div>
+                
+                <div class="text-[9px] text-slate-400 uppercase font-bold mb-0.5">Ürün / Konum</div>
+                <h2 class="text-lg md:text-xl font-bold text-slate-600 leading-tight" id="prdName">Yükleniyor...</h2>
             </div>
         </div>
         
@@ -158,7 +152,11 @@
 <script>
     lucide.createIcons();
     
+    // URL Parametrelerini al
     const params = new URLSearchParams(window.location.search);
+    
+    // Müşteri adını güvenli bir şekilde çek (decodeURIComponent kullanarak)
+    const clientName = params.get('c') || "";
     
     const config = {
         name: decodeURIComponent(params.get('p') || 'Endüstriyel Yalıtım'),
@@ -167,7 +165,7 @@
         save: parseFloat(params.get('v')) || 10000,
         fuel: params.get('f') || 'gas',
         price: parseFloat(params.get('up')) || 10.0,
-        client: params.get('c') ? decodeURIComponent(params.get('c')) : null
+        client: decodeURIComponent(clientName)
     };
 
     const fuels = {
@@ -182,10 +180,19 @@
 
     const f = fuels[config.fuel] || fuels.gas;
 
+    // Elementleri Doldur
     document.getElementById('prdName').innerText = config.name;
     document.getElementById('prdSerial').innerText = `ID: ${config.sn}`;
     document.getElementById('fuelUnit').innerText = f.unit;
     document.getElementById('fuelLabel').innerText = f.label;
+    
+    // MÜŞTERİ ADINI BURADA EKRANA BASTIRIYORUZ
+    const clientEl = document.getElementById('clientDisplay');
+    if (config.client && config.client !== "") {
+        clientEl.innerText = config.client;
+    } else {
+        clientEl.style.display = 'none'; // Eğer müşteri adı yoksa alanı gizle
+    }
     
     const p = config.start.split('-');
     const startDate = new Date(p[0], p[1]-1, p[2], 0, 0, 0).getTime();
@@ -208,14 +215,14 @@
             const moneyEl = document.getElementById('liveMoney');
             moneyEl.innerText = moneyStr;
 
-            // Auto-Scale Font
+            // Yazı Boyutu Dinamik Ayar
             const len = moneyStr.length;
             if(len > 13) {
-                moneyEl.className = "font-black text-slate-800 counter-text tracking-tighter transition-all duration-300 text-3xl md:text-4xl"; 
+                moneyEl.style.fontSize = "1.875rem";
             } else if (len > 10) {
-                moneyEl.className = "font-black text-slate-800 counter-text tracking-tighter transition-all duration-300 text-4xl md:text-5xl"; 
+                moneyEl.style.fontSize = "2.25rem";
             } else {
-                moneyEl.className = "font-black text-slate-800 counter-text tracking-tighter transition-all duration-300 text-5xl md:text-6xl"; 
+                moneyEl.style.fontSize = "3rem";
             }
 
             document.getElementById('liveFuel').innerText = fuelAmount.toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
