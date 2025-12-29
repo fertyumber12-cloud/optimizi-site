@@ -173,6 +173,13 @@
                                 </div>
                             </div>
                             <div>
+                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block text-blue-300">Ortam Sıc. (°C)</label>
+                                <div class="relative">
+                                    <input type="number" id="tAmb" class="glass-input text-xs pl-8 text-blue-300 font-bold border-blue-500/30" value="25">
+                                    <i data-lucide="sun" class="w-3 h-3 text-blue-300 absolute left-2.5 top-2.5"></i>
+                                </div>
+                            </div>
+                            <div>
                                 <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block text-cyan-400">Rüzgar (m/s)</label>
                                 <div class="relative">
                                     <input type="number" id="wind" class="glass-input text-xs pl-8 text-cyan-400 font-bold border-cyan-500/30" value="0" min="0" step="0.5">
@@ -299,7 +306,8 @@
         coal_loc: 4.07
     };
 
-    document.querySelectorAll('#dn, #mat, #temp, #thk, #price, #hours, #fuel, #eff, #qty, #wind').forEach(el => {
+    // tAmb (Ortam Sıcaklığı) buraya eklendi
+    document.querySelectorAll('#dn, #mat, #temp, #tAmb, #thk, #price, #hours, #fuel, #eff, #qty, #wind').forEach(el => {
         el.addEventListener('input', updateLiveCalc);
     });
 
@@ -349,7 +357,10 @@
         const mm = PIPES[dn] || 114.3;
         const dPipe = mm / 1000;
         const tProc = parseFloat(document.getElementById('temp').value) || 0;
-        const tAmb = 25; 
+        
+        // DÜZELTME: Sabit 25 yerine inputtan okuyoruz
+        const tAmb = parseFloat(document.getElementById('tAmb').value) || 25; 
+
         const thk = parseFloat(document.getElementById('thk').value) / 1000 || 0.05;
         const mat = document.getElementById('mat').value;
         const price = parseFloat(document.getElementById('price').value) || 0;
