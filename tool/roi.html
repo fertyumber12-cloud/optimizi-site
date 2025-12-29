@@ -247,6 +247,10 @@
                                 <option value="strainer" data-i18n="val_strainer">Pislik Tutucu</option>
                                 <option value="separator" data-i18n="val_sep">Buhar Seperatörü</option>
                             </optgroup>
+                            <optgroup label="Bağlantı Elemanları" data-i18n="grp_conn">
+                                <option value="flange" data-i18n="val_flange">Flanş Çifti (Takım)</option>
+                                <option value="elbow" data-i18n="val_elbow">Dirsek (90°)</option>
+                            </optgroup>
                             <optgroup label="Kondenstoplar" data-i18n="grp_traps">
                                 <option value="trap_float" data-i18n="val_trap_float">Şamandıralı</option>
                                 <option value="trap_thermo" data-i18n="val_trap_thermo">Termodinamik</option>
@@ -436,7 +440,7 @@
                     VAKİT NAKİTTİR! <i data-lucide="coins" class="w-6 h-6 opacity-30 text-slate-600"></i>
                 </h4>
                 <p class="text-xs text-slate-500 leading-relaxed max-w-md">
-                    Eğer bu yatırımı 1 hafta önce yapmış olsaydınız, bu süre boyunca ne kadar tasarruf sağladığınızı anlık olarak görmek için QR kodu okutarak sayaç bilgilerine ulaşabilirsiniz.
+                    Eğer bu yatırımı karekod içerisinde belirtilen tarihte yapmış olsaydık, bu süre boyunca ne kadar tasarruf sağladığınızı anlık olarak görmek için QR kodu okutarak sayaç bilgilerine ulaşabilirsiniz.
                 </p>
             </div>
             <div class="w-24 h-24 bg-white border border-slate-200 p-1 rounded-lg">
@@ -488,6 +492,7 @@
             th_gain_kwh:"Enerji Kazancı<br><span class='text-[9px] font-normal opacity-70'>(Fark kWh)</span>",
             th_inv:"Yatırım",th_gain:"Kazanç",th_act:"İşlem",
             grp_valves:"Vanalar",val_gate:"Sürgülü Vana",val_globe:"Glob Vana",val_ball_fl:"Küresel Vana",val_butterfly:"Kelebek Vana",val_check:"Çekvalf",val_strainer:"Pislik Tutucu",val_sep:"Buhar Seperatörü",
+            grp_conn:"Bağlantı Elemanları", val_flange:"Flanş Çifti (Takım)", val_elbow:"Dirsek (90°)",
             grp_traps:"Kondenstoplar", val_trap_float:"Şamandıralı", val_trap_thermo:"Termodinamik", val_trap_bimetal:"Bimetalik", val_trap_bucket:"Ters Kovalı",
             std_iso:"ISO 12241 (Standard)",std_astm:"ASTM C680 (ABD)",std_vdi:"VDI 2055 (Alman)",mat_rock:"Taş Yünü (Sanayi)",mat_rubber:"Elastomerik Kauçuk",mat_aerogel:"Aerogel",mat_glass:"İğnelenmiş Cam Elyaf",mat_ceramic:"Seramik Yünü",mat_bare:"⚠️ Yalıtımsız (Çıplak)",
             unit_month:"Ay",
@@ -517,6 +522,7 @@
             th_gain_kwh:"Energy Gain<br><span class='text-[9px] font-normal opacity-70'>(Diff kWh)</span>",
             th_inv:"Invest",th_gain:"Savings",th_act:"Action",
             grp_valves:"Valves",val_gate:"Gate Valve",val_globe:"Globe Valve",val_ball_fl:"Ball Valve",val_butterfly:"Butterfly Valve",val_check:"Check Valve",val_strainer:"Strainer",val_sep:"Steam Separator",
+            grp_conn:"Fittings", val_flange:"Flange Pair", val_elbow:"Elbow (90°)",
             grp_traps:"Steam Traps", val_trap_float:"Float Trap", val_trap_thermo:"Thermodynamic", val_trap_bimetal:"Bimetallic", val_trap_bucket:"Inverted Bucket",
             std_iso:"ISO 12241 (Standard)",std_astm:"ASTM C680 (USA)",std_vdi:"VDI 2055 (German)",mat_rock:"Rock Wool",mat_rubber:"Elastomeric Rubber",mat_aerogel:"Aerogel",mat_glass:"Needled Glass Fiber",mat_ceramic:"Ceramic Fiber",mat_bare:"⚠️ Uninsulated (Bare)",
             unit_month:"Months",
@@ -578,7 +584,8 @@
     const MATS={rockwool:{a:0.035,b:0.00017,c:0},glasswool:{a:0.025,b:0.00015,c:0},ceramic:{a:0.025,b:0.00012,c:1.2e-7},aerogel:{a:0.019,b:0.00004,c:5e-8},rubber:{a:0.034,b:0.000075,c:0},bare:{a:25,b:0,c:0}};
     const VALVE_FACTORS={
         gate:1.2,globe:1.4,butterfly:0.6,ball:1.0,strainer:1.5,check:0.9,
-        trap_float: 1.6, trap_thermo: 0.8, trap_bimetal: 1.0, trap_bucket: 1.5 
+        trap_float: 1.6, trap_thermo: 0.8, trap_bimetal: 1.0, trap_bucket: 1.5,
+        flange: 0.35 // Standart Flanş Çifti
     };
     
     const FUELS={
@@ -658,6 +665,10 @@
                      const sepArea = SEPARATORS[Object.keys(PIPES).find(k=>PIPES[k]==mm)] || 0.5;
                      multiplier = sepArea; 
                      Name=`Steam Separator (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`;
+                } else if(vType === 'elbow') {
+                    // YENİ EKLENEN KISIM: DİRSEK (ELBOW)
+                    multiplier = 2.36 * dPipe; // 2.36 * D
+                    Name=`Elbow 90° (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`;
                 } else {
                      multiplier=1; 
                      const sel = document.getElementById('valveType');
@@ -665,7 +676,7 @@
                      if(vType.startsWith('trap_')){
                          Name=`${txt} (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`;
                      } else {
-                         Name=`Valve (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`;
+                         Name=`${txt} (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`;
                      }
                 }
                 unitLabel="Adet";
@@ -704,7 +715,11 @@
                  Q_total_watts = Q_unit * (multiplier*3) * qty;
              } else {
                  const factor=VALVE_FACTORS[vType]||1.2;
-                 Q_total_watts=Q_unit*factor*qty;
+                 Q_total_watts=Q_unit*factor*qty; // Elbow için multiplier zaten yukarıda 2.36*D olarak hesaplandı ama burada VALVE_FACTORS'e bakılıyor. Düzeltme aşağıda.
+                 if(vType === 'elbow') {
+                     // Dirsekte faktör yerine geometrik alan kullanılır (multiplier = eşdeğer boy)
+                     Q_total_watts = Q_unit * multiplier * qty;
+                 }
              }
         } else if(type==='pipe'){
              Q_total_watts=Q_unit*multiplier; 
@@ -720,6 +735,8 @@
         if(type==='valve'){
             if(vType==='separator'){
                  Q_bare_total = Q_bare_unit * (multiplier*3) * qty;
+            } else if (vType === 'elbow') {
+                 Q_bare_total = Q_bare_unit * multiplier * qty;
             } else {
                  const factor=VALVE_FACTORS[vType]||1.2;
                  Q_bare_total=Q_bare_unit*factor*qty;
