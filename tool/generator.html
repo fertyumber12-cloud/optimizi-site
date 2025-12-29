@@ -125,6 +125,10 @@
                                         <option value="check">Çekvalf</option>
                                         <option value="separator">Buhar Seperatörü</option>
                                     </optgroup>
+                                    <optgroup label="Bağlantı Elemanları">
+                                        <option value="flange">Flanş Çifti (Takım)</option>
+                                        <option value="elbow">Dirsek (90°)</option>
+                                    </optgroup>
                                     <optgroup label="Kondenstoplar">
                                         <option value="trap_float">Şamandıralı</option>
                                         <option value="trap_thermo">Termodinamik</option>
@@ -291,12 +295,12 @@
 
     const VALVE_FACTORS = {
         gate: 1.2, globe: 1.4, butterfly: 0.6, ball: 1.0, strainer: 1.5, check: 0.9,
-        trap_float: 1.6, trap_thermo: 0.8, trap_bimetal: 1.0, trap_bucket: 1.5
+        trap_float: 1.6, trap_thermo: 0.8, trap_bimetal: 1.0, trap_bucket: 1.5,
+        flange: 0.35 // Standart Flanş Çifti (Ortalama 0.35m eşdeğer boru kaybı)
     };
 
     const MATS = { needlemat: {a:0.033, b:0.00018}, rockwool: {a:0.035, b:0.00017}, glasswool: {a:0.032, b:0.00015}, ceramic: {a:0.06, b:0.0002}, aerogel: {a:0.018, b:0.00005}};
     
-    // Enerji Değerleri (LHV kWh/Birim)
     const FUELS = {
         gas: 9.59, 
         elec: 1.0, 
@@ -306,7 +310,6 @@
         coal_loc: 4.07
     };
 
-    // tAmb (Ortam Sıcaklığı) buraya eklendi
     document.querySelectorAll('#dn, #mat, #temp, #tAmb, #thk, #price, #hours, #fuel, #eff, #qty, #wind').forEach(el => {
         el.addEventListener('input', updateLiveCalc);
     });
@@ -357,10 +360,7 @@
         const mm = PIPES[dn] || 114.3;
         const dPipe = mm / 1000;
         const tProc = parseFloat(document.getElementById('temp').value) || 0;
-        
-        // DÜZELTME: Sabit 25 yerine inputtan okuyoruz
         const tAmb = parseFloat(document.getElementById('tAmb').value) || 25; 
-
         const thk = parseFloat(document.getElementById('thk').value) / 1000 || 0.05;
         const mat = document.getElementById('mat').value;
         const price = parseFloat(document.getElementById('price').value) || 0;
@@ -396,6 +396,11 @@
                 const sepArea = SEPARATORS[dn] || 0.5;
                 const pipeAreaPerMeter = Math.PI * dPipe;
                 multiplier = sepArea / pipeAreaPerMeter;
+            } else if(vType === 'elbow') {
+                // DIN 2605 / ANSI B16.9 Long Radius Elbow (R=1.5D)
+                // Centerline Length = (2 * PI * 1.5 * D) / 4 = ~2.356 * D
+                // Eşdeğer Boru Boyu (Geometrik)
+                multiplier = 2.36 * dPipe; 
             } else {
                 multiplier = VALVE_FACTORS[vType] || 1.2;
             }
