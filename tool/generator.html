@@ -22,11 +22,43 @@
   }
 </script>
 <style>
-    body { background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%); color: #f1f5f9; min-height: 100vh; overflow-x: hidden; }
-    .glass-card { background-color: rgba(30, 41, 59, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
-    .glass-input { border-radius: 0.75rem; padding: 0.75rem; width: 100%; background-color: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 0.75rem; transition: all 0.2s; }
-    .glass-input:focus { outline: none; border-color: #6366f1; background-color: rgba(15, 23, 42, 0.8); }
-    select.glass-input { appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.75rem center; background-repeat: no-repeat; background-size: 1.2em 1.2em; padding-right: 2.5rem; }
+    /* CSS Değişkenleri ile Tema Yönetimi */
+    :root {
+        --bg-body: #f1f5f9;
+        --bg-glass: rgba(255, 255, 255, 0.8);
+        --border-glass: rgba(0, 0, 0, 0.1);
+        --input-bg: rgba(255, 255, 255, 0.7);
+        --text-main: #0f172a;
+        --text-muted: #64748b;
+    }
+    .dark {
+        --bg-body: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%);
+        --bg-glass: rgba(30, 41, 59, 0.6);
+        --border-glass: rgba(255, 255, 255, 0.08);
+        --input-bg: rgba(15, 23, 42, 0.6);
+        --text-main: #f1f5f9;
+        --text-muted: #94a3b8;
+    }
+
+    body { background: var(--bg-body); color: var(--text-main); min-height: 100vh; overflow-x: hidden; transition: background 0.3s ease; }
+    
+    .glass-card { background-color: var(--bg-glass); backdrop-filter: blur(16px); border: 1px solid var(--border-glass); transition: all 0.3s; }
+    
+    .glass-input { 
+        border-radius: 0.75rem; padding: 0.75rem; width: 100%; 
+        background-color: var(--input-bg); 
+        border: 1px solid var(--border-glass); 
+        color: var(--text-main); font-size: 0.75rem; transition: all 0.2s; 
+    }
+    .glass-input:focus { outline: none; border-color: #6366f1; background-color: rgba(99, 102, 241, 0.1); }
+    
+    /* GÜNCELLEME: Dark Modda Dropdown Seçeneklerinin Okunabilirliği İçin Fix */
+    .dark option {
+        background-color: #0f172a; /* Koyu Lacivert Arkaplan */
+        color: #f1f5f9; /* Beyaz Yazı */
+    }
+    
+    select.glass-input { appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.75rem center; background-repeat: no-repeat; background-size: 1.2em 1.2em; padding-right: 2.5rem; }
     
     @media print {
         @page { size: A4; margin: 0; }
@@ -35,14 +67,16 @@
         #print-root { position: absolute; left: 0; top: 0; width: 210mm; margin: 0; padding: 0; display: block !important; background: white; }
         #app-container { display: none !important; }
         body { background: white !important; height: auto !important; }
-        .a4-page { width: 210mm; height: 297mm; page-break-after: always; display: grid; grid-template-columns: repeat(5, 40mm); grid-template-rows: repeat(6, 49.5mm); align-content: start; justify-content: center; padding-top: 10mm; }
+        
+        .a4-page { width: 210mm; height: 297mm; page-break-after: always; display: grid; grid-template-columns: repeat(5, 40mm); grid-template-rows: repeat(5, 49.5mm); align-content: start; justify-content: center; padding-top: 10mm; }
+        
         .sticker { width: 40mm; height: 49.5mm; border: 1px dashed #ccc; box-sizing: border-box; padding: 3mm; display: flex; flex-direction: column; align-items: center; justify-content: space-between; background: white; color: black; overflow: hidden; }
         img { max-width: 100% !important; display: block !important; visibility: visible !important; }
     }
 
     #print-root { display: none; }
     #preview-wrapper { transform: scale(0.65); transform-origin: top center; width: 100%; display: flex; flex-direction: column; alignItems: center; }
-    .a4-page { width: 210mm; height: 297mm; background: white; display: grid; grid-template-columns: repeat(5, 40mm); grid-template-rows: repeat(6, 49.5mm); box-shadow: 0 0 50px rgba(0,0,0,0.5); margin-bottom: 20px; }
+    .a4-page { width: 210mm; height: 297mm; background: white; display: grid; grid-template-columns: repeat(5, 40mm); grid-template-rows: repeat(5, 49.5mm); box-shadow: 0 0 50px rgba(0,0,0,0.2); margin-bottom: 20px; }
     .sticker { width: 40mm; height: 49.5mm; border: 1px solid #e2e8f0; padding: 3mm; display: flex; flex-direction: column; align-items: center; justify-content: space-between; background: white; color: black; }
 </style>
 </head>
@@ -55,53 +89,59 @@
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
                 <a href="../index.html" class="flex items-center gap-1 group">
-                    <h1 class="text-2xl font-bold text-white tracking-wide">Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">.App</span></h1>
+                    <h1 class="text-2xl font-bold text-slate-800 dark:text-white tracking-wide">Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-500 dark:from-cyan-400 dark:to-blue-400">.App</span></h1>
                 </a>
-                <div class="h-6 w-px bg-white/10"></div>
-                <div class="text-lg font-bold text-indigo-400 tracking-wide uppercase">Kazanç Takibi</div>
+                <div class="h-6 w-px bg-slate-300 dark:bg-white/10"></div>
+                <div class="text-lg font-bold text-indigo-600 dark:text-indigo-400 tracking-wide uppercase">Kazanç Takibi</div>
             </div>
             
-            <div class="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 rounded-lg border border-white/5">
-                <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                <span class="text-xs font-bold text-slate-300">SİSTEM AKTİF</span>
+            <div class="flex items-center gap-4">
+                <button onclick="toggleTheme()" class="p-2 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-yellow-400 hover:scale-110 transition shadow-sm">
+                    <i data-lucide="sun-moon" class="w-5 h-5"></i>
+                </button>
+
+                <div class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-white/5 shadow-sm">
+                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                    <span class="text-xs font-bold text-slate-600 dark:text-slate-300">SİSTEM AKTİF</span>
+                </div>
             </div>
         </div>
 
         <div class="glass-card p-6 rounded-2xl">
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 
-                <div class="lg:col-span-1 space-y-4 border-r border-white/5 pr-6">
-                    <h3 class="text-indigo-400 text-xs font-bold uppercase mb-4 flex items-center gap-2"><i data-lucide="folder-open" class="w-4 h-4"></i> Proje Bilgileri</h3>
+                <div class="lg:col-span-1 space-y-4 border-r border-slate-200 dark:border-white/5 pr-6">
+                    <h3 class="text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase mb-4 flex items-center gap-2"><i data-lucide="folder-open" class="w-4 h-4"></i> Proje Bilgileri</h3>
                     <div>
-                        <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Müşteri / Firma Adı</label>
+                        <label class="text-[10px] text-slate-500 dark:text-slate-500 font-bold uppercase mb-1 block">Müşteri / Firma Adı</label>
                         <input type="text" id="cName" class="glass-input text-xs" placeholder="Firma Adı Giriniz...">
                     </div>
                     <div>
-                        <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Ürün Etiketi (Lokasyon)</label>
-                        <input type="text" id="pName" class="glass-input text-xs font-bold text-yellow-400" placeholder="Örn: Kazan Vana-1">
+                        <label class="text-[10px] text-slate-500 dark:text-slate-500 font-bold uppercase mb-1 block">Lokasyon / Mahal</label>
+                        <input type="text" id="locName" class="glass-input text-xs font-bold text-yellow-600 dark:text-yellow-400" placeholder="Örn: Kazan Dairesi">
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Tarih</label>
+                            <label class="text-[10px] text-slate-500 dark:text-slate-500 font-bold uppercase mb-1 block">Tarih</label>
                             <input type="date" id="iDate" class="glass-input text-xs">
                         </div>
                         <div>
-                            <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block text-indigo-300">Sipariş / İş No</label>
-                            <input type="text" id="orderNo" class="glass-input text-xs font-bold text-white border-indigo-500/50" value="943">
+                            <label class="text-[10px] text-slate-500 dark:text-slate-500 font-bold uppercase mb-1 block text-indigo-500 dark:text-indigo-300">Sipariş / İş No</label>
+                            <input type="text" id="orderNo" class="glass-input text-xs font-bold text-slate-800 dark:text-white border-indigo-500/50" value="943">
                         </div>
                     </div>
                 </div>
 
                 <div class="lg:col-span-3">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-indigo-400 text-xs font-bold uppercase flex items-center gap-2"><i data-lucide="calculator" class="w-4 h-4"></i> Enerji & ROI Hesabı (ISO 12241)</h3>
+                        <h3 class="text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase flex items-center gap-2"><i data-lucide="calculator" class="w-4 h-4"></i> Enerji & ROI Hesabı (ISO 12241)</h3>
                     </div>
                     
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                         <div class="space-y-3">
                             <div>
-                                <label id="lblQty" class="text-[10px] text-slate-500 font-bold uppercase mb-1 block text-green-400">Adet</label>
-                                <input type="number" id="qty" class="glass-input text-xs font-bold text-white border-green-500/30" value="1" min="1" oninput="updateLiveCalc()">
+                                <label id="lblQty" class="text-[10px] text-slate-500 font-bold uppercase mb-1 block text-green-600 dark:text-green-400">Adet</label>
+                                <input type="number" id="qty" class="glass-input text-xs font-bold text-slate-800 dark:text-white border-green-500/30" value="1" min="1" oninput="updateLiveCalc()">
                             </div>
                             
                             <div>
@@ -160,6 +200,7 @@
                                     <option value="rockwool">Taşyünü (Sanayi)</option>
                                     <option value="ceramic">Seramik Yünü</option>
                                     <option value="aerogel">Aerogel</option>
+                                    <option value="rubber">Elastomerik Kauçuk</option>
                                 </select>
                             </div>
                         </div>
@@ -172,22 +213,22 @@
                             <div>
                                 <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Yüzey Sıc. (°C)</label>
                                 <div class="relative">
-                                    <input type="number" id="temp" class="glass-input text-xs pl-8 text-red-400 font-bold" value="160">
-                                    <i data-lucide="thermometer" class="w-3 h-3 text-red-400 absolute left-2.5 top-2.5"></i>
+                                    <input type="number" id="temp" class="glass-input text-xs pl-8 text-red-600 dark:text-red-400 font-bold" value="160">
+                                    <i data-lucide="thermometer" class="w-3 h-3 text-red-600 dark:text-red-400 absolute left-2.5 top-2.5"></i>
                                 </div>
                             </div>
                             <div>
-                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block text-blue-300">Ortam Sıc. (°C)</label>
+                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block text-blue-500 dark:text-blue-300">Ortam Sıc. (°C)</label>
                                 <div class="relative">
-                                    <input type="number" id="tAmb" class="glass-input text-xs pl-8 text-blue-300 font-bold border-blue-500/30" value="25">
-                                    <i data-lucide="sun" class="w-3 h-3 text-blue-300 absolute left-2.5 top-2.5"></i>
+                                    <input type="number" id="tAmb" class="glass-input text-xs pl-8 text-blue-600 dark:text-blue-300 font-bold border-blue-500/30" value="25">
+                                    <i data-lucide="sun" class="w-3 h-3 text-blue-600 dark:text-blue-300 absolute left-2.5 top-2.5"></i>
                                 </div>
                             </div>
                             <div>
-                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block text-cyan-400">Rüzgar (m/s)</label>
+                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block text-cyan-600 dark:text-cyan-400">Rüzgar (m/s)</label>
                                 <div class="relative">
-                                    <input type="number" id="wind" class="glass-input text-xs pl-8 text-cyan-400 font-bold border-cyan-500/30" value="0" min="0" step="0.5">
-                                    <i data-lucide="wind" class="w-3 h-3 text-cyan-400 absolute left-2.5 top-2.5"></i>
+                                    <input type="number" id="wind" class="glass-input text-xs pl-8 text-cyan-600 dark:text-cyan-400 font-bold border-cyan-500/30" value="0" min="0" step="0.5">
+                                    <i data-lucide="wind" class="w-3 h-3 text-cyan-600 dark:text-cyan-400 absolute left-2.5 top-2.5"></i>
                                 </div>
                             </div>
                         </div>
@@ -213,16 +254,16 @@
                                 <input type="number" id="hours" class="glass-input text-xs" value="8000">
                             </div>
                             <div>
-                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block text-orange-400">Kazan Verimi (%)</label>
-                                <input type="number" id="eff" class="glass-input text-xs font-bold text-orange-400 border-orange-500/30" value="85" max="100" min="10">
+                                <label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block text-orange-600 dark:text-orange-400">Kazan Verimi (%)</label>
+                                <input type="number" id="eff" class="glass-input text-xs font-bold text-orange-600 dark:text-orange-400 border-orange-500/30" value="85" max="100" min="10">
                             </div>
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-4 bg-slate-900/50 p-4 rounded-xl border border-white/5">
+                    <div class="flex items-center gap-4 bg-white/50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-white/5 transition-colors">
                         <div class="flex-1">
                             <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Hesaplanan Toplam Yıllık Kazanç</div>
-                            <div class="text-3xl font-black text-indigo-400 tracking-tight"><span id="liveSave">0</span> <span class="text-sm font-medium text-slate-500">TL / Yıl</span></div>
+                            <div class="text-3xl font-black text-indigo-600 dark:text-indigo-400 tracking-tight"><span id="liveSave">0</span> <span class="text-sm font-medium text-slate-500">TL / Yıl</span></div>
                         </div>
                         <button onclick="addToQueue()" id="btnAdd" class="bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold py-4 px-10 rounded-xl transition shadow-lg shadow-indigo-600/20 flex items-center gap-2 active:scale-95 cursor-pointer">
                             <i data-lucide="plus-circle" class="w-5 h-5"></i>
@@ -239,21 +280,21 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-1">
                 <div class="glass-card rounded-xl overflow-hidden flex flex-col h-[600px] border-t-4 border-t-slate-500">
-                    <div class="p-4 border-b border-white/10 bg-slate-800/80 flex justify-between items-center">
-                        <h3 class="text-xs font-bold text-white uppercase flex items-center gap-2"><i data-lucide="list"></i> Liste</h3>
-                        <button onclick="clearList()" class="text-[10px] text-red-400 hover:text-white transition">Temizle</button>
+                    <div class="p-4 border-b border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800/80 flex justify-between items-center">
+                        <h3 class="text-xs font-bold text-slate-700 dark:text-white uppercase flex items-center gap-2"><i data-lucide="list"></i> Liste</h3>
+                        <button onclick="clearList()" class="text-[10px] text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-white transition">Temizle</button>
                     </div>
                     
-                    <div class="flex-1 overflow-y-auto p-2 space-y-2 custom-scroll bg-slate-900/50" id="queueList">
+                    <div class="flex-1 overflow-y-auto p-2 space-y-2 custom-scroll bg-slate-50 dark:bg-slate-900/50" id="queueList">
                         <div class="flex flex-col items-center justify-center h-full text-slate-500 opacity-50">
                             <i data-lucide="box" class="w-12 h-12 mb-2"></i>
                             <span class="text-xs">Liste Boş</span>
                         </div>
                     </div>
 
-                    <div class="p-4 border-t border-white/10 bg-slate-900 space-y-2">
-                        <button onclick="addProjectTotalSticker()" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg text-xs transition border border-white/10 flex items-center justify-center gap-2 cursor-pointer">
-                            <i data-lucide="sigma" class="w-4 h-4 text-yellow-400"></i> LİSTE TOPLAMI İÇİN ETİKET EKLE
+                    <div class="p-4 border-t border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 space-y-2">
+                        <button onclick="addProjectTotalSticker()" class="w-full bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-white font-bold py-3 rounded-lg text-xs transition border border-transparent dark:border-white/10 flex items-center justify-center gap-2 cursor-pointer">
+                            <i data-lucide="sigma" class="w-4 h-4 text-yellow-600 dark:text-yellow-400"></i> LİSTE TOPLAMI İÇİN ETİKET EKLE
                         </button>
 
                         <button onclick="printLabels()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl text-sm transition shadow-lg shadow-green-500/20 flex items-center justify-center gap-2 cursor-pointer">
@@ -265,10 +306,10 @@
 
             <div class="lg:col-span-2">
                 <div class="glass-card rounded-xl overflow-hidden h-[600px] border-t-4 border-t-slate-500 flex flex-col">
-                    <div class="p-4 border-b border-white/10 bg-slate-800/80">
-                        <h3 class="text-xs font-bold text-white uppercase flex items-center gap-2"><i data-lucide="eye"></i> Baskı Önizleme (A4)</h3>
+                    <div class="p-4 border-b border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800/80">
+                        <h3 class="text-xs font-bold text-slate-700 dark:text-white uppercase flex items-center gap-2"><i data-lucide="eye"></i> Baskı Önizleme (A4)</h3>
                     </div>
-                    <div class="flex-1 overflow-auto bg-slate-700/50 p-8 flex justify-center items-start custom-scroll">
+                    <div class="flex-1 overflow-auto bg-slate-200 dark:bg-slate-700/50 p-8 flex justify-center items-start custom-scroll">
                         <div id="preview-wrapper">
                             <div class="text-slate-400 text-sm mt-20 text-center opacity-50">
                                 Listeye ürün eklediğinizde<br>etiketler burada görünecek.
@@ -296,23 +337,31 @@
     const VALVE_FACTORS = {
         gate: 1.2, globe: 1.4, butterfly: 0.6, ball: 1.0, strainer: 1.5, check: 0.9,
         trap_float: 1.6, trap_thermo: 0.8, trap_bimetal: 1.0, trap_bucket: 1.5,
-        flange: 0.35 // Standart Flanş Çifti (Ortalama 0.35m eşdeğer boru kaybı)
+        flange: 0.35
     };
 
-    const MATS = { needlemat: {a:0.033, b:0.00018}, rockwool: {a:0.035, b:0.00017}, glasswool: {a:0.032, b:0.00015}, ceramic: {a:0.06, b:0.0002}, aerogel: {a:0.018, b:0.00005}};
+    const MATS = { 
+        needlemat: {a:0.033, b:0.00018}, 
+        rockwool: {a:0.035, b:0.00017}, 
+        glasswool: {a:0.032, b:0.00015}, 
+        ceramic: {a:0.06, b:0.0002}, 
+        aerogel: {a:0.018, b:0.00005},
+        // GÜNCELLEME: Elastomerik Kauçuk Katsayıları
+        rubber: {a:0.034, b:0.00010}
+    };
     
     const FUELS = {
-        gas: 9.59, 
-        elec: 1.0, 
-        lng: 13.37, 
-        fueloil: 11.16, 
-        coal_imp: 6.98,
-        coal_loc: 4.07
+        gas: 9.59, elec: 1.0, lng: 13.37, fueloil: 11.16, coal_imp: 6.98, coal_loc: 4.07
     };
 
     document.querySelectorAll('#dn, #mat, #temp, #tAmb, #thk, #price, #hours, #fuel, #eff, #qty, #wind').forEach(el => {
         el.addEventListener('input', updateLiveCalc);
     });
+
+    function toggleTheme() {
+        const html = document.documentElement;
+        html.classList.toggle('dark');
+    }
 
     function updateUI() {
         const type = document.getElementById('equipType').value;
@@ -326,14 +375,14 @@
         if(type === 'valve') {
             rowValve.classList.remove('hidden');
             lblQty.innerText = "Adet";
-            lblQty.className = "text-[10px] text-slate-500 font-bold uppercase mb-1 block text-green-400";
+            lblQty.className = "text-[10px] text-slate-500 font-bold uppercase mb-1 block text-green-600 dark:text-green-400";
         } else if (type === 'pipe') {
             lblQty.innerText = "Uzunluk (Metre)";
-            lblQty.className = "text-[10px] text-slate-500 font-bold uppercase mb-1 block text-blue-400";
+            lblQty.className = "text-[10px] text-slate-500 font-bold uppercase mb-1 block text-blue-600 dark:text-blue-400";
         } else if (type === 'flat') {
             rowDn.classList.add('hidden');
             lblQty.innerText = "Alan (m²)";
-            lblQty.className = "text-[10px] text-slate-500 font-bold uppercase mb-1 block text-yellow-400";
+            lblQty.className = "text-[10px] text-slate-500 font-bold uppercase mb-1 block text-yellow-600 dark:text-yellow-400";
         }
         
         updateLiveCalc();
@@ -397,9 +446,6 @@
                 const pipeAreaPerMeter = Math.PI * dPipe;
                 multiplier = sepArea / pipeAreaPerMeter;
             } else if(vType === 'elbow') {
-                // DIN 2605 / ANSI B16.9 Long Radius Elbow (R=1.5D)
-                // Centerline Length = (2 * PI * 1.5 * D) / 4 = ~2.356 * D
-                // Eşdeğer Boru Boyu (Geometrik)
                 multiplier = 2.36 * dPipe; 
             } else {
                 multiplier = VALVE_FACTORS[vType] || 1.2;
@@ -452,14 +498,29 @@
     }
 
     async function addToQueue() {
-        const pName = document.getElementById('pName').value || "Ürün";
+        const locName = document.getElementById('locName').value || "";
         const cName = document.getElementById('cName').value || "Müşteri";
         const dateStr = document.getElementById('iDate').value;
         const orderNo = document.getElementById('orderNo').value || "1001";
         
         const qty = parseFloat(document.getElementById('qty').value) || 1;
         const type = document.getElementById('equipType').value;
+        const dn = document.getElementById('dn').value;
         
+        let autoProductName = "";
+        
+        if(type === 'valve') {
+            const vTypeEl = document.getElementById('valveType');
+            const vTypeText = vTypeEl.options[vTypeEl.selectedIndex].text;
+            autoProductName = `DN${dn} ${vTypeText}`;
+        } else if (type === 'pipe') {
+            autoProductName = `DN${dn} Boru Hattı`;
+        } else if (type === 'flat') {
+            autoProductName = `Düz Yüzey / Tank`;
+        }
+
+        const finalPName = locName ? `${locName} - ${autoProductName}` : autoProductName;
+
         let qtyText = "";
         if(type === 'valve') qtyText = `(${qty} Adet)`;
         else if(type === 'pipe') qtyText = `(${qty} m)`;
@@ -474,7 +535,7 @@
         const fType = document.getElementById('fuel').value; 
         const uPrice = document.getElementById('price').value;
 
-        const trackUrl = `https://www.optimizi.app/track.html?p=${encodeURIComponent(pName)}&s=${uniqueID}&d=${dateStr}&v=${totalSaving.toFixed(2)}&c=${encodeURIComponent(cName)}&f=${fType}&up=${uPrice}`;
+        const trackUrl = `https://www.optimizi.app/track.html?p=${encodeURIComponent(finalPName)}&s=${uniqueID}&d=${dateStr}&v=${totalSaving.toFixed(2)}&c=${encodeURIComponent(cName)}&f=${fType}&up=${uPrice}`;
 
         const btn = document.getElementById('btnAdd');
         const oldText = btn.innerHTML;
@@ -484,7 +545,7 @@
         const qrBase64 = await generateQRImage(trackUrl);
 
         STICKER_QUEUE.push({
-            id: uniqueID, name: pName, client: cName, date: dateStr,
+            id: uniqueID, name: finalPName, client: cName, date: dateStr,
             saving: totalSaving, qtyLabel: qtyText, qrImg: qrBase64
         });
 
@@ -539,16 +600,21 @@
 
         STICKER_QUEUE.slice().reverse().forEach((item, index) => {
             const originalIndex = STICKER_QUEUE.length - 1 - index;
-            const bgClass = item.isSpecial ? "bg-indigo-900/40 border-indigo-500/30" : "bg-slate-700/50 border-white/5";
+            const bgClass = item.isSpecial 
+                ? "bg-indigo-100 dark:bg-indigo-900/40 border-indigo-500/30" 
+                : "bg-white dark:bg-slate-700/50 border-slate-200 dark:border-white/5";
+            
+            const textClass = "text-slate-800 dark:text-white";
+
             el.innerHTML += `
-                <div class="flex justify-between items-center ${bgClass} p-2 rounded border text-[10px] group hover:bg-slate-700 transition">
+                <div class="flex justify-between items-center ${bgClass} p-2 rounded border text-[10px] group hover:bg-slate-50 dark:hover:bg-slate-700 transition shadow-sm">
                     <div>
-                        <div class="text-indigo-400 font-mono font-bold">${item.id}</div>
-                        <div class="text-white font-bold truncate w-32">${item.name} <span class="text-slate-400 font-normal">${item.qtyLabel}</span></div>
+                        <div class="text-indigo-600 dark:text-indigo-400 font-mono font-bold">${item.id}</div>
+                        <div class="${textClass} font-bold truncate w-32">${item.name} <span class="text-slate-500 dark:text-slate-400 font-normal">${item.qtyLabel}</span></div>
                     </div>
                     <div class="text-right">
-                        <div class="text-green-400 font-bold">${Math.round(item.saving).toLocaleString()} TL</div>
-                        <button onclick="removeItem(${originalIndex})" class="text-red-400 hover:text-white text-[9px] underline mt-1 cursor-pointer">Sil</button>
+                        <div class="text-green-600 dark:text-green-400 font-bold">${Math.round(item.saving).toLocaleString()} TL</div>
+                        <button onclick="removeItem(${originalIndex})" class="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-white text-[9px] underline mt-1 cursor-pointer">Sil</button>
                     </div>
                 </div>
             `;
@@ -569,7 +635,7 @@
         let count = 0;
 
         STICKER_QUEUE.forEach((item) => {
-            if (count > 0 && count % 30 === 0) {
+            if (count > 0 && count % 25 === 0) {
                 container.appendChild(page);
                 page = document.createElement('div');
                 page.className = 'a4-page';
