@@ -356,7 +356,7 @@
 </div>
 
 <div id="print-area">
-    <div class="print-page cover-bg">
+    <div id="p-cover" class="print-page cover-bg">
         <div class="cover-accent"></div>
         <div class="cover-content">
             <div>
@@ -390,13 +390,13 @@
         </div>
     </div>
     
-    <div class="print-page p-12">
+    <div id="p-table" class="print-page p-12">
         <div class="flex justify-between items-center border-b-2 border-slate-900 pb-4 mb-8"><h2 class="text-xl font-black text-slate-900 uppercase" id="rep_p2_title">Detailed Analysis</h2><div class="text-xs text-slate-500" id="rDate">...</div></div>
         <table class="w-full audit-table mb-8"><thead><tr id="rep_table_head"></tr></thead><tbody id="rTable"></tbody></table>
-        <div class="mt-auto pt-8 border-t border-slate-200 text-center text-[10px] text-slate-400">Page 2 / 3</div>
+        <div class="page-num mt-auto pt-8 border-t border-slate-200 text-center text-[10px] text-slate-400">Page 2 / 3</div>
     </div>
     
-    <div class="print-page p-12 flex flex-col h-full">
+    <div id="p-summary" class="print-page p-12 flex flex-col h-full">
         <h2 class="text-2xl font-black text-slate-900 uppercase mb-8 border-b-2 border-slate-900 pb-4" id="rep_p3_title">Executive Summary</h2>
         
         <div class="flex flex-col gap-6 mb-12">
@@ -440,7 +440,7 @@
                     VAKİT NAKİTTİR! <i data-lucide="coins" class="w-6 h-6 opacity-30 text-slate-600"></i>
                 </h4>
                 <p class="text-xs text-slate-500 leading-relaxed max-w-md">
-                    Eğer bu yatırımı karekod içerisinde belirtilen tarihte yapmış olsaydık, bu süre boyunca ne kadar tasarruf sağladığınızı anlık olarak görmek için QR kodu okutarak sayaç bilgilerine ulaşabilirsiniz.
+                   Karekodda belirtilen tarihte bu yatırımı yapmış olsaydınız, geçen süre boyunca sağladığınız tasarrufu anlık olarak görmek için QR kodu okutarak sayaç bilgilerine ulaşabilirsiniz.
                 </p>
             </div>
             <div class="w-24 h-24 bg-white border border-slate-200 p-1 rounded-lg">
@@ -887,20 +887,68 @@
         lucide.createIcons();
     }
 
+    let printTemplateCache = null;
+
     function printRep(){
         try{
-            const T=TRANSLATIONS[currentLang];
-            const d=new Date().toLocaleDateString(currentLang==='tr'?'tr-TR':'en-US');
-            let gInv=0,gSave=0,gCo2=0,gLoss=0,gFuelLost=0;
+            // 1. ŞABLON YÖNETİMİ: İlk çalıştırmada temiz HTML'i hafızaya al
+            const printArea = document.getElementById('print-area');
+            if(!printTemplateCache){
+                printTemplateCache = printArea.innerHTML;
+            }
+            // Her seferinde print-area'yı temiz şablona resetle
+            printArea.innerHTML = printTemplateCache;
+
+            const T = TRANSLATIONS[currentLang];
+            const d = new Date().toLocaleDateString(currentLang==='tr'?'tr-TR':'en-US');
+            
+            // --- DEĞİŞKENLERİ HESAPLA ---
+            let gInv=0, gSave=0, gCo2=0, gLoss=0, gFuelLost=0;
             let lastFuelUnit = "";
             
-            const tb=document.getElementById('rTable');
-            tb.innerHTML='';
-            const currSymVal=document.getElementById('curr').value;
-            const currSymMap={'USD':'$','EUR':'€','GBP':'£','TL':'₺'};
-            const currSym=currSymMap[currSymVal]||'';
+            // Para birimi
+            const currSymVal = document.getElementById('curr').value;
+            const currSymMap = {'USD':'$','EUR':'€','GBP':'£','TL':'₺'};
+            const currSym = currSymMap[currSymVal]||'';
 
-            document.getElementById('rep_table_head').innerHTML=`
+            // Tüm veriyi döngüye sokup toplamları al (Listeleme yapmadan önce)
+            LIST.forEach(i => {
+                if(i.inputs.matKey!=='bare'){
+                    gInv += i.inv;
+                    gSave += i.save;
+                    gCo2 += i.co2;
+                    gLoss += i.lossBare; 
+                    gFuelLost += i.fuelLost;
+                } else {
+                    gLoss += i.loss;
+                    gFuelLost += i.fuelLost;
+                }
+                lastFuelUnit = i.fuelUnit;
+            });
+
+            // --- SAYFALARI OLUŞTURMA MANTIĞI ---
+            const ROWS_PER_PAGE = 20; // 20 Satıra güncellendi
+            const chunks = [];
+            for (let i = 0; i < LIST.length; i += ROWS_PER_PAGE) {
+                chunks.push(LIST.slice(i, i + ROWS_PER_PAGE));
+            }
+            
+            // Eğer hiç veri yoksa boş bir chunk oluştur ki en azından boş sayfa çıksın
+            if(chunks.length === 0) chunks.push([]);
+
+            // Şablondaki sayfaları seç
+            const coverPage = document.getElementById('p-cover');
+            const tablePageTemplate = document.getElementById('p-table'); // Şablon olarak kullanacağız
+            const summaryPage = document.getElementById('p-summary');
+            
+            // Tablo şablonunu DOM'dan kaldır (Çünkü bunu klonlayıp çoğaltacağız)
+            tablePageTemplate.remove();
+
+            // Toplam sayfa sayısı: 1 (Kapak) + Chunk Sayısı + 1 (Özet)
+            const totalPages = 1 + chunks.length + 1;
+
+            // Header HTML'i
+            const tableHeaderHTML = `
                 <th class="w-6">#</th>
                 <th class="w-24 text-center">${T.th_img}</th>
                 <th class="text-left">${T.th_comp}</th>
@@ -911,54 +959,78 @@
                 <th class="text-right text-slate-700">${T.rep_th_inv}</th>
                 <th class="text-right text-green-600 font-black">${T.rep_th_gain}</th>
                 <th class="text-right w-10">ROI</th>`;
-                
-            LIST.forEach((i,x)=>{
-                if(i.inputs.matKey!=='bare'){
-                    gInv+=i.inv;
-                    gSave+=i.save;
-                    gCo2+=i.co2;
-                    gLoss+=i.lossBare; 
-                    gFuelLost+=i.fuelLost;
-                } else {
-                    gLoss+=i.loss;
-                    gFuelLost+=i.fuelLost;
-                }
-                lastFuelUnit = i.fuelUnit;
-                
-                const roi=i.save>0?(i.inv/i.save*12).toFixed(1):"-";
-                const imgTag=i.img?`<img src="${i.img}" class="w-24 h-24 object-cover rounded mx-auto border border-slate-200">`:`<div class="w-8 h-8 bg-slate-100 rounded mx-auto flex items-center justify-center text-[8px]">-</div>`;
-                
-                tb.innerHTML+=`<tr>
-                    <td class="text-center font-bold text-slate-400">${x+1}</td>
-                    <td class="text-center">${imgTag}</td>
-                    <td class="font-bold text-slate-800">${i.name}<div class="text-[9px] text-slate-500 font-normal">${i.desc}</div></td>
-                    
-                    <td class="text-center">
-                        <div class="font-bold text-slate-700">${i.inputs.tProc}°C</div>
-                        <div class="text-[9px] font-bold text-red-500">${i.kwhBare} kWh</div>
-                    </td>
-                    <td class="text-center">
-                        <div class="font-bold text-slate-700">${i.Ts}°C</div>
-                        <div class="text-[9px] font-bold text-orange-500">${i.kwhIns} kWh</div>
-                    </td>
-                    <td class="text-center">
-                        <div class="font-bold text-green-600">+${i.kwhSave} kWh</div>
-                    </td>
 
-                    <td class="text-center">${i.qty} ${i.unit}</td>
-                    <td class="text-right font-mono text-[10px] text-slate-700">${currSym}${Math.round(i.inv).toLocaleString()}</td>
-                    <td class="text-right font-mono text-[10px] text-green-600 font-bold">${i.inputs.matKey!=='bare'?'+'+currSym+Math.round(i.save).toLocaleString():'-'}</td>
-                    <td class="text-right font-bold text-blue-600 text-[10px]">${roi}</td>
-                </tr>`;
+            // CHUNK DÖNGÜSÜ: Her veri parçası için yeni bir sayfa oluştur
+            chunks.forEach((chunk, index) => {
+                // Şablonu klonla
+                const newPage = tablePageTemplate.cloneNode(true);
+                newPage.id = ''; // ID çakışmasını önle
+                
+                // Başlık Güncelleme
+                const titleEl = newPage.querySelector('h2');
+                
+                // ÖNCE başlığı mevcut dilde ayarla (Türkçeyse "Detaylı Analiz Dökümü" yapar)
+                titleEl.innerText = T.rep_p2_title;
+                
+                // Eğer 2. veya daha sonraki sayfaysa, yanına (2) gibi numara ekle
+                if(index > 0) {
+                     titleEl.innerHTML += ` <span class="text-sm text-slate-400 font-normal">(${index+1})</span>`;
+                }
+
+                // Tarih
+                newPage.querySelector('#rDate').innerText = d;
+
+                // Tablo Başlığı
+                newPage.querySelector('thead tr').innerHTML = tableHeaderHTML;
+
+                // Sayfa Numarası (Index 0 -> Sayfa 2)
+                const pageNum = index + 2; 
+                newPage.querySelector('.page-num').innerText = `Page ${pageNum} / ${totalPages}`;
+
+                // Tablo Satırlarını Doldur
+                const tbody = newPage.querySelector('tbody');
+                tbody.innerHTML = '';
+                
+                chunk.forEach((i, subIndex) => {
+                    const globalIndex = (index * ROWS_PER_PAGE) + subIndex + 1;
+                    
+                    const roi = i.save > 0 ? (i.inv/i.save*12).toFixed(1) : "-";
+                    const imgTag = i.img ? `<img src="${i.img}" class="w-24 h-24 object-cover rounded mx-auto border border-slate-200">` : `<div class="w-8 h-8 bg-slate-100 rounded mx-auto flex items-center justify-center text-[8px]">-</div>`;
+
+                    tbody.innerHTML += `<tr>
+                        <td class="text-center font-bold text-slate-400 border-b border-slate-100">${globalIndex}</td>
+                        <td class="text-center border-b border-slate-100 p-2">${imgTag}</td>
+                        <td class="font-bold text-slate-800 border-b border-slate-100">${i.name}<div class="text-[9px] text-slate-500 font-normal">${i.desc}</div></td>
+                        
+                        <td class="text-center border-b border-slate-100">
+                            <div class="font-bold text-slate-700">${i.inputs.tProc}°C</div>
+                            <div class="text-[9px] font-bold text-red-500">${i.kwhBare} kWh</div>
+                        </td>
+                        <td class="text-center border-b border-slate-100">
+                            <div class="font-bold text-slate-700">${i.Ts}°C</div>
+                            <div class="text-[9px] font-bold text-orange-500">${i.kwhIns} kWh</div>
+                        </td>
+                        <td class="text-center border-b border-slate-100">
+                            <div class="font-bold text-green-600">+${i.kwhSave} kWh</div>
+                        </td>
+
+                        <td class="text-center border-b border-slate-100">${i.qty} ${i.unit}</td>
+                        <td class="text-right font-mono text-[10px] text-slate-700 border-b border-slate-100">${currSym}${Math.round(i.inv).toLocaleString()}</td>
+                        <td class="text-right font-mono text-[10px] text-green-600 font-bold border-b border-slate-100">${i.inputs.matKey!=='bare'?'+'+currSym+Math.round(i.save).toLocaleString():'-'}</td>
+                        <td class="text-right font-bold text-blue-600 text-[10px] border-b border-slate-100">${roi}</td>
+                    </tr>`;
+                });
+
+                // Yeni sayfayı, Özet Sayfasından HEMEN ÖNCE ekle
+                printArea.insertBefore(newPage, summaryPage);
             });
 
-            const totalRoi=gSave>0?(gInv/gSave*12):0;
+            // --- STATİK ALANLARI GÜNCELLE (Kapak ve Özet) ---
             document.getElementById('rep_title_top').innerText=T.rep_title_top;
             document.getElementById('rep_title_main').innerHTML=T.rep_title_main;
             document.getElementById('rep_client_lbl').innerText=T.rep_client_lbl;
             document.getElementById('rep_prep_lbl').innerText=T.rep_prep_lbl;
             document.getElementById('rep_roi_month').innerText=T.rep_roi_month;
-            document.getElementById('rep_p2_title').innerText=T.rep_p2_title;
             document.getElementById('rep_p3_title').innerText=T.rep_p3_title;
             document.getElementById('rep_risk_card').innerText=T.rep_risk_card;
             document.getElementById('rep_risk_desc').innerText=T.rep_risk_desc;
@@ -972,12 +1044,13 @@
             document.getElementById('rep_legal').innerHTML=T.rep_legal;
             document.getElementById('rep_tree_note').innerText=T.rep_tree_note; 
 
-            document.getElementById('covClient').innerText=document.getElementById('cName').value||"CLIENT";
-            document.getElementById('covProv').innerText=document.getElementById('pName').value||"OPTIMIZI INC.";
-            document.getElementById('covRoi').innerText=totalRoi>0?totalRoi.toFixed(1):"---";
-            document.getElementById('rDate').innerText=d;
+            // Veriler
+            const totalRoi = gSave>0 ? (gInv/gSave*12) : 0;
+            document.getElementById('covClient').innerText = document.getElementById('cName').value || "CLIENT";
+            document.getElementById('covProv').innerText = document.getElementById('pName').value || "OPTIMIZI INC.";
+            document.getElementById('covRoi').innerText = totalRoi>0 ? totalRoi.toFixed(1) : "---";
             
-            // PARAMETRELERİ GÜNCELLE
+            // Parametreler
             document.getElementById('covTemp').innerText = document.getElementById('tAmb').value;
             document.getElementById('covWind').innerText = document.getElementById('vWind').value;
             const fuelSel = document.getElementById('fuel');
@@ -987,18 +1060,17 @@
             document.getElementById('covCurr').innerText = document.getElementById('energyCurr').value;
             document.getElementById('covHours').innerText = document.getElementById('hours').value;
 
-            document.getElementById('sumLoss').innerText=currSym+Math.round(gLoss).toLocaleString();
-            
+            // Özet Tablosu
+            document.getElementById('sumLoss').innerText = currSym + Math.round(gLoss).toLocaleString();
             document.getElementById('sumFuelLost').innerText = `(${Math.round(gFuelLost).toLocaleString()} ${lastFuelUnit})`;
+            document.getElementById('sumSave').innerText = currSym + Math.round(gSave).toLocaleString();
+            document.getElementById('tabInv').innerText = currSym + Math.round(gInv).toLocaleString();
+            document.getElementById('txtRoi').innerText = totalRoi>0 ? totalRoi.toFixed(1) + " " + T.unit_month : "---";
+            document.getElementById('visualBar').style.width = totalRoi>0 ? Math.min((totalRoi/24)*100,100) + '%' : '0%';
+            document.getElementById('sumCo2').innerText = gCo2.toFixed(1);
+            document.getElementById('sumTrees').innerText = Math.round(gCo2*40).toLocaleString();
 
-            document.getElementById('sumSave').innerText=currSym+Math.round(gSave).toLocaleString();
-            document.getElementById('tabInv').innerText=currSym+Math.round(gInv).toLocaleString();
-            document.getElementById('txtRoi').innerText=totalRoi>0?totalRoi.toFixed(1)+" "+T.unit_month:"---";
-            document.getElementById('visualBar').style.width=totalRoi>0?Math.min((totalRoi/24)*100,100)+'%':'0%';
-            document.getElementById('sumCo2').innerText=gCo2.toFixed(1);
-            document.getElementById('sumTrees').innerText=Math.round(gCo2*40).toLocaleString();
-            
-            // QR GÖRSELİNİ GÜNCELLE
+            // QR Code
             const qrImgEl = document.getElementById('repQrCode');
             if (userQrImg) {
                 qrImgEl.src = userQrImg;
@@ -1008,23 +1080,35 @@
                 qrImgEl.classList.add('opacity-20');
             }
 
-            const pt=document.getElementById('projTable');
-            pt.innerHTML='';
-            let rowL=`<tr class="border-b border-slate-200"><td class="p-2 text-left font-bold text-red-600">${T.rep_scen_loss}</td>`;
-            let tL=0;for(let y=1;y<=5;y++){
-                tL+=gLoss;
-                rowL+=`<td class="p-2 text-red-500">-${currSym}${Math.round(tL).toLocaleString()}</td>`;
+            // Finansal Projeksiyon Tablosu
+            const pt = document.getElementById('projTable');
+            pt.innerHTML = '';
+            let rowL = `<tr class="border-b border-slate-200"><td class="p-2 text-left font-bold text-red-600">${T.rep_scen_loss}</td>`;
+            let tL=0;
+            for(let y=1; y<=5; y++){
+                tL += gLoss;
+                rowL += `<td class="p-2 text-red-500">-${currSym}${Math.round(tL).toLocaleString()}</td>`;
             }
-            rowL+=`<td class="p-2 font-black text-red-700">-${currSym}${Math.round(tL).toLocaleString()}</td></tr>`;
+            rowL += `<td class="p-2 font-black text-red-700">-${currSym}${Math.round(tL).toLocaleString()}</td></tr>`;
             
-            let rowG=`<tr><td class="p-2 text-left font-bold text-green-600">${T.rep_scen_gain}</td>`;
-            let tG=-gInv;for(let y=1;y<=5;y++){tG+=gSave;rowG+=`<td class="p-2 ${tG>=0?'text-green-600':'text-red-400'}">${currSym}${Math.round(tG).toLocaleString()}</td>`;}
-            rowG+=`<td class="p-2 font-black ${tG>=0?'text-green-700':'text-red-700'}">${tG>0?'+':''}${currSym}${Math.round(tG).toLocaleString()}</td></tr>`;
-            pt.innerHTML=rowL+rowG;
-            
-            setTimeout(()=>{lucide.createIcons();window.print();},100);
+            let rowG = `<tr><td class="p-2 text-left font-bold text-green-600">${T.rep_scen_gain}</td>`;
+            let tG = -gInv;
+            for(let y=1; y<=5; y++){
+                tG += gSave;
+                rowG += `<td class="p-2 ${tG>=0?'text-green-600':'text-red-400'}">${currSym}${Math.round(tG).toLocaleString()}</td>`;
+            }
+            rowG += `<td class="p-2 font-black ${tG>=0?'text-green-700':'text-red-700'}">${tG>0?'+':''}${currSym}${Math.round(tG).toLocaleString()}</td></tr>`;
+            pt.innerHTML = rowL + rowG;
+
+            // İkonları yeniden oluştur ve Yazdır
+            setTimeout(()=>{
+                lucide.createIcons();
+                window.print();
+            }, 100);
+
         }catch(e){
-            alert('Report Error');console.log(e);
+            alert('Rapor oluşturulurken hata oluştu: ' + e.message);
+            console.error(e);
         }
     }
 </script>
