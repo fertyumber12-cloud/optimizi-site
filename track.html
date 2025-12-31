@@ -1,319 +1,261 @@
+
 <!doctype html>
 <html lang="tr">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-<title>Canlı Tasarruf | Optimizi</title>
+<title>Canlı Tasarruf Takibi | Optimizi</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> 
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
-<script>tailwind.config = { theme: { fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] } } }</script>
+<link rel="icon" href="favicon.png" type="image/png">
+
+<script>
+  tailwind.config = {
+    theme: {
+      fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] },
+      extend: {
+        animation: {
+          'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        }
+      }
+    }
+  }
+</script>
 <style>
   body { 
-      background-color: #0f172a; 
-      background-image: 
-          radial-gradient(at 0% 0%, rgba(34, 197, 94, 0.15) 0px, transparent 50%),
-          radial-gradient(at 100% 100%, rgba(30, 41, 59, 1) 0px, transparent 50%);
-      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow-x: hidden;
-      color: #f8fafc;
-  }
-  .grid-bg {
-      position: absolute; inset: 0; pointer-events: none; z-index: 0;
-      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-      background-size: 30px 30px;
-  }
-  .spotlight {
-      position: absolute; top: -20%; left: 50%; transform: translateX(-50%);
-      width: 120%; height: 60vh;
-      background: radial-gradient(circle, rgba(74, 222, 128, 0.2) 0%, rgba(34, 197, 94, 0) 60%);
-      filter: blur(40px); z-index: 1; pointer-events: none;
+      background-color: #f8fafc; 
+      background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+      background-size: 24px 24px;
+      color: #0f172a;
+      min-height: 100vh;
+      display: flex; 
+      flex-direction: column; 
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
   }
   .glass-card { 
-      background: rgba(255, 255, 255, 0.05); 
-      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.1); 
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); 
-      z-index: 10; 
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 20px 60px -10px rgba(0,0,0,0.1), 0 10px 20px -5px rgba(0,0,0,0.05);
   }
   .counter-text { font-variant-numeric: tabular-nums; }
-  .price-input {
-      background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2);
-      color: white; padding: 2px 6px; border-radius: 4px; width: 70px; text-align: center; font-family: monospace;
-  }
-  /* Modal Stili */
-  .modal-overlay { position: fixed; inset: 0; bg-black/80; backdrop-filter: blur(5px); z-index: 50; display: none; align-items: center; justify-content: center; }
 </style>
 </head>
-<body class="antialiased font-sans">
+<body class="antialiased font-sans p-4">
 
-<div class="grid-bg"></div>
-<div class="spotlight"></div>
-
-<div class="absolute top-4 right-4 z-50 flex gap-2">
-    <button onclick="showCurrentQR()" class="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white p-2 rounded-full transition shadow-lg group relative">
-        <i data-lucide="qr-code" class="w-5 h-5"></i>
-        <span class="absolute right-0 top-full mt-2 bg-black/80 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">Güncel QR</span>
-    </button>
+<main class="w-full max-w-md flex flex-col items-center justify-center">
     
-    <button onclick="shareLink()" class="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white p-2 rounded-full transition shadow-lg group relative">
-        <i data-lucide="share-2" class="w-5 h-5"></i>
-        <span class="absolute right-0 top-full mt-2 bg-black/80 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">Linki Kopyala</span>
-    </button>
-</div>
-
-<div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 bg-green-500 text-white text-xs font-bold px-4 py-2 rounded-full shadow-xl z-50 opacity-0 transition duration-300 pointer-events-none transform -translate-y-4">
-    Link Kopyalandı! 📋
-</div>
-
-<div id="qrModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex-col items-center justify-center p-4">
-    <div class="bg-white p-6 rounded-2xl max-w-sm w-full text-center relative animate-[fadeIn_0.3s]">
-        <button onclick="closeQR()" class="absolute top-2 right-2 text-slate-400 hover:text-red-500"><i data-lucide="x" class="w-6 h-6"></i></button>
-        
-        <h3 class="text-slate-800 font-bold text-lg mb-1">Güncel Etiket</h3>
-        <p class="text-slate-400 text-xs mb-4">Bu ayarları kalıcı yapmak için bu kodu kullanın.</p>
-        
-        <div id="qrcodeDisplay" class="flex justify-center mb-4 p-2 border rounded-lg bg-white"></div>
-        
-        <div class="text-[10px] bg-slate-100 p-2 rounded text-slate-500 font-mono break-all mb-4">
-            Ayarlı Fiyat: <span id="modalPrice" class="font-bold text-slate-800"></span> TL
+    <div class="mb-8 flex flex-col items-center animate-[fadeIn_0.5s_ease-out]">
+        <div class="flex items-center gap-2 mb-1">
+            <h1 class="text-2xl font-black text-slate-800 tracking-tight">
+                Optimizi<span class="text-green-600">.App</span>
+            </h1>
         </div>
-
-        <button onclick="closeQR()" class="bg-slate-900 text-white w-full py-3 rounded-xl font-bold text-sm">Kapat</button>
-    </div>
-</div>
-
-<main class="relative z-10 w-full max-w-md p-4 flex flex-col items-center justify-center min-h-[90vh]">
-    
-    <div class="mb-8 scale-100 flex flex-col items-center animate-[fadeIn_0.5s_ease-out]">
-        <h1 class="text-3xl font-black text-white tracking-tight">Optimizi<span class="text-green-400">.App</span></h1>
-        <p class="text-[10px] text-slate-400 uppercase font-bold tracking-[0.3em] mt-1">Energy Intelligence</p>
+        <p class="text-[10px] text-slate-400 uppercase font-bold tracking-[0.3em] text-center">Energy Intelligence</p>
     </div>
 
-    <div class="glass-card p-6 rounded-[2rem] w-full border-t-2 border-t-green-500/50">
+    <div class="glass-card p-6 md:p-8 rounded-[2rem] w-full relative overflow-hidden border-t-8 border-green-500 shadow-2xl">
         
         <div class="flex flex-col gap-4 mb-6">
             <div class="flex justify-between items-start">
-                <div class="flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-[10px] text-green-400 font-bold uppercase tracking-wider">
-                    <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> Canlı İzleme
+                <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 border border-green-200 text-[10px] text-green-700 font-bold uppercase tracking-wider">
+                    <span class="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse"></span> Canlı İzleme
                 </div>
-                <div class="text-[10px] text-slate-400 font-mono mt-1 opacity-50" id="prdSerial">ID: ---</div>
+                <div class="text-[10px] text-slate-400 font-mono mt-1" id="prdSerial">ID: ---</div>
             </div>
+
             <div class="text-left pl-1">
-                <div id="clientDisplay" class="text-sm font-extrabold text-white uppercase tracking-tight mb-1"></div>
-                <h2 class="text-lg font-bold text-slate-300 leading-tight" id="prdName">...</h2>
+                <div id="clientDisplay" class="text-sm font-extrabold text-slate-800 uppercase tracking-tight mb-1"></div>
+                <div class="text-[9px] text-slate-400 uppercase font-bold mb-0.5">Ürün / Konum</div>
+                <h2 class="text-lg font-bold text-slate-600 leading-tight" id="prdName">Yükleniyor...</h2>
             </div>
         </div>
         
-        <div class="text-center py-8 rounded-3xl bg-white/5 border border-white/10 mb-6 relative overflow-hidden group">
-            <div class="absolute inset-0 bg-green-500/5 group-hover:bg-green-500/10 transition duration-500"></div>
+        <div class="text-center py-8 rounded-3xl bg-gradient-to-b from-slate-50 to-white border border-slate-100 mb-6 shadow-inner relative group overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-green-400 to-transparent opacity-20"></div>
             
-            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 relative z-10">Toplam Kazanç</div>
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Toplam Kazandırılan Tutar</div>
             <div class="flex items-baseline justify-center gap-1 flex-wrap px-2 relative z-10">
-                <span id="liveMoney" class="font-black text-white counter-text tracking-tighter text-5xl drop-shadow-lg">0,00</span>
-                <span class="text-2xl font-bold text-green-400">₺</span>
+                <span id="liveMoney" class="font-black text-slate-800 counter-text tracking-tighter transition-all duration-300 text-5xl drop-shadow-sm">0,00</span>
+                <span class="text-2xl font-bold text-green-600">₺</span>
             </div>
-
-            <div class="mt-4 flex justify-center relative z-10">
-                <div onclick="toggleEdit()" class="cursor-pointer group/btn flex items-center gap-2 text-[10px] bg-black/20 hover:bg-black/40 border border-white/10 px-3 py-1.5 rounded-full transition">
-                    <i data-lucide="settings-2" class="w-3 h-3 text-slate-400 group-hover/btn:text-green-400"></i>
-                    <span class="text-slate-400">Birim Fiyat:</span>
-                    <span id="priceDisplay" class="font-bold text-green-400">...</span>
-                    <span class="text-slate-500">TL (Düzenle)</span>
-                </div>
-            </div>
-            
-            <div id="editContainer" class="hidden mt-2 flex items-center justify-center gap-2 animate-[fadeIn_0.2s]">
-                <input type="number" id="newPriceInput" class="price-input" step="0.01">
-                <button onclick="saveNewPrice()" class="bg-green-600 hover:bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded">Kaydet</button>
+            <div class="text-[9px] text-slate-400 mt-3 flex items-center justify-center gap-1">
+                <i data-lucide="check-circle" class="w-3 h-3 text-green-500"></i> Doğrulanmış Veri
             </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3 mb-6">
-            <div class="p-3 rounded-2xl bg-white/5 border border-white/5 text-center">
-                <div class="text-[10px] font-bold text-slate-500 uppercase mb-1"><i data-lucide="leaf" class="w-3 h-3 inline text-green-500 mr-1"></i>Karbon</div>
-                <div class="text-lg font-bold text-slate-200"><span id="liveCarbon">0</span> <span class="text-[9px] text-slate-500">Ton</span></div>
+            <div class="p-3 rounded-2xl bg-white/60 border border-slate-100 text-center shadow-sm backdrop-blur-sm">
+                <div class="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center justify-center gap-1.5">
+                    <i data-lucide="leaf" class="w-3.5 h-3.5 text-green-500"></i> Karbon
+                </div>
+                <div class="text-lg font-bold text-slate-800"><span id="liveCarbon" class="counter-text">0,00</span> <span class="text-[9px] text-slate-400">Ton</span></div>
+                <div class="text-[9px] text-green-700 mt-1 font-bold flex items-center justify-center gap-1 bg-green-100/50 rounded-full py-0.5 px-2 mx-auto w-fit">
+                    <i data-lucide="sprout" class="w-3 h-3"></i> <span id="liveTree">0 Ağaç</span>
+                </div>
             </div>
-            <div class="p-3 rounded-2xl bg-white/5 border border-white/5 text-center">
-                <div class="text-[10px] font-bold text-slate-500 uppercase mb-1"><i data-lucide="flame" class="w-3 h-3 inline text-orange-500 mr-1"></i>Yakıt</div>
-                <div class="text-lg font-bold text-slate-200"><span id="liveFuel">0</span> <span id="fuelUnit" class="text-[9px] text-slate-500">...</span></div>
+
+            <div class="p-3 rounded-2xl bg-white/60 border border-slate-100 text-center shadow-sm backdrop-blur-sm">
+                <div class="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center justify-center gap-1.5">
+                    <i data-lucide="flame" class="w-3.5 h-3.5 text-orange-500"></i> <span id="fuelLabel">Yakıt</span>
+                </div>
+                <div class="text-lg font-bold text-slate-800"><span id="liveFuel" class="counter-text">0,00</span> <span id="fuelUnit" class="text-[9px] text-slate-400">m³</span></div>
+                <div class="text-[9px] text-orange-700 mt-1 font-bold bg-orange-100/50 rounded-full py-0.5 px-2 mx-auto w-fit">Tasarruf</div>
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4 border-t border-white/10 pt-4 text-slate-400">
-            <div>
-                <div class="text-[10px] font-bold uppercase mb-1 flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3"></i> Montaj</div>
-                <div id="installDate" class="text-xs font-bold text-slate-200">...</div>
-                <div id="installTime" class="text-[10px] opacity-60">...</div>
+        <div class="grid grid-cols-2 gap-4 border-t border-slate-100 pt-5">
+            <div class="font-sans text-left">
+                <div class="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase mb-1">
+                    <i data-lucide="calendar" class="w-3 h-3 text-slate-400"></i> Montaj
+                </div>
+                <div id="installDate" class="text-xs text-slate-700 font-bold">...</div>
+                <div id="installTime" class="text-[10px] text-slate-400 font-medium">...</div>
             </div>
-            <div class="text-right">
-                <div class="text-[10px] font-bold uppercase mb-1 flex items-center justify-end gap-1">Süre <i data-lucide="clock" class="w-3 h-3"></i></div>
-                <div id="runTime" class="text-xs font-bold text-slate-200">...</div>
+            <div class="font-sans text-right">
+                <div class="flex items-center justify-end gap-1.5 text-[10px] text-slate-400 font-bold uppercase mb-1">
+                    Çalışma Süresi <i data-lucide="clock" class="w-3 h-3 text-slate-400"></i>
+                </div>
+                <div id="runTime" class="text-xs text-slate-700 font-bold">...</div>
             </div>
+        </div>
+
+    </div>
+    
+    <div class="mt-6 opacity-40 hover:opacity-100 transition duration-500">
+        <div class="flex items-center justify-center gap-2 text-[10px] text-slate-500 font-medium tracking-widest">
+            <i data-lucide="shield-check" class="w-3 h-3 text-green-600"></i> Verified by <span class="text-slate-700 font-bold">Optimizi</span>
         </div>
     </div>
 </main>
 
 <script>
     lucide.createIcons();
+    
     const params = new URLSearchParams(window.location.search);
-
-    const BASE_PRICES = {
-        gas: 18.5, elec: 4.5, lng: 22.0, fueloil: 25.0, coal_imp: 8.5, coal_loc: 4.5
-    };
-
+    const clientName = params.get('c') || "";
+    
+    // Konfigürasyon
     const config = {
-        client: decodeURIComponent(params.get('c') || ''),
+        name: decodeURIComponent(params.get('p') || 'Endüstriyel Yalıtım'), // Eski linkler için fallback
         sn: decodeURIComponent(params.get('s') || 'DEMO'),
-        start: params.get('d') || new Date().toISOString(),
-        saveTL: parseFloat(params.get('v')) || 0,
+        start: params.get('d') || new Date().toISOString(), // Tarih dizesi (YYYY-MM-DD-HH-MM)
+        save: parseFloat(params.get('v')) || 0, // Yıllık Toplam Para
         fuel: params.get('f') || 'gas',
-        urlBanked: parseFloat(params.get('b')), 
-        urlTime: parseFloat(params.get('t')),   
-        urlPrice: parseFloat(params.get('p'))   
+        client: decodeURIComponent(clientName)
     };
 
-    const fData = {
-        gas: { unit: 'm³', co2: 0.0019 }, elec: { unit: 'kWh', co2: 0.00045 }, lng: { unit: 'kg', co2: 0.0028 },
-        fueloil: { unit: 'kg', co2: 0.0031 }, coal_imp: { unit: 'kg', co2: 0.0025 }, coal_loc: { unit: 'kg', co2: 0.0015 }
-    }[config.fuel] || { unit: 'br', co2: 0 };
+    // Yakıt Katsayıları (Kömür sadeleştirildi)
+    const fuels = {
+        gas:       { unit: 'm³',  co2: 0.0019, label: 'Doğalgaz' },    
+        elec:      { unit: 'kWh', co2: 0.00045, label: 'Elektrik' },   
+        lng:       { unit: 'kg',  co2: 0.0028, label: 'LNG' },         
+        fueloil:   { unit: 'kg',  co2: 0.0031, label: 'Fuel Oil' },    
+        coal_imp:  { unit: 'kg',  co2: 0.0025, label: 'İthal Kömür' }, 
+        coal_loc:  { unit: 'kg',  co2: 0.0015, label: 'Yerli Kömür' }
+    };
 
-    // UI Doldur
+    const f = fuels[config.fuel] || fuels.gas;
+
+    // Arayüz Doldurma
+    document.getElementById('prdName').innerText = (config.client !== "" && !config.name.includes('İzolasyon')) ? "Yalıtım Uygulaması" : config.name;
     document.getElementById('prdSerial').innerText = `ID: ${config.sn}`;
-    document.getElementById('clientDisplay').innerText = config.client || 'Yalıtım Projesi';
-    document.getElementById('fuelUnit').innerText = fData.unit;
-    document.getElementById('prdName').innerText = (config.client ? "Enerji Takip Sistemi" : "Endüstriyel Yalıtım");
-
-    const p = config.start.split('-');
-    const initialInstallTime = new Date(p[0], p[1]-1, p[2], p[3]||0, p[4]||0).getTime();
-    document.getElementById('installDate').innerText = new Date(initialInstallTime).toLocaleDateString('tr-TR');
-    document.getElementById('installTime').innerText = `Saat: ${String(p[3]||0).padStart(2,'0')}:${String(p[4]||0).padStart(2,'0')}`;
-
-    // --- BANKING SYSTEM ---
-    const basePrice = BASE_PRICES[config.fuel] || 1.0;
-    const impliedQuantity = config.saveTL / basePrice; 
-
-    const keyPrice = `opt_price_${config.sn}`;
-    const keyBanked = `opt_banked_${config.sn}`;
-    const keyLastDate = `opt_lastdate_${config.sn}`;
-
-    let currentPrice, bankedMoney, lastChangeTime;
-
-    // URL varsa oradan al, yoksa LocalStorage, yoksa Default
-    if (!isNaN(config.urlPrice) && !isNaN(config.urlBanked)) {
-        currentPrice = config.urlPrice;
-        bankedMoney = config.urlBanked;
-        lastChangeTime = config.urlTime || initialInstallTime;
-        localStorage.setItem(keyPrice, currentPrice);
-        localStorage.setItem(keyBanked, bankedMoney);
-        localStorage.setItem(keyLastDate, lastChangeTime);
+    document.getElementById('fuelUnit').innerText = f.unit;
+    document.getElementById('fuelLabel').innerText = f.label;
+    
+    const clientEl = document.getElementById('clientDisplay');
+    if (config.client && config.client !== "") {
+        clientEl.innerText = config.client;
+        document.getElementById('prdName').innerText = "Yalıtım Projesi";
     } else {
-        currentPrice = parseFloat(localStorage.getItem(keyPrice)) || basePrice;
-        bankedMoney = parseFloat(localStorage.getItem(keyBanked)) || 0;
-        lastChangeTime = parseFloat(localStorage.getItem(keyLastDate)) || initialInstallTime;
+        clientEl.style.display = 'none';
+        document.getElementById('prdName').innerText = "Endüstriyel Yalıtım";
+    }
+    
+    // --- TARİH VE SAAT PARSE İŞLEMİ (CRITICAL FIX) ---
+    // Gelen Format: YYYY-MM-DD-HH-MM (Örn: 2025-10-27-14-30)
+    // Eski Format: YYYY-MM-DD (Örn: 2025-10-27)
+    
+    const p = config.start.split('-');
+    
+    let year = parseInt(p[0]);
+    let month = parseInt(p[1]) - 1; // JS'de aylar 0'dan başlar
+    let day = parseInt(p[2]);
+    let hour = 0;
+    let minute = 0;
+
+    // Eğer saat ve dakika bilgisi varsa (Generator 2.0 linki ise)
+    if (p.length > 3) {
+        hour = parseInt(p[3]);
+        minute = parseInt(p[4]);
     }
 
-    let currentTotalMoney = 0; 
+    const startDate = new Date(year, month, day, hour, minute, 0).getTime();
+    
+    // Tarihi Ekrana Bas
+    document.getElementById('installDate').innerText = new Date(startDate).toLocaleDateString('tr-TR', {day:'2-digit', month:'long', year:'numeric'});
+    // Saati Ekrana Bas (Eğer varsa)
+    document.getElementById('installTime').innerText = `Saat: ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+
+    // Yıllık kazancı milisaniyelik kazanca çevir
+    // 1 Yıl = 31,536,000,000 milisaniye
+    const savePerMs = config.save / 31536000000;
 
     function updateCounter() {
-        document.getElementById('priceDisplay').innerText = currentPrice.toFixed(2);
         const now = new Date().getTime();
-        const diffSinceLastChange = now - lastChangeTime;
-        const totalDiff = now - initialInstallTime;
+        const diff = now - startDate;
 
-        if (diffSinceLastChange > 0) {
-            const newYearlySave = impliedQuantity * currentPrice;
-            const newSavePerMs = newYearlySave / 31536000000;
-            const moneySinceChange = diffSinceLastChange * newSavePerMs;
-            currentTotalMoney = bankedMoney + moneySinceChange;
+        if (diff > 0) {
+            const money = diff * savePerMs;
             
-            const totalFuelAmount = (impliedQuantity / 31536000000) * totalDiff;
+            // Yakıt miktarını bulmak için yaklaşık birim fiyata bölüyoruz (Görsel amaçlı)
+            // Not: Generator'da birim fiyatı kaldırdığımız için, burada ortalama bir piyasa değeri varsayabiliriz 
+            // ya da sadece parayı gösterip yakıt miktarını oranlayabiliriz.
+            // Basitlik için: Doğalgazın m3'ü 18TL gibi bir varsayımla geriye dönük miktar hesaplayalım.
+            // Bu sadece "kaç m3" göstergesi için, parayı etkilemez.
+            let estimatedPrice = 18.0; 
+            if(config.fuel === 'elec') estimatedPrice = 4.0;
+            if(config.fuel === 'coal_imp') estimatedPrice = 8.0;
+            
+            const fuelAmount = money / estimatedPrice;
+            const co2Ton = fuelAmount * f.co2;
+            const trees = co2Ton / 0.025; // 1 ağaç 25kg CO2 emer varsayımı
 
-            document.getElementById('liveMoney').innerText = currentTotalMoney.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            document.getElementById('liveFuel').innerText = totalFuelAmount.toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-            document.getElementById('liveCarbon').innerText = (totalFuelAmount * fData.co2).toLocaleString('tr-TR', { minimumFractionDigits: 3 });
+            const moneyStr = money.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const moneyEl = document.getElementById('liveMoney');
+            moneyEl.innerText = moneyStr;
 
-            const d = Math.floor(totalDiff/86400000);
-            const h = Math.floor((totalDiff/3600000)%24);
-            document.getElementById('runTime').innerText = d>0 ? `${d} Gün ${h} Sa` : `${h} Sa ${Math.floor((totalDiff/60000)%60)} Dk`;
+            // Yazı Boyutu Dinamik Ayar
+            const len = moneyStr.length;
+            if(len > 13) moneyEl.style.fontSize = "1.875rem";
+            else if (len > 10) moneyEl.style.fontSize = "2.25rem";
+            else moneyEl.style.fontSize = "3rem";
+
+            document.getElementById('liveFuel').innerText = fuelAmount.toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+            document.getElementById('liveCarbon').innerText = co2Ton.toLocaleString('tr-TR', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+            document.getElementById('liveTree').innerText = `${Math.floor(trees)} Ağaç`;
+
+            const d = Math.floor(diff/86400000);
+            const h = Math.floor((diff/3600000)%24);
+            const m = Math.floor((diff/60000)%60);
+            const s = Math.floor((diff/1000)%60);
+            
+            let timeStr = "";
+            if(d > 0) timeStr = `${d} Gün ${h} Saat`;
+            else timeStr = `${h} Saat ${m} Dk`;
+            
+            document.getElementById('runTime').innerHTML = `${timeStr} <span class="opacity-50 text-[10px] font-mono">:${s}</span>`;
+        } else {
+            document.getElementById('runTime').innerText = "Bekleniyor...";
+            document.getElementById('liveMoney').innerText = "0,00";
         }
+        
         requestAnimationFrame(updateCounter);
-    }
-
-    function toggleEdit() {
-        const el = document.getElementById('editContainer');
-        const inp = document.getElementById('newPriceInput');
-        if(el.classList.contains('hidden')) {
-            el.classList.remove('hidden');
-            inp.value = currentPrice;
-            inp.focus();
-        } else { el.classList.add('hidden'); }
-    }
-
-    function saveNewPrice() {
-        const newPrice = parseFloat(document.getElementById('newPriceInput').value);
-        if(newPrice > 0 && newPrice !== currentPrice) {
-            bankedMoney = currentTotalMoney;
-            lastChangeTime = new Date().getTime();
-            currentPrice = newPrice;
-
-            localStorage.setItem(keyBanked, bankedMoney);
-            localStorage.setItem(keyLastDate, lastChangeTime);
-            localStorage.setItem(keyPrice, currentPrice);
-
-            toggleEdit();
-            updateURL(); 
-        }
-    }
-
-    function updateURL() {
-        const url = new URL(window.location);
-        url.searchParams.set('p', currentPrice);
-        url.searchParams.set('b', bankedMoney.toFixed(2));
-        url.searchParams.set('t', lastChangeTime);
-        window.history.replaceState({}, '', url);
-    }
-
-    function shareLink() {
-        updateURL();
-        navigator.clipboard.writeText(window.location.href).then(() => {
-            const toast = document.getElementById('toast');
-            toast.classList.remove('opacity-0', '-translate-y-4');
-            setTimeout(() => { toast.classList.add('opacity-0', '-translate-y-4'); }, 2000);
-        });
-    }
-
-    // --- QR MODAL FONKSİYONLARI ---
-    function showCurrentQR() {
-        updateURL(); // URL'in güncel olduğundan emin ol
-        
-        const modal = document.getElementById('qrModal');
-        const qrContainer = document.getElementById('qrcodeDisplay');
-        const priceText = document.getElementById('modalPrice');
-        
-        qrContainer.innerHTML = ''; // Öncekini temizle
-        priceText.innerText = currentPrice.toFixed(2);
-        
-        // Yeni QR Oluştur
-        new QRCode(qrContainer, {
-            text: window.location.href, // ŞU ANKİ GÜNCEL LİNK
-            width: 200,
-            height: 200,
-            colorDark : "#0f172a",
-            colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.H
-        });
-        
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
-
-    function closeQR() {
-        const modal = document.getElementById('qrModal');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
     }
 
     updateCounter();
