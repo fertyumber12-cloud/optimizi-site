@@ -7,6 +7,7 @@
 <meta name="robots" content="noindex">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> 
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
 <script>tailwind.config = { theme: { fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] } } }</script>
 <style>
@@ -15,7 +16,7 @@
       background-image: 
           radial-gradient(at 0% 0%, rgba(34, 197, 94, 0.15) 0px, transparent 50%),
           radial-gradient(at 100% 100%, rgba(30, 41, 59, 1) 0px, transparent 50%);
-      height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow-x: hidden;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow-x: hidden;
       color: #f8fafc;
   }
   .grid-bg {
@@ -42,6 +43,8 @@
       background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2);
       color: white; padding: 2px 6px; border-radius: 4px; width: 70px; text-align: center; font-family: monospace;
   }
+  /* Modal Stili */
+  .modal-overlay { position: fixed; inset: 0; bg-black/80; backdrop-filter: blur(5px); z-index: 50; display: none; align-items: center; justify-content: center; }
 </style>
 </head>
 <body class="antialiased font-sans">
@@ -49,13 +52,37 @@
 <div class="grid-bg"></div>
 <div class="spotlight"></div>
 
-<button onclick="shareLink()" class="absolute top-4 right-4 z-50 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white p-2 rounded-full transition shadow-lg group">
-    <i data-lucide="share-2" class="w-5 h-5"></i>
-    <span class="absolute right-full mr-2 bg-black/80 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">Güncel Linki Kopyala</span>
-</button>
+<div class="absolute top-4 right-4 z-50 flex gap-2">
+    <button onclick="showCurrentQR()" class="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white p-2 rounded-full transition shadow-lg group relative">
+        <i data-lucide="qr-code" class="w-5 h-5"></i>
+        <span class="absolute right-0 top-full mt-2 bg-black/80 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">Güncel QR</span>
+    </button>
+    
+    <button onclick="shareLink()" class="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white p-2 rounded-full transition shadow-lg group relative">
+        <i data-lucide="share-2" class="w-5 h-5"></i>
+        <span class="absolute right-0 top-full mt-2 bg-black/80 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">Linki Kopyala</span>
+    </button>
+</div>
 
-<div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 bg-green-500 text-white text-xs font-bold px-4 py-2 rounded-full shadow-xl z-50 opacity-0 transition duration-300 pointer-events-none transform -translate-y-4">
+<div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 bg-green-500 text-white text-xs font-bold px-4 py-2 rounded-full shadow-xl z-50 opacity-0 transition duration-300 pointer-events-none transform -translate-y-4">
     Link Kopyalandı! 📋
+</div>
+
+<div id="qrModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex-col items-center justify-center p-4">
+    <div class="bg-white p-6 rounded-2xl max-w-sm w-full text-center relative animate-[fadeIn_0.3s]">
+        <button onclick="closeQR()" class="absolute top-2 right-2 text-slate-400 hover:text-red-500"><i data-lucide="x" class="w-6 h-6"></i></button>
+        
+        <h3 class="text-slate-800 font-bold text-lg mb-1">Güncel Etiket</h3>
+        <p class="text-slate-400 text-xs mb-4">Bu ayarları kalıcı yapmak için bu kodu kullanın.</p>
+        
+        <div id="qrcodeDisplay" class="flex justify-center mb-4 p-2 border rounded-lg bg-white"></div>
+        
+        <div class="text-[10px] bg-slate-100 p-2 rounded text-slate-500 font-mono break-all mb-4">
+            Ayarlı Fiyat: <span id="modalPrice" class="font-bold text-slate-800"></span> TL
+        </div>
+
+        <button onclick="closeQR()" class="bg-slate-900 text-white w-full py-3 rounded-xl font-bold text-sm">Kapat</button>
+    </div>
 </div>
 
 <main class="relative z-10 w-full max-w-md p-4 flex flex-col items-center justify-center min-h-[90vh]">
@@ -143,10 +170,9 @@
         start: params.get('d') || new Date().toISOString(),
         saveTL: parseFloat(params.get('v')) || 0,
         fuel: params.get('f') || 'gas',
-        // URL'den gelen "State" parametreleri (Paylaşılan linkler için)
-        urlBanked: parseFloat(params.get('b')), // URL'de kayıtlı geçmiş para
-        urlTime: parseFloat(params.get('t')),   // URL'de kayıtlı son değişim zamanı
-        urlPrice: parseFloat(params.get('p'))   // URL'de kayıtlı güncel fiyat
+        urlBanked: parseFloat(params.get('b')), 
+        urlTime: parseFloat(params.get('t')),   
+        urlPrice: parseFloat(params.get('p'))   
     };
 
     const fData = {
@@ -165,7 +191,7 @@
     document.getElementById('installDate').innerText = new Date(initialInstallTime).toLocaleDateString('tr-TR');
     document.getElementById('installTime').innerText = `Saat: ${String(p[3]||0).padStart(2,'0')}:${String(p[4]||0).padStart(2,'0')}`;
 
-    // --- BANKING SYSTEM (URL + LOCALSTORAGE ÖNCELİKLİ) ---
+    // --- BANKING SYSTEM ---
     const basePrice = BASE_PRICES[config.fuel] || 1.0;
     const impliedQuantity = config.saveTL / basePrice; 
 
@@ -173,25 +199,17 @@
     const keyBanked = `opt_banked_${config.sn}`;
     const keyLastDate = `opt_lastdate_${config.sn}`;
 
-    // ÖNCELİK SIRASI:
-    // 1. URL Parametreleri (Paylaşılan Link) - En güçlüsü
-    // 2. LocalStorage (Kullanıcının kendi cihazı)
-    // 3. Varsayılan (İlk QR)
-
     let currentPrice, bankedMoney, lastChangeTime;
 
+    // URL varsa oradan al, yoksa LocalStorage, yoksa Default
     if (!isNaN(config.urlPrice) && !isNaN(config.urlBanked)) {
-        // Eğer linkte veri varsa, LocalStorage'ı EZER ve bunu kullanırız.
         currentPrice = config.urlPrice;
         bankedMoney = config.urlBanked;
         lastChangeTime = config.urlTime || initialInstallTime;
-        
-        // Bu paylaşılan veriyi hafızaya da alalım ki yenileyince gitmesin
         localStorage.setItem(keyPrice, currentPrice);
         localStorage.setItem(keyBanked, bankedMoney);
         localStorage.setItem(keyLastDate, lastChangeTime);
     } else {
-        // Link boşsa hafızaya bak
         currentPrice = parseFloat(localStorage.getItem(keyPrice)) || basePrice;
         bankedMoney = parseFloat(localStorage.getItem(keyBanked)) || 0;
         lastChangeTime = parseFloat(localStorage.getItem(keyLastDate)) || initialInstallTime;
@@ -246,35 +264,56 @@
             localStorage.setItem(keyPrice, currentPrice);
 
             toggleEdit();
-            updateURL(); // URL'i güncelle
+            updateURL(); 
         }
     }
 
-    // --- SİHİRLİ KISIM: URL GÜNCELLEME ---
     function updateURL() {
-        // Mevcut URL parametrelerini al
         const url = new URL(window.location);
-        
-        // Yeni durum verilerini ekle
         url.searchParams.set('p', currentPrice);
         url.searchParams.set('b', bankedMoney.toFixed(2));
         url.searchParams.set('t', lastChangeTime);
-
-        // Tarayıcı adres çubuğunu yenilemeden güncelle (Sessizce)
         window.history.replaceState({}, '', url);
     }
 
     function shareLink() {
-        updateURL(); // Garantilemek için güncelle
-        const fullLink = window.location.href;
-        
-        navigator.clipboard.writeText(fullLink).then(() => {
+        updateURL();
+        navigator.clipboard.writeText(window.location.href).then(() => {
             const toast = document.getElementById('toast');
             toast.classList.remove('opacity-0', '-translate-y-4');
-            setTimeout(() => {
-                toast.classList.add('opacity-0', '-translate-y-4');
-            }, 2000);
+            setTimeout(() => { toast.classList.add('opacity-0', '-translate-y-4'); }, 2000);
         });
+    }
+
+    // --- QR MODAL FONKSİYONLARI ---
+    function showCurrentQR() {
+        updateURL(); // URL'in güncel olduğundan emin ol
+        
+        const modal = document.getElementById('qrModal');
+        const qrContainer = document.getElementById('qrcodeDisplay');
+        const priceText = document.getElementById('modalPrice');
+        
+        qrContainer.innerHTML = ''; // Öncekini temizle
+        priceText.innerText = currentPrice.toFixed(2);
+        
+        // Yeni QR Oluştur
+        new QRCode(qrContainer, {
+            text: window.location.href, // ŞU ANKİ GÜNCEL LİNK
+            width: 200,
+            height: 200,
+            colorDark : "#0f172a",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+        
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeQR() {
+        const modal = document.getElementById('qrModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
     }
 
     updateCounter();
