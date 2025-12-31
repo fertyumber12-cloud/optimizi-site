@@ -3,175 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Oluşturucu | Optimizi</title>
+    <title>Optimizi Generator | Final</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <script>
-      tailwind.config = {
-        theme: {
-          fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
-          extend: {}
-        }
-      }
-    </script>
+    <script>tailwind.config = { theme: { fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] } } }</script>
     <style>
-        body { 
-            background-color: #f8fafc; 
-            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
-            background-size: 24px 24px;
-        }
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 20px 40px -5px rgba(0,0,0,0.1);
-        }
+        body { background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 24px 24px; }
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 20px 40px -5px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 text-slate-800">
 
-    <div class="glass-panel w-full max-w-lg rounded-3xl p-8 relative overflow-hidden border-t-8 border-green-500">
+    <div class="glass-panel w-full max-w-lg rounded-3xl p-8 relative overflow-hidden border-t-8 border-green-600">
         
-        <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center justify-between mb-6">
             <div>
-                <h1 class="text-2xl font-black tracking-tight text-slate-900">Optimizi<span class="text-green-600">.Generator</span></h1>
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Yalıtım Takip Sistemi</p>
+                <h1 class="text-2xl font-black tracking-tight text-slate-900">Optimizi<span class="text-green-600">.Gen</span></h1>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Sabit Karekod Sistemi</p>
             </div>
-            <div class="bg-green-50 p-3 rounded-2xl">
-                <i data-lucide="qr-code" class="w-6 h-6 text-green-600"></i>
-            </div>
+            <div class="bg-green-50 p-3 rounded-2xl"><i data-lucide="qr-code" class="w-6 h-6 text-green-600"></i></div>
         </div>
 
-        <div class="space-y-5">
-            
-            <div class="grid grid-cols-2 gap-4">
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Müşteri Adı</label>
-                    <input type="text" id="client" placeholder="Örn: ABC Tekstil" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition shadow-sm">
-                </div>
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Cihaz / Seri No</label>
-                    <input type="text" id="serial" value="PRJ-2025-001" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition shadow-sm">
-                </div>
+        <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-3">
+                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Müşteri</label><input type="text" id="client" placeholder="ABC Tekstil" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:border-green-500 transition"></div>
+                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Seri No</label><input type="text" id="serial" value="PRJ-001" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:border-green-500 transition"></div>
             </div>
 
-            <div class="bg-white p-4 rounded-2xl border border-green-100 shadow-sm relative group">
-                <label class="text-[10px] font-bold text-green-600 uppercase tracking-wider mb-2 block flex items-center gap-1">
-                    <i data-lucide="wallet" class="w-3 h-3"></i> Toplam Yıllık Kazanç
-                </label>
+            <div class="bg-white p-4 rounded-2xl border border-green-100 shadow-sm">
+                <label class="text-[10px] font-bold text-green-600 uppercase flex items-center gap-1 mb-1"><i data-lucide="wallet" class="w-3 h-3"></i> Toplam Yıllık Kazanç</label>
                 <div class="relative">
-                    <input type="text" id="totalValue" placeholder="Örn: 687.750" class="w-full text-3xl font-black text-slate-800 bg-transparent border-none focus:ring-0 p-0 placeholder-slate-200">
-                    <span class="absolute right-0 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">TL / Yıl</span>
-                </div>
-                <p class="text-[9px] text-slate-400 mt-2 font-medium">Nokta (.) kullanabilirsiniz, sistem otomatik düzeltir.</p>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Yakıt Tipi</label>
-                    <div class="relative">
-                        <select id="fuel" class="w-full appearance-none bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm">
-                            <option value="gas">Doğalgaz (m³)</option>
-                            <option value="elec">Elektrik (kWh)</option>
-                            <option value="lng">LNG (kg)</option>
-                            <option value="fueloil">Fuel Oil (kg)</option>
-                            <option value="coal_imp">İthal Kömür (kg)</option>
-                            <option value="coal_loc">Yerli Kömür (kg)</option>
-                        </select>
-                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3 top-3 pointer-events-none"></i>
-                    </div>
-                </div>
-                
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Montaj Tarihi / Saati</label>
-                    <div class="flex gap-2">
-                        <input type="date" id="installDate" class="w-2/3 bg-white border border-slate-200 rounded-xl px-2 py-2.5 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm">
-                        <input type="time" id="installTime" class="w-1/3 bg-white border border-slate-200 rounded-xl px-1 py-2.5 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm text-center">
-                    </div>
+                    <input type="text" id="totalValue" placeholder="Örn: 687.750" class="w-full text-2xl font-black text-slate-800 bg-transparent border-none p-0 outline-none placeholder-slate-200">
+                    <span class="absolute right-0 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">TL / Yıl</span>
                 </div>
             </div>
 
-            <button onclick="generateQR()" class="w-full bg-slate-900 hover:bg-slate-800 text-white p-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition transform active:scale-[0.98] flex items-center justify-center gap-2 mt-4">
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-white p-3 rounded-xl border border-slate-200">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Birim Fiyat</label>
+                    <input type="number" id="unitPrice" placeholder="18.5" step="0.01" class="w-full font-bold text-slate-700 outline-none border-none p-0 bg-transparent">
+                </div>
+                <div class="bg-white p-3 rounded-xl border border-slate-200">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Çalışma Saati</label>
+                    <input type="number" id="workHours" value="5000" class="w-full font-bold text-slate-700 outline-none border-none p-0 bg-transparent">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Yakıt Tipi</label>
+                    <select id="fuel" class="w-full bg-white border border-slate-200 rounded-xl px-2 py-2 text-sm font-bold text-slate-700 outline-none">
+                        <option value="gas">Doğalgaz (m³)</option>
+                        <option value="elec">Elektrik (kWh)</option>
+                        <option value="lng">LNG (kg)</option>
+                        <option value="fueloil">Fuel Oil (kg)</option>
+                        <option value="coal_imp">İthal Kömür (kg)</option>
+                        <option value="coal_loc">Yerli Kömür (kg)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Montaj Tarihi</label>
+                    <input type="date" id="installDate" class="w-full bg-white border border-slate-200 rounded-xl px-2 py-2 text-sm font-bold text-slate-700 outline-none">
+                </div>
+            </div>
+            
+            <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase">Montaj Saati</label>
+                <input type="time" id="installTime" class="w-full bg-white border border-slate-200 rounded-xl px-2 py-2 text-sm font-bold text-slate-700 outline-none text-center">
+            </div>
+
+            <button onclick="generateQR()" class="w-full bg-slate-900 hover:bg-slate-800 text-white p-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition transform active:scale-[0.98] flex items-center justify-center gap-2">
                 <i data-lucide="qr-code"></i> Karekod Oluştur
             </button>
         </div>
 
-        <div id="resultCard" class="hidden mt-6 pt-6 border-t border-slate-200 animate-[fadeIn_0.5s_ease-out]">
-            <div class="bg-white p-6 rounded-2xl shadow-inner border border-slate-100 flex flex-col items-center text-center">
-                <div class="bg-white p-2 rounded-lg shadow-sm border border-slate-100 mb-4">
-                    <div id="qrcode"></div>
-                </div>
-                
-                <p class="text-xs font-bold text-slate-400 uppercase mb-1">Oluşturulan Link</p>
-                <code id="linkText" class="text-[10px] bg-slate-100 p-2 rounded w-full break-all text-slate-600 font-mono mb-4 block">...</code>
-                
-                <a id="downloadBtn" download="optimizi-qr.png" href="#" class="inline-flex items-center gap-2 text-xs font-bold text-green-600 bg-green-50 px-4 py-2 rounded-full hover:bg-green-100 transition">
-                    <i data-lucide="download" class="w-3 h-3"></i> Resmi İndir
-                </a>
-            </div>
+        <div id="resultCard" class="hidden mt-6 pt-6 border-t border-slate-200 text-center bg-white p-4 rounded-xl">
+            <div id="qrcode" class="flex justify-center mb-4"></div>
+            <code id="linkText" class="text-[9px] bg-slate-100 p-2 rounded block mb-2 break-all font-mono text-slate-500">...</code>
+            <a id="downloadBtn" download="optimizi.png" href="#" class="inline-flex items-center gap-2 text-xs font-bold text-green-600 bg-green-50 px-4 py-2 rounded-full hover:bg-green-100 transition">Resmi İndir</a>
         </div>
-
     </div>
 
     <script>
         lucide.createIcons();
-        
-        // Varsayılan Tarih: Bugün, Varsayılan Saat: Şu anki saat
         const now = new Date();
         document.getElementById('installDate').valueAsDate = now;
-        
-        // Saati HH:MM formatına çevir (örn: 09:30)
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        document.getElementById('installTime').value = `${hours}:${minutes}`;
+        // Saati varsayılan olarak şu anki saat yap
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mm = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('installTime').value = `${hh}:${mm}`;
 
         function generateQR() {
             const client = document.getElementById('client').value.trim();
             const serial = document.getElementById('serial').value.trim();
-            let rawValue = document.getElementById('totalValue').value;
+            let rawVal = document.getElementById('totalValue').value;
+            const uPrice = document.getElementById('unitPrice').value;
+            const wHours = document.getElementById('workHours').value;
             const fuel = document.getElementById('fuel').value;
-            const dateInput = document.getElementById('installDate').value;
-            const timeInput = document.getElementById('installTime').value; // Örn: 14:30
+            
+            // SAAT BİLGİSİNİ BURADA LİNKE EKLEMEMİZ LAZIM:
+            const dateStr = document.getElementById('installDate').value; 
+            const timeStr = document.getElementById('installTime').value; // Örn: 14:30
+            const fullDateTime = `${dateStr}-${timeStr.replace(':', '-')}`; // Sonuç: 2025-10-27-14-30
 
-            // Para formatı temizleme
-            rawValue = rawValue.replace(/\./g, '').replace(',', '.');
-            const totalVal = parseFloat(rawValue);
+            rawVal = rawVal.replace(/\./g, '').replace(',', '.');
+            const totalVal = parseFloat(rawVal);
 
-            if(!totalVal || isNaN(totalVal)) {
-                alert("Lütfen geçerli bir tutar giriniz.");
-                return;
-            }
+            if(!totalVal || !uPrice) { alert("Lütfen tutar ve birim fiyatı giriniz."); return; }
 
-            // URL Parametrelerini Oluştur
-            // Tarih formatını YYYY-MM-DD-HH-MM şeklinde birleştiriyoruz
-            // Track sayfası bu formatı "-" ile parçalayıp okuyabilir.
-            const fullDateTime = `${dateInput}-${timeInput.replace(':', '-')}`;
-
+            // Linke 'd' parametresi olarak tam tarihi ekliyoruz
             const baseUrl = "https://optimizi.app/track.html";
-            const finalUrl = `${baseUrl}?c=${encodeURIComponent(client)}&s=${encodeURIComponent(serial)}&v=${totalVal}&f=${fuel}&d=${fullDateTime}`;
+            const finalUrl = `${baseUrl}?c=${encodeURIComponent(client)}&s=${encodeURIComponent(serial)}&v=${totalVal}&up=${uPrice}&wh=${wHours}&f=${fuel}&d=${fullDateTime}`;
 
             const qrContainer = document.getElementById('qrcode');
             qrContainer.innerHTML = '';
-            
-            new QRCode(qrContainer, {
-                text: finalUrl,
-                width: 160,
-                height: 160,
-                colorDark : "#0f172a",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H
-            });
+            new QRCode(qrContainer, { text: finalUrl, width: 160, height: 160, colorDark : "#0f172a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
 
             document.getElementById('linkText').innerText = finalUrl;
             document.getElementById('resultCard').classList.remove('hidden');
-            
-            setTimeout(() => {
-                const img = qrContainer.querySelector("img");
-                if(img) document.getElementById('downloadBtn').href = img.src;
-            }, 300);
+            setTimeout(() => { document.getElementById('downloadBtn').href = qrContainer.querySelector("img").src; }, 300);
         }
     </script>
 </body>
