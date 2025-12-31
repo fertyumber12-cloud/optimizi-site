@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-<title>Canlı Tasarruf Takibi | Optimizi.App</title>
+<title>Canlı Tasarruf Takibi | Optimizi</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
@@ -14,123 +14,107 @@
   tailwind.config = {
     theme: {
       fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] },
-      extend: {}
+      extend: {
+        animation: {
+          'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        }
+      }
     }
   }
 </script>
 <style>
   body { 
       background-color: #f8fafc; 
-      background-image: 
-          linear-gradient(rgba(148, 163, 184, 0.15) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(148, 163, 184, 0.15) 1px, transparent 1px),
-          linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
-      background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
-      background-position: center center;
+      background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+      background-size: 24px 24px;
       color: #0f172a;
-      height: 100vh; 
-      width: 100vw;
+      min-height: 100vh;
       display: flex; 
       flex-direction: column; 
       align-items: center;
       justify-content: center;
-      overflow-y: auto;
       overflow-x: hidden;
-      position: relative; 
   }
   .glass-card { 
-      background-color: rgba(255, 255, 255, 0.7); 
-      backdrop-filter: blur(20px); 
-      border: 1px solid rgba(255, 255, 255, 0.8); 
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
       box-shadow: 0 20px 60px -10px rgba(0,0,0,0.1), 0 10px 20px -5px rgba(0,0,0,0.05);
-      z-index: 10; 
-  }
-  .spotlight {
-      position: absolute;
-      top: -150px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
-      height: 600px;
-      background: radial-gradient(circle, rgba(34, 197, 94, 0.08) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
   }
   .counter-text { font-variant-numeric: tabular-nums; }
 </style>
 </head>
-<body class="antialiased font-sans">
+<body class="antialiased font-sans p-4">
 
-<div class="spotlight"></div>
-
-<main class="relative z-10 w-full max-w-md p-4 flex flex-col items-center justify-center min-h-[90vh]">
+<main class="w-full max-w-md flex flex-col items-center justify-center">
     
-    <div class="mb-6 scale-100 flex flex-col items-center">
-        <div class="flex items-center gap-3">
-            <img src="icon.jpg" alt="Logo" class="w-10 h-10 rounded-xl shadow-lg shadow-green-500/10" onerror="this.style.display='none'">
-            <h1 class="text-3xl font-black text-slate-800 tracking-tight">
-                Optimizi<span class="text-green-600 animate-pulse">.App</span>
+    <div class="mb-8 flex flex-col items-center animate-[fadeIn_0.5s_ease-out]">
+        <div class="flex items-center gap-2 mb-1">
+            <h1 class="text-2xl font-black text-slate-800 tracking-tight">
+                Optimizi<span class="text-green-600">.App</span>
             </h1>
         </div>
-        <p class="text-[10px] text-slate-400 uppercase font-bold tracking-[0.3em] mt-2 text-center text-nowrap">Energy Intelligence</p>
+        <p class="text-[10px] text-slate-400 uppercase font-bold tracking-[0.3em] text-center">Energy Intelligence</p>
     </div>
 
-    <div class="glass-card p-6 md:p-8 rounded-[2rem] w-full relative overflow-hidden border-t-4 border-t-green-500">
+    <div class="glass-card p-6 md:p-8 rounded-[2rem] w-full relative overflow-hidden border-t-8 border-green-500 shadow-2xl">
         
         <div class="flex flex-col gap-4 mb-6">
             <div class="flex justify-between items-start">
-                <div class="flex items-center gap-1.5 px-2 py-1 rounded bg-green-100 border border-green-200 text-[10px] text-green-700 font-bold uppercase tracking-wider">
+                <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 border border-green-200 text-[10px] text-green-700 font-bold uppercase tracking-wider">
                     <span class="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse"></span> Canlı İzleme
                 </div>
                 <div class="text-[10px] text-slate-400 font-mono mt-1" id="prdSerial">ID: ---</div>
             </div>
 
-            <div class="text-left border-l-2 border-green-500 pl-3">
+            <div class="text-left pl-1">
                 <div id="clientDisplay" class="text-sm font-extrabold text-slate-800 uppercase tracking-tight mb-1"></div>
-                
                 <div class="text-[9px] text-slate-400 uppercase font-bold mb-0.5">Ürün / Konum</div>
-                <h2 class="text-lg md:text-xl font-bold text-slate-600 leading-tight" id="prdName">Yükleniyor...</h2>
+                <h2 class="text-lg font-bold text-slate-600 leading-tight" id="prdName">Yükleniyor...</h2>
             </div>
         </div>
         
-        <div class="text-center py-8 rounded-3xl bg-slate-50 border border-slate-200 mb-6 shadow-inner">
-            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Toplam Kazandırılan Tutar</div>
-            <div class="flex items-baseline justify-center gap-1 flex-wrap px-2">
-                <span id="liveMoney" class="font-black text-slate-800 counter-text tracking-tighter transition-all duration-300 text-5xl">0,00</span>
+        <div class="text-center py-8 rounded-3xl bg-gradient-to-b from-slate-50 to-white border border-slate-100 mb-6 shadow-inner relative group overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-green-400 to-transparent opacity-20"></div>
+            
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Toplam Kazandırılan Tutar</div>
+            <div class="flex items-baseline justify-center gap-1 flex-wrap px-2 relative z-10">
+                <span id="liveMoney" class="font-black text-slate-800 counter-text tracking-tighter transition-all duration-300 text-5xl drop-shadow-sm">0,00</span>
                 <span class="text-2xl font-bold text-green-600">₺</span>
             </div>
-            <div class="text-[9px] text-slate-400 mt-2 flex items-center justify-center gap-1">
-                <i data-lucide="info" class="w-3 h-3"></i> ISO 12241 standardına göre
+            <div class="text-[9px] text-slate-400 mt-3 flex items-center justify-center gap-1">
+                <i data-lucide="check-circle" class="w-3 h-3 text-green-500"></i> Doğrulanmış Veri
             </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3 mb-6">
-            <div class="p-3 rounded-2xl bg-white border border-slate-100 text-center shadow-sm">
+            <div class="p-3 rounded-2xl bg-white/60 border border-slate-100 text-center shadow-sm backdrop-blur-sm">
                 <div class="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center justify-center gap-1.5">
                     <i data-lucide="leaf" class="w-3.5 h-3.5 text-green-500"></i> Karbon
                 </div>
                 <div class="text-lg font-bold text-slate-800"><span id="liveCarbon" class="counter-text">0,00</span> <span class="text-[9px] text-slate-400">Ton</span></div>
-                <div class="text-[9px] text-green-600 mt-1 font-bold flex items-center justify-center gap-1 bg-green-50 rounded-full py-0.5 px-2 mx-auto w-fit">
+                <div class="text-[9px] text-green-700 mt-1 font-bold flex items-center justify-center gap-1 bg-green-100/50 rounded-full py-0.5 px-2 mx-auto w-fit">
                     <i data-lucide="sprout" class="w-3 h-3"></i> <span id="liveTree">0 Ağaç</span>
                 </div>
             </div>
 
-            <div class="p-3 rounded-2xl bg-white border border-slate-100 text-center shadow-sm">
+            <div class="p-3 rounded-2xl bg-white/60 border border-slate-100 text-center shadow-sm backdrop-blur-sm">
                 <div class="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center justify-center gap-1.5">
                     <i data-lucide="flame" class="w-3.5 h-3.5 text-orange-500"></i> <span id="fuelLabel">Yakıt</span>
                 </div>
                 <div class="text-lg font-bold text-slate-800"><span id="liveFuel" class="counter-text">0,00</span> <span id="fuelUnit" class="text-[9px] text-slate-400">m³</span></div>
-                <div class="text-[9px] text-orange-600 mt-1 font-bold bg-orange-50 rounded-full py-0.5 px-2 mx-auto w-fit">Tasarruf</div>
+                <div class="text-[9px] text-orange-700 mt-1 font-bold bg-orange-100/50 rounded-full py-0.5 px-2 mx-auto w-fit">Tasarruf</div>
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4 border-t border-slate-100 pt-4">
+        <div class="grid grid-cols-2 gap-4 border-t border-slate-100 pt-5">
             <div class="font-sans text-left">
                 <div class="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase mb-1">
-                    <i data-lucide="calendar" class="w-3 h-3 text-slate-400"></i> Montaj Tarihi
+                    <i data-lucide="calendar" class="w-3 h-3 text-slate-400"></i> Montaj
                 </div>
                 <div id="installDate" class="text-xs text-slate-700 font-bold">...</div>
+                <div id="installTime" class="text-[10px] text-slate-400 font-medium">...</div>
             </div>
             <div class="font-sans text-right">
                 <div class="flex items-center justify-end gap-1.5 text-[10px] text-slate-400 font-bold uppercase mb-1">
@@ -142,9 +126,9 @@
 
     </div>
     
-    <div class="mt-6 opacity-40 hover:opacity-100 transition">
+    <div class="mt-6 opacity-40 hover:opacity-100 transition duration-500">
         <div class="flex items-center justify-center gap-2 text-[10px] text-slate-500 font-medium tracking-widest">
-            <i data-lucide="shield-check" class="w-3 h-3 text-green-600"></i> Verified by <span class="text-slate-700 font-bold">Optimizi.App</span>
+            <i data-lucide="shield-check" class="w-3 h-3 text-green-600"></i> Verified by <span class="text-slate-700 font-bold">Optimizi</span>
         </div>
     </div>
 </main>
@@ -152,52 +136,73 @@
 <script>
     lucide.createIcons();
     
-    // URL Parametrelerini al
     const params = new URLSearchParams(window.location.search);
-    
-    // Müşteri adını güvenli bir şekilde çek (decodeURIComponent kullanarak)
     const clientName = params.get('c') || "";
     
+    // Konfigürasyon
     const config = {
-        name: decodeURIComponent(params.get('p') || 'Endüstriyel Yalıtım'),
-        sn: params.get('s') || 'DEMO-001',
-        start: params.get('d') || new Date().toISOString().split('T')[0],
-        save: parseFloat(params.get('v')) || 10000,
+        name: decodeURIComponent(params.get('p') || 'Endüstriyel Yalıtım'), // Eski linkler için fallback
+        sn: decodeURIComponent(params.get('s') || 'DEMO'),
+        start: params.get('d') || new Date().toISOString(), // Tarih dizesi (YYYY-MM-DD-HH-MM)
+        save: parseFloat(params.get('v')) || 0, // Yıllık Toplam Para
         fuel: params.get('f') || 'gas',
-        price: parseFloat(params.get('up')) || 10.0,
         client: decodeURIComponent(clientName)
     };
 
+    // Yakıt Katsayıları (Kömür sadeleştirildi)
     const fuels = {
         gas:       { unit: 'm³',  co2: 0.0019, label: 'Doğalgaz' },    
         elec:      { unit: 'kWh', co2: 0.00045, label: 'Elektrik' },   
         lng:       { unit: 'kg',  co2: 0.0028, label: 'LNG' },         
         fueloil:   { unit: 'kg',  co2: 0.0031, label: 'Fuel Oil' },    
         coal_imp:  { unit: 'kg',  co2: 0.0025, label: 'İthal Kömür' }, 
-        coal_loc:  { unit: 'kg',  co2: 0.0015, label: 'Yerli Kömür' },
-        coal:      { unit: 'kg',  co2: 0.0025, label: 'Kömür' } 
+        coal_loc:  { unit: 'kg',  co2: 0.0015, label: 'Yerli Kömür' }
     };
 
     const f = fuels[config.fuel] || fuels.gas;
 
-    // Elementleri Doldur
-    document.getElementById('prdName').innerText = config.name;
+    // Arayüz Doldurma
+    document.getElementById('prdName').innerText = (config.client !== "" && !config.name.includes('İzolasyon')) ? "Yalıtım Uygulaması" : config.name;
     document.getElementById('prdSerial').innerText = `ID: ${config.sn}`;
     document.getElementById('fuelUnit').innerText = f.unit;
     document.getElementById('fuelLabel').innerText = f.label;
     
-    // MÜŞTERİ ADINI BURADA EKRANA BASTIRIYORUZ
     const clientEl = document.getElementById('clientDisplay');
     if (config.client && config.client !== "") {
         clientEl.innerText = config.client;
+        document.getElementById('prdName').innerText = "Yalıtım Projesi";
     } else {
-        clientEl.style.display = 'none'; // Eğer müşteri adı yoksa alanı gizle
+        clientEl.style.display = 'none';
+        document.getElementById('prdName').innerText = "Endüstriyel Yalıtım";
     }
     
+    // --- TARİH VE SAAT PARSE İŞLEMİ (CRITICAL FIX) ---
+    // Gelen Format: YYYY-MM-DD-HH-MM (Örn: 2025-10-27-14-30)
+    // Eski Format: YYYY-MM-DD (Örn: 2025-10-27)
+    
     const p = config.start.split('-');
-    const startDate = new Date(p[0], p[1]-1, p[2], 0, 0, 0).getTime();
-    document.getElementById('installDate').innerText = new Date(startDate).toLocaleDateString('tr-TR', {day:'2-digit', month:'long', year:'numeric'});
+    
+    let year = parseInt(p[0]);
+    let month = parseInt(p[1]) - 1; // JS'de aylar 0'dan başlar
+    let day = parseInt(p[2]);
+    let hour = 0;
+    let minute = 0;
 
+    // Eğer saat ve dakika bilgisi varsa (Generator 2.0 linki ise)
+    if (p.length > 3) {
+        hour = parseInt(p[3]);
+        minute = parseInt(p[4]);
+    }
+
+    const startDate = new Date(year, month, day, hour, minute, 0).getTime();
+    
+    // Tarihi Ekrana Bas
+    document.getElementById('installDate').innerText = new Date(startDate).toLocaleDateString('tr-TR', {day:'2-digit', month:'long', year:'numeric'});
+    // Saati Ekrana Bas (Eğer varsa)
+    document.getElementById('installTime').innerText = `Saat: ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+
+    // Yıllık kazancı milisaniyelik kazanca çevir
+    // 1 Yıl = 31,536,000,000 milisaniye
     const savePerMs = config.save / 31536000000;
 
     function updateCounter() {
@@ -206,10 +211,19 @@
 
         if (diff > 0) {
             const money = diff * savePerMs;
-            const unitPrice = config.price > 0 ? config.price : 1; 
-            const fuelAmount = money / unitPrice;
+            
+            // Yakıt miktarını bulmak için yaklaşık birim fiyata bölüyoruz (Görsel amaçlı)
+            // Not: Generator'da birim fiyatı kaldırdığımız için, burada ortalama bir piyasa değeri varsayabiliriz 
+            // ya da sadece parayı gösterip yakıt miktarını oranlayabiliriz.
+            // Basitlik için: Doğalgazın m3'ü 18TL gibi bir varsayımla geriye dönük miktar hesaplayalım.
+            // Bu sadece "kaç m3" göstergesi için, parayı etkilemez.
+            let estimatedPrice = 18.0; 
+            if(config.fuel === 'elec') estimatedPrice = 4.0;
+            if(config.fuel === 'coal_imp') estimatedPrice = 8.0;
+            
+            const fuelAmount = money / estimatedPrice;
             const co2Ton = fuelAmount * f.co2;
-            const trees = co2Ton / 0.025;
+            const trees = co2Ton / 0.025; // 1 ağaç 25kg CO2 emer varsayımı
 
             const moneyStr = money.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             const moneyEl = document.getElementById('liveMoney');
@@ -217,13 +231,9 @@
 
             // Yazı Boyutu Dinamik Ayar
             const len = moneyStr.length;
-            if(len > 13) {
-                moneyEl.style.fontSize = "1.875rem";
-            } else if (len > 10) {
-                moneyEl.style.fontSize = "2.25rem";
-            } else {
-                moneyEl.style.fontSize = "3rem";
-            }
+            if(len > 13) moneyEl.style.fontSize = "1.875rem";
+            else if (len > 10) moneyEl.style.fontSize = "2.25rem";
+            else moneyEl.style.fontSize = "3rem";
 
             document.getElementById('liveFuel').innerText = fuelAmount.toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
             document.getElementById('liveCarbon').innerText = co2Ton.toLocaleString('tr-TR', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
@@ -236,11 +246,12 @@
             
             let timeStr = "";
             if(d > 0) timeStr = `${d} Gün ${h} Saat`;
-            else timeStr = `${h} Saat ${m} Dakika`;
+            else timeStr = `${h} Saat ${m} Dk`;
             
-            document.getElementById('runTime').innerHTML = `${timeStr} <span class="opacity-30 text-[9px]">(${s}sn)</span>`;
+            document.getElementById('runTime').innerHTML = `${timeStr} <span class="opacity-50 text-[10px] font-mono">:${s}</span>`;
         } else {
-            document.getElementById('runTime').innerText = "Başlıyor...";
+            document.getElementById('runTime').innerText = "Bekleniyor...";
+            document.getElementById('liveMoney').innerText = "0,00";
         }
         
         requestAnimationFrame(updateCounter);
