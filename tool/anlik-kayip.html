@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enerji Audit & Kayıp Analizi | Optimizi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <script>
+      tailwind.config = {
+        theme: {
+          fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], body: ['"Inter"', 'sans-serif'] },
+          extend: { 
+            colors: { 
+                brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8' },
+                slate: { 850: '#1e293b' }
+            },
+            boxShadow: {
+                'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                'card': '0 0 0 1px rgba(0,0,0,0.03), 0 2px 8px rgba(0,0,0,0.04)'
+            }
+          }
+        }
+      }
+    </script>
+
+    <style>
+        body { 
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+        .modern-card {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 0 0 1px rgba(226, 232, 240, 1), 0 4px 6px -1px rgba(0, 0, 0, 0.01);
+            transition: all 0.2s ease;
+        }
+        .modern-input {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: #1e293b;
+            border-radius: 0.5rem;
+            padding: 0.6rem 0.8rem;
+            font-size: 0.875rem;
+            width: 100%;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        .modern-input:focus {
+            outline: none;
+            background-color: white;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        select.modern-input {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.25em 1.25em;
+            padding-right: 2.5rem;
+        }
+        .kpi-value { font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
+        
+        /* Tab Styles */
+        .tab-btn {
+            transition: all 0.2s ease;
+        }
+        .tab-btn.active {
+            background-color: white;
+            color: #2563eb;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            font-weight: 700;
+        }
+        .tab-btn:not(.active) {
+            color: #64748b;
+        }
+        .tab-btn:not(.active):hover {
+            color: #334155;
+            background-color: rgba(255,255,255,0.5);
+        }
+
+        /* Item Button Styles */
+        .item-btn {
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+        .item-btn:hover {
+            border-color: #93c5fd;
+            background-color: #eff6ff;
+        }
+        .item-btn.selected {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            color: #1d4ed8;
+            box-shadow: 0 0 0 1px #3b82f6;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 antialiased min-h-screen flex flex-col" onload="initAudit()">
+
+    <div class="max-w-[1400px] mx-auto w-full space-y-6">
+        
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center border border-slate-200 shadow-sm text-brand-600">
+                    <i data-lucide="activity" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight text-slate-900">Mevcut Durum Analizi</h1>
+                    <p class="text-sm text-slate-500 font-medium">Isı Kaybı & Maliyet Denetim Aracı</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-4 w-full lg:w-auto">
+                <div class="modern-card p-4 min-w-[140px]">
+                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Toplam Güç</div>
+                    <div class="text-xl font-bold text-slate-800 kpi-value"><span id="totalWatts">0</span> <span class="text-sm font-medium text-slate-400">kW</span></div>
+                </div>
+                <div class="modern-card p-4 min-w-[140px]">
+                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Yakıt Kaybı</div>
+                    <div class="text-xl font-bold text-orange-600 kpi-value"><span id="totalFuel">0</span> <span id="summaryFuelUnit" class="text-sm font-medium text-slate-400">-</span></div>
+                </div>
+                <div class="modern-card p-4 min-w-[160px] bg-slate-900 !border-slate-800">
+                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Finansal Kayıp</div>
+                    <div class="text-xl font-bold text-white kpi-value"><span id="totalCost">0</span> <span class="text-sm font-medium text-slate-400">TL</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <div class="lg:col-span-4 space-y-6">
+                
+                <div class="modern-card p-6">
+                    <h2 class="text-xs font-bold text-slate-400 uppercase mb-4 flex items-center gap-2">
+                        <i data-lucide="sliders" class="w-3.5 h-3.5"></i> Parametreler
+                    </h2>
+                    
+                    <div class="mb-4">
+                        <label class="text-xs font-semibold text-slate-700 mb-1.5 block">Yüzey Sıcaklığı (°C)</label>
+                        <div class="relative">
+                            <input type="number" id="tSurf" class="modern-input !bg-red-50 !border-red-100 !text-red-600 !text-lg !font-bold pl-10" value="150" oninput="recalc()">
+                            <i data-lucide="thermometer" class="w-4 h-4 text-red-400 absolute left-3.5 top-3.5"></i>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs font-semibold text-slate-700 mb-1.5 block">Ortam Sıc. (°C)</label>
+                            <input type="number" id="tAmb" class="modern-input" value="25" oninput="recalc()">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-slate-700 mb-1.5 block">Rüzgar (m/s)</label>
+                            <input type="number" id="wind" class="modern-input" value="0.5" step="0.5" oninput="recalc()">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 pt-4 border-t border-slate-100">
+                        <label class="text-xs font-semibold text-slate-700 mb-1.5 block">Yıllık Çalışma Saati</label>
+                        <input type="number" id="hours" class="modern-input font-mono" value="7200" oninput="recalc()">
+                    </div>
+                </div>
+
+                <div class="modern-card p-6">
+                    <h2 class="text-xs font-bold text-slate-400 uppercase mb-4 flex items-center gap-2">
+                        <i data-lucide="banknote" class="w-3.5 h-3.5"></i> Yakıt & Maliyet
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-xs font-semibold text-slate-700 mb-1.5 block">Yakıt Cinsi</label>
+                            <select id="fuelType" class="modern-input" onchange="updateFuelLabel()">
+                                <option value="gas" data-lhv="8250" data-unit="m³">Doğalgaz (8250 kcal/m³)</option>
+                                <option value="lng" data-lhv="11500" data-unit="kg">LNG (11500 kcal/kg)</option>
+                                <option value="fueloil" data-lhv="9600" data-unit="kg">Fuel-Oil (9600 kcal/kg)</option>
+                                <option value="coal_imp" data-lhv="6000" data-unit="kg">İthal Kömür (6000 kcal/kg)</option>
+                                <option value="coal_loc" data-lhv="3500" data-unit="kg">Yerli Kömür (3500 kcal/kg)</option>
+                                <option value="elec" data-lhv="860" data-unit="kWh">Elektrik (Rezistans)</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-semibold text-slate-700 mb-1.5 block">Birim Fiyat (<span id="currencyUnit">TL</span>)</label>
+                                <input type="number" id="price" class="modern-input" value="12" step="0.1" oninput="recalc()">
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-slate-700 mb-1.5 block">Kazan Verimi (%)</label>
+                                <input type="number" id="eff" class="modern-input" value="85" max="100" oninput="recalc()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modern-card p-6 border-l-4 border-l-brand-500">
+                    <h2 class="text-xs font-bold text-slate-400 uppercase mb-4 flex items-center gap-2">
+                        <i data-lucide="plus-square" class="w-3.5 h-3.5 text-brand-600"></i> Bileşen Ekle
+                    </h2>
+                    
+                    <div class="flex p-1 bg-slate-100 rounded-lg mb-4 select-none">
+                        <button class="tab-btn flex-1 py-1.5 text-xs font-medium rounded-md active" id="tab-line" onclick="setTab('line')">Hat</button>
+                        <button class="tab-btn flex-1 py-1.5 text-xs font-medium rounded-md" id="tab-valve" onclick="setTab('valve')">Armatür</button>
+                        <button class="tab-btn flex-1 py-1.5 text-xs font-medium rounded-md" id="tab-tank" onclick="setTab('tank')">Tank</button>
+                    </div>
+
+                    <div id="itemGrid" class="grid grid-cols-2 gap-2 mb-4">
+                        </div>
+
+                    <input type="hidden" id="selectedType" value="pipe">
+                    <input type="hidden" id="selectedTypeName" value="Boru">
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div id="dnContainer">
+                            <label class="text-xs font-semibold text-slate-700 mb-1.5 block">Çap (DN)</label>
+                            <select id="dn" class="modern-input">
+                                <option value="15">DN15 (1/2")</option>
+                                <option value="20">DN20 (3/4")</option>
+                                <option value="25">DN25 (1")</option>
+                                <option value="32">DN32 (1 1/4")</option>
+                                <option value="40">DN40 (1 1/2")</option>
+                                <option value="50">DN50 (2")</option>
+                                <option value="65">DN65 (2 1/2")</option>
+                                <option value="80">DN80 (3")</option>
+                                <option value="100" selected>DN100 (4")</option>
+                                <option value="125">DN125 (5")</option>
+                                <option value="150">DN150 (6")</option>
+                                <option value="200">DN200 (8")</option>
+                                <option value="250">DN250 (10")</option>
+                                <option value="300">DN300 (12")</option>
+                                <option value="400">DN400 (16")</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-slate-700 mb-1.5 block" id="qtyLabel">Adet / Metraj</label>
+                            <input type="number" id="qty" class="modern-input font-bold text-center" value="1">
+                        </div>
+                    </div>
+
+                    <button onclick="addItem()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 rounded-lg mt-4 transition-all flex items-center justify-center gap-2 active:scale-95 shadow-lg shadow-slate-900/10">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Listeye Ekle
+                    </button>
+                </div>
+
+            </div>
+
+            <div class="lg:col-span-8">
+                <div class="modern-card overflow-hidden min-h-[600px] flex flex-col">
+                    <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center">
+                                <i data-lucide="list" class="w-4 h-4"></i>
+                            </div>
+                            <span class="font-bold text-slate-800">Denetim Listesi</span>
+                        </div>
+                        <button onclick="clearList()" class="text-xs font-medium text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-1.5 rounded transition">Temizle</button>
+                    </div>
+                    
+                    <div class="flex-1 overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-slate-50 text-[10px] uppercase text-slate-500 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-4 pl-6">Bileşen</th>
+                                    <th class="p-4 text-center">Adet</th>
+                                    <th class="p-4 text-center">Alan (m²)</th>
+                                    <th class="p-4 text-right">Anlık Güç</th>
+                                    <th class="p-4 text-right">Yıllık Enerji</th>
+                                    <th class="p-4 text-right">Yıllık Yakıt</th>
+                                    <th class="p-4 text-right pr-6">Yıllık Kayıp</th>
+                                    <th class="p-4 w-10"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="auditList" class="divide-y divide-slate-100 text-sm font-medium text-slate-700">
+                                <tr>
+                                    <td colspan="8" class="p-12 text-center text-slate-400">
+                                        <div class="flex flex-col items-center justify-center gap-3">
+                                            <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center">
+                                                <i data-lucide="clipboard" class="w-8 h-8 text-slate-300"></i>
+                                            </div>
+                                            <span>Liste boş. Soldan bileşen ekleyin.</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+<script>
+    // --- VERİTABANI ---
+    const PIPES_OD = {15:21.3, 20:26.7, 25:33.4, 32:42.2, 40:48.3, 50:60.3, 65:73.0, 80:88.9, 100:114.3, 125:141.3, 150:168.3, 200:219.1, 250:273.0, 300:323.9, 400:406.4};
+    
+    // Kategorilere Göre Öğeler
+    const CATEGORIES = {
+        line: [
+            { id: 'pipe', name: 'Boru (1m)', factor: 1.0 },
+            { id: 'elbow', name: 'Dirsek (90°)', factor: 0.3 },
+            { id: 'flange', name: 'Flanş (Çift)', factor: 0.4 },
+            { id: 'tee', name: 'T-Parçası', factor: 0.5 }
+        ],
+        valve: [
+            { id: 'valve_gate', name: 'Sürgülü Vana', factor: 1.8 },
+            { id: 'valve_globe', name: 'Glob Vana', factor: 2.0 },
+            { id: 'valve_ball', name: 'Küresel Vana', factor: 1.2 },
+            { id: 'check', name: 'Çekvalf', factor: 1.5 },
+            { id: 'strainer', name: 'Pislik Tutucu', factor: 2.2 },
+            { id: 'separator', name: 'Buhar Sep.', factor: 4.5 }
+        ],
+        tank: [
+            { id: 'flat', name: 'Düz Yüzey (m²)', factor: 1.0 }
+        ]
+    };
+
+    // Tüm faktörleri tek objede birleştirme (Hesaplama için)
+    const ALL_FACTORS = {};
+    Object.values(CATEGORIES).forEach(cat => cat.forEach(item => ALL_FACTORS[item.id] = item.factor));
+
+    let AUDIT_ITEMS = [];
+
+    // --- SEKME YÖNETİMİ ---
+    function initAudit() {
+        setTab('line'); // Varsayılan sekme
+        updateFuelLabel();
+        lucide.createIcons();
+    }
+
+    function setTab(catName) {
+        // 1. Tab Butonlarını Güncelle
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('tab-' + catName).classList.add('active');
+
+        // 2. Grid İçeriğini Doldur
+        const grid = document.getElementById('itemGrid');
+        grid.innerHTML = '';
+        
+        const items = CATEGORIES[catName];
+        items.forEach((item, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'item-btn p-2 rounded text-xs font-medium text-slate-600 hover:text-slate-900';
+            btn.innerText = item.name;
+            btn.onclick = () => selectItemType(item.id, item.name, btn);
+            grid.appendChild(btn);
+            
+            // İlk elemanı otomatik seç
+            if(index === 0) selectItemType(item.id, item.name, btn);
+        });
+    }
+
+    function selectItemType(id, name, btnElement) {
+        // Görsel güncelleme
+        document.querySelectorAll('.item-btn').forEach(b => b.classList.remove('selected'));
+        if(btnElement) btnElement.classList.add('selected');
+
+        // Inputları güncelleme
+        document.getElementById('selectedType').value = id;
+        document.getElementById('selectedTypeName').value = name;
+
+        // Flat mantığı
+        const dnCont = document.getElementById('dnContainer');
+        const qtyLabel = document.getElementById('qtyLabel');
+        
+        if(id === 'flat') {
+            dnCont.classList.add('opacity-30', 'pointer-events-none');
+            qtyLabel.innerText = "Alan (m²)";
+        } else {
+            dnCont.classList.remove('opacity-30', 'pointer-events-none');
+            qtyLabel.innerText = "Adet / Metraj";
+        }
+    }
+
+    // --- HESAPLAMA MOTORU ---
+    function calculateHeatLoss(item) {
+        const tSurf = parseFloat(document.getElementById('tSurf').value) || 100;
+        const tAmb = parseFloat(document.getElementById('tAmb').value) || 25;
+        const wind = parseFloat(document.getElementById('wind').value) || 0;
+        const hours = parseFloat(document.getElementById('hours').value) || 7200;
+        const eff = parseFloat(document.getElementById('eff').value) / 100 || 0.85;
+        const price = parseFloat(document.getElementById('price').value) || 0;
+
+        let area = 0;
+        if(item.type === 'flat') {
+            area = item.qty; 
+        } else {
+            const mm = PIPES_OD[item.dn] || 100;
+            const d = mm / 1000; 
+            const factor = ALL_FACTORS[item.type] || 1.0;
+            area = Math.PI * d * (factor * item.qty);
+        }
+
+        const deltaT = tSurf - tAmb;
+        let h_combined = 0;
+        
+        if (wind < 0.1) {
+            h_combined = 10 + (deltaT * 0.05); 
+        } else {
+            h_combined = 10 + (4 * wind) + (deltaT * 0.02);
+        }
+
+        const q_watts = h_combined * area * deltaT;
+        const q_kwh_year = (q_watts * hours) / 1000;
+
+        const fuelSelect = document.getElementById('fuelType');
+        const selectedOption = fuelSelect.options[fuelSelect.selectedIndex];
+        const lhv = parseFloat(selectedOption.getAttribute('data-lhv')); 
+        
+        const total_kcal_year = q_kwh_year * 860;
+        const fuel_qty = total_kcal_year / (lhv * eff);
+        const total_cost = fuel_qty * price;
+
+        return {
+            watts: q_watts,
+            kwh: q_kwh_year,
+            fuelQty: fuel_qty,
+            cost: total_cost,
+            area: area,
+            fuelUnit: selectedOption.getAttribute('data-unit')
+        };
+    }
+
+    function addItem() {
+        const typeId = document.getElementById('selectedType').value;
+        const typeName = document.getElementById('selectedTypeName').value;
+        const dnSelect = document.getElementById('dn');
+        
+        const item = {
+            id: Date.now(),
+            type: typeId,
+            typeName: typeName,
+            dn: dnSelect.value,
+            qty: parseFloat(document.getElementById('qty').value) || 1
+        };
+
+        AUDIT_ITEMS.push(item);
+        renderList();
+    }
+
+    function deleteItem(id) {
+        AUDIT_ITEMS = AUDIT_ITEMS.filter(i => i.id !== id);
+        renderList();
+    }
+
+    function clearList() {
+        if(confirm("Tüm liste temizlensin mi?")) {
+            AUDIT_ITEMS = [];
+            renderList();
+        }
+    }
+
+    function renderList() {
+        const tbody = document.getElementById('auditList');
+        tbody.innerHTML = '';
+
+        let grandWatts = 0;
+        let grandFuel = 0;
+        let grandCost = 0;
+        let fuelUnit = "birim";
+
+        if(AUDIT_ITEMS.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" class="p-12 text-center text-slate-400"><div class="flex flex-col items-center justify-center gap-3"><div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center"><i data-lucide="clipboard" class="w-8 h-8 text-slate-300"></i></div><span>Liste boş. Soldan bileşen ekleyin.</span></div></td></tr>`;
+            lucide.createIcons();
+        } else {
+            AUDIT_ITEMS.forEach(item => {
+                const res = calculateHeatLoss(item);
+                grandWatts += res.watts;
+                grandFuel += res.fuelQty;
+                grandCost += res.cost;
+                fuelUnit = res.fuelUnit;
+
+                const row = document.createElement('tr');
+                row.className = "hover:bg-slate-50 transition border-b border-slate-100 group";
+                row.innerHTML = `
+                    <td class="p-4 pl-6 font-bold text-slate-800">${item.typeName} <span class="text-slate-400 font-normal text-xs ml-1">(${item.type === 'flat' ? '-' : 'DN'+item.dn})</span></td>
+                    <td class="p-4 text-center text-slate-600 font-mono">${item.qty}</td>
+                    <td class="p-4 text-center text-slate-500 text-xs">${res.area.toFixed(2)}</td>
+                    <td class="p-4 text-right text-orange-600 font-bold kpi-value">${Math.round(res.watts).toLocaleString()} W</td>
+                    <td class="p-4 text-right text-slate-600 kpi-value text-xs">${Math.round(res.kwh).toLocaleString()} kWh</td>
+                    <td class="p-4 text-right text-slate-600 kpi-value text-xs">${Math.round(res.fuelQty).toLocaleString()} ${res.fuelUnit}</td>
+                    <td class="p-4 text-right pr-6 font-bold text-slate-900 kpi-value">${Math.round(res.cost).toLocaleString()} ₺</td>
+                    <td class="p-4 text-right">
+                        <button onclick="deleteItem(${item.id})" class="p-2 text-slate-300 hover:text-red-500 rounded transition opacity-0 group-hover:opacity-100"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Özet Kartları Güncelle
+        document.getElementById('totalWatts').innerText = (grandWatts / 1000).toLocaleString(undefined, {maximumFractionDigits: 1}); 
+        document.getElementById('totalFuel').innerText = Math.round(grandFuel).toLocaleString();
+        document.getElementById('summaryFuelUnit').innerText = fuelUnit;
+        document.getElementById('totalCost').innerText = Math.round(grandCost).toLocaleString();
+        
+        lucide.createIcons();
+    }
+
+    function recalc() {
+        if(AUDIT_ITEMS.length > 0) renderList();
+    }
+
+    function updateFuelLabel() {
+        const fuelSelect = document.getElementById('fuelType');
+        const selectedOption = fuelSelect.options[fuelSelect.selectedIndex];
+        const unit = selectedOption.getAttribute('data-unit');
+        
+        const lbl = unit === 'kWh' ? 'kWh' : (unit === 'm³' ? 'm³' : 'kg');
+        document.getElementById('currencyUnit').innerText = `TL / ${lbl}`;
+        
+        recalc();
+    }
+
+</script>
+</body>
+</html>
