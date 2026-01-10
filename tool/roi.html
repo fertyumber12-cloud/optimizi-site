@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr" class="dark">
 <head>
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-KD7DLCNS');</script>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Endüstriyel İzolasyon Yatırımı Amortisman Hesaplama</title>
@@ -29,20 +28,20 @@
 </script>
 <style>
   :root {
-      /* LIGHT MODE */
-      --bg-grad: #ffffff;
-      --glass-bg: rgba(255, 255, 255, 0.95);
+      /* LIGHT MODE: Tamamen düz gri */
+      --bg-color: #f1f5f9; 
+      --glass-bg: #ffffff;
       --glass-border: rgba(148, 163, 184, 0.4);
-      --input-bg: #ffffff;
+      --input-bg: #f8fafc;
       --input-border: #cbd5e1;
-      --text-main: #0f172a;
-      --card-shadow: 0 10px 30px -10px rgba(0,0,0,0.1);
-      --grid-color: rgba(148, 163, 184, 0.15); 
+      --text-main: #0f172a; 
+      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --grid-color: rgba(0, 0, 0, 0.05);
   }
 
   .dark {
       /* DARK MODE */
-      --bg-grad: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%);
+      --bg-color: #0f172a;
       --glass-bg: rgba(30, 41, 59, 0.4);
       --glass-border: rgba(255, 255, 255, 0.08);
       --input-bg: rgba(15, 23, 42, 0.6);
@@ -50,6 +49,13 @@
       --text-main: #f1f5f9;
       --card-shadow: none;
       --grid-color: rgba(255, 255, 255, 0.03);
+  }
+
+  html:not(.dark) .blob-bg { display: none; }
+  
+  html.dark body {
+      background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%);
+      background-attachment: fixed;
   }
 
   ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -60,13 +66,14 @@
   html { scroll-behavior: smooth; }
   
   body { 
-      background: var(--bg-grad); 
-      background-attachment: fixed; 
+      background-color: var(--bg-color); 
       color: var(--text-main); 
       overflow-x: hidden; 
-      transition: background 0.5s ease, color 0.3s ease;
+      transition: background-color 0.3s ease, color 0.3s ease;
   }
   
+  .app-container { max-width: 1440px; margin: 0 auto; width: 100%; }
+
   .glass-card { 
       transition: all 0.3s ease; 
       background-color: var(--glass-bg); 
@@ -77,8 +84,8 @@
   
   .glass-input { 
       transition: all 0.2s; 
-      border-radius: 0.75rem; 
-      padding: 0.75rem; 
+      border-radius: 0.5rem; 
+      padding: 0.6rem 0.75rem; 
       width: 100%; 
       background-color: var(--input-bg); 
       border: 1px solid var(--input-border); 
@@ -91,7 +98,7 @@
       background-image: 
           linear-gradient(to right, var(--grid-color) 1px, transparent 1px), 
           linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px); 
-      mask-image: radial-gradient(circle at center, black 60%, transparent 100%); 
+      mask-image: radial-gradient(circle at center, black 70%, transparent 100%); 
       pointer-events: none; 
   }
 
@@ -112,14 +119,12 @@
     .audit-table td { border-bottom: 1px solid #e2e8f0; padding: 4px; font-size: 8px; color: #334155; vertical-align: middle; }
     .audit-table tr:nth-child(even) { background-color: #f8fafc; }
     
-    /* QR Section Visibility Logic for Print */
     body.hide-qr-section #rep_qr_section { display: none !important; }
   }
   #print-area { display: none; }
 </style>
 </head>
 <body class="antialiased selection:bg-indigo-500/30 selection:text-indigo-400" onload="initApp()">
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KD7DLCNS" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
     <div class="absolute inset-0 bg-grid"></div>
@@ -128,8 +133,8 @@
 </div>
 
 <div id="app-layer" class="relative z-10 flex flex-col min-h-screen">
-    <nav class="sticky top-0 z-50 glass-card !bg-white/80 dark:!bg-slate-900/80 !border-x-0 !border-t-0 !rounded-none border-b border-slate-200 dark:border-white/10 backdrop-blur-xl">
-      <div class="container mx-auto px-6 h-16 flex items-center justify-between">
+    <nav class="sticky top-0 z-50 glass-card !bg-white/90 dark:!bg-slate-900/80 !border-x-0 !border-t-0 !rounded-none border-b border-slate-200 dark:border-white/10 backdrop-blur-xl">
+      <div class="app-container px-6 h-16 flex items-center justify-between">
           <a href="../index.html" class="flex items-center gap-3 group">
               <div><h1 class="text-lg font-bold text-slate-800 dark:text-white tracking-wide">Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-orange-500 dark:from-indigo-400 dark:to-orange-400">.App</span></h1></div>
           </a>
@@ -149,35 +154,35 @@
                   <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
                   <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
               </button>
-              <button onclick="toggleLanguage()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-400 hover:text-indigo-600 dark:hover:text-white transition cursor-pointer"><span class="lang-flag text-lg">🇬🇧</span></button>
+              
               <button onclick="printRep()" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition shadow-lg shadow-indigo-600/20 active:scale-95 ml-2 cursor-pointer">
-                  <i data-lucide="printer" class="w-4 h-4"></i> <span data-i18n="btn_report">Report</span>
+                  <i data-lucide="printer" class="w-4 h-4"></i> Rapor Al
               </button>
           </div>
       </div>
     </nav>
 
-    <main class="flex-1 container mx-auto p-6 lg:p-8">
+    <main class="flex-1 app-container p-6 lg:p-8">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div class="glass-card p-6 relative overflow-hidden group rounded-2xl">
                <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110"><i data-lucide="timer" class="w-24 h-24 text-indigo-500"></i></div>
-               <div class="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-2" data-i18n="dash_roi">Avg. ROI</div>
+               <div class="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-2">Ort. Amortisman</div>
                <div class="text-4xl font-bold text-slate-800 dark:text-white tracking-tight" id="dashRoi">---</div>
                <div class="mt-4 h-1 w-full bg-slate-200 dark:bg-slate-700/50 rounded-full overflow-hidden"><div id="barRoi" class="h-full bg-indigo-500 w-0 transition-all duration-1000 shadow-[0_0_10px_rgba(99,102,241,0.5)]"></div></div>
             </div>
             <div class="glass-card p-6 relative overflow-hidden group rounded-2xl">
                <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition"><i data-lucide="wallet" class="w-24 h-24 text-green-500"></i></div>
-               <div class="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-2" data-i18n="dash_save">Annual Savings</div>
+               <div class="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-2">Yıllık Kazanç</div>
                <div class="text-3xl font-bold text-green-600 dark:text-green-400 tracking-tight" id="dashSave">0</div>
             </div>
             <div class="glass-card p-6 relative overflow-hidden rounded-2xl">
-               <div class="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-2" data-i18n="dash_inv">Total Investment</div>
+               <div class="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-2">Toplam Yatırım</div>
                <div class="text-3xl font-bold text-slate-800 dark:text-white tracking-tight" id="dashInv">0</div>
             </div>
             <div class="glass-card p-6 !bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 border-orange-500/20 rounded-2xl">
                <div class="flex items-center justify-between">
                   <div>
-                      <div class="text-orange-500 dark:text-orange-400 text-[10px] font-bold uppercase tracking-wider mb-1" data-i18n="dash_co2">CO2 Reduction</div>
+                      <div class="text-orange-500 dark:text-orange-400 text-[10px] font-bold uppercase tracking-wider mb-1">CO2 Azaltım</div>
                       <div class="text-3xl font-bold text-slate-800 dark:text-white" id="dashCo2">0 <span class="text-sm font-normal text-slate-500">Ton</span></div>
                   </div>
                   <div class="p-3 bg-orange-500/10 rounded-xl text-orange-600 dark:text-orange-500 border border-orange-500/20"><i data-lucide="leaf" class="w-6 h-6"></i></div>
@@ -188,113 +193,156 @@
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
             <div class="xl:col-span-4 space-y-6">
                 <div class="glass-card p-6 rounded-2xl">
-                   <h3 class="text-indigo-500 dark:text-indigo-400 text-xs font-bold uppercase mb-4 flex items-center gap-2"><i data-lucide="briefcase" class="w-4 h-4"></i> <span data-i18n="lbl_proj">Project Details</span></h3>
+                   <h3 class="text-indigo-500 dark:text-indigo-400 text-xs font-bold uppercase mb-4 flex items-center gap-2"><i data-lucide="briefcase" class="w-4 h-4"></i> Proje Detayları</h3>
                    <div class="space-y-4">
-                       <div><label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block" data-i18n="lbl_prep">Prepared By</label><div class="grid gap-2"><input type="text" id="pName" class="glass-input text-xs" data-i18n="ph_firm" placeholder="Firm"><input type="text" id="pEng" class="glass-input text-xs" data-i18n="ph_eng" placeholder="Engineer"></div></div>
+                       <div><label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Hazırlayan</label><div class="grid gap-2"><input type="text" id="pName" class="glass-input text-xs" placeholder="Firma Adı"><input type="text" id="pEng" class="glass-input text-xs" placeholder="Mühendis Adı"></div></div>
                        <div class="h-px bg-slate-200 dark:bg-white/5 my-3"></div>
-                       <div><label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block" data-i18n="lbl_cust">Customer Info</label><div class="grid gap-2"><input type="text" id="cName" class="glass-input text-xs" data-i18n="ph_cust_firm" placeholder="Client Firm"><input type="text" id="cEng" class="glass-input text-xs" data-i18n="ph_dept" placeholder="Contact / Dept"></div></div>
+                       <div><label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Firma Bilgileri</label><div class="grid gap-2"><input type="text" id="cName" class="glass-input text-xs" placeholder="Firma Adı"><input type="text" id="cEng" class="glass-input text-xs" placeholder="Yetkili Kişi / Ünvan"></div></div>
                    </div>
                 </div>
 
                 <div class="glass-card p-6 rounded-2xl">
-                    <h3 class="text-orange-500 dark:text-orange-400 text-xs font-bold uppercase mb-4 flex items-center gap-2"><i data-lucide="flame" class="w-4 h-4"></i> <span data-i18n="lbl_env">Environment & Energy</span></h3>
+                    <h3 class="text-orange-500 dark:text-orange-400 text-xs font-bold uppercase mb-4 flex items-center gap-2"><i data-lucide="flame" class="w-4 h-4"></i> Ortam & Enerji</h3>
                     <div class="grid grid-cols-2 gap-4">
-                        <div><label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block" data-i18n="lbl_temp">Amb. Temp (°C)</label><input type="number" id="tAmb" class="glass-input text-xs" value="25"></div>
-                        <div><label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block" data-i18n="lbl_wind">Wind (m/s)</label><input type="number" id="vWind" class="glass-input text-xs" value="1" step="0.5"></div>
+                        <div><label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Ortam Sıc. (°C)</label><input type="number" id="tAmb" class="glass-input text-xs" value="25"></div>
+                        <div><label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Rüzgar (m/s)</label><input type="number" id="vWind" class="glass-input text-xs" value="1" step="0.5"></div>
                     </div>
-                    <div class="mt-4 grid grid-cols-3 gap-3">
-                         <div class="col-span-2">
-                             <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block" data-i18n="lbl_fuel">Fuel Type</label>
-                             <select id="fuel" class="glass-input text-xs">
-                                 <option value="gas" data-i18n="fuel_gas">Doğalgaz (8250 kcal/m³)</option>
-                                 <option value="elec" data-i18n="fuel_elec">Elektrik (860 kcal/kWh)</option>
-                                 <option value="lng" data-i18n="fuel_lng">LNG (11500 kcal/kg)</option>
-                                 <option value="fueloil" data-i18n="fuel_oil">Fuel Oil (9600 kcal/kg)</option>
-                                 <option value="coal_imp" data-i18n="fuel_coal_imp">İthal Kömür (6000 kcal/kg)</option>
-                                 <option value="coal_loc" data-i18n="fuel_coal_loc">Yerli Kömür (3500 kcal/kg)</option>
-                             </select>
+                    
+                    <div class="mt-4">
+                        <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Yakıt Tipi</label>
+                        <select id="fuel" onchange="toggleFuelMode()" class="glass-input text-xs">
+                             <option value="gas">Doğalgaz (8250 kcal/m³)</option>
+                             <option value="elec">Elektrik (860 kcal/kWh)</option>
+                             <option value="lng">LNG (11500 kcal/kg)</option>
+                             <option value="fueloil">Fuel Oil (9600 kcal/kg)</option>
+                             <option value="coal_imp">İthal Kömür (6000 kcal/kg)</option>
+                             <option value="coal_loc">Yerli Kömür (3500 kcal/kg)</option>
+                             <option value="manual" class="font-bold text-indigo-500 dark:text-indigo-400">⚡ Manuel Giriş</option>
+                        </select>
+                    </div>
+
+                    <div id="manualFuelBox" class="hidden mt-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/10">
+                         <div class="grid grid-cols-2 gap-3">
+                             <div>
+                                 <label class="text-[9px] text-indigo-500 dark:text-indigo-400 font-bold mb-1 block">LHV (kcal)</label>
+                                 <input type="number" id="fuelLhv" class="glass-input text-xs" placeholder="Örn: 8250">
+                             </div>
+                             <div>
+                                 <label class="text-[9px] text-indigo-500 dark:text-indigo-400 font-bold mb-1 block">Birim</label>
+                                 <select id="fuelUnit" class="glass-input text-xs">
+                                     <option value="m3">kcal/m³</option>
+                                     <option value="kg">kcal/kg</option>
+                                     <option value="kwh">kcal/kWh</option>
+                                 </select>
+                             </div>
                          </div>
-                         <div><label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block" data-i18n="lbl_eff">Boiler Eff. %</label><input type="number" id="eff" class="glass-input text-center text-xs" value="85"></div>
                     </div>
+                    
+                    <div class="mt-4">
+                        <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Kazan Verimi %</label>
+                        <input type="number" id="eff" class="glass-input text-center text-xs" value="85">
+                    </div>
+
                     <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
-                            <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block" data-i18n="lbl_price">Unit Price</label>
+                            <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Birim Fiyat</label>
                             <div class="flex gap-1"><input type="number" id="price" class="glass-input text-xs" value="0.15"><select id="energyCurr" class="glass-input !px-1 w-14 text-center text-xs"><option value="TL" selected>₺</option><option value="USD">$</option><option value="EUR">€</option><option value="GBP">£</option></select></div>
                         </div>
-                        <div><label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block" data-i18n="lbl_hours">Annual Hours</label><input type="number" id="hours" class="glass-input text-xs" value="8000"></div>
+                        <div><label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Yıllık Saat</label><input type="number" id="hours" class="glass-input text-xs" value="8000"></div>
                     </div>
                 </div>
 
                 <div class="glass-card p-6 border-indigo-500/30 shadow-[0_0_20px_rgba(99,102,241,0.1)] rounded-2xl relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none"></div>
-                    <h3 class="text-slate-800 dark:text-white text-sm font-bold uppercase mb-4 flex items-center gap-2 relative z-10"><i data-lucide="plus-circle" class="w-4 h-4 text-indigo-500"></i> <span data-i18n="lbl_add">Add New Item</span></h3>
+                    <h3 class="text-slate-800 dark:text-white text-sm font-bold uppercase mb-4 flex items-center gap-2 relative z-10"><i data-lucide="plus-circle" class="w-4 h-4 text-indigo-500"></i> Yeni Ölçüm Ekle</h3>
                     
                     <div class="flex bg-slate-100 dark:bg-slate-900/50 rounded-lg p-1 mb-4 border border-slate-200 dark:border-white/5 relative z-10">
-                        <button onclick="setType('valve')" id="btn-valve" class="flex-1 py-1.5 text-xs font-medium rounded text-white bg-slate-700 shadow transition-all" data-i18n="btn_v">Valve</button>
-                        <button onclick="setType('pipe')" id="btn-pipe" class="flex-1 py-1.5 text-xs font-medium rounded text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all" data-i18n="btn_p">Pipe</button>
-                        <button onclick="setType('tank')" id="btn-tank" class="flex-1 py-1.5 text-xs font-medium rounded text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all" data-i18n="btn_t">Flat</button>
+                        <button onclick="setType('valve')" id="btn-valve" class="flex-1 py-1.5 text-xs font-medium rounded text-white bg-slate-700 shadow transition-all">Armatür</button>
+                        <button onclick="setType('pipe')" id="btn-pipe" class="flex-1 py-1.5 text-xs font-medium rounded text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">Boru</button>
+                        <button onclick="setType('tank')" id="btn-tank" class="flex-1 py-1.5 text-xs font-medium rounded text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">Tank/Düz</button>
                     </div>
                     <select id="type" class="hidden"><option value="valve">Valve</option><option value="pipe">Pipe</option><option value="tank">Flat</option></select>
                     
                     <div id="g-valve" class="space-y-3 relative z-10">
                         <select id="valveType" class="glass-input text-xs">
-                            <optgroup label="Vanalar" data-i18n="grp_valves">
-                                <option value="gate" data-i18n="val_gate">Sürgülü Vana</option>
-                                <option value="globe" data-i18n="val_globe">Glob Vana</option>
-                                <option value="ball" data-i18n="val_ball_fl">Küresel Vana</option>
-                                <option value="butterfly" data-i18n="val_butterfly">Kelebek Vana</option>
-                                <option value="check" data-i18n="val_check">Çekvalf</option>
-                                <option value="strainer" data-i18n="val_strainer">Pislik Tutucu</option>
-                                <option value="separator" data-i18n="val_sep">Buhar Seperatörü</option>
+                            <optgroup label="Vanalar">
+                                <option value="gate">Sürgülü Vana</option>
+                                <option value="globe">Glob Vana</option>
+                                <option value="ball">Küresel Vana</option>
+                                <option value="butterfly">Kelebek Vana</option>
+                                <option value="check">Çekvalf</option>
+                                <option value="strainer">Pislik Tutucu</option>
+                                <option value="separator">Buhar Seperatörü</option>
                             </optgroup>
-                            <optgroup label="Bağlantı Elemanları" data-i18n="grp_conn">
-                                <option value="flange" data-i18n="val_flange">Flanş Çifti (Takım)</option>
-                                <option value="elbow" data-i18n="val_elbow">Dirsek (90°)</option>
+                            <optgroup label="Bağlantı Elemanları">
+                                <option value="flange">Flanş Çifti (Takım)</option>
+                                <option value="elbow">Dirsek (90°)</option>
                             </optgroup>
-                            <optgroup label="Kondenstoplar" data-i18n="grp_traps">
-                                <option value="trap_float" data-i18n="val_trap_float">Şamandıralı</option>
-                                <option value="trap_thermo" data-i18n="val_trap_thermo">Termodinamik</option>
-                                <option value="trap_bimetal" data-i18n="val_trap_bimetal">Bimetalik</option>
-                                <option value="trap_bucket" data-i18n="val_trap_bucket">Ters Kovalı</option>
+                            <optgroup label="Kondenstoplar">
+                                <option value="trap_float">Şamandıralı</option>
+                                <option value="trap_thermo">Termodinamik</option>
+                                <option value="trap_bimetal">Bimetalik</option>
+                                <option value="trap_bucket">Ters Kovalı</option>
                             </optgroup>
                         </select>
                         <select id="vDN" class="glass-input text-xs"></select>
                     </div>
-                    <div id="g-pipe" class="hidden grid grid-cols-2 gap-3 relative z-10"><select id="pDN" class="glass-input text-xs"></select><input type="number" id="pLen" class="glass-input text-xs" placeholder="Pipe Length (m)" value="1"></div>
-                    <div id="g-tank" class="hidden grid grid-cols-2 gap-3 relative z-10"><input type="number" id="tA" class="glass-input text-xs" placeholder="Width (m)" data-i18n="ph_width" value="1"><input type="number" id="tB" class="glass-input text-xs" placeholder="Height (m)" data-i18n="ph_height" value="1"></div>
+                    <div id="g-pipe" class="hidden grid grid-cols-2 gap-3 relative z-10"><select id="pDN" class="glass-input text-xs"></select><input type="number" id="pLen" class="glass-input text-xs" placeholder="Boru Uzunluğu (m)" value="1"></div>
+                    
+                    <div id="g-tank" class="hidden relative z-10">
+                        <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-white/5 mb-3">
+                            <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-2 block font-bold">Yüzey Ölçüleri Ekle (cm)</label>
+                            <div class="flex gap-2 mb-2">
+                                <input type="number" id="surfW" class="glass-input text-xs" placeholder="En (cm)">
+                                <input type="number" id="surfH" class="glass-input text-xs" placeholder="Boy (cm)">
+                                <button onclick="addSurface()" class="bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg px-3 flex items-center justify-center transition"><i data-lucide="plus" class="w-4 h-4"></i></button>
+                            </div>
+                            <div id="surfaceList" class="space-y-1 mb-2 max-h-24 overflow-y-auto">
+                                </div>
+                            <div class="text-right text-[10px] text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-white/5 pt-2">
+                                Toplam Alan: <span id="totalSurfArea" class="font-bold text-slate-800 dark:text-white text-xs">0.00</span> m²
+                            </div>
+                        </div>
+                    </div>
                     
                     <div class="grid grid-cols-2 gap-3 mt-4 relative z-10">
-                        <div><label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block" data-i18n="lbl_st">Process Temp</label><div class="relative"><input type="number" id="tProc" class="glass-input pl-8 text-xs" value="160"><i data-lucide="thermometer" class="w-3 h-3 text-red-500 dark:text-red-400 absolute left-2.5 top-2.5"></i></div></div>
-                        <div><label id="lblQty" class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block" data-i18n="lbl_qty">Quantity</label><input type="number" id="qty" class="glass-input text-center font-bold text-xs" value="1"></div>
+                        <div><label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">İşletme Sıc. (°C)</label><div class="relative"><input type="number" id="tProc" class="glass-input pl-8 text-xs" value="160"><i data-lucide="thermometer" class="w-3 h-3 text-red-500 dark:text-red-400 absolute left-2.5 top-2.5"></i></div></div>
+                        <div><label id="lblQty" class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Adet</label><input type="number" id="qty" class="glass-input text-center font-bold text-xs" value="1"></div>
                     </div>
                     
                     <div class="mt-4 relative z-10">
+                         <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Mahal / Lokasyon</label>
+                         <input type="text" id="location" class="glass-input text-xs" placeholder="Örn: Kazan Dairesi">
+                    </div>
+
+                    <div class="mt-4 relative z-10">
                         <input type="file" id="imgInp" class="hidden" accept="image/*" onchange="readImg(this)">
-                        <div onclick="document.getElementById('imgInp').click()" class="border border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-3 text-center cursor-pointer hover:border-indigo-500 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition group"><i data-lucide="camera" class="w-4 h-4 text-slate-400 dark:text-slate-500 mx-auto group-hover:text-indigo-500 dark:group-hover:text-indigo-400 mb-1"></i><span class="text-[10px] text-slate-400 block" data-i18n="lbl_photo">Select Thermal Photo</span></div>
+                        <div onclick="document.getElementById('imgInp').click()" class="border border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-3 text-center cursor-pointer hover:border-indigo-500 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition group"><i data-lucide="camera" class="w-4 h-4 text-slate-400 dark:text-slate-500 mx-auto group-hover:text-indigo-500 dark:group-hover:text-indigo-400 mb-1"></i><span class="text-[10px] text-slate-400 block">Termal Foto Seç</span></div>
                         <img id="prevImg" class="hidden w-full h-24 object-cover rounded-lg mt-2 border border-slate-300 dark:border-slate-600">
                     </div>
 
                     <div class="mt-4 relative z-10">
                         <input type="file" id="qrInp" class="hidden" accept="image/*" onchange="readQr(this)">
-                        <div onclick="document.getElementById('qrInp').click()" class="border border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-3 text-center cursor-pointer hover:border-green-500 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition group"><i data-lucide="qr-code" class="w-4 h-4 text-slate-400 dark:text-slate-500 mx-auto group-hover:text-green-500 mb-1"></i><span class="text-[10px] text-slate-400 block" data-i18n="lbl_qr">Rapor QR'ı Yükle</span></div>
+                        <div onclick="document.getElementById('qrInp').click()" class="border border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-3 text-center cursor-pointer hover:border-green-500 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition group"><i data-lucide="qr-code" class="w-4 h-4 text-slate-400 dark:text-slate-500 mx-auto group-hover:text-green-500 mb-1"></i><span class="text-[10px] text-slate-400 block">Rapor QR'ı Yükle</span></div>
                     </div>
 
                     <div class="bg-slate-100 dark:bg-slate-900/50 rounded-lg p-3 mt-4 border border-slate-200 dark:border-white/5 relative z-10">
-                        <label class="text-[10px] text-green-600 dark:text-green-400 font-bold uppercase mb-2 block" data-i18n="lbl_spec">İzolasyon Özellikleri</label>
-                        <div class="mb-2"><select id="calcStd" class="glass-input text-[10px] !py-1 !h-7 text-slate-500 dark:text-slate-300"><option value="iso" data-i18n="std_iso">ISO 12241 (Standard)</option><option value="astm" data-i18n="std_astm">ASTM C680 (USA)</option><option value="vdi" data-i18n="std_vdi">VDI 2055 (German)</option></select></div>
+                        <label class="text-[10px] text-green-600 dark:text-green-400 font-bold uppercase mb-2 block">İzolasyon Özellikleri</label>
+                        <div class="mb-2"><select id="calcStd" class="glass-input text-[10px] !py-1 !h-7 text-slate-500 dark:text-slate-300"><option value="iso">ISO 12241 (Standard)</option><option value="astm">ASTM C680 (USA)</option><option value="vdi">VDI 2055 (German)</option></select></div>
+                        
+                        <div class="text-[9px] text-slate-400 uppercase font-bold mb-1">1. Katman</div>
                         <select id="matSelect" class="glass-input text-xs mb-2">
-                            <option value="rockwool" data-i18n="mat_rock">Taş Yünü (Sanayi)</option>
-                            <option value="glasswool" data-i18n="mat_glass">İğnelenmiş Cam Elyaf</option> 
-                            <option value="rubber" data-i18n="mat_rubber">Elastomerik Kauçuk</option>
-                            <option value="aerogel" data-i18n="mat_aerogel">Aerogel</option>
-                            <option value="ceramic" data-i18n="mat_ceramic">Seramik Yünü</option>
-                            <option value="bare" class="font-bold text-red-500 dark:text-red-400" data-i18n="mat_bare">⚠️ Yalıtımsız (Çıplak)</option>
+                            <option value="rockwool">Taş Yünü (Sanayi)</option>
+                            <option value="glasswool">İğnelenmiş Cam Elyaf</option> 
+                            <option value="rubber">Elastomerik Kauçuk</option>
+                            <option value="aerogel">Aerogel</option>
+                            <option value="ceramic">Seramik Yünü</option>
+                            <option value="bare" class="font-bold text-red-500 dark:text-red-400">⚠️ Yalıtımsız (Çıplak)</option>
                         </select>
-                        <div class="grid grid-cols-2 gap-2 mt-2">
-                            <input type="number" id="thk" class="glass-input text-xs" value="50" placeholder="Thick. (mm)" data-i18n="ph_thk">
-                            
+                        <div class="grid grid-cols-2 gap-2 mt-2 mb-2">
+                            <input type="number" id="thk" class="glass-input text-xs" value="50" placeholder="Kalınlık (mm)">
                             <div class="flex gap-1">
-                                <input type="number" id="inv" class="glass-input text-xs" placeholder="Unit Invest." data-i18n="ph_inv">
+                                <input type="number" id="inv" class="glass-input text-xs" placeholder="Birim Yatırım">
                                 <select id="invCurr" class="glass-input !px-1 w-14 text-center text-xs">
                                     <option value="TL">₺</option>
                                     <option value="USD">$</option>
@@ -303,22 +351,40 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="mt-2 text-right">
+
+                        <div class="mt-2 pt-2 border-t border-slate-300 dark:border-white/10">
+                            <label class="flex items-center gap-2 cursor-pointer mb-2">
+                                <input type="checkbox" id="useL2" onchange="toggleL2()" class="w-3 h-3 rounded border-slate-400 text-indigo-500">
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold">2. Katman Ekle (Kompozit)</span>
+                            </label>
+                            <div id="layer2Box" class="hidden">
+                                <select id="matSelect2" class="glass-input text-xs mb-2">
+                                    <option value="rubber" selected>Elastomerik Kauçuk</option>
+                                    <option value="rockwool">Taş Yünü (Sanayi)</option>
+                                    <option value="glasswool">İğnelenmiş Cam Elyaf</option>
+                                    <option value="aerogel">Aerogel</option>
+                                    <option value="ceramic">Seramik Yünü</option>
+                                </select>
+                                <input type="number" id="thk2" class="glass-input text-xs" value="19" placeholder="Kalınlık (mm)">
+                            </div>
+                        </div>
+
+                        <div class="mt-3 text-right">
                             <label class="text-[9px] text-slate-500 mr-2 uppercase font-bold">Rapor Para Birimi:</label>
                             <select id="curr" class="glass-input text-[10px] !w-20 inline-block !py-1 !h-7"><option value="TL" selected>₺ TL</option><option value="USD">$ USD</option><option value="EUR">€ EUR</option><option value="GBP">£ GBP</option></select>
                         </div>
                     </div>
 
                     <div id="btn-group" class="mt-4 relative z-10">
-                        <button id="btnAdd" onclick="calc()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-600/20 transition active:scale-95 flex items-center justify-center gap-2 text-sm cursor-pointer"><i data-lucide="plus" class="w-4 h-4"></i> <span data-i18n="btn_calc">Calculate & Add</span></button>
-                        <button id="btnUpdate" onclick="finishUpdate()" class="hidden w-full bg-orange-500 hover:bg-orange-400 text-white font-bold py-3 rounded-xl shadow-lg shadow-orange-500/20 transition active:scale-95 flex items-center justify-center gap-2 text-sm cursor-pointer"><i data-lucide="check" class="w-4 h-4"></i> Finish Edit</button>
+                        <button id="btnAdd" onclick="calc()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-600/20 transition active:scale-95 flex items-center justify-center gap-2 text-sm cursor-pointer"><i data-lucide="plus" class="w-4 h-4"></i> Hesapla & Ekle</button>
+                        <button id="btnUpdate" onclick="finishUpdate()" class="hidden w-full bg-orange-500 hover:bg-orange-400 text-white font-bold py-3 rounded-xl shadow-lg shadow-orange-500/20 transition active:scale-95 flex items-center justify-center gap-2 text-sm cursor-pointer"><i data-lucide="check" class="w-4 h-4"></i> Güncellemeyi Bitir</button>
                     </div>
                 </div>
 
                 <div class="glass-card p-4 rounded-xl border-l-4 border-l-yellow-500/50 bg-yellow-500/5">
                     <div class="flex gap-3">
                         <i data-lucide="info" class="w-5 h-5 text-yellow-600 dark:text-yellow-500 shrink-0 mt-0.5"></i>
-                        <p class="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed text-justify" data-i18n="legal_body">This software provides theoretical thermal simulations based on ISO 12241.</p>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed text-justify">Bu yazılım ISO 12241 mühendislik standartlarına dayalı teorik termal simülasyonlar sunar.</p>
                     </div>
                 </div>
             </div>
@@ -326,33 +392,33 @@
             <div class="xl:col-span-8">
                 <div class="glass-card p-0 overflow-hidden min-h-[600px] flex flex-col rounded-2xl">
                     <div class="p-4 border-b border-slate-200 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-slate-900/30">
-                        <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2"><i data-lucide="list" class="w-4 h-4 text-green-500"></i> <span data-i18n="lbl_list">Calculation List</span></h3>
+                        <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2"><i data-lucide="list" class="w-4 h-4 text-green-500"></i> Hesaplama Listesi</h3>
                         
                         <div class="flex gap-2">
                              <input type="file" id="csvInput" class="hidden" accept=".csv" onchange="importCSV(this)">
                              <button onclick="document.getElementById('csvInput').click()" class="flex items-center gap-1 text-[10px] bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-2 py-1 rounded transition cursor-pointer dark:bg-emerald-900/30 dark:text-emerald-400 dark:hover:bg-emerald-900/50"><i data-lucide="upload" class="w-3 h-3"></i> Excel Yükle</button>
                              <button onclick="exportCSV()" class="flex items-center gap-1 text-[10px] bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded transition cursor-pointer dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"><i data-lucide="download" class="w-3 h-3"></i> Excel İndir</button>
                              <div class="w-px h-4 bg-slate-300 dark:bg-slate-700 mx-1"></div>
-                             <button onclick="clearAll()" class="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition cursor-pointer" data-i18n="btn_clear">Clear All</button>
+                             <button onclick="clearAll()" class="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition cursor-pointer">Temizle</button>
                         </div>
                     </div>
                     <div class="overflow-x-auto flex-1">
                         <table class="w-full text-left text-sm" id="grid">
                         <thead class="bg-slate-100 dark:bg-slate-900/80 text-[10px] uppercase text-slate-500 dark:text-slate-400 font-semibold sticky top-0 backdrop-blur-md">
                             <tr>
-                            <th class="px-6 py-3" data-i18n="th_img">Img</th>
-                            <th class="px-6 py-3" data-i18n="th_comp">Component</th>
-                            <th class="px-6 py-3" data-i18n="th_det">Detail</th>
-                            <th class="px-6 py-3 text-center" data-i18n="th_qty">Qty</th>
-                            <th class="px-6 py-3 text-center text-red-500 dark:text-red-400" data-i18n="th_bare">Bare Surface Temp<br><span class="text-[9px]">(Loss kWh)</span></th>
-                            <th class="px-6 py-3 text-center text-orange-500 dark:text-orange-400" data-i18n="th_ins">Ins. Surface Temp<br><span class="text-[9px]">(Loss kWh)</span></th>
-                            <th class="px-6 py-3 text-center text-green-600 dark:text-green-400" data-i18n="th_gain_kwh">Gain<br><span class="text-[9px]">(Saved kWh)</span></th>
-                            <th class="px-6 py-3 text-right" data-i18n="th_inv">Invest</th><th class="px-6 py-3 text-right text-green-600 dark:text-green-400" data-i18n="th_gain">Gain (Money)</th>
-                            <th class="px-6 py-3 text-right">ROI</th><th class="px-6 py-3 text-right" data-i18n="th_act">Action</th>
+                            <th class="px-6 py-3">Görsel</th>
+                            <th class="px-6 py-3">Ekipman</th>
+                            <th class="px-6 py-3">Detay</th>
+                            <th class="px-6 py-3 text-center">Miktar</th>
+                            <th class="px-6 py-3 text-center text-red-500 dark:text-red-400">Çıplak Yüzey Sıc.<br><span class="text-[9px]">(Kayıp kWh)</span></th>
+                            <th class="px-6 py-3 text-center text-orange-500 dark:text-orange-400">İzolasyonlu Yüzey Sıc.<br><span class="text-[9px]">(Kayıp kWh)</span></th>
+                            <th class="px-6 py-3 text-center text-green-600 dark:text-green-400">Kazanç<br><span class="text-[9px]">(Fark kWh)</span></th>
+                            <th class="px-6 py-3 text-right">Yatırım</th><th class="px-6 py-3 text-right text-green-600 dark:text-green-400">Kazanç (Tutar)</th>
+                            <th class="px-6 py-3 text-right">ROI</th><th class="px-6 py-3 text-right">İşlem</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200 dark:divide-slate-700/50" id="gridBody">
-                            <tr><td colspan="10" class="px-6 py-20 text-center text-slate-500"><i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-20"></i><span id="emptyMsg" data-i18n="msg_no_calc">No calculation added yet.</span></td></tr>
+                            <tr><td colspan="10" class="px-6 py-20 text-center text-slate-500"><i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-20"></i><span id="emptyMsg">Henüz hesaplama eklenmedi.</span></td></tr>
                         </tbody>
                         </table>
                     </div>
@@ -367,28 +433,31 @@
         <div class="cover-accent"></div>
         <div class="cover-content">
             <div>
-                <div class="text-sm tracking-[5px] text-slate-500 uppercase mb-4 opacity-90" id="rep_title_top">Energy Efficiency Audit</div>
-                <h1 class="text-6xl font-black leading-tight mb-10 text-slate-900 relative z-10" id="rep_title_main">INDUSTRIAL <br><span class="text-green-600">INSULATION</span> <br>REPORT</h1>
+                <div class="text-sm tracking-[5px] text-slate-500 uppercase mb-4 opacity-90">Isı Kaybı Kaynaklı Enerji Verimliliği Simülasyonu</div>
+                <h1 class="text-6xl font-black leading-tight mb-10 text-slate-900 relative z-10">ENDÜSTRİYEL <br><span class="text-green-600">YALITIM</span> <br>RAPORU</h1>
             </div>
             
             <div>
                 <div class="flex justify-between items-end">
                     <div class="border-l-4 border-green-600 pl-8 relative z-10">
-                        <div class="text-xs uppercase opacity-60 mb-1" id="rep_client_lbl">Client</div><div class="text-3xl font-bold mb-8 text-slate-800" id="covClient">CLIENT COMPANY</div>
-                        <div class="text-xs uppercase opacity-60 mb-1" id="rep_prep_lbl">Prepared By</div><div class="text-xl font-bold text-slate-800" id="covProv">PROVIDER</div>
+                        <div class="text-xs uppercase opacity-60 mb-1">Firma</div>
+                        <div class="text-3xl font-bold mb-1 text-slate-800" id="covClient">FİRMA ADI</div>
+                        <div class="text-sm text-slate-500 font-medium uppercase tracking-wider mb-8" id="covContact"></div>
+
+                        <div class="text-xs uppercase opacity-60 mb-1">Hazırlayan</div><div class="text-xl font-bold text-slate-800" id="covProv">TEDARİKÇİ</div>
                     </div> 
-                    <div class="text-right relative z-10"><div class="text-[100px] font-black text-green-600 leading-none" id="covRoi">---</div><div class="text-xl font-medium tracking-wide text-slate-500" id="rep_roi_month">MONTH PAYBACK</div></div>
+                    <div class="text-right relative z-10"><div class="text-[100px] font-black text-green-600 leading-none" id="covRoi">---</div><div class="text-xl font-medium tracking-wide text-slate-500">AY AMORTİSMAN SÜRESİ</div></div>
                 </div>
 
                 <div class="mt-12 border-t border-slate-200 pt-6">
-                    <div class="text-[10px] uppercase font-bold text-slate-400 mb-3" data-i18n="lbl_params">Hesaplama Parametreleri</div>
+                    <div class="text-[10px] uppercase font-bold text-slate-400 mb-3">Hesaplama Parametreleri</div>
                     <div class="grid grid-cols-3 gap-6 text-xs text-slate-600">
-                        <div><span class="font-bold text-slate-800" data-i18n="lbl_cov_temp">Ortam Sıcaklığı:</span> <span id="covTemp">25</span>°C</div>
-                        <div><span class="font-bold text-slate-800" data-i18n="lbl_cov_wind">Rüzgar Hızı:</span> <span id="covWind">1</span> m/s</div>
-                        <div><span class="font-bold text-slate-800" data-i18n="lbl_cov_fuel">Yakıt Tipi:</span> <span id="covFuel">Gas</span></div>
-                        <div><span class="font-bold text-slate-800" data-i18n="lbl_cov_eff">Kazan Verimi:</span> <span id="covEff">85</span>%</div>
-                        <div><span class="font-bold text-slate-800" data-i18n="lbl_cov_price">Enerji Fiyatı:</span> <span id="covPrice">0.15</span> <span id="covCurr">TL</span></div>
-                        <div><span class="font-bold text-slate-800" data-i18n="lbl_cov_hours">Operasyon:</span> <span id="covHours">8000</span> h/y</div>
+                        <div><span class="font-bold text-slate-800">Ortam Sıcaklığı:</span> <span id="covTemp">25</span>°C</div>
+                        <div><span class="font-bold text-slate-800">Rüzgar Hızı:</span> <span id="covWind">1</span> m/s</div>
+                        <div><span class="font-bold text-slate-800">Yakıt Bilgisi:</span> <span id="covFuel">LHV</span></div>
+                        <div><span class="font-bold text-slate-800">Kazan Verimi:</span> <span id="covEff">85</span>%</div>
+                        <div><span class="font-bold text-slate-800">Enerji Fiyatı:</span> <span id="covPrice">0.15</span> <span id="covCurr">TL</span></div>
+                        <div><span class="font-bold text-slate-800">Operasyon:</span> <span id="covHours">8000</span> h/y</div>
                     </div>
                 </div>
             </div>
@@ -398,46 +467,46 @@
     </div>
     
     <div id="p-table" class="print-page p-12">
-        <div class="flex justify-between items-center border-b-2 border-slate-900 pb-4 mb-8"><h2 class="text-xl font-black text-slate-900 uppercase" id="rep_p2_title">Detailed Analysis</h2><div class="text-xs text-slate-500" id="rDate">...</div></div>
+        <div class="flex justify-between items-center border-b-2 border-slate-900 pb-4 mb-8"><h2 class="text-xl font-black text-slate-900 uppercase">Detaylı Analiz Dökümü</h2><div class="text-xs text-slate-500" id="rDate">...</div></div>
         <table class="w-full audit-table mb-8"><thead><tr id="rep_table_head"></tr></thead><tbody id="rTable"></tbody></table>
         <div class="page-num mt-auto pt-8 border-t border-slate-200 text-center text-[10px] text-slate-400">Page 2 / 3</div>
     </div>
     
     <div id="p-summary" class="print-page p-12 flex flex-col h-full">
-        <h2 class="text-2xl font-black text-slate-900 uppercase mb-8 border-b-2 border-slate-900 pb-4" id="rep_p3_title">Executive Summary</h2>
+        <h2 class="text-2xl font-black text-slate-900 uppercase mb-8 border-b-2 border-slate-900 pb-4">Yönetici Özeti</h2>
         
         <div class="flex flex-col gap-6 mb-12">
             <div class="pl-6 border-l-4 border-red-500 py-2">
-                <div class="text-xs font-bold text-red-400 uppercase tracking-widest mb-1" id="rep_risk_card">CURRENT ANNUAL LOSS</div>
+                <div class="text-xs font-bold text-red-400 uppercase tracking-widest mb-1">MEVCUT YILLIK KAYIP</div>
                 <div class="flex items-end gap-4">
                     <div class="text-5xl font-black text-red-600 tracking-tight leading-none" id="sumLoss">0</div>
                     <div class="text-lg font-bold text-slate-500 mb-1" id="sumFuelLost"></div>
                 </div>
-                <div class="text-[9px] text-red-800 mt-1 font-bold opacity-70" id="rep_risk_desc">Loss if no action taken.</div>
+                <div class="text-[9px] text-red-800 mt-1 font-bold opacity-70">Müdahale edilmezse kaybedilecek tutar.</div>
             </div>
             
             <div class="pl-6 border-l-4 border-slate-400 py-2">
-                <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1" id="rep_cost_card">TOTAL INVESTMENT</div>
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">TOPLAM YATIRIM</div>
                 <div class="text-5xl font-black text-slate-800 tracking-tight leading-none" id="tabInv">0</div>
             </div>
             
             <div class="pl-6 border-l-4 border-green-500 py-2">
-                <div class="text-xs font-bold text-green-400 uppercase tracking-widest mb-1" id="rep_opp_card">NET SAVINGS (ANNUAL)</div>
+                <div class="text-xs font-bold text-green-400 uppercase tracking-widest mb-1">NET KAZANÇ (YILLIK)</div>
                 <div class="text-5xl font-black text-green-600 tracking-tight leading-none" id="sumSave">0</div>
             </div>
         </div>
 
-        <div class="mb-8"><h3 class="text-sm font-bold text-slate-900 uppercase mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-4 h-4"></i> <span id="rep_proj_title">Financial Projection</span></h3><table class="w-full text-xs text-right border-collapse"><thead><tr class="bg-slate-100 text-slate-500"><th class="p-2 text-left" id="rep_scen">Scenario</th><th class="p-2" id="th_y1">Year 1</th><th class="p-2" id="th_y2">Year 2</th><th class="p-2" id="th_y3">Year 3</th><th class="p-2" id="th_y4">Year 4</th><th class="p-2" id="th_y5">Year 5</th><th class="p-2 font-black" id="th_total">TOTAL</th></tr></thead><tbody class="font-mono" id="projTable"></tbody></table></div>
+        <div class="mb-8"><h3 class="text-sm font-bold text-slate-900 uppercase mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-4 h-4"></i> Finansal Projeksiyon (5 Yıl)</h3><table class="w-full text-xs text-right border-collapse"><thead><tr class="bg-slate-100 text-slate-500"><th class="p-2 text-left">Senaryo</th><th class="p-2">Yıl 1</th><th class="p-2">Yıl 2</th><th class="p-2">Yıl 3</th><th class="p-2">Yıl 4</th><th class="p-2">Yıl 5</th><th class="p-2 font-black">TOPLAM</th></tr></thead><tbody class="font-mono" id="projTable"></tbody></table></div>
         
         <div class="flex gap-8 mb-4">
-             <div class="flex-1 bg-blue-50 border border-blue-100 rounded-xl p-6 flex flex-col justify-center"><span class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-1" id="rep_roi_card">ROI</span><div class="text-4xl font-black text-blue-600" id="txtRoi">---</div><div class="h-2 bg-blue-200 rounded-full overflow-hidden mt-2 w-full"><div id="visualBar" class="h-full bg-blue-600 w-0 transition-all"></div></div></div>
+             <div class="flex-1 bg-blue-50 border border-blue-100 rounded-xl p-6 flex flex-col justify-center"><span class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-1">Yatırım Geri Dönüş (ROI)</span><div class="text-4xl font-black text-blue-600" id="txtRoi">---</div><div class="h-2 bg-blue-200 rounded-full overflow-hidden mt-2 w-full"><div id="visualBar" class="h-full bg-blue-600 w-0 transition-all"></div></div></div>
              <div class="flex-1 flex flex-col">
                  <div class="flex-1 bg-emerald-900 rounded-xl p-6 text-white flex items-center justify-between relative overflow-hidden h-full">
                       <div class="absolute right-0 bottom-0 opacity-10 pointer-events-none translate-x-4 translate-y-4"><i data-lucide="sprout" class="w-32 h-32 text-white"></i></div>
-                     <div class="z-10"><div class="text-[10px] text-emerald-300 font-bold uppercase tracking-widest" id="rep_env_title">CARBON FOOTPRINT</div><div class="text-3xl font-black mt-1"><span id="sumCo2">0</span> Ton</div></div>
-                     <div class="text-right z-10 border-l border-emerald-700 pl-6"><div class="text-3xl font-black"><span id="sumTrees">0</span></div><div class="text-[9px] text-emerald-400 mt-1" id="rep_tree_desc">Trees</div></div>
+                     <div class="z-10"><div class="text-[10px] text-emerald-300 font-bold uppercase tracking-widest">KARBON AYAK İZİ</div><div class="text-3xl font-black mt-1"><span id="sumCo2">0</span> Ton</div></div>
+                     <div class="text-right z-10 border-l border-emerald-700 pl-6"><div class="text-3xl font-black"><span id="sumTrees">0</span></div><div class="text-[9px] text-emerald-400 mt-1">Ağaç Eşdeğeri</div></div>
                  </div>
-                 <div class="text-[8px] text-slate-400 text-right mt-1 italic leading-tight" id="rep_tree_note">...</div>
+                 <div class="text-[8px] text-slate-400 text-right mt-1 italic leading-tight">* Ağaç eşleniği: 1 Ağaç ≈ 25 kg CO₂ (Kaynak: EEA)</div>
              </div>
          </div>
 
@@ -456,7 +525,7 @@
         </div>
 
         <div class="border-t-2 border-slate-100 pt-4">
-            <p class="text-[10px] text-slate-400 text-center font-medium leading-relaxed" id="rep_legal">...</p>
+            <p class="text-[10px] text-slate-400 text-center font-medium leading-relaxed">Hesaplamalar ISO 12241 mühendislik standartlarına göre simüle edilmiştir. Garanti niteliği taşımaz.</p>
         </div>
     </div>
 </div>
@@ -466,7 +535,6 @@
         document.documentElement.classList.toggle('dark');
     }
 
-    // QR GİZLEME/GÖSTERME FONKSİYONU
     function toggleQrVisibility() {
         const isChecked = document.getElementById('toggleQrInput').checked;
         const body = document.body;
@@ -476,98 +544,19 @@
             body.classList.remove('hide-qr-section');
         }
     }
-
-    async function initApp(){ try{const r=await fetch('https://ipapi.co/json/');const d=await r.json();if(d.country_code==='TR') setLang('tr'); else setLang('en');}catch(e){setLang('tr');} init(); }
     
-    const TRANSLATIONS={
-        tr:{
-            legal_body:"Bu yazılım, ISO 12241 & ASTM C680 mühendislik standartlarına dayalı teorik termal simülasyonlar sunar.",
-            page_title:"Yalıtım Simülasyonu",btn_report:"Rapor Al",dash_roi:"Ort. Amortisman",dash_save:"Yıllık Kazanç",dash_inv:"Toplam Yatırım",dash_co2:"CO2 Azaltım",lbl_proj:"Proje Detayları",lbl_prep:"Hazırlayan",ph_firm:"Firma Adı",ph_eng:"Mühendis Adı",lbl_cust:"Müşteri Bilgileri",ph_cust_firm:"Müşteri Firma",ph_dept:"İlgili Kişi",lbl_env:"Ortam & Enerji",lbl_temp:"Ortam Sıc. (°C)",lbl_wind:"Rüzgar (m/s)",
-            lbl_fuel:"Yakıt Tipi", lbl_eff: "Kazan Verimi %", 
-            fuel_gas:"Doğalgaz (8250 kcal/m³)",
-            fuel_elec:"Elektrik (860 kcal/kWh)",
-            fuel_lng:"LNG (11500 kcal/kg)",
-            fuel_oil:"Fuel Oil (9600 kcal/kg)",
-            fuel_coal_imp:"İthal Kömür (6000 kcal/kg)",
-            fuel_coal_loc:"Yerli Kömür (3500 kcal/kg)",
-            lbl_price:"Birim Fiyat",lbl_hours:"Yıllık Saat",lbl_add:"Yeni Ölçüm Ekle",
-            btn_v:"Armatür",btn_p:"Boru",btn_t:"Tank / Düz",lbl_st:"İşletme Sıc. (°C)",lbl_qty:"Adet",
-            lbl_plen:"Boru Boyu (m)", 
-            lbl_photo:"Termal Foto Seç",lbl_qr:"Rapor QR'ı Yükle",lbl_spec:"İzolasyon Özellikleri",btn_calc:"Hesapla & Ekle",lbl_list:"Hesaplama Listesi",msg_no_calc:"Henüz hesaplama eklenmedi.",btn_clear:"Temizle",th_img:"Görsel",th_comp:"Ekipman",th_det:"Detay",th_qty:"Miktar",
-            th_bare:"Çıplak Yüzey Sıc.<br><span class='text-[9px] font-normal opacity-70'>(Kayıp kWh)</span>",
-            th_ins:"İzolasyonlu Yüzey Sıc.<br><span class='text-[9px] font-normal opacity-70'>(Kayıp kWh)</span>",
-            th_gain_kwh:"Enerji Kazancı<br><span class='text-[9px] font-normal opacity-70'>(Fark kWh)</span>",
-            th_inv:"Yatırım",th_gain:"Kazanç",th_act:"İşlem",
-            grp_valves:"Vanalar",val_gate:"Sürgülü Vana",val_globe:"Glob Vana",val_ball_fl:"Küresel Vana",val_butterfly:"Kelebek Vana",val_check:"Çekvalf",val_strainer:"Pislik Tutucu",val_sep:"Buhar Seperatörü",
-            grp_conn:"Bağlantı Elemanları", val_flange:"Flanş Çifti (Takım)", val_elbow:"Dirsek (90°)",
-            grp_traps:"Kondenstoplar", val_trap_float:"Şamandıralı", val_trap_thermo:"Termodinamik", val_trap_bimetal:"Bimetalik", val_trap_bucket:"Ters Kovalı",
-            std_iso:"ISO 12241 (Standard)",std_astm:"ASTM C680 (ABD)",std_vdi:"VDI 2055 (Alman)",mat_rock:"Taş Yünü (Sanayi)",mat_rubber:"Elastomerik Kauçuk",mat_aerogel:"Aerogel",mat_glass:"İğnelenmiş Cam Elyaf",mat_ceramic:"Seramik Yünü",mat_bare:"⚠️ Yalıtımsız (Çıplak)",
-            unit_month:"Ay",
-            rep_title_top:"Isı Kaybı Kaynaklı Enerji Verimliliği Simülasyonu",
-            rep_title_main:"ENDÜSTRİYEL <br><span class='text-green-600'>YALITIM</span> <br>RAPORU",rep_client_lbl:"Müşteri",rep_prep_lbl:"Hazırlayan",rep_roi_month:"AY AMORTİSMAN SÜRESİ",rep_p2_title:"Detaylı Analiz Dökümü",rep_th_inv:"Yatırım",rep_th_gain:"Net Kazanç",rep_p3_title:"Yönetici Özeti",rep_risk_card:"MEVCUT YILLIK KAYIP",rep_risk_desc:"Müdahale edilmezse kaybedilecek tutar.",rep_cost_card:"TOPLAM YATIRIM",rep_opp_card:"NET KAZANÇ (YILLIK)",rep_proj_title:"Finansal Projeksiyon (5 Yıl)",rep_scen:"Senaryo",rep_scen_loss:"Mevcut Durum (Kümülatif Kayıp)",rep_scen_gain:"Yatırım Sonrası (Kümülatif Kazanç)",rep_roi_card:"Yatırım Geri Dönüş (ROI)",rep_env_title:"KARBON AYAK İZİ",rep_tree_desc:"Ağaç Eşdeğeri",
-            rep_legal:"Hesaplamalar ISO 12241 mühendislik standartlarına göre simüle edilmiştir. Garanti niteliği taşımaz.",
-            rep_tree_note:"* Ağaç eşleniği: 1 Ağaç ≈ 25 kg CO₂ (Kaynak: EEA)",
-            ph_inv:"Birim Yatırım",ph_thk:"Kalınlık (mm)",ph_len:"Uzunluk (m)",ph_width:"Genişlik (m)",ph_height:"Yükseklik (m)",th_y1:"Yıl 1",th_y2:"Yıl 2",th_y3:"Yıl 3",th_y4:"Yıl 4",th_y5:"Yıl 5",th_total:"TOPLAM", th_proc: "İşletme Sıc.", th_surf: "Yüzey Sıc.",
-            lbl_params: "Hesaplama Parametreleri", lbl_cov_temp:"Ortam Sıcaklığı:", lbl_cov_wind:"Rüzgar Hızı:", lbl_cov_fuel:"Yakıt Tipi:", lbl_cov_eff:"Kazan Verimi:", lbl_cov_price:"Enerji Fiyatı:", lbl_cov_hours:"Operasyon:"
-        },
-        en:{
-            legal_body:"This software provides theoretical thermal simulations based on ISO 12241 & ASTM C680.",
-            page_title:"Insulation Simulation",btn_report:"Get Report",dash_roi:"Avg. ROI",dash_save:"Annual Savings",dash_inv:"Total Investment",dash_co2:"CO2 Reduction",lbl_proj:"Project Details",lbl_prep:"Prepared By",ph_firm:"Company",ph_eng:"Engineer",lbl_cust:"Customer Info",ph_cust_firm:"Client Company",ph_dept:"Contact",lbl_env:"Environment & Energy",lbl_temp:"Amb. Temp (°C)",lbl_wind:"Wind (m/s)",
-            lbl_fuel:"Fuel Type", lbl_eff: "Boiler Eff. %", 
-            fuel_gas:"Natural Gas (8250 kcal/m³)",
-            fuel_elec:"Electricity (860 kcal/kWh)",
-            fuel_lng:"LNG (11500 kcal/kg)",
-            fuel_oil:"Fuel Oil (9600 kcal/kg)",
-            fuel_coal_imp:"Imp. Coal (6000 kcal/kg)",
-            fuel_coal_loc:"Loc. Coal (3500 kcal/kg)",
-            lbl_price:"Unit Price",lbl_hours:"Annual Hours",lbl_add:"Add New Item",
-            btn_v:"Valve",btn_p:"Pipe",btn_t:"Tank / Flat",lbl_st:"Process Temp (°C)",lbl_qty:"Qty",
-            lbl_plen:"Pipe Length (m)",
-            lbl_photo:"Select Thermal Photo",lbl_qr:"Upload Report QR",lbl_spec:"Insulation Specs",btn_calc:"Calculate & Add",lbl_list:"Calculation List",msg_no_calc:"No calculation added yet.",btn_clear:"Clear All",th_img:"Img",th_comp:"Component",th_det:"Detail",th_qty:"Qty",
-            th_bare:"Bare Surface Temp<br><span class='text-[9px] font-normal opacity-70'>(Loss kWh)</span>",
-            th_ins:"Ins. Surface Temp<br><span class='text-[9px] font-normal opacity-70'>(Loss kWh)</span>",
-            th_gain_kwh:"Energy Gain<br><span class='text-[9px] font-normal opacity-70'>(Diff kWh)</span>",
-            th_inv:"Invest",th_gain:"Savings",th_act:"Action",
-            grp_valves:"Valves",val_gate:"Gate Valve",val_globe:"Globe Valve",val_ball_fl:"Ball Valve",val_butterfly:"Butterfly Valve",val_check:"Check Valve",val_strainer:"Strainer",val_sep:"Steam Separator",
-            grp_conn:"Fittings", val_flange:"Flange Pair", val_elbow:"Elbow (90°)",
-            grp_traps:"Steam Traps", val_trap_float:"Float Trap", val_trap_thermo:"Thermodynamic", val_trap_bimetal:"Bimetallic", val_trap_bucket:"Inverted Bucket",
-            std_iso:"ISO 12241 (Standard)",std_astm:"ASTM C680 (USA)",std_vdi:"VDI 2055 (German)",mat_rock:"Rock Wool",mat_rubber:"Elastomeric Rubber",mat_aerogel:"Aerogel",mat_glass:"Needled Glass Fiber",mat_ceramic:"Ceramic Fiber",mat_bare:"⚠️ Uninsulated (Bare)",
-            unit_month:"Months",
-            rep_title_top:"Thermal Loss & Energy Efficiency Simulation",
-            rep_title_main:"INDUSTRIAL <br><span class='text-green-500'>INSULATION</span> <br>REPORT",rep_client_lbl:"Client",rep_prep_lbl:"Prepared By",rep_roi_month:"MONTH PAYBACK",rep_p2_title:"Detailed Analysis",rep_th_inv:"Investment",rep_th_gain:"Net Savings",rep_p3_title:"Executive Summary",rep_risk_card:"CURRENT ANNUAL LOSS",rep_risk_desc:"Loss if no action taken.",rep_cost_card:"TOTAL INVESTMENT",rep_opp_card:"NET SAVINGS (ANNUAL)",rep_proj_title:"Financial Projection",rep_scen:"Scenario",rep_scen_loss:"Current State (Loss)",rep_scen_gain:"Post-Investment (Gain)",rep_roi_card:"ROI",rep_env_title:"CARBON FOOTPRINT",rep_tree_desc:"Trees",
-            rep_legal:"Calculations simulated according to ISO 12241 standards. Results are estimates.",
-            rep_tree_note:"* Tree equivalent: 1 Tree ≈ 25 kg CO₂ (Source: EEA)",
-            ph_inv:"Unit Investment",ph_thk:"Thick. (mm)",ph_len:"Length (m)",ph_width:"Width (m)",ph_height:"Height (m)",th_y1:"Year 1",th_y2:"Year 2",th_y3:"Year 3",th_y4:"Year 4",th_y5:"Year 5",th_total:"TOTAL", th_proc: "Process Temp", th_surf: "Surf. Temp",
-            lbl_params: "Calculation Parameters", lbl_cov_temp:"Ambient Temp:", lbl_cov_wind:"Wind Speed:", lbl_cov_fuel:"Fuel Type:", lbl_cov_eff:"Boiler Eff:", lbl_cov_price:"Energy Price:", lbl_cov_hours:"Operation:"
-        }
-    };
-    
-    let currentLang='en';
-    function toggleLanguage(){setLang(currentLang==='tr'?'en':'tr');}
-    function setLang(code){
-        currentLang=code;
-        const isEn=currentLang==='en';
-        document.querySelectorAll('.lang-flag').forEach(el=>el.innerText=isEn?'🇬🇧':'🇹🇷');
-        document.querySelectorAll('[data-i18n]').forEach(el=>{
-            const key=el.getAttribute('data-i18n');
-            if(TRANSLATIONS[currentLang][key]){
-                if(el.tagName==='INPUT'||el.tagName==='TEXTAREA')el.placeholder=TRANSLATIONS[currentLang][key];
-                else if(el.tagName==='OPTGROUP')el.label=TRANSLATIONS[currentLang][key];
-                else if(el.tagName==='OPTION')el.innerText=TRANSLATIONS[currentLang][key];
-                else {
-                    el.innerHTML=TRANSLATIONS[currentLang][key]; // innerHTML for HTML support
-                }
-            }
-        });
-        
-        const pLenInput = document.getElementById('pLen');
-        if(pLenInput) pLenInput.placeholder = TRANSLATIONS[currentLang].lbl_plen;
-
-        if(document.getElementById('th_y1')){
-             ['th_y1','th_y2','th_y3','th_y4','th_y5'].forEach(id=>{document.getElementById(id).innerText=TRANSLATIONS[currentLang][id]});
-        }
-        render();
+    function toggleL2() {
+        const box = document.getElementById('layer2Box');
+        if(document.getElementById('useL2').checked) box.classList.remove('hidden'); else box.classList.add('hidden');
     }
+    
+    function toggleFuelMode() {
+        const fuel = document.getElementById('fuel').value;
+        const box = document.getElementById('manualFuelBox');
+        if(fuel === 'manual') box.classList.remove('hidden'); else box.classList.add('hidden');
+    }
+
+    function initApp(){ init(); }
     
     function setType(t){
         ['valve','pipe','tank'].forEach(x=>{document.getElementById('g-'+x).classList.add('hidden');});
@@ -585,26 +574,64 @@
         qtyInput.value = 1;
     }
 
-    const PIPES={15:21.3,20:26.7,25:33.4,32:42.2,40:48.3,50:60.3,65:73.0,80:88.9,100:114.3,125:141.3,150:168.3,200:219.1,250:273.0,300:323.9,350:355.6,400:406.4};
+    // DN500 EKLENDİ (508mm)
+    const PIPES={15:21.3,20:26.7,25:33.4,32:42.2,40:48.3,50:60.3,65:73.0,80:88.9,100:114.3,125:141.3,150:168.3,200:219.1,250:273.0,300:323.9,350:355.6,400:406.4,500:508.0};
     const SEPARATORS = {15:0.15, 20:0.18, 25:0.22, 32:0.28, 40:0.35, 50:0.45, 65:0.60, 80:0.75, 100:1.10, 125:1.45, 150:1.90, 200:2.80};
 
     const MATS={rockwool:{a:0.035,b:0.00017,c:0},glasswool:{a:0.025,b:0.00015,c:0},ceramic:{a:0.025,b:0.00012,c:1.2e-7},aerogel:{a:0.019,b:0.00004,c:5e-8},rubber:{a:0.034,b:0.000075,c:0},bare:{a:25,b:0,c:0}};
     const VALVE_FACTORS={
         gate:1.2,globe:1.4,butterfly:0.6,ball:1.0,strainer:1.5,check:0.9,
         trap_float: 1.6, trap_thermo: 0.8, trap_bimetal: 1.0, trap_bucket: 1.5,
-        flange: 0.35 // Standart Flanş Çifti
+        flange: 0.35
     };
-    
     const FUELS={
-        gas: 9.59, 
-        elec: 1.0, 
-        lng: 13.37, 
-        fueloil: 11.16, 
-        coal_imp: 6.98,
-        coal_loc: 4.07
+        gas: 8250, 
+        elec: 860, 
+        lng: 11500, 
+        fueloil: 9600, 
+        coal_imp: 6000,
+        coal_loc: 3500
     };
     
     let LIST=[],FX={USD:34.50,EUR:36.50,GBP:43.20,TL:1.0},currImg=null,userQrImg=null,editingIndex=null;
+    
+    // YENİ YÜZEY YÖNETİMİ
+    let currentSurfaces = []; 
+
+    function addSurface(){
+        const w = parseFloat(document.getElementById('surfW').value);
+        const h = parseFloat(document.getElementById('surfH').value);
+        if(!w || !h){ alert("Lütfen En ve Boy giriniz."); return; }
+        
+        currentSurfaces.push({w: w, h: h});
+        document.getElementById('surfW').value = '';
+        document.getElementById('surfH').value = '';
+        renderSurfaces();
+    }
+    
+    function removeSurface(idx){
+        currentSurfaces.splice(idx,1);
+        renderSurfaces();
+    }
+    
+    function renderSurfaces(){
+        const listEl = document.getElementById('surfaceList');
+        const totalEl = document.getElementById('totalSurfArea');
+        listEl.innerHTML = '';
+        let totalAreaM2 = 0;
+        
+        currentSurfaces.forEach((s, idx) => {
+            const m2 = (s.w * s.h) / 10000;
+            totalAreaM2 += m2;
+            const div = document.createElement('div');
+            div.className = "flex justify-between items-center bg-white dark:bg-white/10 p-1.5 rounded border border-slate-200 dark:border-white/5";
+            div.innerHTML = `<span>${s.w} x ${s.h} cm</span> <button onclick="removeSurface(${idx})" class="text-red-500 hover:text-red-700"><i data-lucide="x" class="w-3 h-3"></i></button>`;
+            listEl.appendChild(div);
+        });
+        
+        totalEl.innerText = totalAreaM2.toFixed(3);
+        lucide.createIcons();
+    }
 
     function getK(matKey,T){if(!MATS[matKey])return 0.04;const m=MATS[matKey];return m.a+(m.b*T)+((m.c||0)*T*T);}
     function getSurfaceCoeff(std,vWind,Ts,Ta,D_out,isFlat){const dT=Math.abs(Ts-Ta);const sigma=5.67e-8,eps=0.9;let h_rad=eps*sigma*(Math.pow(Ts+273.15,4)-Math.pow(Ta+273.15,4))/(dT||1);if(dT<0.1)h_rad=5;let h_cv=0;if(std==='astm'){if(vWind<0.1){if(isFlat)h_cv=1.95*Math.pow(dT,0.25);else h_cv=1.32*Math.pow(dT/(D_out||1),0.25);}else{h_cv=10.0*Math.pow(vWind,0.6)/Math.pow((D_out||1),0.4);}}else if(std==='vdi'){if(vWind<0.1)h_cv=3.5+0.05*dT;else h_cv=3.9*Math.pow(vWind,0.7)/Math.pow((D_out||1),0.3);}else{if(vWind<0.5){if(isFlat)h_cv=2.2*Math.pow(dT,0.25);else h_cv=1.4*Math.pow(dT/(D_out||1),0.25);}else{h_cv=4+4*vWind;}}if(h_cv<1)h_cv=1;return h_rad+h_cv;}
@@ -612,19 +639,23 @@
     function getCalculationResult(){
         const qty=parseFloat(document.getElementById('qty').value)||1;
         const type=document.getElementById('type').value;
+        const location=document.getElementById('location').value||"";
         const tProc=parseFloat(document.getElementById('tProc').value)||0;
         const tAmb=parseFloat(document.getElementById('tAmb').value)||25;
         const vWind=parseFloat(document.getElementById('vWind').value)||0;
+        
         const matKey=document.getElementById('matSelect').value;
         const thk=parseFloat(document.getElementById('thk').value)||0;
-        const standard=document.getElementById('calcStd').value;
         
+        const useL2 = document.getElementById('useL2').checked;
+        const matKey2 = useL2 ? document.getElementById('matSelect2').value : null;
+        const thk2 = useL2 ? (parseFloat(document.getElementById('thk2').value)||0) : 0;
+        
+        const standard=document.getElementById('calcStd').value;
         const pLen = parseFloat(document.getElementById('pLen').value)||1; 
         
         let multiplier=1; 
-        if(type==='pipe'){
-            multiplier = pLen * qty;
-        }
+        if(type==='pipe'){ multiplier = pLen * qty; }
 
         const invRaw=parseFloat(document.getElementById('inv').value)||0;
         const invCurrencyCode = document.getElementById('invCurr').value; 
@@ -636,18 +667,13 @@
         let invUnitInReportCurr = invRaw * (invRate / reportRate);
 
         let invTotal = 0;
-        if(type==='pipe'){
-            invTotal = invUnitInReportCurr * multiplier; 
-        } else {
-            invTotal = invUnitInReportCurr * qty; 
-        }
+        if(type==='pipe'){ invTotal = invUnitInReportCurr * multiplier; } else { invTotal = invUnitInReportCurr * qty; }
         
         const eff=(parseFloat(document.getElementById('eff').value)||85)/100;
         const priceRaw=parseFloat(document.getElementById('price').value)||0;
         
         const energyCurrencyCode = document.getElementById('energyCurr').value;
         const energyRate = FX[energyCurrencyCode] || 1;
-        
         const priceInReportCurr = priceRaw * (energyRate / reportRate);
 
         const hours=parseFloat(document.getElementById('hours').value)||8000;
@@ -656,10 +682,25 @@
         let dPipe=0,D_ext=0,Name="",unitLabel="Adet";
 
         if(isFlat){
-            const A=parseFloat(document.getElementById('tA').value)||1;
-            const B=parseFloat(document.getElementById('tB').value)||1;
-            multiplier=A*B; 
-            dPipe=1.0; D_ext=1.0; Name=`Flat/Tank (${A}x${B}m)`; unitLabel="Set";
+            // YENİ ÇOKLU YÜZEY MANTIĞI
+            if(currentSurfaces.length === 0) {
+                // Eğer yüzey eklenmemişse default 1x1 kabul edelim ki çökmesin
+                multiplier = 1;
+                Name = `Tank/Düz (Ölçüsüz)`;
+                unitLabel = "Set";
+            } else {
+                let totalArea = 0;
+                let dims = [];
+                currentSurfaces.forEach(s => {
+                    totalArea += (s.w * s.h) / 10000;
+                    dims.push(`${s.w}x${s.h}cm`);
+                });
+                multiplier = totalArea;
+                // İsim kısmında tüm yüzeyleri listele
+                Name = `Düz Yüzey (${dims.join(' + ')})`;
+                unitLabel = "Set";
+            }
+            dPipe=1.0; D_ext=1.0; 
             invTotal = invUnitInReportCurr * qty; 
         } else {
             const dn=(type==='valve')?document.getElementById('vDN').value:document.getElementById('pDN').value;
@@ -671,68 +712,77 @@
                 if(vType === 'separator'){
                      const sepArea = SEPARATORS[Object.keys(PIPES).find(k=>PIPES[k]==mm)] || 0.5;
                      multiplier = sepArea; 
-                     Name=`Steam Separator (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`;
+                     Name=`Buhar Separatörü (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`;
                 } else if(vType === 'elbow') {
-                    // YENİ EKLENEN KISIM: DİRSEK (ELBOW)
-                    multiplier = 2.36 * dPipe; // 2.36 * D
-                    Name=`Elbow 90° (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`;
+                    multiplier = 2.36 * dPipe; 
+                    Name=`Dirsek 90° (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`;
                 } else {
                      multiplier=1; 
                      const sel = document.getElementById('valveType');
                      const txt = sel.options[sel.selectedIndex].text;
-                     if(vType.startsWith('trap_')){
-                         Name=`${txt} (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`;
-                     } else {
-                         Name=`${txt} (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`;
-                     }
+                     Name=`${txt} (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`;
                 }
                 unitLabel="Adet";
             } else {
-                Name=`Pipe (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`;
+                Name=`Boru (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`;
                 unitLabel="m";
             }
         }
         
         const thkM=thk/1000;
+        const thkM2=thk2/1000;
         let minTs=tAmb,maxTs=tProc,Ts=(minTs+maxTs)/2;
         
         if(matKey==='bare'){
             for(let i=0;i<100;i++){let D_out=isFlat?1.0:dPipe;const h_total=getSurfaceCoeff(standard,vWind,tProc,tAmb,D_out,isFlat);Ts=tProc;break;}
         }else{
             for(let i=0;i<100;i++){
-                const Tm=(tProc+Ts)/2;const k1=getK(matKey,Tm);let R1=isFlat?thkM/k1:Math.log((dPipe+2*thkM)/dPipe)/(2*Math.PI*k1);
-                const Q_cond=(tProc-Ts)/R1;let D_out=isFlat?1.0:dPipe+2*thkM;
-                const h_total=getSurfaceCoeff(standard,vWind,Ts,tAmb,D_out,isFlat);let A_surf=isFlat?1:2*Math.PI*(D_out/2);
+                const Tm=(tProc+Ts)/2;
+                const k1=getK(matKey,Tm);
+                
+                let R1 = 0, R2 = 0;
+                
+                if(isFlat) {
+                    R1 = thkM / k1;
+                    if(useL2) {
+                         const Tm2 = (Tm + Ts)/2 - 10; 
+                         const k2 = getK(matKey2, Tm2);
+                         R2 = thkM2 / k2;
+                    }
+                } else {
+                    R1 = Math.log((dPipe + 2*thkM)/dPipe) / (2*Math.PI*k1);
+                    if(useL2) {
+                        const Tm2 = (Tm + Ts)/2 - 10;
+                        const k2 = getK(matKey2, Tm2);
+                        R2 = Math.log((dPipe + 2*thkM + 2*thkM2) / (dPipe + 2*thkM)) / (2*Math.PI*k2);
+                    }
+                }
+                
+                const R_total = R1 + R2;
+                const Q_cond=(tProc-Ts)/R_total;
+                let D_out = isFlat ? 1.0 : dPipe + 2*(thkM + thkM2);
+                const h_total=getSurfaceCoeff(standard,vWind,Ts,tAmb,D_out,isFlat);
+                let A_surf=isFlat?1:2*Math.PI*(D_out/2);
                 const Q_conv=h_total*A_surf*(Ts-tAmb);
+                
                 if(Q_cond>Q_conv)minTs=Ts;else maxTs=Ts;Ts=(minTs+maxTs)/2;
             }
         }
         
         const finalTs=Ts;
-        let D_out_final=isFlat?1.0:dPipe+(matKey==='bare'?0:2*thkM);
+        let D_out_final = isFlat ? 1.0 : dPipe + (matKey==='bare' ? 0 : 2*(thkM + thkM2));
         const h_final=getSurfaceCoeff(standard,vWind,finalTs,tAmb,D_out_final,isFlat);
         let A_outer_unit=isFlat?1:Math.PI*D_out_final;
         const Q_unit=h_final*A_outer_unit*(finalTs-tAmb); 
         
         let Q_total_watts=0;
         const vType=document.getElementById('valveType').value;
-        
         if(type==='valve'){
-             if(vType === 'separator'){
-                 Q_total_watts = Q_unit * (multiplier*3) * qty;
-             } else {
-                 const factor=VALVE_FACTORS[vType]||1.2;
-                 Q_total_watts=Q_unit*factor*qty; // Elbow için multiplier zaten yukarıda 2.36*D olarak hesaplandı ama burada VALVE_FACTORS'e bakılıyor. Düzeltme aşağıda.
-                 if(vType === 'elbow') {
-                     // Dirsekte faktör yerine geometrik alan kullanılır (multiplier = eşdeğer boy)
-                     Q_total_watts = Q_unit * multiplier * qty;
-                 }
-             }
-        } else if(type==='pipe'){
-             Q_total_watts=Q_unit*multiplier; 
-        } else {
-             Q_total_watts=Q_unit*multiplier*qty; 
-        }
+             if(vType === 'separator'){ Q_total_watts = Q_unit * (multiplier*3) * qty; } 
+             else if(vType === 'elbow') { Q_total_watts = Q_unit * multiplier * qty; } 
+             else { const factor=VALVE_FACTORS[vType]||1.2; Q_total_watts=Q_unit*factor*qty; }
+        } else if(type==='pipe'){ Q_total_watts=Q_unit*multiplier; } 
+        else { Q_total_watts=Q_unit*multiplier*qty; }
         
         let h_bare=getSurfaceCoeff(standard,vWind,tProc,tAmb,dPipe,isFlat);
         let A_bare_unit=isFlat?1:Math.PI*dPipe;
@@ -740,55 +790,79 @@
         let Q_bare_total=0;
         
         if(type==='valve'){
-            if(vType==='separator'){
-                 Q_bare_total = Q_bare_unit * (multiplier*3) * qty;
-            } else if (vType === 'elbow') {
-                 Q_bare_total = Q_bare_unit * multiplier * qty;
-            } else {
-                 const factor=VALVE_FACTORS[vType]||1.2;
-                 Q_bare_total=Q_bare_unit*factor*qty;
-            }
-        } else if(type==='pipe'){
-            Q_bare_total=Q_bare_unit*multiplier;
-        } else {
-            Q_bare_total=Q_bare_unit*multiplier*qty;
-        }
+            if(vType==='separator'){ Q_bare_total = Q_bare_unit * (multiplier*3) * qty; } 
+            else if (vType === 'elbow') { Q_bare_total = Q_bare_unit * multiplier * qty; } 
+            else { const factor=VALVE_FACTORS[vType]||1.2; Q_bare_total=Q_bare_unit*factor*qty; }
+        } else if(type==='pipe'){ Q_bare_total=Q_bare_unit*multiplier; } 
+        else { Q_bare_total=Q_bare_unit*multiplier*qty; }
 
-        const LHV_kWh=FUELS[document.getElementById('fuel').value]||10;
-        const loss_money_insulated=(Q_total_watts*hours/1000/(LHV_kWh*eff))*priceInReportCurr;
-        const loss_money_bare=(Q_bare_total*hours/1000/(LHV_kWh*eff))*priceInReportCurr;
+        const fuelType = document.getElementById('fuel').value;
+        let LHV_Val = 8250;
+        let LHV_Unit = "m3";
+
+        if(fuelType === 'manual') {
+            LHV_Val = parseFloat(document.getElementById('fuelLhv').value) || 0;
+            LHV_Unit = document.getElementById('fuelUnit').value;
+        } else {
+            LHV_Val = FUELS[fuelType];
+            if(fuelType === 'gas') LHV_Unit = 'm3';
+            else if(fuelType === 'elec') LHV_Unit = 'kwh';
+            else LHV_Unit = 'kg';
+        }
+        
+        const energyLostIns_kWh = (Q_total_watts * hours) / 1000;
+        const energyLostBare_kWh = (Q_bare_total * hours) / 1000;
+        const energySaved_kWh = energyLostBare_kWh - energyLostIns_kWh;
+        
+        const energySaved_kcal = energySaved_kWh * 860;
+        const energyLostBare_kcal = energyLostBare_kWh * 860;
+
+        const fuelSavedAmount = energySaved_kcal / (LHV_Val * eff);
+        const fuelLostAmount = energyLostBare_kcal / (LHV_Val * eff);
+
+        const loss_money_insulated = (energyLostIns_kWh * 860 / (LHV_Val * eff)) * priceInReportCurr;
+        const loss_money_bare = (energyLostBare_kcal / (LHV_Val * eff)) * priceInReportCurr;
         
         const save_money=(matKey==='bare')?0:(loss_money_bare-loss_money_insulated);
         const annual_loss=(matKey==='bare')?loss_money_bare:loss_money_insulated;
         
-        const fuelType = document.getElementById('fuel').value;
-        const fuelUnitLabel = (fuelType === 'gas') ? 'm³' : (fuelType === 'elec' ? 'kWh' : 'kg');
-
-        const energySaved_kWh = (Q_bare_total - Q_total_watts) * hours / 1000;
-        const energyLostBare_kWh = (Q_bare_total * hours) / 1000;
-        const energyLostIns_kWh = (Q_total_watts * hours) / 1000;
-
-        const fuelSavedAmount = energySaved_kWh / (LHV_kWh * eff);
-        const fuelLostAmount = energyLostBare_kWh / (LHV_kWh * eff);
+        // YÜZEY BİLGİLERİNİ SAKLA
+        // clone the array to avoid reference issues
+        const savedSurfaces = JSON.parse(JSON.stringify(currentSurfaces));
 
         const inputs={
-            type,qty,pLen,
-            tProc,tAmb,matKey,thk,inv:invRaw,standard,
+            type,qty,pLen,location,
+            tProc,tAmb,matKey,thk,
+            useL2, matKey2, thk2,
+            inv:invRaw,standard,
             vDN:document.getElementById('vDN').value,
             pDN:document.getElementById('pDN').value,
             valveType: document.getElementById('valveType').value,
-            tA: document.getElementById('tA').value,
-            tB: document.getElementById('tB').value,
+            surfaces: savedSurfaces, // YENİ
             img:currImg,
             invCurr: invCurrencyCode,
-            energyCurr: energyCurrencyCode
+            energyCurr: energyCurrencyCode,
+            fuelType: fuelType,
+            fuelLhv: LHV_Val,
+            fuelUnit: LHV_Unit
         };
         
-        const matName=document.getElementById('matSelect').options[document.getElementById('matSelect').selectedIndex].text;
+        const matName1=document.getElementById('matSelect').options[document.getElementById('matSelect').selectedIndex].text;
+        let descStr = "";
+        if(matKey==='bare') {
+            descStr = "Yalıtımsız";
+        } else {
+            descStr = `${thk}mm ${matName1}`;
+            if(useL2) {
+                const matName2 = document.getElementById('matSelect2').options[document.getElementById('matSelect2').selectedIndex].text;
+                descStr += ` + ${thk2}mm ${matName2}`;
+            }
+        }
         
         return{
             name:Name,
-            desc:matKey==='bare'?"No Insulation":`${thk}mm ${matName}`,
+            desc:descStr,
+            location: location,
             qty: (type==='pipe' ? multiplier : qty),
             unit: unitLabel,
             inv:invTotal,
@@ -797,7 +871,7 @@
             lossBare: loss_money_bare,
             fuelSaved: (matKey==='bare') ? 0 : fuelSavedAmount,
             fuelLost: fuelLostAmount, 
-            fuelUnit: fuelUnitLabel,
+            fuelUnit: LHV_Unit,
             kwhBare: Math.round(energyLostBare_kWh).toLocaleString(),
             kwhIns: Math.round(energyLostIns_kWh).toLocaleString(),
             kwhSave: Math.round(energySaved_kWh).toLocaleString(),
@@ -814,9 +888,7 @@
     function init(){fillDN('vDN');fillDN('pDN');getFx();lucide.createIcons(); setType('valve');}
     function fillDN(id){const el=document.getElementById(id);el.innerHTML='';for(const[k,v]of Object.entries(PIPES)){let o=document.createElement('option');o.value=v;o.text=`DN ${k}`;el.add(o);}if(id==='vDN')el.value=60.3;if(id==='pDN')el.value=88.9;}
     
-    // FOTOĞRAF VE QR OKUMA FONKSİYONLARI
     function readImg(i){if(i.files&&i.files[0]){const r=new FileReader();r.onload=e=>{currImg=e.target.result;document.getElementById('prevImg').src=currImg;document.getElementById('prevImg').classList.remove('hidden');};r.readAsDataURL(i.files[0]);}}
-    
     function readQr(i){if(i.files&&i.files[0]){const r=new FileReader();r.onload=e=>{userQrImg=e.target.result;alert("QR Kod yüklendi! Raporun son sayfasında görünecek.");};r.readAsDataURL(i.files[0]);}}
 
     async function getFx(){try{const r=await fetch('https://api.frankfurter.app/latest?from=USD&to=TRY');const d=await r.json();FX.USD=d.rates.TRY;const r2=await fetch('https://api.frankfurter.app/latest?from=EUR&to=TRY');const d2=await r2.json();FX.EUR=d2.rates.TRY;const r3=await fetch('https://api.frankfurter.app/latest?from=GBP&to=TRY');const d3=await r3.json();FX.GBP=d3.rates.TRY;document.getElementById('fxVal').innerText=FX.USD.toFixed(2);}catch(e){}}
@@ -833,8 +905,25 @@
         document.getElementById('inv').value = d.inv;
         document.getElementById('qty').value = d.qty;
         document.getElementById('calcStd').value = d.standard;
+        document.getElementById('location').value = d.location || ""; 
+        document.getElementById('useL2').checked = d.useL2 || false;
+        toggleL2();
+        if(d.useL2) {
+            document.getElementById('matSelect2').value = d.matKey2;
+            document.getElementById('thk2').value = d.thk2;
+        }
+
         if(d.invCurr) document.getElementById('invCurr').value = d.invCurr;
         if(d.energyCurr) document.getElementById('energyCurr').value = d.energyCurr;
+        
+        // Handle Fuel Edit
+        document.getElementById('fuel').value = d.fuelType || 'gas';
+        toggleFuelMode();
+        if(d.fuelType === 'manual') {
+            document.getElementById('fuelLhv').value = d.fuelLhv;
+            document.getElementById('fuelUnit').value = d.fuelUnit;
+        }
+
         if(d.img){ currImg=d.img; document.getElementById('prevImg').src=currImg; document.getElementById('prevImg').classList.remove('hidden'); }
         if(d.type === 'valve'){
             document.getElementById('valveType').value = d.valveType || 'gate';
@@ -843,28 +932,43 @@
             document.getElementById('pDN').value = d.pDN;
             document.getElementById('pLen').value = d.pLen || 1;
         } else if (d.type === 'tank'){
-            document.getElementById('tA').value = d.tA;
-            document.getElementById('tB').value = d.tB;
+            // Yüzey listesini geri yükle
+            currentSurfaces = d.surfaces || [];
+            renderSurfaces();
         }
         document.getElementById('btnAdd').classList.add('hidden');
         document.getElementById('btnUpdate').classList.remove('hidden');
     }
 
-    function del(i){if(confirm('Delete?')){LIST.splice(i,1);render();}}
-    function resetForm(){currImg=null;document.getElementById('prevImg').classList.add('hidden');document.getElementById('inv').value='';} 
-    function clearAll(){if(confirm('Clear all?')){LIST=[];render();}}
+    function del(i){if(confirm('Silmek istediğine emin misin?')){LIST.splice(i,1);render();}}
+    function resetForm(){
+        currImg=null;
+        document.getElementById('prevImg').classList.add('hidden');
+        document.getElementById('inv').value='';
+        document.getElementById('location').value='';
+        // Yüzeyleri sıfırla
+        currentSurfaces = [];
+        renderSurfaces();
+    } 
+    function clearAll(){if(confirm('Tüm listeyi temizle?')){LIST=[];render();}}
     
-    // CSV EXPORT VE IMPORT FONKSİYONLARI
     function exportCSV(){
         if(LIST.length===0){alert("Liste boş!");return;}
-        // CSV Headers (Sadece yeniden yükleme için gereken inputlar)
-        let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // UTF-8 BOM
-        csvContent += "Type,Qty,PipeLen,Temp_Proc,Temp_Amb,Material,Thickness,Invest,Standard,Valve_DN,Pipe_DN,Valve_Type,Tank_A,Tank_B,Invest_Curr,Energy_Curr\n";
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
+        // Header updated with Surfaces
+        csvContent += "Type,Qty,PipeLen,Temp_Proc,Temp_Amb,Material,Thickness,Invest,Standard,Valve_DN,Pipe_DN,Valve_Type,Surfaces,Invest_Curr,Energy_Curr,Location,UseL2,Mat2,Thk2,FuelType,FuelLHV,FuelUnit\n";
         
         LIST.forEach(row => {
             const i = row.inputs;
+            // Yüzeyleri string'e çevir: "50x100|30x50"
+            let surfStr = "";
+            if(i.surfaces && i.surfaces.length > 0){
+                surfStr = i.surfaces.map(s => `${s.w}x${s.h}`).join('|');
+            }
+            
             const r = [
-                i.type, i.qty, i.pLen, i.tProc, i.tAmb, i.matKey, i.thk, i.inv, i.standard, i.vDN, i.pDN, i.valveType, i.tA, i.tB, i.invCurr, i.energyCurr
+                i.type, i.qty, i.pLen, i.tProc, i.tAmb, i.matKey, i.thk, i.inv, i.standard, i.vDN, i.pDN, i.valveType, surfStr, i.invCurr, i.energyCurr, 
+                `"${i.location}"`, i.useL2, i.matKey2, i.thk2, i.fuelType, i.fuelLhv, i.fuelUnit
             ];
             csvContent += r.join(",") + "\n";
         });
@@ -881,21 +985,17 @@
     function importCSV(input){
         const file = input.files[0];
         if(!file) return;
-        
         const reader = new FileReader();
         reader.onload = function(e){
             const text = e.target.result;
             const rows = text.split("\n");
-            
-            // Başlığı atla
             for(let i=1; i<rows.length; i++){
                 const row = rows[i].trim();
                 if(row){
                     const cols = row.split(",");
-                    if(cols.length >= 8){ // Basit bir doğrulama
-                        // Formu geçici olarak doldur (hesaplama fonksiyonunu kullanmak için)
+                    if(cols.length >= 8){ 
                         document.getElementById('type').value = cols[0];
-                        setType(cols[0]); // UI'ı güncelle
+                        setType(cols[0]); 
                         document.getElementById('qty').value = cols[1];
                         document.getElementById('pLen').value = cols[2];
                         document.getElementById('tProc').value = cols[3];
@@ -904,27 +1004,45 @@
                         document.getElementById('thk').value = cols[6];
                         document.getElementById('inv').value = cols[7];
                         document.getElementById('calcStd').value = cols[8];
-                        
-                        // Ekstra alanlar
                         if(cols[9]) document.getElementById('vDN').value = cols[9];
                         if(cols[10]) document.getElementById('pDN').value = cols[10];
                         if(cols[11]) document.getElementById('valveType').value = cols[11];
-                        if(cols[12]) document.getElementById('tA').value = cols[12];
-                        if(cols[13]) document.getElementById('tB').value = cols[13];
-                        if(cols[14]) document.getElementById('invCurr').value = cols[14];
-                        if(cols[15]) document.getElementById('energyCurr').value = cols[15];
+                        
+                        // Parse Surfaces "50x100|30x50"
+                        if(cols[12] && cols[12].trim() !== ""){
+                            const parts = cols[12].split('|');
+                            currentSurfaces = parts.map(p => {
+                                const d = p.split('x');
+                                return {w: parseFloat(d[0]), h: parseFloat(d[1])};
+                            });
+                        } else {
+                            currentSurfaces = [];
+                        }
+                        renderSurfaces();
+                        
+                        if(cols[13]) document.getElementById('invCurr').value = cols[13];
+                        if(cols[14]) document.getElementById('energyCurr').value = cols[14];
+                        if(cols[15]) document.getElementById('location').value = cols[15].replace(/"/g, "");
+                        if(cols[16]) document.getElementById('useL2').checked = (cols[16] === 'true');
+                        if(cols[17]) document.getElementById('matSelect2').value = cols[17];
+                        if(cols[18]) document.getElementById('thk2').value = cols[18];
+                        if(cols[19]) {
+                            document.getElementById('fuel').value = cols[19];
+                            toggleFuelMode();
+                        }
+                        if(cols[20]) document.getElementById('fuelLhv').value = cols[20];
+                        if(cols[21]) document.getElementById('fuelUnit').value = cols[21];
 
-                        // Hesapla ve Listeye Ekle
                         LIST.push(getCalculationResult());
                     }
                 }
             }
             render();
             resetForm();
-            alert(rows.length - 2 + " satır başarıyla yüklendi!"); // -2 because header + empty last line usually
+            alert(rows.length - 2 + " satır başarıyla yüklendi!"); 
         };
         reader.readAsText(file);
-        input.value = ''; // Reset input so same file can be selected again
+        input.value = ''; 
     }
     
     function render(){
@@ -935,34 +1053,24 @@
 
         LIST.forEach((i,x)=>{
             if(i.inputs.matKey!=='bare'){gInv+=i.inv;gSave+=i.save;gCo2+=i.co2;}
-            const roiSuffix=TRANSLATIONS[currentLang].unit_month;
+            const roiSuffix="Ay";
             const roi=i.save>0?(i.inv/i.save*12).toFixed(1)+" "+roiSuffix:"-";
             const imgTag=i.img?`<img src="${i.img}" class="w-10 h-10 object-cover rounded">`:`<div class="w-10 h-10 bg-slate-200 dark:bg-slate-800 rounded flex items-center justify-center text-xs text-slate-500">-</div>`;
-            
-            tb.insertAdjacentHTML('beforeend',`<tr class="hover:bg-slate-100 dark:hover:bg-slate-800/30 transition border-b border-slate-200 dark:border-slate-700/50 ${x===editingIndex?'bg-indigo-50 dark:bg-indigo-900/20':''}"><td class="px-6 py-4">${imgTag}</td><td class="px-6 py-4 font-bold text-slate-800 dark:text-white">${i.name}</td><td class="px-6 py-4 text-slate-500 dark:text-slate-400">${i.desc}</td><td class="px-6 py-4 text-center text-slate-800 dark:text-white">${i.qty} ${i.unit}</td>
-            
-            <td class="px-6 py-4 text-center">
-                <div class="font-bold text-slate-700 dark:text-white">${i.inputs.tProc}°C</div>
-                <div class="text-[10px] font-bold text-red-500 dark:text-red-400">${i.kwhBare} kWh</div>
-            </td>
-            <td class="px-6 py-4 text-center">
-                <div class="font-bold text-slate-700 dark:text-white">${i.Ts}°C</div>
-                <div class="text-[10px] font-bold text-orange-500 dark:text-orange-400">${i.kwhIns} kWh</div>
-            </td>
-            <td class="px-6 py-4 text-center">
-                <div class="font-bold text-green-600 dark:text-green-400">+${i.kwhSave} kWh</div>
-            </td>
+            const locTag = i.location ? `<div class="text-[9px] text-indigo-500 font-bold mt-1 uppercase"><i data-lucide="map-pin" class="w-3 h-3 inline"></i> ${i.location}</div>` : '';
 
+            tb.insertAdjacentHTML('beforeend',`<tr class="hover:bg-slate-100 dark:hover:bg-slate-800/30 transition border-b border-slate-200 dark:border-slate-700/50 ${x===editingIndex?'bg-indigo-50 dark:bg-indigo-900/20':''}"><td class="px-6 py-4">${imgTag}</td><td class="px-6 py-4 font-bold text-slate-800 dark:text-white">${i.name} ${locTag}</td><td class="px-6 py-4 text-slate-500 dark:text-slate-400 text-xs">${i.desc}</td><td class="px-6 py-4 text-center text-slate-800 dark:text-white">${i.qty} ${i.unit}</td>
+            <td class="px-6 py-4 text-center"><div class="font-bold text-slate-700 dark:text-white">${i.inputs.tProc}°C</div><div class="text-[10px] font-bold text-red-500 dark:text-red-400">${i.kwhBare} kWh</div></td>
+            <td class="px-6 py-4 text-center"><div class="font-bold text-slate-700 dark:text-white">${i.Ts}°C</div><div class="text-[10px] font-bold text-orange-500 dark:text-orange-400">${i.kwhIns} kWh</div></td>
+            <td class="px-6 py-4 text-center"><div class="font-bold text-green-600 dark:text-green-400">+${i.kwhSave} kWh</div></td>
             <td class="px-6 py-4 text-right text-slate-600 dark:text-slate-300">${currSym}${Math.round(i.inv).toLocaleString()}</td><td class="px-6 py-4 text-right text-green-600 dark:text-green-400">${i.inputs.matKey!=='bare'?'+'+currSym+Math.round(i.save).toLocaleString():'-'}</td><td class="px-6 py-4 text-right font-bold text-indigo-500 dark:text-indigo-400">${roi}</td><td class="px-6 py-4 text-right"><button onclick="edit(${x})" class="text-indigo-500 dark:text-indigo-400 mr-2 hover:text-slate-900 dark:hover:text-white"><i data-lucide="pencil" class="w-4 h-4"></i></button><button onclick="del(${x})" class="text-red-500 dark:text-red-400 hover:text-slate-900 dark:hover:text-white"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td></tr>`);
         });
-        if(LIST.length===0)tb.innerHTML=`<tr><td colspan="10" class="px-6 py-20 text-center text-slate-500"><i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-20"></i><span id="emptyMsg" data-i18n="msg_no_calc">${TRANSLATIONS[currentLang].msg_no_calc}</span></td></tr>`;
+        if(LIST.length===0)tb.innerHTML=`<tr><td colspan="10" class="px-6 py-20 text-center text-slate-500"><i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-20"></i><span id="emptyMsg">Henüz hesaplama eklenmedi.</span></td></tr>`;
         
         document.getElementById('dashInv').innerText=currSym+Math.round(gInv).toLocaleString();
         document.getElementById('dashSave').innerText=currSym+Math.round(gSave).toLocaleString();
         document.getElementById('dashCo2').innerHTML=gCo2.toFixed(1)+' Ton';
-        const roiSuffix=TRANSLATIONS[currentLang].unit_month;
         const totalRoi=gSave>0?(gInv/gSave*12):0;
-        document.getElementById('dashRoi').innerHTML=totalRoi>0?totalRoi.toFixed(1)+` <span class="text-lg text-slate-500 font-normal">${roiSuffix}</span>`:'---';
+        document.getElementById('dashRoi').innerHTML=totalRoi>0?totalRoi.toFixed(1)+` <span class="text-lg text-slate-500 font-normal">Ay</span>`:'---';
         document.getElementById('barRoi').style.width=totalRoi>0?Math.min((totalRoi/24)*100,100)+'%':'0%';
         lucide.createIcons();
     }
@@ -971,27 +1079,19 @@
 
     function printRep(){
         try{
-            // 1. ŞABLON YÖNETİMİ: İlk çalıştırmada temiz HTML'i hafızaya al
             const printArea = document.getElementById('print-area');
             if(!printTemplateCache){
                 printTemplateCache = printArea.innerHTML;
             }
-            // Her seferinde print-area'yı temiz şablona resetle
             printArea.innerHTML = printTemplateCache;
-
-            const T = TRANSLATIONS[currentLang];
-            const d = new Date().toLocaleDateString(currentLang==='tr'?'tr-TR':'en-US');
+            const d = new Date().toLocaleDateString('tr-TR');
             
-            // --- DEĞİŞKENLERİ HESAPLA ---
             let gInv=0, gSave=0, gCo2=0, gLoss=0, gFuelLost=0;
             let lastFuelUnit = "";
-            
-            // Para birimi
             const currSymVal = document.getElementById('curr').value;
             const currSymMap = {'USD':'$','EUR':'€','GBP':'£','TL':'₺'};
             const currSym = currSymMap[currSymVal]||'';
 
-            // Tüm veriyi döngüye sokup toplamları al (Listeleme yapmadan önce)
             LIST.forEach(i => {
                 if(i.inputs.matKey!=='bare'){
                     gInv += i.inv;
@@ -1006,190 +1106,118 @@
                 lastFuelUnit = i.fuelUnit;
             });
 
-            // --- SAYFALARI OLUŞTURMA MANTIĞI ---
-            const ROWS_PER_PAGE = 20; // 20 Satıra güncellendi
+            const ROWS_PER_PAGE = 20;
             const chunks = [];
             for (let i = 0; i < LIST.length; i += ROWS_PER_PAGE) {
                 chunks.push(LIST.slice(i, i + ROWS_PER_PAGE));
             }
-            
-            // Eğer hiç veri yoksa boş bir chunk oluştur ki en azından boş sayfa çıksın
             if(chunks.length === 0) chunks.push([]);
 
-            // Şablondaki sayfaları seç
             const coverPage = document.getElementById('p-cover');
-            const tablePageTemplate = document.getElementById('p-table'); // Şablon olarak kullanacağız
+            const tablePageTemplate = document.getElementById('p-table');
             const summaryPage = document.getElementById('p-summary');
-            
-            // Tablo şablonunu DOM'dan kaldır (Çünkü bunu klonlayıp çoğaltacağız)
             tablePageTemplate.remove();
-
-            // Toplam sayfa sayısı: 1 (Kapak) + Chunk Sayısı + 1 (Özet)
             const totalPages = 1 + chunks.length + 1;
 
-            // Header HTML'i
             const tableHeaderHTML = `
                 <th class="w-6">#</th>
-                <th class="w-24 text-center">${T.th_img}</th>
-                <th class="text-left">${T.th_comp}</th>
-                <th class="text-center w-24 text-xs text-red-500">${T.th_bare}</th>
-                <th class="text-center w-24 text-xs text-blue-500">${T.th_ins}</th>
-                <th class="text-center w-20 text-xs text-green-500">${T.th_gain_kwh}</th>
-                <th class="text-center w-8">${T.th_qty}</th>
-                <th class="text-right text-slate-700">${T.rep_th_inv}</th>
-                <th class="text-right text-green-600 font-black">${T.rep_th_gain}</th>
+                <th class="w-20 text-center">Görsel</th>
+                <th class="text-left w-48">Ekipman</th>
+                <th class="text-center w-20 text-xs text-red-500">Çıplak<br><span class="text-[8px] font-normal">(Kayıp kWh)</span></th>
+                <th class="text-center w-20 text-xs text-blue-500">İzolasyon<br><span class="text-[8px] font-normal">(Kayıp kWh)</span></th>
+                <th class="text-center w-20 text-xs text-green-500">Kazanç<br><span class="text-[8px] font-normal">(Fark kWh)</span></th>
+                <th class="text-center w-8">Adet</th>
+                <th class="text-right text-slate-700">Yatırım</th>
+                <th class="text-right text-green-600 font-black">Net Kazanç</th>
                 <th class="text-right w-10">ROI</th>`;
 
-            // CHUNK DÖNGÜSÜ: Her veri parçası için yeni bir sayfa oluştur
             chunks.forEach((chunk, index) => {
-                // Şablonu klonla
                 const newPage = tablePageTemplate.cloneNode(true);
-                newPage.id = ''; // ID çakışmasını önle
-                
-                // Başlık Güncelleme
+                newPage.id = '';
                 const titleEl = newPage.querySelector('h2');
-                
-                // ÖNCE başlığı mevcut dilde ayarla (Türkçeyse "Detaylı Analiz Dökümü" yapar)
-                titleEl.innerText = T.rep_p2_title;
-                
-                // Eğer 2. veya daha sonraki sayfaysa, yanına (2) gibi numara ekle
-                if(index > 0) {
-                     titleEl.innerHTML += ` <span class="text-sm text-slate-400 font-normal">(${index+1})</span>`;
-                }
-
-                // Tarih
+                titleEl.innerText = "Detaylı Analiz Dökümü";
+                if(index > 0) { titleEl.innerHTML += ` <span class="text-sm text-slate-400 font-normal">(${index+1})</span>`; }
                 newPage.querySelector('#rDate').innerText = d;
-
-                // Tablo Başlığı
                 newPage.querySelector('thead tr').innerHTML = tableHeaderHTML;
-
-                // Sayfa Numarası (Index 0 -> Sayfa 2)
                 const pageNum = index + 2; 
-                newPage.querySelector('.page-num').innerText = `Page ${pageNum} / ${totalPages}`;
-
-                // Tablo Satırlarını Doldur
+                newPage.querySelector('.page-num').innerText = `Sayfa ${pageNum} / ${totalPages}`;
                 const tbody = newPage.querySelector('tbody');
                 tbody.innerHTML = '';
                 
                 chunk.forEach((i, subIndex) => {
                     const globalIndex = (index * ROWS_PER_PAGE) + subIndex + 1;
-                    
                     const roi = i.save > 0 ? (i.inv/i.save*12).toFixed(1) : "-";
-                    const imgTag = i.img ? `<img src="${i.img}" class="w-24 h-24 object-cover rounded mx-auto border border-slate-200">` : `<div class="w-8 h-8 bg-slate-100 rounded mx-auto flex items-center justify-center text-[8px]">-</div>`;
+                    const imgTag = i.img ? `<img src="${i.img}" class="w-16 h-16 object-cover rounded mx-auto border border-slate-200">` : `<div class="w-8 h-8 bg-slate-100 rounded mx-auto flex items-center justify-center text-[8px]">-</div>`;
+                    const locText = i.location ? `<div class="text-[8px] uppercase text-slate-400 mt-1 font-bold">📍 ${i.location}</div>` : '';
 
                     tbody.innerHTML += `<tr>
                         <td class="text-center font-bold text-slate-400 border-b border-slate-100">${globalIndex}</td>
-                        <td class="text-center border-b border-slate-100 p-2">${imgTag}</td>
-                        <td class="font-bold text-slate-800 border-b border-slate-100">${i.name}<div class="text-[9px] text-slate-500 font-normal">${i.desc}</div></td>
-                        
-                        <td class="text-center border-b border-slate-100">
-                            <div class="font-bold text-slate-700">${i.inputs.tProc}°C</div>
-                            <div class="text-[9px] font-bold text-red-500">${i.kwhBare} kWh</div>
-                        </td>
-                        <td class="text-center border-b border-slate-100">
-                            <div class="font-bold text-slate-700">${i.Ts}°C</div>
-                            <div class="text-[9px] font-bold text-orange-500">${i.kwhIns} kWh</div>
-                        </td>
-                        <td class="text-center border-b border-slate-100">
-                            <div class="font-bold text-green-600">+${i.kwhSave} kWh</div>
-                        </td>
-
-                        <td class="text-center border-b border-slate-100">${i.qty} ${i.unit}</td>
+                        <td class="text-center border-b border-slate-100 p-1">${imgTag}</td>
+                        <td class="font-bold text-slate-800 border-b border-slate-100 text-[10px]">${i.name} ${locText}<div class="text-[8px] text-slate-500 font-normal mt-0.5">${i.desc}</div></td>
+                        <td class="text-center border-b border-slate-100"><div class="font-bold text-slate-700">${i.inputs.tProc}°C</div><div class="text-[9px] font-bold text-red-500">${i.kwhBare} kWh</div></td>
+                        <td class="text-center border-b border-slate-100"><div class="font-bold text-slate-700">${i.Ts}°C</div><div class="text-[9px] font-bold text-orange-500">${i.kwhIns} kWh</div></td>
+                        <td class="text-center border-b border-slate-100"><div class="font-bold text-green-600">+${i.kwhSave} kWh</div></td>
+                        <td class="text-center border-b border-slate-100 text-[10px]">${i.qty} ${i.unit}</td>
                         <td class="text-right font-mono text-[10px] text-slate-700 border-b border-slate-100">${currSym}${Math.round(i.inv).toLocaleString()}</td>
                         <td class="text-right font-mono text-[10px] text-green-600 font-bold border-b border-slate-100">${i.inputs.matKey!=='bare'?'+'+currSym+Math.round(i.save).toLocaleString():'-'}</td>
                         <td class="text-right font-bold text-blue-600 text-[10px] border-b border-slate-100">${roi}</td>
                     </tr>`;
                 });
-
-                // Yeni sayfayı, Özet Sayfasından HEMEN ÖNCE ekle
                 printArea.insertBefore(newPage, summaryPage);
             });
 
-            // --- STATİK ALANLARI GÜNCELLE (Kapak ve Özet) ---
-            document.getElementById('rep_title_top').innerText=T.rep_title_top;
-            document.getElementById('rep_title_main').innerHTML=T.rep_title_main;
-            document.getElementById('rep_client_lbl').innerText=T.rep_client_lbl;
-            document.getElementById('rep_prep_lbl').innerText=T.rep_prep_lbl;
-            document.getElementById('rep_roi_month').innerText=T.rep_roi_month;
-            document.getElementById('rep_p3_title').innerText=T.rep_p3_title;
-            document.getElementById('rep_risk_card').innerText=T.rep_risk_card;
-            document.getElementById('rep_risk_desc').innerText=T.rep_risk_desc;
-            document.getElementById('rep_cost_card').innerText=T.rep_cost_card;
-            document.getElementById('rep_opp_card').innerText=T.rep_opp_card;
-            document.getElementById('rep_proj_title').innerText=T.rep_proj_title;
-            document.getElementById('rep_scen').innerText=T.rep_scen;
-            document.getElementById('rep_roi_card').innerText=T.rep_roi_card;
-            document.getElementById('rep_env_title').innerText=T.rep_env_title;
-            document.getElementById('rep_tree_desc').innerText=T.rep_tree_desc;
-            document.getElementById('rep_legal').innerHTML=T.rep_legal;
-            document.getElementById('rep_tree_note').innerText=T.rep_tree_note; 
-
-            // Veriler
             const totalRoi = gSave>0 ? (gInv/gSave*12) : 0;
-            document.getElementById('covClient').innerText = document.getElementById('cName').value || "CLIENT";
-            document.getElementById('covProv').innerText = document.getElementById('pName').value || "OPTIMIZI INC.";
+            document.getElementById('covClient').innerText = document.getElementById('cName').value || "FİRMA ADI";
+            document.getElementById('covContact').innerText = document.getElementById('cEng').value || "";
+
+            document.getElementById('covProv').innerText = document.getElementById('pName').value || "TEDARİKÇİ";
             document.getElementById('covRoi').innerText = totalRoi>0 ? totalRoi.toFixed(1) : "---";
-            
-            // Parametreler
             document.getElementById('covTemp').innerText = document.getElementById('tAmb').value;
             document.getElementById('covWind').innerText = document.getElementById('vWind').value;
-            const fuelSel = document.getElementById('fuel');
-            document.getElementById('covFuel').innerText = fuelSel.options[fuelSel.selectedIndex].text;
+            
+            const fType = document.getElementById('fuel').value;
+            let fuelDisp = "";
+            if(fType === 'manual') {
+                fuelDisp = `${document.getElementById('fuelLhv').value} (${document.getElementById('fuelUnit').value})`;
+            } else {
+                const sel = document.getElementById('fuel');
+                fuelDisp = sel.options[sel.selectedIndex].text;
+            }
+            document.getElementById('covFuel').innerText = fuelDisp;
+
             document.getElementById('covEff').innerText = document.getElementById('eff').value;
             document.getElementById('covPrice').innerText = document.getElementById('price').value;
             document.getElementById('covCurr').innerText = document.getElementById('energyCurr').value;
             document.getElementById('covHours').innerText = document.getElementById('hours').value;
 
-            // Özet Tablosu
             document.getElementById('sumLoss').innerText = currSym + Math.round(gLoss).toLocaleString();
             document.getElementById('sumFuelLost').innerText = `(${Math.round(gFuelLost).toLocaleString()} ${lastFuelUnit})`;
             document.getElementById('sumSave').innerText = currSym + Math.round(gSave).toLocaleString();
             document.getElementById('tabInv').innerText = currSym + Math.round(gInv).toLocaleString();
-            document.getElementById('txtRoi').innerText = totalRoi>0 ? totalRoi.toFixed(1) + " " + T.unit_month : "---";
+            document.getElementById('txtRoi').innerText = totalRoi>0 ? totalRoi.toFixed(1) + " Ay" : "---";
             document.getElementById('visualBar').style.width = totalRoi>0 ? Math.min((totalRoi/24)*100,100) + '%' : '0%';
             document.getElementById('sumCo2').innerText = gCo2.toFixed(1);
             document.getElementById('sumTrees').innerText = Math.round(gCo2*40).toLocaleString();
 
-            // QR Code
             const qrImgEl = document.getElementById('repQrCode');
-            if (userQrImg) {
-                qrImgEl.src = userQrImg;
-                qrImgEl.classList.remove('opacity-20');
-            } else {
-                qrImgEl.src = "";
-                qrImgEl.classList.add('opacity-20');
-            }
+            if (userQrImg) { qrImgEl.src = userQrImg; qrImgEl.classList.remove('opacity-20'); } 
+            else { qrImgEl.src = ""; qrImgEl.classList.add('opacity-20'); }
 
-            // Finansal Projeksiyon Tablosu
             const pt = document.getElementById('projTable');
             pt.innerHTML = '';
-            let rowL = `<tr class="border-b border-slate-200"><td class="p-2 text-left font-bold text-red-600">${T.rep_scen_loss}</td>`;
+            let rowL = `<tr class="border-b border-slate-200"><td class="p-2 text-left font-bold text-red-600">Mevcut Durum (Kümülatif Kayıp)</td>`;
             let tL=0;
-            for(let y=1; y<=5; y++){
-                tL += gLoss;
-                rowL += `<td class="p-2 text-red-500">-${currSym}${Math.round(tL).toLocaleString()}</td>`;
-            }
+            for(let y=1; y<=5; y++){ tL += gLoss; rowL += `<td class="p-2 text-red-500">-${currSym}${Math.round(tL).toLocaleString()}</td>`; }
             rowL += `<td class="p-2 font-black text-red-700">-${currSym}${Math.round(tL).toLocaleString()}</td></tr>`;
-            
-            let rowG = `<tr><td class="p-2 text-left font-bold text-green-600">${T.rep_scen_gain}</td>`;
+            let rowG = `<tr><td class="p-2 text-left font-bold text-green-600">Yatırım Sonrası (Kümülatif Kazanç)</td>`;
             let tG = -gInv;
-            for(let y=1; y<=5; y++){
-                tG += gSave;
-                rowG += `<td class="p-2 ${tG>=0?'text-green-600':'text-red-400'}">${currSym}${Math.round(tG).toLocaleString()}</td>`;
-            }
+            for(let y=1; y<=5; y++){ tG += gSave; rowG += `<td class="p-2 ${tG>=0?'text-green-600':'text-red-400'}">${currSym}${Math.round(tG).toLocaleString()}</td>`; }
             rowG += `<td class="p-2 font-black ${tG>=0?'text-green-700':'text-red-700'}">${tG>0?'+':''}${currSym}${Math.round(tG).toLocaleString()}</td></tr>`;
             pt.innerHTML = rowL + rowG;
 
-            // İkonları yeniden oluştur ve Yazdır
-            setTimeout(()=>{
-                lucide.createIcons();
-                window.print();
-            }, 100);
+            setTimeout(()=>{ lucide.createIcons(); window.print(); }, 100);
 
-        }catch(e){
-            alert('Rapor oluşturulurken hata oluştu: ' + e.message);
-            console.error(e);
-        }
+        }catch(e){ alert('Rapor oluşturulurken hata oluştu: ' + e.message); console.error(e); }
     }
 </script>
 </body>
