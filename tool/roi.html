@@ -246,7 +246,7 @@
                     <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
                             <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Birim Fiyat</label>
-                            <div class="flex gap-1"><input type="number" id="price" class="glass-input text-xs" value="0.15"><select id="energyCurr" class="glass-input !px-1 w-14 text-center text-xs"><option value="TL" selected>₺</option><option value="USD">$</option><option value="EUR">€</option><option value="GBP">£</option></select></div>
+                            <div class="flex gap-1"><input type="number" id="price" class="glass-input text-xs" value="0.15"><select id="energyCurr" class="glass-input !px-1 w-14 text-center text-xs"><option value="TL" selected>₺</option><option value="USD">$</option><option value="EUR">€</option></select></div>
                         </div>
                         <div><label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Yıllık Saat</label><input type="number" id="hours" class="glass-input text-xs" value="8000"></div>
                     </div>
@@ -347,7 +347,6 @@
                                     <option value="TL">₺</option>
                                     <option value="USD">$</option>
                                     <option value="EUR">€</option>
-                                    <option value="GBP">£</option>
                                 </select>
                             </div>
                         </div>
@@ -371,7 +370,7 @@
 
                         <div class="mt-3 text-right">
                             <label class="text-[9px] text-slate-500 mr-2 uppercase font-bold">Rapor Para Birimi:</label>
-                            <select id="curr" class="glass-input text-[10px] !w-20 inline-block !py-1 !h-7"><option value="TL" selected>₺ TL</option><option value="USD">$ USD</option><option value="EUR">€ EUR</option><option value="GBP">£ GBP</option></select>
+                            <select id="curr" class="glass-input text-[10px] !w-20 inline-block !py-1 !h-7" onchange="render()"><option value="TL" selected>₺ TL</option><option value="USD">$ USD</option><option value="EUR">€ EUR</option></select>
                         </div>
                     </div>
 
@@ -558,6 +557,9 @@
 
     function initApp(){ init(); }
     
+    // Formatter
+    function fmt(n){ return n.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    
     function setType(t){
         ['valve','pipe','tank'].forEach(x=>{document.getElementById('g-'+x).classList.add('hidden');});
         document.getElementById('g-'+t).classList.remove('hidden');
@@ -574,7 +576,6 @@
         qtyInput.value = 1;
     }
 
-    // DN500 EKLENDİ (508mm)
     const PIPES={15:21.3,20:26.7,25:33.4,32:42.2,40:48.3,50:60.3,65:73.0,80:88.9,100:114.3,125:141.3,150:168.3,200:219.1,250:273.0,300:323.9,350:355.6,400:406.4,500:508.0};
     const SEPARATORS = {15:0.15, 20:0.18, 25:0.22, 32:0.28, 40:0.35, 50:0.45, 65:0.60, 80:0.75, 100:1.10, 125:1.45, 150:1.90, 200:2.80};
 
@@ -593,7 +594,7 @@
         coal_loc: 3500
     };
     
-    let LIST=[],FX={USD:34.50,EUR:36.50,GBP:43.20,TL:1.0},currImg=null,userQrImg=null,editingIndex=null;
+    let LIST=[],FX={USD:34.50,EUR:36.50,TL:1.0},currImg=null,userQrImg=null,editingIndex=null;
     
     // YENİ YÜZEY YÖNETİMİ
     let currentSurfaces = []; 
@@ -662,19 +663,20 @@
         const reportCurrencyCode = document.getElementById('curr').value;
         
         const invRate = FX[invCurrencyCode] || 1; 
-        const reportRate = FX[reportCurrencyCode] || 1; 
+        // const reportRate = FX[reportCurrencyCode] || 1; 
 
-        let invUnitInReportCurr = invRaw * (invRate / reportRate);
+        // BAZ HESAPLAMA: HER ŞEYİ TL'YE ÇEVİR VE SAKLA
+        let invUnitTL = invRaw * invRate;
 
-        let invTotal = 0;
-        if(type==='pipe'){ invTotal = invUnitInReportCurr * multiplier; } else { invTotal = invUnitInReportCurr * qty; }
+        let invTotalTL = 0;
+        if(type==='pipe'){ invTotalTL = invUnitTL * multiplier; } else { invTotalTL = invUnitTL * qty; }
         
         const eff=(parseFloat(document.getElementById('eff').value)||85)/100;
         const priceRaw=parseFloat(document.getElementById('price').value)||0;
         
         const energyCurrencyCode = document.getElementById('energyCurr').value;
         const energyRate = FX[energyCurrencyCode] || 1;
-        const priceInReportCurr = priceRaw * (energyRate / reportRate);
+        const priceTL = priceRaw * energyRate; // Birim Enerji Fiyatı (TL)
 
         const hours=parseFloat(document.getElementById('hours').value)||8000;
         
@@ -682,9 +684,7 @@
         let dPipe=0,D_ext=0,Name="",unitLabel="Adet";
 
         if(isFlat){
-            // YENİ ÇOKLU YÜZEY MANTIĞI
             if(currentSurfaces.length === 0) {
-                // Eğer yüzey eklenmemişse default 1x1 kabul edelim ki çökmesin
                 multiplier = 1;
                 Name = `Tank/Düz (Ölçüsüz)`;
                 unitLabel = "Set";
@@ -696,12 +696,11 @@
                     dims.push(`${s.w}x${s.h}cm`);
                 });
                 multiplier = totalArea;
-                // İsim kısmında tüm yüzeyleri listele
                 Name = `Düz Yüzey (${dims.join(' + ')})`;
                 unitLabel = "Set";
             }
             dPipe=1.0; D_ext=1.0; 
-            invTotal = invUnitInReportCurr * qty; 
+            invTotalTL = invUnitTL * qty; 
         } else {
             const dn=(type==='valve')?document.getElementById('vDN').value:document.getElementById('pDN').value;
             const mm=parseFloat(dn)||100;
@@ -820,14 +819,16 @@
         const fuelSavedAmount = energySaved_kcal / (LHV_Val * eff);
         const fuelLostAmount = energyLostBare_kcal / (LHV_Val * eff);
 
-        const loss_money_insulated = (energyLostIns_kWh * 860 / (LHV_Val * eff)) * priceInReportCurr;
-        const loss_money_bare = (energyLostBare_kcal / (LHV_Val * eff)) * priceInReportCurr;
+        // TÜM PARASAL HESAPLAMALAR TL BAZINDA YAPILIYOR
+        const loss_money_insulated_TL = (energyLostIns_kWh * 860 / (LHV_Val * eff)) * priceTL;
+        const loss_money_bare_TL = (energyLostBare_kcal / (LHV_Val * eff)) * priceTL;
         
-        const save_money=(matKey==='bare')?0:(loss_money_bare-loss_money_insulated);
-        const annual_loss=(matKey==='bare')?loss_money_bare:loss_money_insulated;
+        const save_money_TL = (matKey==='bare') ? 0 : (loss_money_bare_TL - loss_money_insulated_TL);
+        const annual_loss_TL = (matKey==='bare') ? loss_money_bare_TL : loss_money_insulated_TL;
         
-        // YÜZEY BİLGİLERİNİ SAKLA
-        // clone the array to avoid reference issues
+        let roiCalc = 0;
+        if(save_money_TL > 0.01) { roiCalc = (invTotalTL / save_money_TL * 12); }
+
         const savedSurfaces = JSON.parse(JSON.stringify(currentSurfaces));
 
         const inputs={
@@ -838,7 +839,7 @@
             vDN:document.getElementById('vDN').value,
             pDN:document.getElementById('pDN').value,
             valveType: document.getElementById('valveType').value,
-            surfaces: savedSurfaces, // YENİ
+            surfaces: savedSurfaces,
             img:currImg,
             invCurr: invCurrencyCode,
             energyCurr: energyCurrencyCode,
@@ -865,10 +866,10 @@
             location: location,
             qty: (type==='pipe' ? multiplier : qty),
             unit: unitLabel,
-            inv:invTotal,
-            save:save_money,
-            loss:annual_loss,
-            lossBare: loss_money_bare,
+            invTL: invTotalTL, // TL BAZLI
+            saveTL: save_money_TL, // TL BAZLI
+            lossTL: annual_loss_TL, // TL BAZLI
+            lossBareTL: loss_money_bare_TL, // TL BAZLI
             fuelSaved: (matKey==='bare') ? 0 : fuelSavedAmount,
             fuelLost: fuelLostAmount, 
             fuelUnit: LHV_Unit,
@@ -881,6 +882,7 @@
             qBare:Q_bare_unit,
             qIns:Q_unit,
             img:currImg,
+            roi: roiCalc,
             inputs
         };
     }
@@ -891,7 +893,7 @@
     function readImg(i){if(i.files&&i.files[0]){const r=new FileReader();r.onload=e=>{currImg=e.target.result;document.getElementById('prevImg').src=currImg;document.getElementById('prevImg').classList.remove('hidden');};r.readAsDataURL(i.files[0]);}}
     function readQr(i){if(i.files&&i.files[0]){const r=new FileReader();r.onload=e=>{userQrImg=e.target.result;alert("QR Kod yüklendi! Raporun son sayfasında görünecek.");};r.readAsDataURL(i.files[0]);}}
 
-    async function getFx(){try{const r=await fetch('https://api.frankfurter.app/latest?from=USD&to=TRY');const d=await r.json();FX.USD=d.rates.TRY;const r2=await fetch('https://api.frankfurter.app/latest?from=EUR&to=TRY');const d2=await r2.json();FX.EUR=d2.rates.TRY;const r3=await fetch('https://api.frankfurter.app/latest?from=GBP&to=TRY');const d3=await r3.json();FX.GBP=d3.rates.TRY;document.getElementById('fxVal').innerText=FX.USD.toFixed(2);}catch(e){}}
+    async function getFx(){try{const r=await fetch('https://api.frankfurter.app/latest?from=USD&to=TRY');const d=await r.json();FX.USD=d.rates.TRY;const r2=await fetch('https://api.frankfurter.app/latest?from=EUR&to=TRY');const d2=await r2.json();FX.EUR=d2.rates.TRY;document.getElementById('fxVal').innerText=FX.USD.toFixed(2);}catch(e){}}
     function calc(){LIST.push(getCalculationResult());resetForm();render();}
     function finishUpdate(){if(editingIndex!==null)LIST[editingIndex]=getCalculationResult();editingIndex=null;document.getElementById('btnAdd').classList.remove('hidden');document.getElementById('btnUpdate').classList.add('hidden');resetForm();render();}
     
@@ -916,7 +918,6 @@
         if(d.invCurr) document.getElementById('invCurr').value = d.invCurr;
         if(d.energyCurr) document.getElementById('energyCurr').value = d.energyCurr;
         
-        // Handle Fuel Edit
         document.getElementById('fuel').value = d.fuelType || 'gas';
         toggleFuelMode();
         if(d.fuelType === 'manual') {
@@ -932,7 +933,6 @@
             document.getElementById('pDN').value = d.pDN;
             document.getElementById('pLen').value = d.pLen || 1;
         } else if (d.type === 'tank'){
-            // Yüzey listesini geri yükle
             currentSurfaces = d.surfaces || [];
             renderSurfaces();
         }
@@ -946,7 +946,6 @@
         document.getElementById('prevImg').classList.add('hidden');
         document.getElementById('inv').value='';
         document.getElementById('location').value='';
-        // Yüzeyleri sıfırla
         currentSurfaces = [];
         renderSurfaces();
     } 
@@ -955,12 +954,10 @@
     function exportCSV(){
         if(LIST.length===0){alert("Liste boş!");return;}
         let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
-        // Header updated with Surfaces
         csvContent += "Type,Qty,PipeLen,Temp_Proc,Temp_Amb,Material,Thickness,Invest,Standard,Valve_DN,Pipe_DN,Valve_Type,Surfaces,Invest_Curr,Energy_Curr,Location,UseL2,Mat2,Thk2,FuelType,FuelLHV,FuelUnit\n";
         
         LIST.forEach(row => {
             const i = row.inputs;
-            // Yüzeyleri string'e çevir: "50x100|30x50"
             let surfStr = "";
             if(i.surfaces && i.surfaces.length > 0){
                 surfStr = i.surfaces.map(s => `${s.w}x${s.h}`).join('|');
@@ -1008,7 +1005,6 @@
                         if(cols[10]) document.getElementById('pDN').value = cols[10];
                         if(cols[11]) document.getElementById('valveType').value = cols[11];
                         
-                        // Parse Surfaces "50x100|30x50"
                         if(cols[12] && cols[12].trim() !== ""){
                             const parts = cols[12].split('|');
                             currentSurfaces = parts.map(p => {
@@ -1047,14 +1043,23 @@
     
     function render(){
         const tb=document.getElementById('gridBody');tb.innerHTML='';let gInv=0,gSave=0,gCo2=0;
+        
+        // DİNAMİK KUR SİSTEMİ
         const currSymVal=document.getElementById('curr')?document.getElementById('curr').value:'TL';
-        const currSymMap={'USD':'$','EUR':'€','GBP':'£','TL':'₺'};
+        const reportRate = FX[currSymVal] || 1; 
+
+        const currSymMap={'USD':'$','EUR':'€','TL':'₺'};
         const currSym=currSymMap[currSymVal]||'';
 
         LIST.forEach((i,x)=>{
-            if(i.inputs.matKey!=='bare'){gInv+=i.inv;gSave+=i.save;gCo2+=i.co2;}
+            // ANLIK ÇEVİRİM YAPILIYOR
+            const invDisp = i.invTL / reportRate;
+            const saveDisp = i.saveTL / reportRate;
+
+            if(i.inputs.matKey!=='bare'){gInv+=invDisp;gSave+=saveDisp;gCo2+=i.co2;}
+            
             const roiSuffix="Ay";
-            const roi=i.save>0?(i.inv/i.save*12).toFixed(1)+" "+roiSuffix:"-";
+            const roi=i.roi > 0 ? i.roi.toFixed(1)+" "+roiSuffix : "-";
             const imgTag=i.img?`<img src="${i.img}" class="w-10 h-10 object-cover rounded">`:`<div class="w-10 h-10 bg-slate-200 dark:bg-slate-800 rounded flex items-center justify-center text-xs text-slate-500">-</div>`;
             const locTag = i.location ? `<div class="text-[9px] text-indigo-500 font-bold mt-1 uppercase"><i data-lucide="map-pin" class="w-3 h-3 inline"></i> ${i.location}</div>` : '';
 
@@ -1062,12 +1067,12 @@
             <td class="px-6 py-4 text-center"><div class="font-bold text-slate-700 dark:text-white">${i.inputs.tProc}°C</div><div class="text-[10px] font-bold text-red-500 dark:text-red-400">${i.kwhBare} kWh</div></td>
             <td class="px-6 py-4 text-center"><div class="font-bold text-slate-700 dark:text-white">${i.Ts}°C</div><div class="text-[10px] font-bold text-orange-500 dark:text-orange-400">${i.kwhIns} kWh</div></td>
             <td class="px-6 py-4 text-center"><div class="font-bold text-green-600 dark:text-green-400">+${i.kwhSave} kWh</div></td>
-            <td class="px-6 py-4 text-right text-slate-600 dark:text-slate-300">${currSym}${Math.round(i.inv).toLocaleString()}</td><td class="px-6 py-4 text-right text-green-600 dark:text-green-400">${i.inputs.matKey!=='bare'?'+'+currSym+Math.round(i.save).toLocaleString():'-'}</td><td class="px-6 py-4 text-right font-bold text-indigo-500 dark:text-indigo-400">${roi}</td><td class="px-6 py-4 text-right"><button onclick="edit(${x})" class="text-indigo-500 dark:text-indigo-400 mr-2 hover:text-slate-900 dark:hover:text-white"><i data-lucide="pencil" class="w-4 h-4"></i></button><button onclick="del(${x})" class="text-red-500 dark:text-red-400 hover:text-slate-900 dark:hover:text-white"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td></tr>`);
+            <td class="px-6 py-4 text-right text-slate-600 dark:text-slate-300">${currSym}${fmt(invDisp)}</td><td class="px-6 py-4 text-right text-green-600 dark:text-green-400">${i.inputs.matKey!=='bare'?'+'+currSym+fmt(saveDisp):'-'}</td><td class="px-6 py-4 text-right font-bold text-indigo-500 dark:text-indigo-400">${roi}</td><td class="px-6 py-4 text-right"><button onclick="edit(${x})" class="text-indigo-500 dark:text-indigo-400 mr-2 hover:text-slate-900 dark:hover:text-white"><i data-lucide="pencil" class="w-4 h-4"></i></button><button onclick="del(${x})" class="text-red-500 dark:text-red-400 hover:text-slate-900 dark:hover:text-white"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td></tr>`);
         });
         if(LIST.length===0)tb.innerHTML=`<tr><td colspan="10" class="px-6 py-20 text-center text-slate-500"><i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-20"></i><span id="emptyMsg">Henüz hesaplama eklenmedi.</span></td></tr>`;
         
-        document.getElementById('dashInv').innerText=currSym+Math.round(gInv).toLocaleString();
-        document.getElementById('dashSave').innerText=currSym+Math.round(gSave).toLocaleString();
+        document.getElementById('dashInv').innerText=currSym+fmt(gInv);
+        document.getElementById('dashSave').innerText=currSym+fmt(gSave);
         document.getElementById('dashCo2').innerHTML=gCo2.toFixed(1)+' Ton';
         const totalRoi=gSave>0?(gInv/gSave*12):0;
         document.getElementById('dashRoi').innerHTML=totalRoi>0?totalRoi.toFixed(1)+` <span class="text-lg text-slate-500 font-normal">Ay</span>`:'---';
@@ -1086,21 +1091,29 @@
             printArea.innerHTML = printTemplateCache;
             const d = new Date().toLocaleDateString('tr-TR');
             
-            let gInv=0, gSave=0, gCo2=0, gLoss=0, gFuelLost=0;
-            let lastFuelUnit = "";
             const currSymVal = document.getElementById('curr').value;
-            const currSymMap = {'USD':'$','EUR':'€','GBP':'£','TL':'₺'};
+            const reportRate = FX[currSymVal] || 1;
+            const currSymMap = {'USD':'$','EUR':'€','TL':'₺'};
             const currSym = currSymMap[currSymVal]||'';
 
+            let gInv=0, gSave=0, gCo2=0, gLoss=0, gFuelLost=0;
+            let lastFuelUnit = "";
+
             LIST.forEach(i => {
+                // RAPORLAMA ESNASINDA DÖNÜŞTÜR
+                const invDisp = i.invTL / reportRate;
+                const saveDisp = i.saveTL / reportRate;
+                const lossDisp = i.lossTL / reportRate;
+                const lossBareDisp = i.lossBareTL / reportRate;
+
                 if(i.inputs.matKey!=='bare'){
-                    gInv += i.inv;
-                    gSave += i.save;
+                    gInv += invDisp;
+                    gSave += saveDisp;
                     gCo2 += i.co2;
-                    gLoss += i.lossBare; 
+                    gLoss += lossBareDisp; 
                     gFuelLost += i.fuelLost;
                 } else {
-                    gLoss += i.loss;
+                    gLoss += lossDisp;
                     gFuelLost += i.fuelLost;
                 }
                 lastFuelUnit = i.fuelUnit;
@@ -1146,7 +1159,11 @@
                 
                 chunk.forEach((i, subIndex) => {
                     const globalIndex = (index * ROWS_PER_PAGE) + subIndex + 1;
-                    const roi = i.save > 0 ? (i.inv/i.save*12).toFixed(1) : "-";
+                    
+                    const iInv = i.invTL / reportRate;
+                    const iSave = i.saveTL / reportRate;
+
+                    const roi = i.roi > 0 ? i.roi.toFixed(1) : "-";
                     const imgTag = i.img ? `<img src="${i.img}" class="w-16 h-16 object-cover rounded mx-auto border border-slate-200">` : `<div class="w-8 h-8 bg-slate-100 rounded mx-auto flex items-center justify-center text-[8px]">-</div>`;
                     const locText = i.location ? `<div class="text-[8px] uppercase text-slate-400 mt-1 font-bold">📍 ${i.location}</div>` : '';
 
@@ -1158,8 +1175,8 @@
                         <td class="text-center border-b border-slate-100"><div class="font-bold text-slate-700">${i.Ts}°C</div><div class="text-[9px] font-bold text-orange-500">${i.kwhIns} kWh</div></td>
                         <td class="text-center border-b border-slate-100"><div class="font-bold text-green-600">+${i.kwhSave} kWh</div></td>
                         <td class="text-center border-b border-slate-100 text-[10px]">${i.qty} ${i.unit}</td>
-                        <td class="text-right font-mono text-[10px] text-slate-700 border-b border-slate-100">${currSym}${Math.round(i.inv).toLocaleString()}</td>
-                        <td class="text-right font-mono text-[10px] text-green-600 font-bold border-b border-slate-100">${i.inputs.matKey!=='bare'?'+'+currSym+Math.round(i.save).toLocaleString():'-'}</td>
+                        <td class="text-right font-mono text-[10px] text-slate-700 border-b border-slate-100">${currSym}${fmt(iInv)}</td>
+                        <td class="text-right font-mono text-[10px] text-green-600 font-bold border-b border-slate-100">${i.inputs.matKey!=='bare'?'+'+currSym+fmt(iSave):'-'}</td>
                         <td class="text-right font-bold text-blue-600 text-[10px] border-b border-slate-100">${roi}</td>
                     </tr>`;
                 });
@@ -1190,10 +1207,10 @@
             document.getElementById('covCurr').innerText = document.getElementById('energyCurr').value;
             document.getElementById('covHours').innerText = document.getElementById('hours').value;
 
-            document.getElementById('sumLoss').innerText = currSym + Math.round(gLoss).toLocaleString();
+            document.getElementById('sumLoss').innerText = currSym + fmt(gLoss);
             document.getElementById('sumFuelLost').innerText = `(${Math.round(gFuelLost).toLocaleString()} ${lastFuelUnit})`;
-            document.getElementById('sumSave').innerText = currSym + Math.round(gSave).toLocaleString();
-            document.getElementById('tabInv').innerText = currSym + Math.round(gInv).toLocaleString();
+            document.getElementById('sumSave').innerText = currSym + fmt(gSave);
+            document.getElementById('tabInv').innerText = currSym + fmt(gInv);
             document.getElementById('txtRoi').innerText = totalRoi>0 ? totalRoi.toFixed(1) + " Ay" : "---";
             document.getElementById('visualBar').style.width = totalRoi>0 ? Math.min((totalRoi/24)*100,100) + '%' : '0%';
             document.getElementById('sumCo2').innerText = gCo2.toFixed(1);
@@ -1207,12 +1224,12 @@
             pt.innerHTML = '';
             let rowL = `<tr class="border-b border-slate-200"><td class="p-2 text-left font-bold text-red-600">Mevcut Durum (Kümülatif Kayıp)</td>`;
             let tL=0;
-            for(let y=1; y<=5; y++){ tL += gLoss; rowL += `<td class="p-2 text-red-500">-${currSym}${Math.round(tL).toLocaleString()}</td>`; }
-            rowL += `<td class="p-2 font-black text-red-700">-${currSym}${Math.round(tL).toLocaleString()}</td></tr>`;
+            for(let y=1; y<=5; y++){ tL += gLoss; rowL += `<td class="p-2 text-red-500">-${currSym}${fmt(tL)}</td>`; }
+            rowL += `<td class="p-2 font-black text-red-700">-${currSym}${fmt(tL)}</td></tr>`;
             let rowG = `<tr><td class="p-2 text-left font-bold text-green-600">Yatırım Sonrası (Kümülatif Kazanç)</td>`;
             let tG = -gInv;
-            for(let y=1; y<=5; y++){ tG += gSave; rowG += `<td class="p-2 ${tG>=0?'text-green-600':'text-red-400'}">${currSym}${Math.round(tG).toLocaleString()}</td>`; }
-            rowG += `<td class="p-2 font-black ${tG>=0?'text-green-700':'text-red-700'}">${tG>0?'+':''}${currSym}${Math.round(tG).toLocaleString()}</td></tr>`;
+            for(let y=1; y<=5; y++){ tG += gSave; rowG += `<td class="p-2 ${tG>=0?'text-green-600':'text-red-400'}">${currSym}${fmt(tG)}</td>`; }
+            rowG += `<td class="p-2 font-black ${tG>=0?'text-green-700':'text-red-700'}">${tG>0?'+':''}${currSym}${fmt(tG)}</td></tr>`;
             pt.innerHTML = rowL + rowG;
 
             setTimeout(()=>{ lucide.createIcons(); window.print(); }, 100);
