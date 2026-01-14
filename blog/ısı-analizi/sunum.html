@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Termodinamik Analiz Sunumu</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@200;400;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- RESET & TEMEL AYARLAR --- */
+        :root {
+            --bg-dark: #050505;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --accent-fire: #ff4d00;
+            --accent-ice: #00f2ff;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* --- ARKA PLAN EFEKTLERİ --- */
+        .ambient-light {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 50% 50%, #111 0%, #000 100%);
+            overflow: hidden;
+        }
+        
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.3;
+            animation: float 20s infinite ease-in-out;
+        }
+        .orb-1 { width: 600px; height: 600px; background: #ff4500; top: -10%; left: -10%; }
+        .orb-2 { width: 500px; height: 500px; background: #0051ff; bottom: -10%; right: -10%; animation-delay: -5s; }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(30px, -30px); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 80px 40px;
+        }
+
+        /* --- BAŞLIK --- */
+        header {
+            text-align: center;
+            margin-bottom: 100px;
+        }
+
+        header h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 4.5rem;
+            font-weight: 800;
+            margin: 0;
+            background: linear-gradient(180deg, #fff, #999);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        header p { color: var(--text-muted); font-size: 1.2rem; margin-top: 15px; letter-spacing: 2px; text-transform: uppercase; }
+
+        /* --- BÖLÜMLER --- */
+        .section-title {
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 20px; margin-bottom: 40px; margin-top: 80px;
+        }
+        .section-title h2 { font-family: 'Outfit', sans-serif; font-size: 2rem; margin: 0; }
+        .hot h2 { color: #ffab7d; text-shadow: 0 0 15px rgba(255, 69, 0, 0.4); }
+        .cool h2 { color: #aeeeff; text-shadow: 0 0 15px rgba(0, 242, 255, 0.4); }
+
+        /* --- GRID --- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        /* --- KART TASARIMI --- */
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            position: relative;
+            cursor: pointer; /* Tıklanabilir olduğunu gösterir */
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(255,255,255,0.2);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        /* Zoom İkonu */
+        .card::after {
+            content: '🔍 Büyüt';
+            position: absolute;
+            top: 20px; right: 20px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .card:hover::after { opacity: 1; }
+
+        .img-box {
+            width: 100%;
+            height: 250px;
+            overflow: hidden;
+        }
+
+        .img-box img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .card:hover .img-box img { transform: scale(1.1); }
+
+        .content { padding: 25px; }
+        .content h3 { margin: 0 0 10px 0; font-family: 'Outfit', sans-serif; font-size: 1.5rem; }
+        .content p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; margin: 0; }
+
+        .tag {
+            display: inline-block; margin-top: 15px; padding: 5px 12px;
+            border-radius: 50px; font-size: 0.75rem; font-weight: 600; letter-spacing: 1px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* --- LIGHTBOX (MODAL) --- */
+        .modal {
+            display: none; /* Başlangıçta gizli */
+            position: fixed; z-index: 1000;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+
+        .modal.active { display: flex; opacity: 1; }
+
+        .modal-img {
+            max-width: 90%; max-height: 85%;
+            border-radius: 12px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal.active .modal-img { transform: scale(1); }
+
+        .close-btn {
+            position: absolute; top: 30px; right: 40px;
+            color: #fff; font-size: 40px; font-weight: bold; cursor: pointer;
+            transition: 0.2s;
+        }
+        .close-btn:hover { color: var(--accent-ice); transform: rotate(90deg); }
+        .caption {
+            position: absolute; bottom: 30px;
+            color: #fff; font-size: 1.2rem; font-family: 'Outfit', sans-serif;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="ambient-light">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>TERMODİNAMİK ANALİZ</h1>
+            <p>Endüstriyel Isı Kayıpları ve İzolasyon Çözümü</p>
+        </header>
+
+        <div class="section-title hot">
+            <h2>01. İÇ MEKANİZMA (Kayıp Başlıyor)</h2>
+        </div>
+        <div class="grid">
+            <div class="card" onclick="openModal(this)">
+                <div class="img-box"><img src="1.webp" alt="İletim (Conduction)"></div>
+                <div class="content">
+                    <h3>1. İletim (Conduction)</h3>
+                    <p>Sıcak akışkanın metale çarpması ve moleküler titreşimle enerjiyi aktarması.</p>
+                    <span class="tag">Moleküler Transfer</span>
+                </div>
+            </div>
+            <div class="card" onclick="openModal(this)">
+                <div class="img-box"><img src="2.webp" alt="Işınım (Radiation)"></div>
+                <div class="content">
+                    <h3>2. Işınım (Radiation)</h3>
+                    <p>Isınan metalin etrafa kızılötesi dalgalar yayması. Temassız ısı transferi.</p>
+                    <span class="tag">Termal Dalga</span>
+                </div>
+            </div>
+            <div class="card" onclick="openModal(this)">
+                <div class="img-box"><img src="3.webp" alt="Komple Görünüm"></div>
+                <div class="content">
+                    <h3>3. Kaotik Yayılım</h3>
+                    <p>İletim ve ışınımın birleştiği nokta. Vana artık tam bir ısı kaynağıdır.</p>
+                    <span class="tag">Maksimum Yük</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title hot">
+            <h2>02. DIŞ KAYIPLAR (Atmosfere Kaçış)</h2>
+        </div>
+        <div class="grid">
+            <div class="card" onclick="openModal(this)">
+                <div class="img-box"><img src="4.webp" alt="Doğal Konveksiyon"></div>
+                <div class="content">
+                    <h3>4. Hava Akımı (Oklar)</h3>
+                    <p>Soğuk hava yüzeye çarpar, ısınır ve yükselir. Sürekli bir enerji kaybı döngüsü.</p>
+                    <span class="tag">Baca Etkisi</span>
+                </div>
+            </div>
+            <div class="card" onclick="openModal(this)">
+                <div class="img-box"><img src="5.webp" alt="Termal Yangın"></div>
+                <div class="content">
+                    <h3>5. Görünmez Yangın</h3>
+                    <p>Çıplak gözle görülmeyen ısı kaybının görselleştirilmiş hali. Enerji yanıp gidiyor.</p>
+                    <span class="tag">Termal Görüş</span>
+                </div>
+            </div>
+            <div class="card" onclick="openModal(this)">
+                <div class="img-box"><img src="6.webp" alt="Zorlanmış Konveksiyon"></div>
+                <div class="content">
+                    <h3>6. Rüzgar Etkisi (Fan)</h3>
+                    <p>Zorlanmış konveksiyon. Fan veya rüzgar ısı kaybını katlanarak artırır.</p>
+                    <span class="tag">Kritik Kayıp</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title cool">
+            <h2>03. SONUÇ VE ÇÖZÜM</h2>
+        </div>
+        <div class="grid" style="grid-template-columns: 1fr; max-width: 800px; margin: 0 auto;">
+            <div class="card" onclick="openModal(this)" style="border-color: rgba(0, 242, 255, 0.4);">
+                <div class="img-box" style="height: 400px;"><img src="7.webp" alt="Karşılaştırma"></div>
+                <div class="content">
+                    <h3 style="color: #00f2ff;">7. Büyük Dönüşüm (Sonuç)</h3>
+                    <p>Sol taraf: İzolesiz, tehlikeli ve kayıp dolu. Sağ taraf: İzoleli, güvenli ve verimli. Vana ceketi konveksiyonu ve ışınımı hapseder.</p>
+                    <span class="tag" style="background: rgba(0, 242, 255, 0.2); color: #00f2ff;">Çözüm</span>
+                </div>
+            </div>
+        </div>
+
+        <footer style="text-align: center; margin-top: 100px; color: #555;">
+            <p>2024 &copy; High Performance Insulation</p>
+        </footer>
+    </div>
+
+    <div id="lightbox" class="modal" onclick="closeModal()">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <img class="modal-img" id="lightbox-img">
+        <div class="caption" id="caption"></div>
+    </div>
+
+    <script>
+        // Modal açma fonksiyonu
+        function openModal(element) {
+            const modal = document.getElementById('lightbox');
+            const modalImg = document.getElementById('lightbox-img');
+            const captionText = document.getElementById('caption');
+            
+            // Kartın içindeki resmi ve başlığı al
+            const img = element.querySelector('img');
+            const title = element.querySelector('h3').innerText;
+
+            modal.style.display = "flex";
+            // Küçük bir gecikmeyle opacity'i artır ki animasyon çalışsın
+            setTimeout(() => {
+                modal.classList.add('active');
+            }, 10);
+
+            modalImg.src = img.src;
+            captionText.innerHTML = title;
+        }
+
+        // Modal kapatma fonksiyonu
+        function closeModal() {
+            const modal = document.getElementById('lightbox');
+            modal.classList.remove('active');
+            
+            // Animasyon bitince gizle
+            setTimeout(() => {
+                modal.style.display = "none";
+            }, 300);
+        }
+    </script>
+
+</body>
+</html>
