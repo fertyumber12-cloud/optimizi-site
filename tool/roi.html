@@ -28,7 +28,7 @@
 </script>
 <style>
   :root {
-      /* LIGHT MODE: Tamamen düz gri */
+      /* LIGHT MODE */
       --bg-color: #f1f5f9; 
       --glass-bg: #ffffff;
       --glass-border: rgba(148, 163, 184, 0.4);
@@ -505,7 +505,7 @@
                      <div class="z-10"><div class="text-[10px] text-emerald-300 font-bold uppercase tracking-widest">KARBON AYAK İZİ</div><div class="text-3xl font-black mt-1"><span id="sumCo2">0</span> Ton</div></div>
                      <div class="text-right z-10 border-l border-emerald-700 pl-6"><div class="text-3xl font-black"><span id="sumTrees">0</span></div><div class="text-[9px] text-emerald-400 mt-1">Ağaç Eşdeğeri</div></div>
                  </div>
-                 <div class="text-[8px] text-slate-400 text-right mt-1 italic leading-tight">* Ağaç eşleniği: 1 Ağaç ≈ 25 kg CO₂ (Kaynak: EEA)</div>
+                 <div class="text-[8px] text-slate-400 text-right mt-1 italic leading-tight">* CO₂ Faktörü yakıt tipine göre hesaplanmıştır.</div>
              </div>
          </div>
 
@@ -557,7 +557,7 @@
 
     function initApp(){ init(); }
     
-    // FORMATTER: 2 DECIMAL PRECISION (EXCEL-LIKE)
+    // FORMATTER
     function fmt(n){ return n.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
     
     function setType(t){
@@ -585,18 +585,24 @@
         trap_float: 1.6, trap_thermo: 0.8, trap_bimetal: 1.0, trap_bucket: 1.5,
         flange: 0.35
     };
-    const FUELS={
-        gas: 8250, 
-        elec: 860, 
-        lng: 11500, 
-        fueloil: 9600, 
-        coal_imp: 6000,
-        coal_loc: 3500
+    
+    // YENİ YAKIT VERİ YAPISI: LHV (kcal) + CO2 (kg/kWh Fuel Input)
+    // Doğalgaz ~ 0.202
+    // Elektrik ~ 0.478 (Türkiye Ort.)
+    // İthal Kömür ~ 0.34
+    // Yerli Kömür (Linyit) ~ 0.38 - 0.40 (Daha kirli)
+    // Fuel Oil ~ 0.27
+    const FUEL_PARAMS = {
+        gas: { lhv: 8250, co2: 0.202 }, 
+        elec: { lhv: 860, co2: 0.478 }, 
+        lng: { lhv: 11500, co2: 0.22 }, 
+        fueloil: { lhv: 9600, co2: 0.27 }, 
+        coal_imp: { lhv: 6000, co2: 0.34 }, 
+        coal_loc: { lhv: 3500, co2: 0.38 }
     };
     
     let LIST=[],FX={USD:34.50,EUR:36.50,TL:1.0},currImg=null,userQrImg=null,editingIndex=null;
     
-    // YENİ YÜZEY YÖNETİMİ
     let currentSurfaces = []; 
 
     function addSurface(){
@@ -660,10 +666,8 @@
 
         const invRaw=parseFloat(document.getElementById('inv').value)||0;
         const invCurrencyCode = document.getElementById('invCurr').value; 
-        const reportCurrencyCode = document.getElementById('curr').value;
         
         const invRate = FX[invCurrencyCode] || 1; 
-        // const reportRate = FX[reportCurrencyCode] || 1; 
 
         // BAZ HESAPLAMA: HER ŞEYİ TL'YE ÇEVİR VE SAKLA
         let invUnitTL = invRaw * invRate;
@@ -795,15 +799,23 @@
         } else if(type==='pipe'){ Q_bare_total=Q_bare_unit*multiplier; } 
         else { Q_bare_total=Q_bare_unit*multiplier*qty; }
 
+        // --- YENİ YAKIT & CO2 HESABI ---
         const fuelType = document.getElementById('fuel').value;
         let LHV_Val = 8250;
+        let co2Factor = 0.202; // Default Gas
         let LHV_Unit = "m3";
 
         if(fuelType === 'manual') {
             LHV_Val = parseFloat(document.getElementById('fuelLhv').value) || 0;
             LHV_Unit = document.getElementById('fuelUnit').value;
+            // Manuel seçimde ortalama bir CO2 faktörü atayalım ya da yakıt türüne göre tahmin edelim
+            if(LHV_Unit === 'm3') co2Factor = 0.202; 
+            else if(LHV_Unit === 'kwh') co2Factor = 0.478; 
+            else co2Factor = 0.3; // kg ise katı/sıvı yakıt ortalaması
         } else {
-            LHV_Val = FUELS[fuelType];
+            LHV_Val = FUEL_PARAMS[fuelType].lhv;
+            co2Factor = FUEL_PARAMS[fuelType].co2;
+            
             if(fuelType === 'gas') LHV_Unit = 'm3';
             else if(fuelType === 'elec') LHV_Unit = 'kwh';
             else LHV_Unit = 'kg';
@@ -818,6 +830,11 @@
 
         const fuelSavedAmount = energySaved_kcal / (LHV_Val * eff);
         const fuelLostAmount = energyLostBare_kcal / (LHV_Val * eff);
+
+        // CO2 HESABI: Tasarruf edilen Termal Enerji / Verim = Yakıt Enerjisi Girişi (kWh) -> * CO2 Faktörü
+        // Yani kazana girmesi gereken fazladan yakıtın CO2 karşılığı.
+        const fuelEnergyInputSaved_kWh = energySaved_kWh / eff; 
+        const co2SavedTotal = (matKey==='bare') ? 0 : (fuelEnergyInputSaved_kWh * co2Factor) / 1000; // Ton
 
         // TÜM PARASAL HESAPLAMALAR TL BAZINDA YAPILIYOR
         const loss_money_insulated_TL = (energyLostIns_kWh * 860 / (LHV_Val * eff)) * priceTL;
@@ -866,17 +883,17 @@
             location: location,
             qty: (type==='pipe' ? multiplier : qty),
             unit: unitLabel,
-            invTL: invTotalTL, // TL BAZLI
-            saveTL: save_money_TL, // TL BAZLI
-            lossTL: annual_loss_TL, // TL BAZLI
-            lossBareTL: loss_money_bare_TL, // TL BAZLI
+            invTL: invTotalTL, 
+            saveTL: save_money_TL, 
+            lossTL: annual_loss_TL, 
+            lossBareTL: loss_money_bare_TL, 
             fuelSaved: (matKey==='bare') ? 0 : fuelSavedAmount,
             fuelLost: fuelLostAmount, 
             fuelUnit: LHV_Unit,
             kwhBare: Math.round(energyLostBare_kWh).toLocaleString(),
             kwhIns: Math.round(energyLostIns_kWh).toLocaleString(),
             kwhSave: Math.round(energySaved_kWh).toLocaleString(),
-            co2:(matKey==='bare'?0:(Q_bare_total-Q_total_watts)*hours/1000*0.4/1000),
+            co2: co2SavedTotal, // ARTIK YAKIT TÜRÜNE GÖRE
             Ts:finalTs.toFixed(1),
             Tins:finalTs.toFixed(1),
             qBare:Q_bare_unit,
