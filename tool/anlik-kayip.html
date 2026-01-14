@@ -669,6 +669,23 @@
             fuelUnit: LHV_Unit
         };
         
+        // --- CO2 HESAPLAMA DÜZELTMESİ ---
+        // kg CO2 per kWh (Giriş Enerjisi Bazlı)
+        const co2Factors = { 
+            gas: 0.202,      // Doğalgaz
+            elec: 0.440,     // Elektrik
+            lng: 0.226,      // LNG
+            fueloil: 0.279,  // Fuel Oil
+            coal_imp: 0.340, // İthal Kömür
+            coal_loc: 0.380, // Yerli Kömür
+            manual: 0.300    // Varsayılan
+        };
+        const selectedCo2Factor = co2Factors[fuelType] || 0.3;
+        
+        // Enerji Kaybı (kWh) / Verim = Harcanan Yakıt Enerjisi (kWh cinsinden)
+        // Harcanan Enerji * Katsayı = Toplam CO2 (kg)
+        // Sonuç Ton'a çevrilir (/1000)
+        
         return{
             name:Name,
             desc: `Ölçülen: ${tProc}°C`,
@@ -681,7 +698,7 @@
             fuelUnit: LHV_Unit,
             kwhLoss: Math.round(energyLostBare_kWh).toLocaleString(), 
             rawKwhLoss: energyLostBare_kWh,
-            co2:(Q_bare_total*hours/1000*0.4/1000),
+            co2: ((Q_bare_total*hours/1000) / eff) * selectedCo2Factor / 1000,
             tSurf: tProc,
             img:currImg,
             inputs
