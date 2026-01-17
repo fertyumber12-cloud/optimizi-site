@@ -20,9 +20,9 @@
   }
 
   body { 
-      background-color: #0f172a; /* Slate 900 */
+      background-color: #0f172a; 
       background-image: 
-          radial-gradient(at 50% 100%, #7f1d1d 0px, transparent 50%), /* Red 900 glow at bottom */
+          radial-gradient(at 50% 100%, #7f1d1d 0px, transparent 50%),
           linear-gradient(to top, #1a0505 0%, #0f172a 100%);
       min-height: 100vh; 
       display: flex; 
@@ -40,7 +40,6 @@
       background-size: 30px 30px;
   }
 
-  /* ALEV/KOR EFEKTLERİ */
   .embers {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -52,9 +51,9 @@
       position: absolute;
       bottom: -10px;
       width: 4px; height: 4px;
-      background: #f97316; /* Orange 500 */
+      background: #f97316;
       border-radius: 50%;
-      box-shadow: 0 0 10px 2px #ef4444; /* Red glow */
+      box-shadow: 0 0 10px 2px #ef4444;
       animation: rise linear infinite;
       opacity: 0;
   }
@@ -66,23 +65,20 @@
   .glass-card { 
       background: rgba(30, 10, 10, 0.6); 
       backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(220, 38, 38, 0.3); /* Red border */
+      border: 1px solid rgba(220, 38, 38, 0.3); 
       box-shadow: 0 0 50px -10px rgba(220, 38, 38, 0.2); 
       z-index: 10; 
   }
   
   .counter-text { 
       font-variant-numeric: tabular-nums; 
-      text-shadow: 0 0 20px rgba(239, 68, 68, 0.6); /* Glowing text */
+      text-shadow: 0 0 20px rgba(239, 68, 68, 0.6); 
   }
   
+  .alert-pulse { animation: pulse-red 2s infinite; }
   @keyframes pulse-red {
       0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
       70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-  }
-  
-  .alert-pulse {
-      animation: pulse-red 2s infinite;
   }
 </style>
 </head>
@@ -166,12 +162,11 @@
     lucide.createIcons();
     const params = new URLSearchParams(window.location.search);
 
-    // Konfigürasyon: 'v' artık yıllık KAYBI temsil ediyor.
     const config = {
         client: decodeURIComponent(params.get('c') || ''),
         sn: decodeURIComponent(params.get('s') || 'DEMO'),
-        start: params.get('d') || new Date().toISOString(),
-        lossTL: parseFloat(params.get('v')) || 0, // saveTL yerine lossTL
+        start: params.get('d') || "", // Default boş, aşağıda kontrol edeceğiz
+        lossTL: parseFloat(params.get('v')) || 0,
         unitPrice: parseFloat(params.get('up')) || 0,
         workHours: params.get('wh') || "---",
         fuel: params.get('f') || 'gas'
@@ -186,22 +181,34 @@
         coal_loc: { unit: 'kg', co2: 0.0015, label: 'Yerli Kömür' }
     }[config.fuel] || { unit: 'br', co2: 0, label: 'Yakıt' };
 
-    // Veri Doldurma
     document.getElementById('prdSerial').innerText = `REF: ${config.sn}`;
     document.getElementById('clientDisplay').innerText = config.client || 'Kayıp Analizi';
     document.getElementById('fuelUnit').innerText = fData.unit;
     document.getElementById('fuelLabel').innerText = `İsraf (${fData.label})`; 
     document.getElementById('prdName').innerText = (config.client ? "Termal Kayıp İzleme" : "Endüstriyel Yalıtım");
-
     document.getElementById('dispHours').innerText = config.workHours;
     document.getElementById('dispPrice').innerText = `${config.unitPrice} TL (${fData.label})`;
 
-    // Tarih
-    const p = config.start.split('-');
-    const startDate = new Date(p[0], p[1]-1, p[2], 0, 0, 0).getTime();
-    document.getElementById('installDate').innerText = new Date(startDate).toLocaleDateString('tr-TR', {day:'2-digit', month:'long', year:'numeric'});
+    // TARİH PARSE İŞLEMİ (DÜZELTİLDİ)
+    let startDate;
+    if (config.start) {
+        // YYYY-MM-DD-HH-MM
+        const p = config.start.split('-');
+        // p[0]:Yıl, p[1]:Ay, p[2]:Gün, p[3]:Saat, p[4]:Dakika
+        startDate = new Date(
+            parseInt(p[0]), 
+            parseInt(p[1]) - 1, 
+            parseInt(p[2]), 
+            parseInt(p[3] || 0), 
+            parseInt(p[4] || 0), 
+            0
+        ).getTime();
+    } else {
+        startDate = new Date().getTime(); // Parametre yoksa şimdi başla
+    }
 
-    // Hesaplama Motoru (Değişkenler aynı mantıkta çalışır, sadece anlamları değişti)
+    document.getElementById('installDate').innerText = new Date(startDate).toLocaleDateString('tr-TR', {day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit'});
+
     const lossPerMs = config.lossTL / 31536000000;
     const impliedTotalQuantity = config.unitPrice > 0 ? (config.lossTL / config.unitPrice) : 0;
     const quantityPerMs = impliedTotalQuantity / 31536000000;
@@ -230,16 +237,15 @@
 
             document.getElementById('runTime').innerText = timeStr;
         } else {
-            document.getElementById('runTime').innerText = "Bekleniyor...";
+            // Gelecek bir tarih girildiyse
+            document.getElementById('runTime').innerText = "Başlangıç Bekleniyor...";
         }
         requestAnimationFrame(updateCounter);
     }
 
-    // Alev/Kıvılcım Efekti Oluşturucu
     function createEmbers() {
         const container = document.getElementById('embersContainer');
         const emberCount = 20; 
-
         for (let i = 0; i < emberCount; i++) {
             const ember = document.createElement('div');
             ember.classList.add('ember');
@@ -250,7 +256,7 @@
 
     function resetEmber(el) {
         el.style.left = Math.random() * 100 + '%';
-        el.style.animationDuration = (Math.random() * 3 + 2) + 's'; // 2-5 sn arası hız
+        el.style.animationDuration = (Math.random() * 3 + 2) + 's'; 
         el.style.animationDelay = (Math.random() * 5) + 's';
         el.style.opacity = Math.random() * 0.5 + 0.2;
     }
