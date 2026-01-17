@@ -3,15 +3,14 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-<title>Canlı Tasarruf | Optimizi</title>
-  <link rel="icon" href="favicon.png" type="image/png">
+<title>Canlı Kayıp Analizi | Optimizi</title>
+<link rel="icon" href="favicon.png" type="image/png">
 <meta name="robots" content="noindex">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
 <script>tailwind.config = { theme: { fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] } } }</script>
 <style>
-  /* FIX: HTML ve Body için taşmayı engelleme */
   html, body {
       overflow-x: hidden;
       width: 100%;
@@ -21,10 +20,10 @@
   }
 
   body { 
-      background-color: #0f172a; 
+      background-color: #0f172a; /* Slate 900 */
       background-image: 
-          radial-gradient(at 0% 0%, rgba(34, 197, 94, 0.15) 0px, transparent 50%),
-          radial-gradient(at 100% 100%, rgba(30, 41, 59, 1) 0px, transparent 50%);
+          radial-gradient(at 50% 100%, #7f1d1d 0px, transparent 50%), /* Red 900 glow at bottom */
+          linear-gradient(to top, #1a0505 0%, #0f172a 100%);
       min-height: 100vh; 
       display: flex; 
       flex-direction: column; 
@@ -36,98 +35,128 @@
   
   .grid-bg {
       position: absolute; inset: 0; pointer-events: none; z-index: 0;
-      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-image: linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
       background-size: 30px 30px;
   }
 
-  .spotlight {
-      position: absolute; top: -20%; left: 50%; transform: translateX(-50%);
-      width: 120%; height: 60vh;
-      background: radial-gradient(circle, rgba(74, 222, 128, 0.2) 0%, rgba(34, 197, 94, 0) 60%);
-      filter: blur(40px); z-index: 1; pointer-events: none;
-      /* FIX: Işığın mobilde taşmasını engellemek için */
-      max-width: 100vw; 
+  /* ALEV/KOR EFEKTLERİ */
+  .embers {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+  }
+  .ember {
+      position: absolute;
+      bottom: -10px;
+      width: 4px; height: 4px;
+      background: #f97316; /* Orange 500 */
+      border-radius: 50%;
+      box-shadow: 0 0 10px 2px #ef4444; /* Red glow */
+      animation: rise linear infinite;
+      opacity: 0;
+  }
+  @keyframes rise {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(-80vh) scale(0); opacity: 0; }
   }
 
   .glass-card { 
-      background: rgba(255, 255, 255, 0.05); 
-      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.1); 
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); 
+      background: rgba(30, 10, 10, 0.6); 
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(220, 38, 38, 0.3); /* Red border */
+      box-shadow: 0 0 50px -10px rgba(220, 38, 38, 0.2); 
       z-index: 10; 
   }
-  .counter-text { font-variant-numeric: tabular-nums; }
+  
+  .counter-text { 
+      font-variant-numeric: tabular-nums; 
+      text-shadow: 0 0 20px rgba(239, 68, 68, 0.6); /* Glowing text */
+  }
+  
+  @keyframes pulse-red {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+  }
+  
+  .alert-pulse {
+      animation: pulse-red 2s infinite;
+  }
 </style>
 </head>
 <body class="antialiased font-sans">
 
 <div class="grid-bg"></div>
-<div class="spotlight"></div>
+<div class="embers" id="embersContainer"></div>
 
 <main class="relative z-10 w-full max-w-md p-4 flex flex-col items-center justify-center min-h-[90vh]">
     
     <div class="mb-8 scale-100 flex flex-col items-center animate-[fadeIn_0.5s_ease-out]">
-        <h1 class="text-3xl font-black text-white tracking-tight">Optimizi<span class="text-green-400">.App</span></h1>
-        <p class="text-[10px] text-slate-400 uppercase font-bold tracking-[0.3em] mt-1">Energy Intelligence</p>
+        <h1 class="text-3xl font-black text-white tracking-tight">Optimizi<span class="text-red-500">.App</span></h1>
+        <p class="text-[10px] text-red-300/70 uppercase font-bold tracking-[0.3em] mt-1">Loss Prevention Monitor</p>
     </div>
 
-    <div class="glass-card p-6 rounded-[2rem] w-full border-t-2 border-t-green-500/50">
+    <div class="glass-card p-6 rounded-[2rem] w-full border-t-4 border-t-red-600">
         
         <div class="flex flex-col gap-4 mb-6">
             <div class="flex justify-between items-start">
-                <div class="flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-[10px] text-green-400 font-bold uppercase tracking-wider">
-                    <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> Canlı İzleme
+                <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-950/50 border border-red-500/50 text-[10px] text-red-400 font-bold uppercase tracking-wider alert-pulse">
+                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span> Kritik Kayıp
                 </div>
-                <div class="text-[10px] text-slate-400 font-mono mt-1 opacity-50" id="prdSerial">ID: ---</div>
+                <div class="text-[10px] text-slate-500 font-mono mt-1 opacity-70" id="prdSerial">ID: ---</div>
             </div>
             <div class="text-left pl-1">
                 <div id="clientDisplay" class="text-sm font-extrabold text-white uppercase tracking-tight mb-1"></div>
-                <h2 class="text-lg font-bold text-slate-300 leading-tight" id="prdName">...</h2>
+                <h2 class="text-lg font-bold text-slate-300 leading-tight" id="prdName">Endüstriyel Yalıtım</h2>
             </div>
         </div>
         
-        <div class="text-center py-8 rounded-3xl bg-white/5 border border-white/10 mb-6 relative overflow-hidden group">
-            <div class="absolute inset-0 bg-green-500/5 group-hover:bg-green-500/10 transition duration-500"></div>
+        <div class="text-center py-10 rounded-3xl bg-gradient-to-b from-red-950/30 to-slate-900/50 border border-red-500/20 mb-6 relative overflow-hidden group">
+            <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-1/2 bg-red-600/10 blur-[50px] rounded-full animate-pulse"></div>
             
-            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 relative z-10">Toplam Kazanç</div>
-            <div class="flex items-baseline justify-center gap-1 flex-wrap px-2 relative z-10">
-                <span id="liveMoney" class="font-black text-white counter-text tracking-tighter text-5xl drop-shadow-lg">0,00</span>
-                <span class="text-2xl font-bold text-green-400">₺</span>
+            <div class="text-[10px] font-bold text-red-400 uppercase tracking-widest mb-2 relative z-10 flex justify-center items-center gap-2">
+                <i data-lucide="flame" class="w-3 h-3 text-orange-500 fill-orange-500"></i> Kümülatif Nakit Kaybı
             </div>
-            <div class="mt-2 text-[9px] text-slate-500 flex items-center justify-center gap-1 relative z-10">
-                <i data-lucide="shield-check" class="w-3 h-3"></i> ISO 12241 Standartlarına Göre
+            <div class="flex items-baseline justify-center gap-1 flex-wrap px-2 relative z-10">
+                <span class="text-3xl font-black text-red-600 mr-1">-</span>
+                <span id="liveMoney" class="font-black text-white counter-text tracking-tighter text-5xl">0,00</span>
+                <span class="text-2xl font-bold text-red-500">₺</span>
+            </div>
+            <div class="mt-3 text-[9px] text-slate-400 flex items-center justify-center gap-1 relative z-10">
+                <span class="bg-red-500/10 px-2 py-0.5 rounded text-red-300 border border-red-500/10">Müdahale Edilmeyen Tutar</span>
             </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3 mb-6">
-            <div class="p-3 rounded-2xl bg-white/5 border border-white/5 text-center">
-                <div class="text-[10px] font-bold text-slate-500 uppercase mb-1"><i data-lucide="leaf" class="w-3 h-3 inline text-green-500 mr-1"></i>Karbon</div>
+            <div class="p-3 rounded-2xl bg-slate-900/50 border border-slate-700/50 text-center relative overflow-hidden">
+                <div class="text-[10px] font-bold text-slate-500 uppercase mb-1"><i data-lucide="cloud-fog" class="w-3 h-3 inline text-slate-400 mr-1"></i>Karbon Salımı</div>
                 <div class="text-lg font-bold text-slate-200"><span id="liveCarbon">0</span> <span class="text-[9px] text-slate-500">Ton</span></div>
             </div>
-            <div class="p-3 rounded-2xl bg-white/5 border border-white/5 text-center">
-                <div class="text-[10px] font-bold text-slate-500 uppercase mb-1"><i data-lucide="flame" class="w-3 h-3 inline text-orange-500 mr-1"></i><span id="fuelLabel">Yakıt</span></div>
+            <div class="p-3 rounded-2xl bg-slate-900/50 border border-slate-700/50 text-center relative overflow-hidden">
+                <div class="text-[10px] font-bold text-slate-500 uppercase mb-1"><i data-lucide="trash-2" class="w-3 h-3 inline text-red-400 mr-1"></i><span id="fuelLabel">Boşa Giden</span></div>
                 <div class="text-lg font-bold text-slate-200"><span id="liveFuel">0</span> <span id="fuelUnit" class="text-[9px] text-slate-500">...</span></div>
             </div>
         </div>
 
-        <div class="bg-white/5 border border-white/10 rounded-xl p-4 mb-4">
+        <div class="bg-red-950/20 border border-red-900/30 rounded-xl p-4 mb-4">
             <div class="flex items-start gap-3">
-                <i data-lucide="info" class="w-4 h-4 text-slate-400 mt-0.5 shrink-0"></i>
-                <p class="text-[10px] text-slate-400 leading-relaxed">
-                    Bu hesaplama, projenin yıllık <strong class="text-slate-200" id="dispHours">---</strong> saat çalışma süresi ve <strong class="text-slate-200" id="dispPrice">---</strong> birim enerji bedeli baz alınarak oluşturulan ROI raporuna dayanmaktadır.
+                <i data-lucide="alert-triangle" class="w-5 h-5 text-red-500 mt-0.5 shrink-0 animate-pulse"></i>
+                <p class="text-[10px] text-slate-300 leading-relaxed">
+                    Tesis şu anda yalıtımsız ekipmanlar nedeniyle yıllık <strong class="text-white" id="dispHours">---</strong> saat boyunca <strong class="text-white" id="dispPrice">---</strong> birim fiyat üzerinden enerjiyi havaya atmaktadır.
                 </p>
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4 border-t border-white/10 pt-4 text-slate-400">
+        <div class="grid grid-cols-2 gap-4 border-t border-white/5 pt-4 text-slate-500">
             <div>
-                <div class="text-[10px] font-bold uppercase mb-1 flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3"></i> Montaj</div>
-                <div id="installDate" class="text-xs font-bold text-slate-200">...</div>
+                <div class="text-[10px] font-bold uppercase mb-1 flex items-center gap-1"><i data-lucide="calendar-clock" class="w-3 h-3 text-slate-400"></i> Başlangıç</div>
+                <div id="installDate" class="text-xs font-bold text-slate-300">...</div>
             </div>
             <div class="text-right">
-                <div class="text-[10px] font-bold uppercase mb-1 flex items-center justify-end gap-1">Süre <i data-lucide="clock" class="w-3 h-3"></i></div>
-                <div id="runTime" class="text-xs font-bold text-slate-200">...</div>
+                <div class="text-[10px] font-bold uppercase mb-1 flex items-center justify-end gap-1">Geçen Süre <i data-lucide="timer" class="w-3 h-3 text-red-400"></i></div>
+                <div id="runTime" class="text-xs font-bold text-red-200 font-mono">...</div>
             </div>
         </div>
     </div>
@@ -137,11 +166,12 @@
     lucide.createIcons();
     const params = new URLSearchParams(window.location.search);
 
+    // Konfigürasyon: 'v' artık yıllık KAYBI temsil ediyor.
     const config = {
         client: decodeURIComponent(params.get('c') || ''),
         sn: decodeURIComponent(params.get('s') || 'DEMO'),
         start: params.get('d') || new Date().toISOString(),
-        saveTL: parseFloat(params.get('v')) || 0,
+        lossTL: parseFloat(params.get('v')) || 0, // saveTL yerine lossTL
         unitPrice: parseFloat(params.get('up')) || 0,
         workHours: params.get('wh') || "---",
         fuel: params.get('f') || 'gas'
@@ -157,11 +187,11 @@
     }[config.fuel] || { unit: 'br', co2: 0, label: 'Yakıt' };
 
     // Veri Doldurma
-    document.getElementById('prdSerial').innerText = `ID: ${config.sn}`;
-    document.getElementById('clientDisplay').innerText = config.client || 'Yalıtım Projesi';
+    document.getElementById('prdSerial').innerText = `REF: ${config.sn}`;
+    document.getElementById('clientDisplay').innerText = config.client || 'Kayıp Analizi';
     document.getElementById('fuelUnit').innerText = fData.unit;
-    document.getElementById('fuelLabel').innerText = fData.label; 
-    document.getElementById('prdName').innerText = (config.client ? "Canlı Amortisman Sayacı" : "Endüstriyel Yalıtım");
+    document.getElementById('fuelLabel').innerText = `İsraf (${fData.label})`; 
+    document.getElementById('prdName').innerText = (config.client ? "Termal Kayıp İzleme" : "Endüstriyel Yalıtım");
 
     document.getElementById('dispHours').innerText = config.workHours;
     document.getElementById('dispPrice').innerText = `${config.unitPrice} TL (${fData.label})`;
@@ -171,9 +201,9 @@
     const startDate = new Date(p[0], p[1]-1, p[2], 0, 0, 0).getTime();
     document.getElementById('installDate').innerText = new Date(startDate).toLocaleDateString('tr-TR', {day:'2-digit', month:'long', year:'numeric'});
 
-    // Sayaç Motoru
-    const savePerMs = config.saveTL / 31536000000;
-    const impliedTotalQuantity = config.unitPrice > 0 ? (config.saveTL / config.unitPrice) : 0;
+    // Hesaplama Motoru (Değişkenler aynı mantıkta çalışır, sadece anlamları değişti)
+    const lossPerMs = config.lossTL / 31536000000;
+    const impliedTotalQuantity = config.unitPrice > 0 ? (config.lossTL / config.unitPrice) : 0;
     const quantityPerMs = impliedTotalQuantity / 31536000000;
 
     function updateCounter() {
@@ -181,7 +211,7 @@
         const diff = now - startDate;
 
         if(diff > 0) {
-            const money = diff * savePerMs;
+            const money = diff * lossPerMs;
             const fuelAmount = diff * quantityPerMs;
             const co2Ton = fuelAmount * fData.co2;
 
@@ -192,10 +222,11 @@
             const d = Math.floor(diff/86400000);
             const h = Math.floor((diff/3600000)%24);
             const m = Math.floor((diff/60000)%60);
+            const s = Math.floor((diff/1000)%60);
             
             let timeStr = "";
-            if(d > 0) timeStr = `${d} Gün ${h} Sa`;
-            else timeStr = `${h} Sa ${m} Dk`;
+            if(d > 0) timeStr = `${d}G ${h}S ${m}D ${s}sn`;
+            else timeStr = `${h} Sa ${m} Dk ${s} sn`;
 
             document.getElementById('runTime').innerText = timeStr;
         } else {
@@ -204,9 +235,28 @@
         requestAnimationFrame(updateCounter);
     }
 
+    // Alev/Kıvılcım Efekti Oluşturucu
+    function createEmbers() {
+        const container = document.getElementById('embersContainer');
+        const emberCount = 20; 
+
+        for (let i = 0; i < emberCount; i++) {
+            const ember = document.createElement('div');
+            ember.classList.add('ember');
+            resetEmber(ember);
+            container.appendChild(ember);
+        }
+    }
+
+    function resetEmber(el) {
+        el.style.left = Math.random() * 100 + '%';
+        el.style.animationDuration = (Math.random() * 3 + 2) + 's'; // 2-5 sn arası hız
+        el.style.animationDelay = (Math.random() * 5) + 's';
+        el.style.opacity = Math.random() * 0.5 + 0.2;
+    }
+
+    createEmbers();
     updateCounter();
 </script>
 </body>
 </html>
-
-
