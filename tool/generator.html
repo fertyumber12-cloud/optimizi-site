@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Optimizi Generator</title>
+    <title>Optimizi Kayıp Simülatörü</title>
     <link rel="icon" href="favicon.png" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -17,25 +17,26 @@
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 text-slate-800">
 
-    <div class="glass-panel w-full max-w-lg rounded-3xl p-8 relative overflow-hidden border-t-8 border-green-600">
+    <div class="glass-panel w-full max-w-lg rounded-3xl p-8 relative overflow-hidden border-t-8 border-red-600">
         
         <div class="flex items-center justify-between mb-6">
             <div>
-                <h1 class="text-2xl font-black tracking-tight text-slate-900">Optimizi<span class="text-green-600">.Gen</span></h1>
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Sabit Karekod Sistemi</p>
+                <h1 class="text-2xl font-black tracking-tight text-slate-900">Optimizi<span class="text-red-600">.Gen</span></h1>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Kayıp Takip Sistemi</p>
             </div>
-            <div class="bg-green-50 p-3 rounded-2xl"><i data-lucide="qr-code" class="w-6 h-6 text-green-600"></i></div>
+            <div class="bg-red-50 p-3 rounded-2xl"><i data-lucide="qr-code" class="w-6 h-6 text-red-600"></i></div>
         </div>
 
         <div class="space-y-4">
             <div class="grid grid-cols-2 gap-3">
-                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Müşteri</label><input type="text" id="client" placeholder="ABC Tekstil" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:border-green-500 transition"></div>
-                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Seri No</label><input type="text" id="serial" value="PRJ-001" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:border-green-500 transition"></div>
+                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Müşteri</label><input type="text" id="client" placeholder="ABC Tesisleri" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:border-red-500 transition"></div>
+                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Rapor No</label><input type="text" id="serial" value="LSS-001" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:border-red-500 transition"></div>
             </div>
 
-            <div class="bg-white p-4 rounded-2xl border border-green-100 shadow-sm">
-                <label class="text-[10px] font-bold text-green-600 uppercase flex items-center gap-1 mb-1"><i data-lucide="wallet" class="w-3 h-3"></i> Toplam Yıllık Kazanç</label>
-                <div class="relative">
+            <div class="bg-white p-4 rounded-2xl border border-red-100 shadow-sm relative overflow-hidden">
+                <div class="absolute right-0 top-0 p-4 opacity-5"><i data-lucide="flame" class="w-16 h-16 text-red-600"></i></div>
+                <label class="text-[10px] font-bold text-red-600 uppercase flex items-center gap-1 mb-1"><i data-lucide="flame" class="w-3 h-3"></i> Toplam Yıllık Kayıp (İsraf)</label>
+                <div class="relative z-10">
                     <input type="text" id="totalValue" placeholder="Örn: 687.750" class="w-full text-2xl font-black text-slate-800 bg-transparent border-none p-0 outline-none placeholder-slate-200">
                     <span class="absolute right-0 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">TL / Yıl</span>
                 </div>
@@ -48,7 +49,7 @@
                 </div>
                 <div class="bg-white p-3 rounded-xl border border-slate-200">
                     <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Çalışma Saati</label>
-                    <input type="number" id="workHours" value="5000" class="w-full font-bold text-slate-700 outline-none border-none p-0 bg-transparent">
+                    <input type="number" id="workHours" value="8000" class="w-full font-bold text-slate-700 outline-none border-none p-0 bg-transparent">
                 </div>
             </div>
 
@@ -65,25 +66,25 @@
                     </select>
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Montaj Tarihi</label>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Başlangıç Tarihi</label>
                     <input type="date" id="installDate" class="w-full bg-white border border-slate-200 rounded-xl px-2 py-2 text-sm font-bold text-slate-700 outline-none">
                 </div>
             </div>
             
             <div>
-                <label class="text-[10px] font-bold text-slate-400 uppercase">Montaj Saati</label>
+                <label class="text-[10px] font-bold text-slate-400 uppercase">Başlangıç Saati</label>
                 <input type="time" id="installTime" class="w-full bg-white border border-slate-200 rounded-xl px-2 py-2 text-sm font-bold text-slate-700 outline-none text-center">
             </div>
 
-            <button onclick="generateQR()" class="w-full bg-slate-900 hover:bg-slate-800 text-white p-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition transform active:scale-[0.98] flex items-center justify-center gap-2">
-                <i data-lucide="qr-code"></i> Karekod Oluştur
+            <button onclick="generateQR()" class="w-full bg-slate-900 hover:bg-red-600 text-white p-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-red-600/30 transition transform active:scale-[0.98] flex items-center justify-center gap-2 group">
+                <i data-lucide="qr-code" class="group-hover:rotate-180 transition duration-500"></i> Simülasyonu Başlat
             </button>
         </div>
 
         <div id="resultCard" class="hidden mt-6 pt-6 border-t border-slate-200 text-center bg-white p-4 rounded-xl">
             <div id="qrcode" class="flex justify-center mb-4"></div>
             <code id="linkText" class="text-[9px] bg-slate-100 p-2 rounded block mb-2 break-all font-mono text-slate-500">...</code>
-            <a id="downloadBtn" download="optimizi.png" href="#" class="inline-flex items-center gap-2 text-xs font-bold text-green-600 bg-green-50 px-4 py-2 rounded-full hover:bg-green-100 transition">Resmi İndir</a>
+            <a id="downloadBtn" download="optimizi_kayip.png" href="#" class="inline-flex items-center gap-2 text-xs font-bold text-red-600 bg-red-50 px-4 py-2 rounded-full hover:bg-red-100 transition">QR Kodunu İndir</a>
         </div>
     </div>
 
@@ -91,7 +92,7 @@
         lucide.createIcons();
         const now = new Date();
         document.getElementById('installDate').valueAsDate = now;
-        // Saati varsayılan olarak şu anki saat yap
+        
         const hh = String(now.getHours()).padStart(2, '0');
         const mm = String(now.getMinutes()).padStart(2, '0');
         document.getElementById('installTime').value = `${hh}:${mm}`;
@@ -104,17 +105,16 @@
             const wHours = document.getElementById('workHours').value;
             const fuel = document.getElementById('fuel').value;
             
-            // SAAT BİLGİSİNİ BURADA LİNKE EKLEMEMİZ LAZIM:
-            const dateStr = document.getElementById('installDate').value; 
-            const timeStr = document.getElementById('installTime').value; // Örn: 14:30
-            const fullDateTime = `${dateStr}-${timeStr.replace(':', '-')}`; // Sonuç: 2025-10-27-14-30
+            const dateStr = document.getElementById('installDate').value; // YYYY-MM-DD
+            const timeStr = document.getElementById('installTime').value; // HH:MM
+            // Format: YYYY-MM-DD-HH-MM
+            const fullDateTime = `${dateStr}-${timeStr.replace(':', '-')}`; 
 
             rawVal = rawVal.replace(/\./g, '').replace(',', '.');
             const totalVal = parseFloat(rawVal);
 
-            if(!totalVal || !uPrice) { alert("Lütfen tutar ve birim fiyatı giriniz."); return; }
+            if(!totalVal || !uPrice) { alert("Lütfen kayıp tutarını ve birim fiyatı giriniz."); return; }
 
-            // Linke 'd' parametresi olarak tam tarihi ekliyoruz
             const baseUrl = "https://optimizi.app/track.html";
             const finalUrl = `${baseUrl}?c=${encodeURIComponent(client)}&s=${encodeURIComponent(serial)}&v=${totalVal}&up=${uPrice}&wh=${wHours}&f=${fuel}&d=${fullDateTime}`;
 
@@ -129,4 +129,3 @@
     </script>
 </body>
 </html>
-
