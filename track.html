@@ -165,21 +165,38 @@
     const config = {
         client: decodeURIComponent(params.get('c') || ''),
         sn: decodeURIComponent(params.get('s') || 'DEMO'),
-        start: params.get('d') || "", // Default boş, aşağıda kontrol edeceğiz
+        start: params.get('d') || "", 
         lossTL: parseFloat(params.get('v')) || 0,
         unitPrice: parseFloat(params.get('up')) || 0,
         workHours: params.get('wh') || "---",
-        fuel: params.get('f') || 'gas'
+        fuel: params.get('f') || 'gas',
+        // ÖZEL YAKIT PARAMETRELERİ
+        customLabel: decodeURIComponent(params.get('fl') || ''),
+        customUnit: decodeURIComponent(params.get('fu') || 'kg'),
+        customCo2: parseFloat(params.get('fc')) || 0.36
     };
 
-    const fData = {
-        gas: { unit: 'm³', co2: 0.0019, label: 'Doğalgaz' }, 
-        elec: { unit: 'kWh', co2: 0.00045, label: 'Elektrik' }, 
-        lng: { unit: 'kg', co2: 0.0028, label: 'LNG' }, 
-        fueloil: { unit: 'kg', co2: 0.0031, label: 'Fuel Oil' }, 
-        coal_imp: { unit: 'kg', co2: 0.0025, label: 'İthal Kömür' }, 
-        coal_loc: { unit: 'kg', co2: 0.0015, label: 'Yerli Kömür' }
-    }[config.fuel] || { unit: 'br', co2: 0, label: 'Yakıt' };
+    // YAKIT VERİ TABLOSU
+    let fData;
+    
+    // EĞER MANUEL SEÇİLDİYSE GENERATOR'DAN GELEN VERİYİ KULLAN
+    if(config.fuel === 'manual') {
+        fData = { 
+            unit: config.customUnit, 
+            co2: config.customCo2, 
+            label: config.customLabel || 'Özel Yakıt' 
+        };
+    } else {
+        // STANDART LİSTE
+        fData = {
+            gas: { unit: 'm³', co2: 0.0019, label: 'Doğalgaz' }, 
+            elec: { unit: 'kWh', co2: 0.00045, label: 'Elektrik' }, 
+            lng: { unit: 'kg', co2: 0.0028, label: 'LNG' }, 
+            fueloil: { unit: 'kg', co2: 0.0031, label: 'Fuel Oil' }, 
+            coal_imp: { unit: 'kg', co2: 0.0025, label: 'İthal Kömür' }, 
+            coal_loc: { unit: 'kg', co2: 0.0015, label: 'Yerli Kömür' }
+        }[config.fuel] || { unit: 'br', co2: 0, label: 'Yakıt' };
+    }
 
     document.getElementById('prdSerial').innerText = `REF: ${config.sn}`;
     document.getElementById('clientDisplay').innerText = config.client || 'Kayıp Analizi';
@@ -187,14 +204,12 @@
     document.getElementById('fuelLabel').innerText = `İsraf (${fData.label})`; 
     document.getElementById('prdName').innerText = (config.client ? "Termal Kayıp İzleme" : "Endüstriyel Yalıtım");
     document.getElementById('dispHours').innerText = config.workHours;
-    document.getElementById('dispPrice').innerText = `${config.unitPrice} TL (${fData.label})`;
+    document.getElementById('dispPrice').innerText = `${config.unitPrice} TL`;
 
-    // TARİH PARSE İŞLEMİ (DÜZELTİLDİ)
+    // TARİH PARSE İŞLEMİ
     let startDate;
     if (config.start) {
-        // YYYY-MM-DD-HH-MM
         const p = config.start.split('-');
-        // p[0]:Yıl, p[1]:Ay, p[2]:Gün, p[3]:Saat, p[4]:Dakika
         startDate = new Date(
             parseInt(p[0]), 
             parseInt(p[1]) - 1, 
@@ -204,7 +219,7 @@
             0
         ).getTime();
     } else {
-        startDate = new Date().getTime(); // Parametre yoksa şimdi başla
+        startDate = new Date().getTime(); 
     }
 
     document.getElementById('installDate').innerText = new Date(startDate).toLocaleDateString('tr-TR', {day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit'});
@@ -237,7 +252,6 @@
 
             document.getElementById('runTime').innerText = timeStr;
         } else {
-            // Gelecek bir tarih girildiyse
             document.getElementById('runTime').innerText = "Başlangıç Bekleniyor...";
         }
         requestAnimationFrame(updateCounter);
