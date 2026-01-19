@@ -5,8 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Endüstriyel İzolasyon Yatırımı Amortisman Hesaplama</title>
 <meta name="description" content="ISO 12241 standardına göre boru, vana ve tank yüzeylerinden ısı kaybını hesaplayın.">
-<link rel="icon" type="image/png" href="favicon.png">
-  <script src="https://cdn.tailwindcss.com"></script>
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔥</text></svg>">
+
+<script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1604,16 +1606,16 @@
                     allWinds.push(i.inputs.vWind || 1);
                 }
 
-                // --- TOPLAM KWH HESAPLAMA (YENİ) ---
+                // --- TOPLAM KWH HESAPLAMA (DÜZELTİLDİ) ---
                 // Mevcut kayıp durumuna göre (Eğer izolasyon yoksa çıplak kaybı, varsa o anki kaybı al)
-                // Genelde raporlarda "Yalıtımsız durumun kaybı" vurgulanır ama burada "Current Loss" mantığına göre gidelim.
-                // Eğer ürün 'bare' ise kwhBare kadar kayıp vardır. Eğer izole ise kwhIns kadar kayıp vardır.
-                const rawKwh = i.inputs.matKey === 'bare' 
-                    ? parseFloat(i.kwhBare.replace(/\./g,'').replace(',','.')) 
-                    : parseFloat(i.kwhIns.replace(/\./g,'').replace(',','.'));
+                // Ama rapor "Mevcut Durum" raporu ise, ve biz bir "Öneri" sunuyorsak (matKey !== bare),
+                // o zaman "Current Loss" olarak BARE halini almalıyız ki müşteri ne kadar kaybettiğini görsün.
+                // Eğer zaten bare olarak eklemişsek, yine bare halini almalıyız.
+                // Kısaca: Her zaman kwhBare'i topluyoruz.
                 
+                const rawKwh = parseFloat(i.kwhBare.replace(/\./g,'').replace(',','.'));
                 gTotalKwh += rawKwh;
-                // -----------------------------------
+                // -----------------------------------------
 
                 if(i.inputs.matKey!=='bare'){
                     gInv += invDisp;
@@ -1763,7 +1765,7 @@
             document.getElementById('covFuelWeek').innerText = Math.round(fuelWeekly).toLocaleString();
             document.getElementById('covFuelDay').innerText = Math.round(fuelDaily).toLocaleString();
             
-            // --- KWH VERİLERİNİ YAZDIR (YENİ) ---
+            // --- KWH VERİLERİNİ YAZDIR (DÜZELTİLDİ) ---
             document.getElementById('covKwhYear').innerText = Math.round(gTotalKwh).toLocaleString();
             document.getElementById('covKwhMonth').innerText = Math.round(gTotalKwh/12).toLocaleString();
             document.getElementById('covKwhWeek').innerText = Math.round(gTotalKwh/52).toLocaleString();
