@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Endüstriyel İzolasyon Yatırımı Amortisman Hesaplama</title>
 <meta name="description" content="ISO 12241 standardına göre boru, vana ve tank yüzeylerinden ısı kaybını hesaplayın.">
-<link rel="icon" type="image/png" href="favicon.png">
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔥</text></svg>">
+
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -525,21 +527,37 @@
                         <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">GÜNLÜK KAYIP</div>
                         <div class="text-xl font-black text-slate-800" id="covFuelDay">0</div>
                         <div class="text-[9px] text-slate-400 fuel-unit-label">...</div>
+                        <div class="mt-2 border-t border-slate-300 pt-1">
+                            <span class="text-[9px] font-bold text-slate-500" id="covKwhDay">0</span>
+                            <span class="text-[8px] text-slate-400">kWh</span>
+                        </div>
                     </div>
                     <div class="bg-slate-100 p-4 rounded-xl text-center border-b-4 border-slate-300">
                         <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">HAFTALIK KAYIP</div>
                         <div class="text-xl font-black text-slate-800" id="covFuelWeek">0</div>
                         <div class="text-[9px] text-slate-400 fuel-unit-label">...</div>
+                        <div class="mt-2 border-t border-slate-300 pt-1">
+                            <span class="text-[9px] font-bold text-slate-500" id="covKwhWeek">0</span>
+                            <span class="text-[8px] text-slate-400">kWh</span>
+                        </div>
                     </div>
                     <div class="bg-slate-100 p-4 rounded-xl text-center border-b-4 border-slate-300">
                         <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">AYLIK KAYIP</div>
                         <div class="text-xl font-black text-slate-800" id="covFuelMonth">0</div>
                         <div class="text-[9px] text-slate-400 fuel-unit-label">...</div>
+                        <div class="mt-2 border-t border-slate-300 pt-1">
+                            <span class="text-[9px] font-bold text-slate-500" id="covKwhMonth">0</span>
+                            <span class="text-[8px] text-slate-400">kWh</span>
+                        </div>
                     </div>
                     <div class="bg-red-600 p-4 rounded-xl text-center border-b-4 border-red-800 text-white shadow-lg transform scale-105">
                         <div class="text-[10px] uppercase font-bold text-red-200 tracking-wider mb-1">YILLIK TOPLAM</div>
                         <div class="text-2xl font-black text-white" id="covFuelYear">0</div>
                         <div class="text-[9px] text-red-200 fuel-unit-label">...</div>
+                        <div class="mt-2 border-t border-red-400 pt-1">
+                            <span class="text-[9px] font-bold text-red-100" id="covKwhYear">0</span>
+                            <span class="text-[8px] text-red-200">kWh</span>
+                        </div>
                     </div>
                 </div>
 
@@ -817,13 +835,8 @@
 
     function readPkgImg(i){if(i.files&&i.files[0]){const r=new FileReader();r.onload=e=>{currPkgImg=e.target.result;document.getElementById('pkgPrevImg').src=currPkgImg;document.getElementById('pkgPrevImg').classList.remove('hidden');};r.readAsDataURL(i.files[0]);}}
 
-    function commitPackage(){
-        if(PACKAGE_BASKET.length === 0) { alert("Sepet boş!"); return; }
-        
-        const pkgName = document.getElementById('pkgName').value || "İsimsiz Paket";
-        const pkgQty = parseFloat(document.getElementById('pkgQty').value) || 1;
-        const pkgInvRaw = parseFloat(document.getElementById('pkgInv').value) || 0;
-        const pkgInvCurr = document.getElementById('pkgInvCurr').value;
+    // PAKET OLUŞTURMA VE RESTORE İÇİN ORTAK YARDIMCI FONKSİYON
+    function buildPackageItem(basket, pkgName, pkgQty, pkgInvRaw, pkgInvCurr) {
         const pkgInvRate = FX[pkgInvCurr] || 1;
         const pkgUnitInvTL = pkgInvRaw * pkgInvRate; // Paket Birim Yatırımı TL
         const pkgTotalInvTL = pkgUnitInvTL * pkgQty; // Toplam Yatırım
@@ -839,9 +852,9 @@
         let totalKwhIns = 0;
         let totalKwhSave = 0;
         let itemsDesc = [];
-        let fuelUnit = PACKAGE_BASKET[0].fuelUnit; 
+        let fuelUnit = basket.length > 0 ? basket[0].fuelUnit : ""; 
 
-        PACKAGE_BASKET.forEach(item => {
+        basket.forEach(item => {
             totalSaveTL += item.saveTL;
             totalLossTL += item.lossTL;
             totalLossBareTL += item.lossBareTL;
@@ -871,11 +884,10 @@
         let roiCalc = 0;
         if(totalSaveTL > 0.01) { roiCalc = (pkgTotalInvTL / totalSaveTL * 12); }
 
-        // Main Listeye Eklenecek Obje
-        const compositeItem = {
+        return {
             name: `📦 PAKET: ${pkgName}`,
-            desc: `(${pkgQty} SET) - ${PACKAGE_BASKET.length} Kalem İçerir: ` + itemsDesc.join(', '), 
-            location: PACKAGE_BASKET[0].location || "Muhtelif",
+            desc: `(${pkgQty} SET) - ${basket.length} Kalem İçerir: ` + itemsDesc.join(', '), 
+            location: basket.length > 0 ? (basket[0].location || "Muhtelif") : "Muhtelif",
             qty: pkgQty,
             unit: "Set",
             invTL: pkgTotalInvTL,
@@ -891,7 +903,7 @@
             co2: totalCo2,
             Ts: "-", 
             Tins: "-",
-            img: currPkgImg, // PAKET FOTOĞRAFI
+            img: currPkgImg, 
             roi: roiCalc,
             inputs: {
                 type: 'package',
@@ -899,10 +911,21 @@
                 inv: pkgInvRaw,
                 invCurr: pkgInvCurr,
                 isLumpSum: true,
-                subItems: JSON.parse(JSON.stringify(PACKAGE_BASKET)),
-                vWind: 0 // Paket için önemsiz
+                subItems: JSON.parse(JSON.stringify(basket)), // Deep copy
+                vWind: 0 
             }
         };
+    }
+
+    function commitPackage(){
+        if(PACKAGE_BASKET.length === 0) { alert("Sepet boş!"); return; }
+        
+        const pkgName = document.getElementById('pkgName').value || "İsimsiz Paket";
+        const pkgQty = parseFloat(document.getElementById('pkgQty').value) || 1;
+        const pkgInvRaw = parseFloat(document.getElementById('pkgInv').value) || 0;
+        const pkgInvCurr = document.getElementById('pkgInvCurr').value;
+
+        const compositeItem = buildPackageItem(PACKAGE_BASKET, pkgName, pkgQty, pkgInvRaw, pkgInvCurr);
 
         LIST.push(compositeItem);
         
@@ -1288,7 +1311,7 @@
     function exportCSV(){
         if(LIST.length===0){alert("Liste boş!");return;}
         let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
-        csvContent += "Type,Qty,PipeLen,Temp_Proc,Temp_Amb,Material,Thickness,Invest,Standard,Valve_DN,Pipe_DN,Valve_Type,Surfaces,Invest_Curr,Energy_Curr,Location,UseL2,Mat2,Thk2,FuelType,FuelLHV,FuelUnit,PackageName,SubItemsCount,WindSpeed\n";
+        csvContent += "Type,Qty,PipeLen,Temp_Proc,Temp_Amb,Material,Thickness,Invest,Standard,Valve_DN,Pipe_DN,Valve_Type,Surfaces,Invest_Curr,Energy_Curr,Location,UseL2,Mat2,Thk2,FuelType,FuelLHV,FuelUnit,PackageName,SubItemsCount,WindSpeed,SubItemsDump\n";
         
         LIST.forEach(row => {
             const i = row.inputs;
@@ -1300,9 +1323,13 @@
             const pkgName = i.type === 'package' ? row.name.replace("📦 PAKET: ", "") : "";
             const subCount = i.type === 'package' ? i.subItems.length : 0;
             
+            // PAKETLERİ ŞİFRELEYEREK CSV'YE EKLE (BASE64)
+            // Bu sayede içe aktarırken paketi tekrar oluşturabileceğiz.
+            const subItemsDump = i.type === 'package' ? btoa(unescape(encodeURIComponent(JSON.stringify(i.subItems)))) : "";
+
             const r = [
                 i.type, row.qty, i.pLen, i.tProc || 0, i.tAmb || 0, i.matKey, i.thk || 0, i.inv, i.standard || "", i.vDN || "", i.pDN || "", i.valveType || "", surfStr, i.invCurr, i.energyCurr, 
-                `"${row.location}"`, i.useL2, i.matKey2, i.thk2, i.fuelType, i.fuelLhv, i.fuelUnit, `"${pkgName}"`, subCount, i.vWind || 1
+                `"${row.location}"`, i.useL2, i.matKey2, i.thk2, i.fuelType, i.fuelLhv, i.fuelUnit, `"${pkgName}"`, subCount, i.vWind || 1, subItemsDump
             ];
             csvContent += r.join(",") + "\n";
         });
@@ -1372,13 +1399,36 @@
                     // CSV SÜTUN SIRASI:
                     // 0:Type, 1:Qty, 2:PipeLen, 3:tProc, 4:tAmb, 5:Mat, 6:Thk, 7:Inv, 8:Std, 
                     // 9:vDN, 10:pDN, 11:vType, 12:Surfaces, 13:InvCurr, 14:EnergyCurr, 15:Loc, 
-                    // 16:UseL2, 17:Mat2, 18:Thk2, 19:FuelType, 20:LHV, 21:Unit, 22:PkgName, 23:SubCount, 24:Wind
+                    // 16:UseL2, 17:Mat2, 18:Thk2, 19:FuelType, 20:LHV, 21:Unit, 22:PkgName, 23:SubCount, 
+                    // 24:Wind, 25:SubItemsDump (Base64)
 
-                    // 1. Tipi Ayarla
                     const type = cols[0];
+
+                    // --- PAKET İÇE AKTARMA MANTIĞI ---
+                    if (type === 'package' && cols[25] && cols[25].length > 5) {
+                        try {
+                            const subItemsJson = decodeURIComponent(escape(window.atob(cols[25])));
+                            const basket = JSON.parse(subItemsJson);
+                            
+                            const pkgName = cols[22] ? cols[22].replace(/^"|"$/g, '') : "Paket";
+                            const pkgQty = parseFloat(cols[1]) || 1;
+                            const pkgInv = parseFloat(cols[7]) || 0;
+                            const pkgInvCurr = cols[13] || "TL";
+
+                            const compositeItem = buildPackageItem(basket, pkgName, pkgQty, pkgInv, pkgInvCurr);
+                            LIST.push(compositeItem);
+                            addedCount++;
+                            return; // Paket eklendi, döngünün sonuna git
+                        } catch (pkgErr) {
+                            console.error("Paket parse hatası:", pkgErr);
+                            // Paket parse edilemezse normal devam etmesin, hata versin veya atlasın
+                            return; 
+                        }
+                    }
+
+                    // --- NORMAL ÜRÜN İÇE AKTARMA MANTIĞI ---
                     setType(type); // Formu o tipe göre ayarlar (valve/pipe/tank)
 
-                    // 2. Değerleri Forma Doldur
                     el.qty.value = cols[1];
                     el.pLen.value = cols[2];
                     el.tProc.value = cols[3];
@@ -1395,7 +1445,6 @@
                         el.pDN.value = cols[10] || ""; 
                     } 
                     
-                    // Tank yüzeyleri
                     if(type === 'tank' && cols[12] && cols[12].length > 2) {
                         currentSurfaces = []; 
                         const sList = cols[12].split('|');
@@ -1426,12 +1475,10 @@
                         el.fuelUnit.value = cols[21];
                     }
 
-                    // Rüzgar
                     if(cols[24] !== undefined) {
                         el.vWind.value = cols[24];
                     }
 
-                    // 3. HESAPLA VE LİSTEYE EKLE
                     const resultObj = getCalculationResult();
                     LIST.push(resultObj);
                     addedCount++;
@@ -1441,15 +1488,14 @@
                 }
             });
 
-            // 4. Bittiğinde Temizle ve Göster
             resetForm();
             render();
             input.value = ''; 
             
             if(addedCount > 0) {
-                alert(`${addedCount} kalem başarıyla içe aktarıldı ve yeniden hesaplandı!`);
+                alert(`${addedCount} kalem başarıyla içe aktarıldı!`);
             } else {
-                alert("İçe aktarılacak geçerli veri bulunamadı veya format hatalı.");
+                alert("İçe aktarılacak veri bulunamadı.");
             }
         };
         reader.readAsText(file);
@@ -1503,6 +1549,7 @@
 
     let printTemplateCache = null;
 
+    // OTOMATİK SAYFALAMA MANTIĞI İLE YENİLENMİŞ PRINT FONKSİYONU
     function printRep(){
         try{
             const printArea = document.getElementById('print-area');
@@ -1526,6 +1573,7 @@
             const currSym = currSymMap[currSymVal]||'';
 
             let gInv=0, gSave=0, gCo2=0, gLoss=0, gFuelLost=0;
+            let gTotalKwh = 0; // YENİ EKLENEN TOPLAM KWH
             let lastFuelUnit = "";
             let maxTempDetected = 0; 
 
@@ -1543,6 +1591,17 @@
                 if(i.inputs.type !== 'package') {
                     allWinds.push(i.inputs.vWind || 1);
                 }
+
+                // --- TOPLAM KWH HESAPLAMA (YENİ) ---
+                // Mevcut kayıp durumuna göre (Eğer izolasyon yoksa çıplak kaybı, varsa o anki kaybı al)
+                // Genelde raporlarda "Yalıtımsız durumun kaybı" vurgulanır ama burada "Current Loss" mantığına göre gidelim.
+                // Eğer ürün 'bare' ise kwhBare kadar kayıp vardır. Eğer izole ise kwhIns kadar kayıp vardır.
+                const rawKwh = i.inputs.matKey === 'bare' 
+                    ? parseFloat(i.kwhBare.replace(/\./g,'').replace(',','.')) 
+                    : parseFloat(i.kwhIns.replace(/\./g,'').replace(',','.'));
+                
+                gTotalKwh += rawKwh;
+                // -----------------------------------
 
                 if(i.inputs.matKey!=='bare'){
                     gInv += invDisp;
@@ -1567,17 +1626,15 @@
                 windNarrativeBit = `<strong>${val} m/s</strong> rüzgar hızı koşullarında`;
             }
 
-            const ROWS_PER_PAGE = 18; // Modern görünüm için tekrar 18'e çektik
-            const chunks = [];
-            for (let i = 0; i < LIST.length; i += ROWS_PER_PAGE) {
-                chunks.push(LIST.slice(i, i + ROWS_PER_PAGE));
-            }
-            if(chunks.length === 0) chunks.push([]);
-
-            const tablePageTemplate = document.getElementById('p-table');
-            const summaryPage = document.getElementById('p-summary');
-            tablePageTemplate.remove();
-            const totalPages = 1 + chunks.length + 1;
+            // --- AKILLI SAYFALAMA MANTIĞI (GHOST TABLE) ---
+            const ghostContainer = document.createElement('div');
+            ghostContainer.style.width = '210mm'; 
+            ghostContainer.style.padding = '40px'; 
+            ghostContainer.style.position = 'absolute';
+            ghostContainer.style.top = '-9999px';
+            ghostContainer.style.left = '-9999px';
+            ghostContainer.style.visibility = 'hidden';
+            document.body.appendChild(ghostContainer);
 
             const tableHeaderHTML = `
                 <th class="w-6">#</th>
@@ -1591,7 +1648,69 @@
                 <th class="text-right text-green-600 font-black">Net Kazanç</th>
                 <th class="text-right w-10">ROI</th>`;
 
-            chunks.forEach((chunk, index) => {
+            const PAGE_SAFE_HEIGHT = 880; 
+
+            const pages = [];
+            let currentPage = [];
+            let currentHeight = 0;
+
+            let tempTable = document.createElement('table');
+            tempTable.className = 'w-full text-sm'; 
+            ghostContainer.appendChild(tempTable);
+            let tempTbody = document.createElement('tbody');
+            tempTable.appendChild(tempTbody);
+
+            LIST.forEach((i, idx) => {
+                const globalIndex = idx + 1;
+                const iInv = i.invTL / reportRate;
+                const iSave = i.saveTL / reportRate;
+                const roi = i.roi > 0 ? i.roi.toFixed(1) : "-";
+                const imgTag = i.img ? `<img src="${i.img}" class="w-16 h-16 object-cover rounded mx-auto border border-slate-200">` : `<div class="w-8 h-8 bg-slate-100 rounded mx-auto flex items-center justify-center text-[8px]">${i.inputs.type==='package'?'PKG':'-'}</div>`;
+                const locText = i.location ? `<div class="text-[8px] uppercase text-slate-400 mt-1 font-bold">📍 ${i.location}</div>` : '';
+
+                const trHTML = `
+                    <td class="text-center font-bold text-slate-400 border-b border-slate-100">${globalIndex}</td>
+                    <td class="text-center border-b border-slate-100 p-1">${imgTag}</td>
+                    <td class="font-bold text-slate-800 border-b border-slate-100 text-[10px]">${i.name} ${locText}<div class="text-[8px] text-slate-500 font-normal mt-0.5">${i.desc}</div></td>
+                    <td class="text-center border-b border-slate-100"><div class="font-bold text-slate-700">${i.Ts}</div><div class="text-[9px] font-bold text-red-500">${i.kwhBare} kWh</div></td>
+                    <td class="text-center border-b border-slate-100"><div class="font-bold text-slate-700">${i.Tins}</div><div class="text-[9px] font-bold text-orange-500">${i.kwhIns} kWh</div></td>
+                    <td class="text-center border-b border-slate-100"><div class="font-bold text-green-600">+${i.kwhSave} kWh</div></td>
+                    <td class="text-center border-b border-slate-100 text-[10px]">${i.qty} ${i.unit}</td>
+                    <td class="text-right font-mono text-[10px] text-slate-700 border-b border-slate-100">${currSym}${fmt(iInv)}</td>
+                    <td class="text-right font-mono text-[10px] text-green-600 font-bold border-b border-slate-100">${i.inputs.matKey!=='bare'?'+'+currSym+fmt(iSave):'-'}</td>
+                    <td class="text-right font-bold text-blue-600 text-[10px] border-b border-slate-100">${roi}</td>
+                `;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = trHTML;
+                tempTbody.appendChild(tr);
+                
+                const rowHeight = tr.offsetHeight;
+
+                if (currentHeight + rowHeight > PAGE_SAFE_HEIGHT) {
+                    pages.push(currentPage); 
+                    currentPage = []; 
+                    currentHeight = 0;
+                    tempTbody.innerHTML = ''; 
+                    
+                    tempTbody.appendChild(tr); 
+                }
+
+                currentPage.push({ html: trHTML });
+                currentHeight += rowHeight;
+            });
+
+            if (currentPage.length > 0) pages.push(currentPage);
+
+            document.body.removeChild(ghostContainer);
+
+            const tablePageTemplate = document.getElementById('p-table');
+            const summaryPage = document.getElementById('p-summary');
+            tablePageTemplate.remove(); 
+            
+            const totalPages = 1 + pages.length + 1; 
+
+            pages.forEach((pageRows, index) => {
                 const newPage = tablePageTemplate.cloneNode(true);
                 newPage.id = '';
                 const titleEl = newPage.querySelector('h2');
@@ -1602,29 +1721,12 @@
                 const pageNum = index + 2; 
                 newPage.querySelector('.page-num').innerText = `Sayfa ${pageNum} / ${totalPages}`;
                 const tbody = newPage.querySelector('tbody');
-                tbody.innerHTML = '';
+                tbody.innerHTML = ''; 
                 
-                chunk.forEach((i, subIndex) => {
-                    const globalIndex = (index * ROWS_PER_PAGE) + subIndex + 1;
-                    const iInv = i.invTL / reportRate;
-                    const iSave = i.saveTL / reportRate;
-                    const roi = i.roi > 0 ? i.roi.toFixed(1) : "-";
-                    const imgTag = i.img ? `<img src="${i.img}" class="w-16 h-16 object-cover rounded mx-auto border border-slate-200">` : `<div class="w-8 h-8 bg-slate-100 rounded mx-auto flex items-center justify-center text-[8px]">${i.inputs.type==='package'?'PKG':'-'}</div>`;
-                    const locText = i.location ? `<div class="text-[8px] uppercase text-slate-400 mt-1 font-bold">📍 ${i.location}</div>` : '';
-
-                    tbody.innerHTML += `<tr>
-                        <td class="text-center font-bold text-slate-400 border-b border-slate-100">${globalIndex}</td>
-                        <td class="text-center border-b border-slate-100 p-1">${imgTag}</td>
-                        <td class="font-bold text-slate-800 border-b border-slate-100 text-[10px]">${i.name} ${locText}<div class="text-[8px] text-slate-500 font-normal mt-0.5">${i.desc}</div></td>
-                        <td class="text-center border-b border-slate-100"><div class="font-bold text-slate-700">${i.Ts}</div><div class="text-[9px] font-bold text-red-500">${i.kwhBare} kWh</div></td>
-                        <td class="text-center border-b border-slate-100"><div class="font-bold text-slate-700">${i.Tins}</div><div class="text-[9px] font-bold text-orange-500">${i.kwhIns} kWh</div></td>
-                        <td class="text-center border-b border-slate-100"><div class="font-bold text-green-600">+${i.kwhSave} kWh</div></td>
-                        <td class="text-center border-b border-slate-100 text-[10px]">${i.qty} ${i.unit}</td>
-                        <td class="text-right font-mono text-[10px] text-slate-700 border-b border-slate-100">${currSym}${fmt(iInv)}</td>
-                        <td class="text-right font-mono text-[10px] text-green-600 font-bold border-b border-slate-100">${i.inputs.matKey!=='bare'?'+'+currSym+fmt(iSave):'-'}</td>
-                        <td class="text-right font-bold text-blue-600 text-[10px] border-b border-slate-100">${roi}</td>
-                    </tr>`;
+                pageRows.forEach(row => {
+                    tbody.innerHTML += `<tr>${row.html}</tr>`;
                 });
+
                 document.getElementById('print-area').insertBefore(newPage, summaryPage);
             });
 
@@ -1649,6 +1751,13 @@
             document.getElementById('covFuelWeek').innerText = Math.round(fuelWeekly).toLocaleString();
             document.getElementById('covFuelDay').innerText = Math.round(fuelDaily).toLocaleString();
             
+            // --- KWH VERİLERİNİ YAZDIR (YENİ) ---
+            document.getElementById('covKwhYear').innerText = Math.round(gTotalKwh).toLocaleString();
+            document.getElementById('covKwhMonth').innerText = Math.round(gTotalKwh/12).toLocaleString();
+            document.getElementById('covKwhWeek').innerText = Math.round(gTotalKwh/52).toLocaleString();
+            document.getElementById('covKwhDay').innerText = Math.round(gTotalKwh/365).toLocaleString();
+            // ------------------------------------
+
             const fuelLabels = document.querySelectorAll('.fuel-unit-label');
             fuelLabels.forEach(el => el.innerText = lastFuelUnit);
             
