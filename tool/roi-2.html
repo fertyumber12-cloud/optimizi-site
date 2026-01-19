@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Endüstriyel İzolasyon Yatırımı Amortisman Hesaplama</title>
+  <link rel="icon" type="image/png" href="favicon.png">
 <meta name="description" content="ISO 12241 standardına göre boru, vana ve tank yüzeylerinden ısı kaybını hesaplayın.">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
@@ -1158,10 +1159,6 @@
             }
         }
         
-        // EKRAN GÖSTERİM DÜZELTMESİ (User Fix)
-        // Eğer malzeme yalıtımsız ise: finalTs doğrudur. İzolasyonlu sütunu boştur.
-        // Eğer malzeme izolasyonlu ise: Çıplak sütunu tProc (veya ayrı hesaplanan bareTemp) olmalıdır. İzolasyonlu sütunu finalTs'dir.
-        
         const realBareTemp = (matKey === 'bare') ? finalTs : tProc; 
         const realInsTemp = (matKey === 'bare') ? "-" : finalTs;
 
@@ -1235,7 +1232,11 @@
         document.getElementById('calcStd').value = d.standard;
         document.getElementById('location').value = d.location || ""; 
         document.getElementById('useL2').checked = d.useL2 || false;
-        document.getElementById('vWind').value = d.vWind || 1; // RÜZGAR YÜKLE
+        
+        // --- RÜZGAR DÜZELTMESİ ---
+        // 0 değerini "yok" saymaması için !== undefined kontrolü yapıldı
+        document.getElementById('vWind').value = (d.vWind !== undefined && d.vWind !== null) ? d.vWind : 1; 
+        // --------------------------
         
         toggleL2();
         if(d.useL2) {
@@ -1378,17 +1379,12 @@
             
             // --- TARİH AYARLAMALARI ---
             const today = new Date().toLocaleDateString('tr-TR');
-            
-            // Kullanıcının girdiği denetim tarihi
             const auditInput = document.getElementById('auditDate').value;
-            let auditDateStr = today; // Varsayılan: Bugün
-            
+            let auditDateStr = today; 
             if(auditInput){
-                // YYYY-MM-DD -> DD.MM.YYYY çevirimi
                 const parts = auditInput.split('-'); 
                 auditDateStr = `${parts[2]}.${parts[1]}.${parts[0]}`;
             }
-            // ---------------------------
             
             const currSymVal = document.getElementById('curr').value;
             const reportRate = FX[currSymVal] || 1;
@@ -1437,7 +1433,7 @@
                 windNarrativeBit = `<strong>${val} m/s</strong> rüzgar hızı koşullarında`;
             }
 
-            const ROWS_PER_PAGE = 18;
+            const ROWS_PER_PAGE = 18; // Modern görünüm için tekrar 18'e çektik
             const chunks = [];
             for (let i = 0; i < LIST.length; i += ROWS_PER_PAGE) {
                 chunks.push(LIST.slice(i, i + ROWS_PER_PAGE));
@@ -1467,7 +1463,7 @@
                 const titleEl = newPage.querySelector('h2');
                 titleEl.innerText = "Detaylı Analiz Dökümü";
                 if(index > 0) { titleEl.innerHTML += ` <span class="text-sm text-slate-400 font-normal">(${index+1})</span>`; }
-                newPage.querySelector('#rDate').innerText = today; // Sayfa üstü tarih (Rapor Tarihi)
+                newPage.querySelector('#rDate').innerText = today; 
                 newPage.querySelector('thead tr').innerHTML = tableHeaderHTML;
                 const pageNum = index + 2; 
                 newPage.querySelector('.page-num').innerText = `Sayfa ${pageNum} / ${totalPages}`;
@@ -1504,8 +1500,8 @@
             document.getElementById('covClient').innerText = document.getElementById('cName').value || "FİRMA ADI";
             document.getElementById('covContact').innerText = document.getElementById('cEng').value || "";
             document.getElementById('covProv').innerText = document.getElementById('pName').value || "TEDARİKÇİ";
-            document.getElementById('covDate').innerText = today; // Sağ üstteki "Rapor Tarihi" (Bugün)
-            document.getElementById('covIntroDate').innerText = auditDateStr; // Metin içindeki "Denetim Tarihi" (Seçilen)
+            document.getElementById('covDate').innerText = today; 
+            document.getElementById('covIntroDate').innerText = auditDateStr; 
             document.getElementById('covRoi').innerText = totalRoi>0 ? totalRoi.toFixed(1) : "---";
             document.getElementById('covMaxTemp').innerText = maxTempDetected.toFixed(0);
 
