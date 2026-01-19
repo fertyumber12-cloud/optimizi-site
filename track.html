@@ -201,7 +201,7 @@
     document.getElementById('prdSerial').innerText = `REF: ${config.sn}`;
     document.getElementById('clientDisplay').innerText = config.client || 'Kayıp Analizi';
     document.getElementById('fuelUnit').innerText = fData.unit;
-    document.getElementById('fuelLabel').innerText = `İsraf (${fData.label})`; 
+    document.getElementById('fuelLabel').innerText = `KAYIP (${fData.label})`; 
     document.getElementById('prdName').innerText = (config.client ? "Termal Kayıp İzleme" : "Endüstriyel Yalıtım");
     document.getElementById('dispHours').innerText = config.workHours;
     document.getElementById('dispPrice').innerText = `${config.unitPrice} TL`;
@@ -280,3 +280,4 @@
 </script>
 </body>
 </html>
+
