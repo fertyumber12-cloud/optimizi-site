@@ -119,10 +119,9 @@
             const manualFields = document.getElementById('manualFuelFields');
             if(fuelSelect === 'manual') {
                 manualFields.classList.remove('hidden');
-                // Varsayılan Paçal Değerlerini Ata
                 document.getElementById('customFuelLabel').value = "Paçal Kömür";
-                document.getElementById('customFuelCo2').value = "0.36"; // Kömür ortalaması
-                document.getElementById('customFuelLhv').value = ""; // Kullanıcı girsin
+                document.getElementById('customFuelCo2').value = "0.36";
+                document.getElementById('customFuelLhv').value = ""; 
             } else {
                 manualFields.classList.add('hidden');
             }
@@ -148,28 +147,43 @@
             const baseUrl = "https://optimizi.app/track.html";
             let finalUrl = `${baseUrl}?c=${encodeURIComponent(client)}&s=${encodeURIComponent(serial)}&v=${totalVal}&up=${uPrice}&wh=${wHours}&f=${fuel}&d=${fullDateTime}`;
 
-            // MANUEL / PAÇAL SEÇİLDİYSE
             if(fuel === 'manual') {
                 let cLabel = document.getElementById('customFuelLabel').value || 'Paçal Kömür';
                 const cUnit = document.getElementById('customFuelUnit').value || 'kg';
                 const cCo2 = document.getElementById('customFuelCo2').value || '0.36';
                 const cLhv = document.getElementById('customFuelLhv').value;
 
-                // Eğer kalori girildiyse ismin yanına (4500 kcal) gibi ekle
-                if(cLhv) {
-                    cLabel += ` (${cLhv} kcal)`;
-                }
+                if(cLhv) { cLabel += ` (${cLhv} kcal)`; }
                 
                 finalUrl += `&fl=${encodeURIComponent(cLabel)}&fu=${encodeURIComponent(cUnit)}&fc=${encodeURIComponent(cCo2)}`;
             }
 
+            // --- KRİTİK DÜZELTME BURADA ---
+            // 1. Önce alanı görünür yap (Görünmez alana QR çizilemez)
+            const resultCard = document.getElementById('resultCard');
+            resultCard.classList.remove('hidden');
+
+            // 2. İçini temizle
             const qrContainer = document.getElementById('qrcode');
             qrContainer.innerHTML = '';
-            new QRCode(qrContainer, { text: finalUrl, width: 160, height: 160, colorDark : "#0f172a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
+
+            // 3. QR Kodunu oluştur (Hata düzeltme seviyesini M yaptık ki uzun link sığsın)
+            new QRCode(qrContainer, { 
+                text: finalUrl, 
+                width: 160, 
+                height: 160, 
+                colorDark : "#0f172a", 
+                colorLight : "#ffffff", 
+                correctLevel : QRCode.CorrectLevel.M 
+            });
 
             document.getElementById('linkText').innerText = finalUrl;
-            document.getElementById('resultCard').classList.remove('hidden');
-            setTimeout(() => { document.getElementById('downloadBtn').href = qrContainer.querySelector("img").src; }, 300);
+            
+            // 4. İndirme linkini hafif gecikmeli ata (Çizimin bitmesini bekle)
+            setTimeout(() => { 
+                const img = qrContainer.querySelector("img");
+                if(img) document.getElementById('downloadBtn').href = img.src; 
+            }, 150);
         }
     </script>
 </body>
