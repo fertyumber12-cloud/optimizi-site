@@ -4,8 +4,8 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Endüstriyel İzolasyon Yatırımı Amortisman Hesaplama</title>
-  <link rel="icon" type="image/png" href="favicon.png">
 <meta name="description" content="ISO 12241 standardına göre boru, vana ve tank yüzeylerinden ısı kaybını hesaplayın.">
+<link rel="icon" type="image/png" href="favicon.png">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -931,7 +931,12 @@
         const location=document.getElementById('location').value||"";
         const tProc=parseFloat(document.getElementById('tProc').value)||0;
         const tAmb=parseFloat(document.getElementById('tAmb').value)||25;
-        const vWind=parseFloat(document.getElementById('vWind').value)||0;
+        
+        // --- RÜZGAR DÜZELTMESİ (User Fix) ---
+        // Input'tan değeri al, boşsa 0 al (önceki hata 1 yapıyordu)
+        const vWindInput = document.getElementById('vWind').value;
+        const vWind = (vWindInput === "") ? 0 : parseFloat(vWindInput);
+        // ------------------------------------
         
         const matKey=document.getElementById('matSelect').value;
         const thk=parseFloat(document.getElementById('thk').value)||0;
@@ -1314,11 +1319,140 @@
     function importCSV(input){
         const file = input.files[0];
         if(!file) return;
+        
         const reader = new FileReader();
         reader.onload = function(e){
-            alert("CSV İçe Aktarma şu an sadece tekil ürünleri destekler. Paketleri manuel oluşturunuz.");
+            const text = e.target.result;
+            // Satırlara böl
+            const rows = text.split('\n');
+            // Başlık satırını at
+            rows.shift();
+            
+            let addedCount = 0;
+
+            // DOM elemanlarını referans al (Döngüde kullanacağız)
+            const el = {
+                type: document.getElementById('type'),
+                qty: document.getElementById('qty'),
+                pLen: document.getElementById('pLen'),
+                tProc: document.getElementById('tProc'),
+                tAmb: document.getElementById('tAmb'),
+                matKey: document.getElementById('matSelect'),
+                thk: document.getElementById('thk'),
+                inv: document.getElementById('inv'),
+                calcStd: document.getElementById('calcStd'),
+                vDN: document.getElementById('vDN'),
+                pDN: document.getElementById('pDN'),
+                valveType: document.getElementById('valveType'),
+                invCurr: document.getElementById('invCurr'),
+                energyCurr: document.getElementById('energyCurr'),
+                location: document.getElementById('location'),
+                useL2: document.getElementById('useL2'),
+                matSelect2: document.getElementById('matSelect2'),
+                thk2: document.getElementById('thk2'),
+                fuel: document.getElementById('fuel'),
+                fuelLhv: document.getElementById('fuelLhv'),
+                fuelUnit: document.getElementById('fuelUnit'),
+                vWind: document.getElementById('vWind')
+            };
+
+            // Paket modu açıksa kapatalım ki form düzgün dolsun
+            if(isPackageMode) togglePackageMode();
+
+            rows.forEach(row => {
+                if(!row.trim()) return;
+                
+                // Excel Türkçe ayarda ; ile ayırabilir, normal CSV , ile ayrılır.
+                let cols = row.split(',');
+                if(cols.length < 5) cols = row.split(';'); // Virgül yoksa noktalı virgül dene
+
+                if(cols.length < 10) return; // Hatalı satır
+
+                try {
+                    // CSV SÜTUN SIRASI:
+                    // 0:Type, 1:Qty, 2:PipeLen, 3:tProc, 4:tAmb, 5:Mat, 6:Thk, 7:Inv, 8:Std, 
+                    // 9:vDN, 10:pDN, 11:vType, 12:Surfaces, 13:InvCurr, 14:EnergyCurr, 15:Loc, 
+                    // 16:UseL2, 17:Mat2, 18:Thk2, 19:FuelType, 20:LHV, 21:Unit, 22:PkgName, 23:SubCount, 24:Wind
+
+                    // 1. Tipi Ayarla
+                    const type = cols[0];
+                    setType(type); // Formu o tipe göre ayarlar (valve/pipe/tank)
+
+                    // 2. Değerleri Forma Doldur
+                    el.qty.value = cols[1];
+                    el.pLen.value = cols[2];
+                    el.tProc.value = cols[3];
+                    el.tAmb.value = cols[4];
+                    el.matKey.value = cols[5];
+                    el.thk.value = cols[6];
+                    el.inv.value = cols[7];
+                    el.calcStd.value = cols[8]; 
+                    
+                    if(type === 'valve') {
+                        el.vDN.value = cols[9] || ""; 
+                        el.valveType.value = cols[11] || "gate";
+                    } else if (type === 'pipe') {
+                        el.pDN.value = cols[10] || ""; 
+                    } 
+                    
+                    // Tank yüzeyleri
+                    if(type === 'tank' && cols[12] && cols[12].length > 2) {
+                        currentSurfaces = []; 
+                        const sList = cols[12].split('|');
+                        sList.forEach(s => {
+                            const dims = s.split('x');
+                            if(dims.length===2) currentSurfaces.push({w: parseFloat(dims[0]), h: parseFloat(dims[1])});
+                        });
+                    }
+
+                    el.invCurr.value = cols[13] || "TL";
+                    el.energyCurr.value = cols[14] || "TL";
+                    
+                    let locRaw = cols[15] || "";
+                    el.location.value = locRaw.replace(/^"|"$/g, '');
+
+                    const isL2 = (cols[16] === 'true');
+                    el.useL2.checked = isL2;
+                    toggleL2(); 
+                    if(isL2){
+                        el.matSelect2.value = cols[17];
+                        el.thk2.value = cols[18];
+                    }
+
+                    el.fuel.value = cols[19] || 'gas';
+                    toggleFuelMode();
+                    if(cols[19] === 'manual'){
+                        el.fuelLhv.value = cols[20];
+                        el.fuelUnit.value = cols[21];
+                    }
+
+                    // Rüzgar
+                    if(cols[24] !== undefined) {
+                        el.vWind.value = cols[24];
+                    }
+
+                    // 3. HESAPLA VE LİSTEYE EKLE
+                    const resultObj = getCalculationResult();
+                    LIST.push(resultObj);
+                    addedCount++;
+
+                } catch(err) {
+                    console.error("Satır işleme hatası:", err, row);
+                }
+            });
+
+            // 4. Bittiğinde Temizle ve Göster
+            resetForm();
+            render();
+            input.value = ''; 
+            
+            if(addedCount > 0) {
+                alert(`${addedCount} kalem başarıyla içe aktarıldı ve yeniden hesaplandı!`);
+            } else {
+                alert("İçe aktarılacak geçerli veri bulunamadı veya format hatalı.");
+            }
         };
-        input.value = ''; 
+        reader.readAsText(file);
     }
     
     function render(){
