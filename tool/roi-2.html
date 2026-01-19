@@ -9,7 +9,6 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="icon" href="../favicon.png" type="image/png">
 <script>
   tailwind.config = {
     darkMode: 'class',
@@ -137,7 +136,7 @@
 <div id="app-layer" class="relative z-10 flex flex-col min-h-screen">
     <nav class="sticky top-0 z-50 glass-card !bg-white/90 dark:!bg-slate-900/80 !border-x-0 !border-t-0 !rounded-none border-b border-slate-200 dark:border-white/10 backdrop-blur-xl">
       <div class="app-container px-6 h-16 flex items-center justify-between">
-          <a href="../index.html" class="flex items-center gap-3 group">
+          <a href="#" class="flex items-center gap-3 group">
               <div><h1 class="text-lg font-bold text-slate-800 dark:text-white tracking-wide">Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-orange-500 dark:from-indigo-400 dark:to-orange-400">.App</span></h1></div>
           </a>
           <div class="flex items-center gap-3">
@@ -198,6 +197,10 @@
                    <h3 class="text-indigo-500 dark:text-indigo-400 text-xs font-bold uppercase mb-4 flex items-center gap-2"><i data-lucide="briefcase" class="w-4 h-4"></i> Proje Detayları</h3>
                    <div class="space-y-4">
                        <div><label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Hazırlayan</label><div class="grid gap-2"><input type="text" id="pName" class="glass-input text-xs" placeholder="Firma Adı"><input type="text" id="pEng" class="glass-input text-xs" placeholder="Mühendis Adı"></div></div>
+                       <div>
+                           <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Saha Denetim Tarihi</label>
+                           <input type="date" id="auditDate" class="glass-input text-xs text-slate-600 dark:text-slate-300">
+                       </div>
                        <div class="h-px bg-slate-200 dark:bg-white/5 my-3"></div>
                        <div><label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Firma Bilgileri</label><div class="grid gap-2"><input type="text" id="cName" class="glass-input text-xs" placeholder="Firma Adı"><input type="text" id="cEng" class="glass-input text-xs" placeholder="Yetkili Kişi / Ünvan"></div></div>
                    </div>
@@ -493,31 +496,88 @@
         <div class="cover-accent"></div>
         <div class="cover-content">
             <div>
-                <div class="text-sm tracking-[5px] text-slate-500 uppercase mb-4 opacity-90">Isı Kaybı Kaynaklı Enerji Verimliliği Simülasyonu</div>
-                <h1 class="text-6xl font-black leading-tight mb-10 text-slate-900 relative z-10">ENDÜSTRİYEL <br><span class="text-green-600">YALITIM</span> <br>RAPORU</h1>
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="text-sm tracking-[5px] text-slate-500 uppercase mb-2 opacity-90">Enerji Verimliliği & ISG Raporu</div>
+                        <h1 class="text-6xl font-black leading-tight text-slate-900">ENDÜSTRİYEL <br><span class="text-green-600">YALITIM</span> <br>ANALİZİ</h1>
+                    </div>
+                    <div class="text-right border-r-4 border-green-600 pr-4">
+                        <div class="text-xs uppercase opacity-60 mb-1">Firma</div>
+                        <div class="text-2xl font-bold mb-1 text-slate-800" id="covClient">FİRMA ADI</div>
+                        <div class="text-xs text-slate-500 font-medium uppercase tracking-wider" id="covContact">YETKİLİ</div>
+                        <div class="mt-4 text-xs uppercase opacity-60 mb-1">Rapor Tarihi</div>
+                        <div class="text-lg font-bold text-slate-800" id="covDate">...</div>
+                        <div class="text-xs text-slate-400 mt-1" id="covProv">TEDARİKÇİ</div>
+                    </div>
+                </div>
             </div>
             
-            <div>
-                <div class="flex justify-between items-end">
-                    <div class="border-l-4 border-green-600 pl-8 relative z-10">
-                        <div class="text-xs uppercase opacity-60 mb-1">Firma</div>
-                        <div class="text-3xl font-bold mb-1 text-slate-800" id="covClient">FİRMA ADI</div>
-                        <div class="text-sm text-slate-500 font-medium uppercase tracking-wider mb-8" id="covContact"></div>
+            <div class="flex-1 flex flex-col justify-center py-8">
+                <p class="text-sm text-slate-700 font-medium mb-6 leading-relaxed text-justify border-l-4 border-red-500 pl-4 bg-red-50 p-4 rounded-r-lg">
+                    <span id="covIntroDate" class="font-bold text-slate-900">...</span> tarihli saha denetiminden edinilen termal veriler ışığında; tesisinizdeki yalıtımsız ekipmanlardan kaynaklı enerji kaçakları tespit edilmiştir. Mevcut durum, sadece finansal kayıp değil, aynı zamanda ciddi bir <strong>Karbon Salınımı</strong> ve <strong>İş Güvenliği Riski</strong> oluşturmaktadır. 
+                    <br><br>
+                    Aşağıdaki tabloda, şu an atmosfere karışan <span id="covFuelType" class="font-black text-red-600 uppercase">...</span> yakıt miktarının zamana yayılmış dökümü sunulmuştur:
+                </p>
 
-                        <div class="text-xs uppercase opacity-60 mb-1">Hazırlayan</div><div class="text-xl font-bold text-slate-800" id="covProv">TEDARİKÇİ</div>
-                    </div> 
-                    <div class="text-right relative z-10"><div class="text-[100px] font-black text-green-600 leading-none" id="covRoi">---</div><div class="text-xl font-medium tracking-wide text-slate-500">AY AMORTİSMAN SÜRESİ</div></div>
+                <div class="grid grid-cols-4 gap-4 mb-8">
+                    <div class="bg-slate-100 p-4 rounded-xl text-center border-b-4 border-slate-300">
+                        <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">GÜNLÜK KAYIP</div>
+                        <div class="text-xl font-black text-slate-800" id="covFuelDay">0</div>
+                        <div class="text-[9px] text-slate-400 fuel-unit-label">...</div>
+                    </div>
+                    <div class="bg-slate-100 p-4 rounded-xl text-center border-b-4 border-slate-300">
+                        <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">HAFTALIK KAYIP</div>
+                        <div class="text-xl font-black text-slate-800" id="covFuelWeek">0</div>
+                        <div class="text-[9px] text-slate-400 fuel-unit-label">...</div>
+                    </div>
+                    <div class="bg-slate-100 p-4 rounded-xl text-center border-b-4 border-slate-300">
+                        <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">AYLIK KAYIP</div>
+                        <div class="text-xl font-black text-slate-800" id="covFuelMonth">0</div>
+                        <div class="text-[9px] text-slate-400 fuel-unit-label">...</div>
+                    </div>
+                    <div class="bg-red-600 p-4 rounded-xl text-center border-b-4 border-red-800 text-white shadow-lg transform scale-105">
+                        <div class="text-[10px] uppercase font-bold text-red-200 tracking-wider mb-1">YILLIK TOPLAM</div>
+                        <div class="text-2xl font-black text-white" id="covFuelYear">0</div>
+                        <div class="text-[9px] text-red-200 fuel-unit-label">...</div>
+                    </div>
                 </div>
 
-                <div class="mt-12 border-t border-slate-200 pt-6">
-                    <div class="text-[10px] uppercase font-bold text-slate-400 mb-3">Rapor Kapsamı & Parametreler</div>
-                    <p class="text-xs text-slate-600 leading-relaxed text-justify" id="covNarrative">
+                <div class="flex gap-6 items-stretch">
+                    <div class="flex-1 bg-slate-900 text-white p-5 rounded-xl flex items-center gap-4 relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-green-500 rounded-full blur-2xl opacity-20"></div>
+                        <div class="bg-white p-2 rounded-lg shrink-0 w-24 h-24">
+                             <img id="covQrCode" src="" class="w-full h-full object-contain opacity-20" alt="QR">
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-bold text-green-400 leading-tight mb-1">CANLI TAKİP SİSTEMİ</h4>
+                            <p class="text-[10px] text-slate-300 leading-snug">
+                                Isı kayıplarının işletmenize olan kümülatif maliyetini anlık olarak izlemek için QR kodu tarayınız.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="w-1/3 bg-orange-100 border border-orange-200 p-5 rounded-xl flex flex-col justify-center items-center text-center">
+                        <i data-lucide="triangle-alert" class="w-8 h-8 text-orange-600 mb-2"></i>
+                        <div class="text-[10px] font-black uppercase text-orange-700 mb-1">İŞ GÜVENLİĞİ RİSKİ</div>
+                        <p class="text-[9px] text-orange-800 leading-tight">
+                            Tespit edilen yüzeylerde <span class="font-bold text-black" id="covMaxTemp">---</span>°C'ye varan sıcaklıklar ölçülmüştür. Yanık ve iş kazası riski oluşturmaktadır.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-200 pt-4 flex justify-between items-end">
+                <div class="w-2/3">
+                    <div class="text-[9px] uppercase font-bold text-slate-400 mb-1">Rapor Parametreleri</div>
+                    <p class="text-[9px] text-slate-500 leading-relaxed text-justify" id="covNarrative">
                         ...
                     </p>
                 </div>
+                <div class="text-right">
+                    <div class="text-[40px] font-black text-slate-200 leading-none" id="covRoi">---</div>
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">AY AMORTİSMAN</div>
+                </div>
             </div>
-
-            <div class="absolute bottom-6 w-full text-center text-xs text-slate-300 font-bold uppercase tracking-widest left-0">POWERED BY OPTIMIZI.APP</div>
         </div>
     </div>
     
@@ -565,21 +625,7 @@
              </div>
          </div>
 
-         <div id="rep_qr_section" class="mt-auto mb-8 p-6 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between">
-            <div>
-                <h4 class="text-lg font-black text-slate-800 uppercase mb-2 flex items-center gap-2">
-                    VAKİT NAKİTTİR! <i data-lucide="coins" class="w-6 h-6 opacity-30 text-slate-600"></i>
-                </h4>
-                <p class="text-xs text-slate-500 leading-relaxed max-w-lg font-medium text-justify">
-                    Endüstriyel tesislerde ısı kayıpları, üretim durmadığı sürece devam eden görünmez bir maliyet kalemidir. Bu raporun hazırlandığı tarihten itibaren gerekli yalıtım uygulamaları yapılmadığı takdirde, işletmenizin kümülatif olarak ne kadar enerji bedelini boşa harcadığını QR kodu okutarak anlık takip edebilirsiniz.
-                </p>
-            </div>
-            <div class="w-24 h-24 bg-white border border-slate-200 p-1 rounded-lg shrink-0 ml-4">
-                <img id="repQrCode" src="" class="w-full h-full object-contain opacity-20" alt="QR">
-            </div>
-        </div>
-
-        <div class="border-t-2 border-slate-100 pt-4">
+        <div class="border-t-2 border-slate-100 pt-4 mt-auto">
             <p class="text-[10px] text-slate-400 text-center font-medium leading-relaxed">Hesaplamalar ISO 12241 mühendislik standartlarına göre simüle edilmiştir. Garanti niteliği taşımaz.</p>
         </div>
     </div>
@@ -1112,6 +1158,13 @@
             }
         }
         
+        // EKRAN GÖSTERİM DÜZELTMESİ (User Fix)
+        // Eğer malzeme yalıtımsız ise: finalTs doğrudur. İzolasyonlu sütunu boştur.
+        // Eğer malzeme izolasyonlu ise: Çıplak sütunu tProc (veya ayrı hesaplanan bareTemp) olmalıdır. İzolasyonlu sütunu finalTs'dir.
+        
+        const realBareTemp = (matKey === 'bare') ? finalTs : tProc; 
+        const realInsTemp = (matKey === 'bare') ? "-" : finalTs;
+
         return{
             name:Name,
             desc:descStr,
@@ -1129,8 +1182,8 @@
             kwhIns: Math.round(energyLostIns_kWh).toLocaleString('tr-TR'),
             kwhSave: Math.round(energySaved_kWh).toLocaleString('tr-TR'),
             co2: co2SavedTotal, // ARTIK YAKIT TÜRÜNE GÖRE
-            Ts:finalTs.toFixed(1),
-            Tins:finalTs.toFixed(1),
+            Ts: realBareTemp.toFixed(1), // DÜZELTİLEN SATIR
+            Tins: (matKey === 'bare') ? "-" : realInsTemp.toFixed(1), // DÜZELTİLEN SATIR
             qBare:Q_bare_unit,
             qIns:Q_unit,
             img:currImg,
@@ -1143,7 +1196,7 @@
     function fillDN(id){const el=document.getElementById(id);el.innerHTML='';for(const[k,v]of Object.entries(PIPES)){let o=document.createElement('option');o.value=v;o.text=`DN ${k}`;el.add(o);}if(id==='vDN')el.value=60.3;if(id==='pDN')el.value=88.9;}
     
     function readImg(i){if(i.files&&i.files[0]){const r=new FileReader();r.onload=e=>{currImg=e.target.result;document.getElementById('prevImg').src=currImg;document.getElementById('prevImg').classList.remove('hidden');};r.readAsDataURL(i.files[0]);}}
-    function readQr(i){if(i.files&&i.files[0]){const r=new FileReader();r.onload=e=>{userQrImg=e.target.result;alert("QR Kod yüklendi! Raporun son sayfasında görünecek.");};r.readAsDataURL(i.files[0]);}}
+    function readQr(i){if(i.files&&i.files[0]){const r=new FileReader();r.onload=e=>{userQrImg=e.target.result;alert("QR Kod yüklendi! Raporun kapağında görünecek.");};r.readAsDataURL(i.files[0]);}}
 
     async function getFx(){try{const r=await fetch('https://api.frankfurter.app/latest?from=USD&to=TRY');const d=await r.json();FX.USD=d.rates.TRY;const r2=await fetch('https://api.frankfurter.app/latest?from=EUR&to=TRY');const d2=await r2.json();FX.EUR=d2.rates.TRY;document.getElementById('fxVal').innerText=FX.USD.toFixed(2);}catch(e){}}
     
@@ -1322,7 +1375,20 @@
                 printTemplateCache = printArea.innerHTML;
             }
             printArea.innerHTML = printTemplateCache;
-            const d = new Date().toLocaleDateString('tr-TR');
+            
+            // --- TARİH AYARLAMALARI ---
+            const today = new Date().toLocaleDateString('tr-TR');
+            
+            // Kullanıcının girdiği denetim tarihi
+            const auditInput = document.getElementById('auditDate').value;
+            let auditDateStr = today; // Varsayılan: Bugün
+            
+            if(auditInput){
+                // YYYY-MM-DD -> DD.MM.YYYY çevirimi
+                const parts = auditInput.split('-'); 
+                auditDateStr = `${parts[2]}.${parts[1]}.${parts[0]}`;
+            }
+            // ---------------------------
             
             const currSymVal = document.getElementById('curr').value;
             const reportRate = FX[currSymVal] || 1;
@@ -1331,8 +1397,8 @@
 
             let gInv=0, gSave=0, gCo2=0, gLoss=0, gFuelLost=0;
             let lastFuelUnit = "";
+            let maxTempDetected = 0; 
 
-            // RÜZGAR HIZI KONTROLÜ
             let allWinds = [];
 
             LIST.forEach(i => {
@@ -1340,8 +1406,10 @@
                 const saveDisp = i.saveTL / reportRate;
                 const lossDisp = i.lossTL / reportRate;
                 const lossBareDisp = i.lossBareTL / reportRate;
+                
+                const itemTs = parseFloat(i.Ts) || 0;
+                if(itemTs > maxTempDetected) maxTempDetected = itemTs;
 
-                // Paketlerin içindeki rüzgarı hesaba katmıyoruz şimdilik, ana kalemlere bakıyoruz
                 if(i.inputs.type !== 'package') {
                     allWinds.push(i.inputs.vWind || 1);
                 }
@@ -1356,31 +1424,26 @@
                     gLoss += lossDisp;
                     gFuelLost += i.fuelLost;
                 }
-                lastFuelUnit = i.fuelUnit;
+                lastFuelUnit = i.inputs.fuelUnit || "";
             });
 
-            // Rüzgar homojen mi?
             let uniqueWinds = new Set(allWinds);
-            let windDisplay = "";
             let windNarrativeBit = "";
 
             if(uniqueWinds.size > 1 || LIST.some(x=>x.inputs.type==='package')) {
-                windDisplay = "Muhtelif / Değişken";
-                windNarrativeBit = "tesis içi farklı lokasyonların (iç/dış ortam) rüzgar ve ortam şartlarına uygun olarak";
+                windNarrativeBit = "tesis içi farklı lokasyonların rüzgar şartlarına uygun olarak";
             } else {
                 let val = allWinds.length > 0 ? allWinds[0] : document.getElementById('vWind').value;
-                windDisplay = val + " m/s";
                 windNarrativeBit = `<strong>${val} m/s</strong> rüzgar hızı koşullarında`;
             }
 
-            const ROWS_PER_PAGE = 20;
+            const ROWS_PER_PAGE = 18;
             const chunks = [];
             for (let i = 0; i < LIST.length; i += ROWS_PER_PAGE) {
                 chunks.push(LIST.slice(i, i + ROWS_PER_PAGE));
             }
             if(chunks.length === 0) chunks.push([]);
 
-            const coverPage = document.getElementById('p-cover');
             const tablePageTemplate = document.getElementById('p-table');
             const summaryPage = document.getElementById('p-summary');
             tablePageTemplate.remove();
@@ -1404,7 +1467,7 @@
                 const titleEl = newPage.querySelector('h2');
                 titleEl.innerText = "Detaylı Analiz Dökümü";
                 if(index > 0) { titleEl.innerHTML += ` <span class="text-sm text-slate-400 font-normal">(${index+1})</span>`; }
-                newPage.querySelector('#rDate').innerText = d;
+                newPage.querySelector('#rDate').innerText = today; // Sayfa üstü tarih (Rapor Tarihi)
                 newPage.querySelector('thead tr').innerHTML = tableHeaderHTML;
                 const pageNum = index + 2; 
                 newPage.querySelector('.page-num').innerText = `Sayfa ${pageNum} / ${totalPages}`;
@@ -1413,10 +1476,8 @@
                 
                 chunk.forEach((i, subIndex) => {
                     const globalIndex = (index * ROWS_PER_PAGE) + subIndex + 1;
-                    
                     const iInv = i.invTL / reportRate;
                     const iSave = i.saveTL / reportRate;
-
                     const roi = i.roi > 0 ? i.roi.toFixed(1) : "-";
                     const imgTag = i.img ? `<img src="${i.img}" class="w-16 h-16 object-cover rounded mx-auto border border-slate-200">` : `<div class="w-8 h-8 bg-slate-100 rounded mx-auto flex items-center justify-center text-[8px]">${i.inputs.type==='package'?'PKG':'-'}</div>`;
                     const locText = i.location ? `<div class="text-[8px] uppercase text-slate-400 mt-1 font-bold">📍 ${i.location}</div>` : '';
@@ -1434,32 +1495,49 @@
                         <td class="text-right font-bold text-blue-600 text-[10px] border-b border-slate-100">${roi}</td>
                     </tr>`;
                 });
-                printArea.insertBefore(newPage, summaryPage);
+                document.getElementById('print-area').insertBefore(newPage, summaryPage);
             });
 
+            // KAPAK VERİLERİ
             const totalRoi = gSave>0 ? (gInv/gSave*12) : 0;
+            
             document.getElementById('covClient').innerText = document.getElementById('cName').value || "FİRMA ADI";
             document.getElementById('covContact').innerText = document.getElementById('cEng').value || "";
-
             document.getElementById('covProv').innerText = document.getElementById('pName').value || "TEDARİKÇİ";
+            document.getElementById('covDate').innerText = today; // Sağ üstteki "Rapor Tarihi" (Bugün)
+            document.getElementById('covIntroDate').innerText = auditDateStr; // Metin içindeki "Denetim Tarihi" (Seçilen)
             document.getElementById('covRoi').innerText = totalRoi>0 ? totalRoi.toFixed(1) : "---";
+            document.getElementById('covMaxTemp').innerText = maxTempDetected.toFixed(0);
+
+            const fuelYearly = gFuelLost;
+            const fuelMonthly = gFuelLost / 12;
+            const fuelWeekly = gFuelLost / 52;
+            const fuelDaily = gFuelLost / 365;
+
+            document.getElementById('covFuelYear').innerText = Math.round(fuelYearly).toLocaleString();
+            document.getElementById('covFuelMonth').innerText = Math.round(fuelMonthly).toLocaleString();
+            document.getElementById('covFuelWeek').innerText = Math.round(fuelWeekly).toLocaleString();
+            document.getElementById('covFuelDay').innerText = Math.round(fuelDaily).toLocaleString();
             
-            // PARAMETRE YAZISINI OLUŞTUR
+            const fuelLabels = document.querySelectorAll('.fuel-unit-label');
+            fuelLabels.forEach(el => el.innerText = lastFuelUnit);
+            
+            const fType = document.getElementById('fuel').value;
+            let fuelDisp = fType === 'manual' ? "ÖZEL YAKIT" : document.getElementById('fuel').options[document.getElementById('fuel').selectedIndex].text.split('(')[0].toUpperCase();
+            document.getElementById('covFuelType').innerText = fuelDisp;
+
             const tAmb = document.getElementById('tAmb').value;
-            // vWind zaten yukarıda hesaplandı (windDisplay ve windNarrativeBit)
             const eff = document.getElementById('eff').value;
             const price = document.getElementById('price').value;
             const hours = document.getElementById('hours').value;
             const energyCurr = document.getElementById('energyCurr').value;
             
-            const fType = document.getElementById('fuel').value;
-            let fuelDisp = "";
-            if(fType === 'manual') fuelDisp = "Özel Yakıt";
-            else fuelDisp = document.getElementById('fuel').options[document.getElementById('fuel').selectedIndex].text.split('(')[0];
-
-            const narrative = `İşbu rapor, işletmenizin enerji verimliliği potansiyelini belirlemek amacıyla hazırlanmıştır. Simülasyonlar, <strong>${tAmb}°C</strong> ortam sıcaklığı ve ${windNarrativeBit}, <strong>${fuelDisp}</strong> yakıt tipi ve <strong>%${eff}</strong> sistem verimliliği baz alınarak gerçekleştirilmiştir. Enerji birim maliyetleri <strong>${price} ${energyCurr}</strong> üzerinden hesaplanmış olup, tesisin yıllık <strong>${hours} saat</strong> aktif çalıştığı öngörülmüştür.`;
-            
+            const narrative = `Simülasyonlar; <strong>${tAmb}°C</strong> ortam sıcaklığı, ${windNarrativeBit}, <strong>%${eff}</strong> sistem verimi ve yıllık <strong>${hours} saat</strong> çalışma süresi baz alınarak hesaplanmıştır. Enerji birim maliyeti <strong>${price} ${energyCurr}</strong> olarak kabul edilmiştir.`;
             document.getElementById('covNarrative').innerHTML = narrative;
+
+            const qrImgEl = document.getElementById('covQrCode');
+            if (userQrImg) { qrImgEl.src = userQrImg; qrImgEl.classList.remove('opacity-20'); } 
+            else { qrImgEl.src = ""; qrImgEl.classList.add('opacity-20'); }
 
             document.getElementById('sumLoss').innerText = currSym + fmt(gLoss);
             document.getElementById('sumFuelLost').innerText = `(${Math.round(gFuelLost).toLocaleString()} ${lastFuelUnit})`;
@@ -1469,10 +1547,6 @@
             document.getElementById('visualBar').style.width = totalRoi>0 ? Math.min((totalRoi/24)*100,100) + '%' : '0%';
             document.getElementById('sumCo2').innerText = gCo2.toFixed(1);
             document.getElementById('sumTrees').innerText = Math.round(gCo2*40).toLocaleString();
-
-            const qrImgEl = document.getElementById('repQrCode');
-            if (userQrImg) { qrImgEl.src = userQrImg; qrImgEl.classList.remove('opacity-20'); } 
-            else { qrImgEl.src = ""; qrImgEl.classList.add('opacity-20'); }
 
             const pt = document.getElementById('projTable');
             pt.innerHTML = '';
