@@ -6,7 +6,7 @@
 <title>Endüstriyel İzolasyon Yatırımı Amortisman Hesaplama</title>
 <meta name="description" content="ISO 12241 standardına göre boru, vana ve tank yüzeylerinden ısı kaybını hesaplayın.">
 <link rel="icon" type="image/png" href="favicon.png">
-<script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -852,6 +852,11 @@
         let itemsDesc = [];
         let fuelUnit = basket.length > 0 ? basket[0].fuelUnit : ""; 
 
+        // PAKET İÇİNDE EN YÜKSEK YÜZEY SICAKLIĞINI BULMA (ISG Uyarısı İçin)
+        let maxTemp = -9999;
+        let displayTs = "-";
+        let displayTins = "-";
+
         basket.forEach(item => {
             totalSaveTL += item.saveTL;
             totalLossTL += item.lossTL;
@@ -865,6 +870,15 @@
             totalKwhSave += parseFloat(item.kwhSave.replace(/\./g,'').replace(',','.'));
             
             itemsDesc.push(`${item.qty}x ${item.name}`);
+
+            // YÜZEY SICAKLIĞI KONTROLÜ
+            // item.Ts genelde çıplak yüzey sıcaklığıdır.
+            let tVal = parseFloat(item.Ts);
+            if(!isNaN(tVal) && tVal > maxTemp){
+                maxTemp = tVal;
+                displayTs = item.Ts;
+                displayTins = item.Tins;
+            }
         });
 
         // TÜM DEĞERLERİ PAKET ADEDİ İLE ÇARP
@@ -899,8 +913,8 @@
             kwhIns: Math.round(totalKwhIns).toLocaleString('tr-TR'),
             kwhSave: Math.round(totalKwhSave).toLocaleString('tr-TR'),
             co2: totalCo2,
-            Ts: "-", 
-            Tins: "-",
+            Ts: displayTs, // ARTIK MAX SICAKLIK GÖRÜNECEK
+            Tins: displayTins,
             img: currPkgImg, 
             roi: roiCalc,
             inputs: {
@@ -1219,7 +1233,7 @@
     function fillDN(id){const el=document.getElementById(id);el.innerHTML='';for(const[k,v]of Object.entries(PIPES)){let o=document.createElement('option');o.value=v;o.text=`DN ${k}`;el.add(o);}if(id==='vDN')el.value=60.3;if(id==='pDN')el.value=88.9;}
     
     function readImg(i){if(i.files&&i.files[0]){const r=new FileReader();r.onload=e=>{currImg=e.target.result;document.getElementById('prevImg').src=currImg;document.getElementById('prevImg').classList.remove('hidden');};r.readAsDataURL(i.files[0]);}}
-    function readQr(i){if(i.files&&i.files[0]){const r=new FileReader();r.onload=e=>{userQrImg=e.target.result;alert("QR Kod yüklendi! Raporun kapağında görünecek.");};r.readAsDataURL(i.files[0]);}}
+    function readQr(i){if(i.files&&i.files[0]){const r=new FileReader();r.onload=e=>{userQrImg=e.target.result;alert("QR Kod yüklendi! Raporun son sayfasında görünecek.");};r.readAsDataURL(i.files[0]);}}
 
     async function getFx(){try{const r=await fetch('https://api.frankfurter.app/latest?from=USD&to=TRY');const d=await r.json();FX.USD=d.rates.TRY;const r2=await fetch('https://api.frankfurter.app/latest?from=EUR&to=TRY');const d2=await r2.json();FX.EUR=d2.rates.TRY;document.getElementById('fxVal').innerText=FX.USD.toFixed(2);}catch(e){}}
     
@@ -1804,4 +1818,3 @@
 </script>
 </body>
 </html>
-
