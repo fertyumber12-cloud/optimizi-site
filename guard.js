@@ -2,8 +2,8 @@
     // --- AYARLAR ---
     // Burayı kendine göre düzenle
     const CONFIG = {
-        user: "inspro",
-        pass: "inspro4455", 
+        user: "admin",
+        pass: "123456", 
         title: "Optimizi<span style='color:#6366f1'>.App</span>" // Mor renk vurgusu
     };
 
