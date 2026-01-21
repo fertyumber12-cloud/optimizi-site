@@ -2,7 +2,7 @@
     // --- AYARLAR ---
     const CONFIG = {
         user: "inspro",
-        pass: "inspro4455", 
+        pass: "inspro4431", 
         title: "Optimizi<span style='color:#6366f1'>.App</span>"
     };
 
