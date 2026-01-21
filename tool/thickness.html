@@ -26,7 +26,6 @@
 
 <style>
   :root {
-    /* MÜHENDİSLİK KAĞIDI (AYDINLIK TEMA) */
     --bg-color: #fdfdfd; 
     --grid-line: rgba(99, 102, 241, 0.06); 
     --glass-bg: rgba(255, 255, 255, 0.85);
@@ -85,7 +84,6 @@
   .w-e { width: 75%; background: var(--c-E); } .w-f { width: 85%; background: var(--c-F); }
   .w-g { width: 100%; background: var(--c-G); }
   
-  /* Standart Seçim Butonları */
   .std-btn {
       border: 1px solid #e2e8f0;
       border-radius: 0.5rem;
@@ -156,9 +154,26 @@
                             </div>
                         </div>
                         
-                        <div id="row-dims" class="hidden grid grid-cols-2 gap-4">
-                            <div><label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Genişlik (m)</label><input type="number" id="dimW" value="1" class="glass-input text-xs" oninput="calc()"></div>
-                            <div><label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Yükseklik (m)</label><input type="number" id="dimH" value="1" class="glass-input text-xs" oninput="calc()"></div>
+                        <div id="row-dims" class="hidden space-y-3">
+                            <div class="flex items-center gap-4 bg-slate-50 p-2 rounded border border-slate-100">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="flatShape" value="rect" checked onchange="toggleFlatShape()" class="text-indigo-600 focus:ring-indigo-500">
+                                    <span class="text-[10px] font-bold text-slate-600 uppercase">Dikdörtgen</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="flatShape" value="circle" onchange="toggleFlatShape()" class="text-indigo-600 focus:ring-indigo-500">
+                                    <span class="text-[10px] font-bold text-slate-600 uppercase">Daire (Tank Tepesi vb.)</span>
+                                </label>
+                            </div>
+
+                            <div id="box-rect" class="grid grid-cols-2 gap-4">
+                                <div><label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Genişlik (cm)</label><input type="number" id="dimW" value="100" class="glass-input text-xs" oninput="calc()"></div>
+                                <div><label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Yükseklik (cm)</label><input type="number" id="dimH" value="100" class="glass-input text-xs" oninput="calc()"></div>
+                            </div>
+
+                            <div id="box-circle" class="hidden">
+                                <div><label class="text-[10px] text-slate-500 font-bold uppercase mb-1 block">Çap (cm)</label><input type="number" id="dimD" value="100" class="glass-input text-xs" oninput="calc()"></div>
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-3 gap-3">
@@ -326,10 +341,9 @@
 
     const PIPES={15:21.3,20:26.7,25:33.4,32:42.2,40:48.3,50:60.3,65:73.0,80:88.9,100:114.3,125:141.3,150:168.3,200:219.1,250:273.0,300:323.9,350:355.6,400:406.4,500:508.0};
     
-    // GÜNCELLENEN MATERYAL LİSTESİ
     const MATS={
         rockwool:{a:0.035,b:0.00017,c:0, limit:650},
-        needlemat:{a:0.033,b:0.00015,c:0, limit:650, name:"İğnelenmiş Cam Elyaf"}, // YENİ
+        needlemat:{a:0.033,b:0.00015,c:0, limit:650, name:"İğnelenmiş Cam Elyaf"},
         ceramic:{a:0.025,b:0.00012,c:1.2e-7, limit:1200},
         aerogel:{a:0.019,b:0.00004,c:5e-8, limit:650},
         rubber:{a:0.034,b:0.000075,c:0, limit:105},
@@ -362,6 +376,7 @@
         if(t === 'flat'){
             rowDn.classList.add('hidden');
             rowDims.classList.remove('hidden');
+            boxQty.classList.add('hidden'); // Flat için kendi girdilerini kullanıyoruz
         } else {
             rowDn.classList.remove('hidden');
             rowDims.classList.add('hidden');
@@ -378,6 +393,22 @@
                 boxQty.classList.remove('hidden');
                 lblQty.innerText = "Metraj (m)";
             }
+        }
+        calc();
+    }
+    
+    // YENİ FONKSİYON: Düz yüzey şekil değiştirme
+    function toggleFlatShape(){
+        const shape = document.querySelector('input[name="flatShape"]:checked').value;
+        const boxRect = document.getElementById('box-rect');
+        const boxCircle = document.getElementById('box-circle');
+        
+        if(shape === 'rect'){
+            boxRect.classList.remove('hidden');
+            boxCircle.classList.add('hidden');
+        } else {
+            boxRect.classList.add('hidden');
+            boxCircle.classList.remove('hidden');
         }
         calc();
     }
@@ -452,9 +483,18 @@
                 multiplier = (dPipe * 2.5) * qty;
             }
         } else {
-             const dimW = parseFloat(document.getElementById('dimW').value)||1;
-             const dimH = parseFloat(document.getElementById('dimH').value)||1;
-             multiplier = dimW * dimH; 
+             // DÜZ YÜZEY HESABI (CM GİRİŞ -> M DÖNÜŞÜM)
+             const flatShape = document.querySelector('input[name="flatShape"]:checked').value;
+             
+             if(flatShape === 'rect'){
+                 const dimW_cm = parseFloat(document.getElementById('dimW').value) || 0;
+                 const dimH_cm = parseFloat(document.getElementById('dimH').value) || 0;
+                 multiplier = (dimW_cm / 100) * (dimH_cm / 100); // m²
+             } else {
+                 const dimD_cm = parseFloat(document.getElementById('dimD').value) || 0;
+                 const r_m = (dimD_cm / 100) / 2;
+                 multiplier = Math.PI * r_m * r_m; // m² (Daire Alanı)
+             }
              dPipe = 1.0; 
         }
         
