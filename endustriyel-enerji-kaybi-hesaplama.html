@@ -18,39 +18,49 @@
                 extend: {
                     colors: { slate: { 850: '#151e2e', 900: '#0f172a', 950: '#020617' } },
                     animation: {
-                        'float-slow': 'float 8s ease-in-out infinite',
                         'blob': 'blob 20s infinite',
                         'gradient-x': 'gradientX 8s ease infinite',
-                        'shimmer': 'shimmer 2s infinite',
                     },
                     keyframes: {
-                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-20px)' } },
                         blob: {
                             '0%': { transform: 'translate(0px, 0px) scale(1)' },
                             '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
                             '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
                             '100%': { transform: 'translate(0px, 0px) scale(1)' },
                         },
-                        gradientX: { '0%, 100%': { 'background-position': '0% 50%' }, '50%': { 'background-position': '100% 50%' } },
-                        shimmer: { '0%': { transform: 'translateX(-100%)' }, '100%': { transform: 'translateX(100%)' } }
+                        gradientX: { '0%, 100%': { 'background-position': '0% 50%' }, '50%': { 'background-position': '100% 50%' } }
                     }
                 }
             }
         }
     </script>
     <style>
-        html { scroll-behavior: smooth; }
         body { 
             background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%);
             background-attachment: fixed; color: #f1f5f9; overflow-x: hidden;
         }
         .glass-nav { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.08); }
+        
+        /* Slider Container Styles */
+        .slider-container {
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+            padding: 20px 4px; /* Kartların gölgesi kesilmesin diye */
+            cursor: grab;
+        }
+        .slider-container::-webkit-scrollbar { display: none; }
+        .slider-container.active { cursor: grabbing; cursor: -webkit-grabbing; }
+
         .spotlight-card {
             background-color: rgba(30, 41, 59, 0.4); 
             backdrop-filter: blur(16px);
             position: relative; overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 1.5rem; transition: all 0.3s ease;
             --mouse-x: 0px; --mouse-y: 0px;
+            min-width: 350px; /* Slider için minimum genişlik */
+            flex-shrink: 0;   /* Küçülmesini engelle */
         }
         .spotlight-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.2); }
         .spotlight-card::before {
@@ -66,6 +76,7 @@
             -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0; transition: opacity 0.5s; pointer-events: none; z-index: 3;
         }
         .spotlight-card:hover .spotlight-border { opacity: 1; }
+        
         .bg-grid { background-size: 60px 60px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px); mask-image: radial-gradient(circle at center, black 40%, transparent 80%); }
         .text-gradient-dynamic { background: linear-gradient(to right, #818cf8, #c084fc, #fb923c, #ef4444); background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: gradientX 8s ease infinite; }
 
@@ -94,37 +105,25 @@
                 </div>
                 <button onclick="toggleMenu()" class="p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
-            
             <nav class="flex flex-col gap-6">
                 <a href="index.html" class="sidebar-link text-2xl font-bold text-slate-300 hover:text-white transition group flex items-center gap-4">
                     <span class="w-1 h-8 bg-blue-500 rounded-full scale-y-0 group-hover:scale-y-100 transition duration-300"></span>
                     <span data-i18n="nav_home">Ana Sayfa</span>
                 </a>
-
                 <a href="contact.html" class="sidebar-link text-2xl font-bold text-slate-300 hover:text-white transition group flex items-center gap-4">
                     <span class="w-1 h-8 bg-indigo-500 rounded-full scale-y-0 group-hover:scale-y-100 transition duration-300"></span>
                     <span data-i18n="nav_contact">İletişim</span>
                 </a>
-                
                 <a href="blog.html" class="sidebar-link text-2xl font-bold text-slate-300 hover:text-white transition group flex items-center gap-4">
                     <span class="w-1 h-8 bg-orange-500 rounded-full scale-y-0 group-hover:scale-y-100 transition duration-300"></span>
                     <span data-i18n="nav_blog">Blog</span>
                 </a>
             </nav>
-
-            <div class="mt-auto pt-8 border-t border-white/10">
-                <div class="text-xs text-slate-500 mb-4 uppercase tracking-wider font-bold" data-i18n="nav_social">Sosyal Medya</div>
-                <div class="flex gap-4">
-                    <a href="https://www.linkedin.com/company/optimizi-app/" target="_blank" class="p-2 bg-white/5 rounded-lg hover:bg-indigo-600 hover:text-white transition text-slate-400"><i data-lucide="linkedin" class="w-5 h-5"></i></a>
-                    <a href="mailto:contact@optimizi.app" class="p-2 bg-white/5 rounded-lg hover:bg-red-500 hover:text-white transition text-slate-400"><i data-lucide="mail" class="w-5 h-5"></i></a>
-                </div>
-            </div>
         </div>
     </aside>
 
     <nav class="fixed w-full z-50 glass-nav transition-all duration-300">
         <div class="container mx-auto px-6 h-20 flex items-center justify-between">
-            
             <div class="flex items-center gap-6">
                 <button onclick="toggleMenu()" class="group p-2 -ml-2 rounded-lg hover:bg-white/5 transition">
                     <div class="space-y-1.5">
@@ -133,7 +132,6 @@
                         <span class="block w-6 h-0.5 bg-slate-300 group-hover:bg-white transition-all group-hover:w-4 ml-0"></span>
                     </div>
                 </button>
-
                 <a href="index.html" class="flex items-center gap-3 group">
                     <img src="icon.jpg" alt="Icon" class="w-10 h-10 rounded-xl shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition duration-300" onerror="this.style.display='none'">
                     <div class="leading-none">
@@ -141,7 +139,6 @@
                     </div>
                 </a>
             </div>
-            
             <div class="flex items-center gap-3">
                 <button onclick="toggleLang()" class="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800/80 hover:bg-slate-700 text-white transition border border-slate-600 shadow-lg shadow-black/20">
                     <span id="langFlag" class="text-base">🇬🇧</span><span id="langText" class="text-xs font-bold hidden sm:inline">EN</span>
@@ -152,89 +149,133 @@
 
     <main class="relative z-10 pt-32 pb-20 container mx-auto px-6 flex flex-col items-center min-h-screen">
         
-        <div class="text-center max-w-3xl mb-16 animate-float-slow">
-            <h1 class="text-5xl md:text-7xl font-black mb-6 leading-[1.1] tracking-tight text-white">
+        <div class="text-center max-w-4xl mb-12">
+            <h1 class="text-4xl md:text-6xl font-black mb-6 leading-[1.1] tracking-tight text-white">
                 <span data-i18n="hero_title_1">Enerji Verimliliği</span> <br>
-                <span class="text-gradient-dynamic" data-i18n="hero_title_2">Hesaplama</span>
+                <span class="text-gradient-dynamic" data-i18n="hero_title_2">Hesaplama Araçları</span>
             </h1>
             <p class="text-slate-300 text-lg leading-relaxed max-w-2xl mx-auto" data-i18n="hero_desc">
-                Tesisinizdeki enerji kayıplarını tespit edin, yatırım geri dönüşlerini (ROI) hesaplayın ve karbon ayak izinizi yönetin.
+                Tesisinizdeki enerji kayıplarını tespit edin, yatırım geri dönüşlerini (ROI) hesaplayın.
             </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl">
-            
-            <a href="tool/roi.html" class="spotlight-card p-8 group cursor-pointer block h-full flex flex-col justify-between">
-                <div class="spotlight-border"></div>
-                <div class="relative z-10">
-                    <div class="absolute top-0 right-0 p-2 opacity-20 group-hover:opacity-40 transition-opacity">
-                        <i data-lucide="calculator" class="w-24 h-24 text-indigo-500"></i>
-                    </div>
-                    
-                    <div class="w-16 h-16 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white transition-all duration-300 border border-indigo-500/30 shadow-lg shadow-indigo-500/10">
-                        <i data-lucide="flame" class="w-8 h-8"></i>
-                    </div>
-                    
-                    <h3 class="text-2xl font-bold mb-3 text-white group-hover:text-indigo-400 transition-colors" data-i18n="card_1_title">Termal İzolasyon & ROI</h3>
-                    <p class="text-sm text-slate-400 mb-8 leading-relaxed group-hover:text-slate-300 transition-colors" data-i18n="card_1_desc">
-                        ISO 12241 standartlarına göre boru, vana ve tank yüzeylerinden ısı kaybı ve amortisman hesabı.
-                    </p>
+        <div class="w-full max-w-[1400px]">
+            <div class="flex justify-between items-center mb-4 px-2">
+                <h2 class="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2"><i data-lucide="layout-grid" class="w-4 h-4"></i> Hesaplama Modülleri</h2>
+                <div class="flex gap-2 text-slate-500 text-xs items-center">
+                    <i data-lucide="move-horizontal" class="w-4 h-4"></i>
+                    <span class="hidden md:inline">Kaydırılabilir</span>
                 </div>
+            </div>
+
+            <div class="slider-container flex gap-8 pb-8" id="slider">
                 
-                <div class="relative z-10">
-                    <div class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40">
-                        <span data-i18n="btn_calc">HESAPLA</span> <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                <a href="tool/anlik-kayip.html" class="spotlight-card p-8 group cursor-pointer flex flex-col justify-between border-l-4 !border-l-red-500">
+                    <div class="spotlight-border"></div>
+                    <div class="relative z-10">
+                        <div class="absolute top-0 right-0 p-2 opacity-20 group-hover:opacity-40 transition-opacity">
+                            <i data-lucide="clipboard-list" class="w-24 h-24 text-red-500"></i>
+                        </div>
+                        <div class="w-16 h-16 rounded-2xl bg-red-500/20 text-red-400 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-red-500 group-hover:text-white transition-all duration-300 border border-red-500/30 shadow-lg shadow-red-500/10">
+                            <i data-lucide="scan-line" class="w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3 text-white group-hover:text-red-400 transition-colors" data-i18n="card_audit_title">Saha Kayıp Analizi</h3>
+                        <p class="text-sm text-slate-400 mb-8 leading-relaxed group-hover:text-slate-300 transition-colors" data-i18n="card_audit_desc">
+                            Sahada anlık ölçümlerle kayıp/kaçak tespiti yapın, fotoğraflayın ve anında PDF raporu oluşturun.
+                        </p>
                     </div>
-                </div>
-            </a>
+                    <div class="relative z-10">
+                        <div class="w-full py-3 rounded-xl bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-red-500/20 group-hover:shadow-red-500/40">
+                            <span data-i18n="btn_audit">DENETİME BAŞLA</span> <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                </a>
 
-            <a href="tool/boiler.html" class="spotlight-card p-8 group cursor-pointer block h-full flex flex-col justify-between">
-                <div class="spotlight-border"></div>
-                <div class="relative z-10">
-                    <div class="absolute top-0 right-0 p-2 opacity-20 group-hover:opacity-40 transition-opacity">
-                        <i data-lucide="factory" class="w-24 h-24 text-indigo-500"></i>
+                <a href="tool/chiller-roi.html" class="spotlight-card p-8 group cursor-pointer flex flex-col justify-between border-l-4 !border-l-cyan-500">
+                    <div class="spotlight-border"></div>
+                    <div class="relative z-10">
+                        <div class="absolute top-0 right-0 p-2 opacity-20 group-hover:opacity-40 transition-opacity">
+                            <i data-lucide="snowflake" class="w-24 h-24 text-cyan-500"></i>
+                        </div>
+                        <div class="w-16 h-16 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-cyan-500 group-hover:text-white transition-all duration-300 border border-cyan-500/30 shadow-lg shadow-cyan-500/10">
+                            <i data-lucide="thermometer-snowflake" class="w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3 text-white group-hover:text-cyan-400 transition-colors" data-i18n="card_chiller_title">Soğutma & Chiller ROI</h3>
+                        <p class="text-sm text-slate-400 mb-8 leading-relaxed group-hover:text-slate-300 transition-colors" data-i18n="card_chiller_desc">
+                            Soğutma hatlarında yoğuşma kontrolü ve yalıtım amortisman hesabı.
+                        </p>
                     </div>
-                    
-                    <div class="w-16 h-16 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white transition-all duration-300 border border-indigo-500/30 shadow-lg shadow-indigo-500/10">
-                        <i data-lucide="gauge" class="w-8 h-8"></i>
+                    <div class="relative z-10">
+                        <div class="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-cyan-500/20 group-hover:shadow-cyan-500/40">
+                            <span data-i18n="btn_calc">HESAPLA</span> <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </div>
                     </div>
-                    
-                    <h3 class="text-2xl font-bold mb-3 text-white group-hover:text-indigo-400 transition-colors" data-i18n="card_2_title">Kazan Verimliliği</h3>
-                    <p class="text-sm text-slate-400 mb-8 leading-relaxed group-hover:text-slate-300 transition-colors" data-i18n="card_2_desc">
-                        Direkt yöntem ile buhar kazanı verim hesabı ve enerji dengesi analizi.
-                    </p>
-                </div>
-                
-                <div class="relative z-10">
-                    <div class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40">
-                        <span data-i18n="btn_calc">HESAPLA</span> <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                    </div>
-                </div>
-            </a>
+                </a>
 
-            <a href="tool/thickness.html" class="spotlight-card p-8 group cursor-pointer block h-full flex flex-col justify-between">
-                <div class="spotlight-border"></div>
-                <div class="relative z-10">
-                    <div class="absolute top-0 right-0 p-2 opacity-20 group-hover:opacity-40 transition-opacity">
-                        <i data-lucide="layers" class="w-24 h-24 text-indigo-500"></i>
+                <a href="tool/roi.html" class="spotlight-card p-8 group cursor-pointer flex flex-col justify-between">
+                    <div class="spotlight-border"></div>
+                    <div class="relative z-10">
+                        <div class="absolute top-0 right-0 p-2 opacity-20 group-hover:opacity-40 transition-opacity">
+                            <i data-lucide="calculator" class="w-24 h-24 text-indigo-500"></i>
+                        </div>
+                        <div class="w-16 h-16 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white transition-all duration-300 border border-indigo-500/30 shadow-lg shadow-indigo-500/10">
+                            <i data-lucide="flame" class="w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3 text-white group-hover:text-indigo-400 transition-colors" data-i18n="card_1_title">Termal İzolasyon & ROI</h3>
+                        <p class="text-sm text-slate-400 mb-8 leading-relaxed group-hover:text-slate-300 transition-colors" data-i18n="card_1_desc">
+                            ISO 12241 standartlarına göre sıcak yüzey yalıtım karlılık ve ısı kaybı hesabı.
+                        </p>
                     </div>
-                    
-                    <div class="w-16 h-16 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white transition-all duration-300 border border-indigo-500/30 shadow-lg shadow-indigo-500/10">
-                        <i data-lucide="layers" class="w-8 h-8"></i>
+                    <div class="relative z-10">
+                        <div class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40">
+                            <span data-i18n="btn_calc">HESAPLA</span> <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </div>
                     </div>
-                    <h3 class="text-2xl font-bold mb-3 text-white group-hover:text-indigo-400 transition-colors" data-i18n="card_3_title">Enerji Verimlilik Sınıfı Hesaplama</h3>
-                    <p class="text-sm text-slate-400 mb-8 leading-relaxed group-hover:text-slate-300 transition-colors" data-i18n="card_3_desc">
-                        Optimum yalıtım kalınlığının VDI 2055 standartlarına göre belirlenmesi.
-                    </p>
-                </div>
+                </a>
 
-                <div class="relative z-10">
-                    <div class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40">
-                        <span data-i18n="btn_calc">HESAPLA</span> <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                <a href="tool/boiler.html" class="spotlight-card p-8 group cursor-pointer flex flex-col justify-between">
+                    <div class="spotlight-border"></div>
+                    <div class="relative z-10">
+                        <div class="absolute top-0 right-0 p-2 opacity-20 group-hover:opacity-40 transition-opacity">
+                            <i data-lucide="factory" class="w-24 h-24 text-indigo-500"></i>
+                        </div>
+                        <div class="w-16 h-16 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white transition-all duration-300 border border-indigo-500/30 shadow-lg shadow-indigo-500/10">
+                            <i data-lucide="gauge" class="w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3 text-white group-hover:text-indigo-400 transition-colors" data-i18n="card_2_title">Kazan Verimliliği</h3>
+                        <p class="text-sm text-slate-400 mb-8 leading-relaxed group-hover:text-slate-300 transition-colors" data-i18n="card_2_desc">
+                            Direkt yöntem ile buhar kazanı verim hesabı ve enerji dengesi analizi.
+                        </p>
                     </div>
-                </div>
-            </a>
+                    <div class="relative z-10">
+                        <div class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40">
+                            <span data-i18n="btn_calc">HESAPLA</span> <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                </a>
 
+                <a href="tool/thickness.html" class="spotlight-card p-8 group cursor-pointer flex flex-col justify-between">
+                    <div class="spotlight-border"></div>
+                    <div class="relative z-10">
+                        <div class="absolute top-0 right-0 p-2 opacity-20 group-hover:opacity-40 transition-opacity">
+                            <i data-lucide="layers" class="w-24 h-24 text-indigo-500"></i>
+                        </div>
+                        <div class="w-16 h-16 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white transition-all duration-300 border border-indigo-500/30 shadow-lg shadow-indigo-500/10">
+                            <i data-lucide="ruler" class="w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3 text-white group-hover:text-indigo-400 transition-colors" data-i18n="card_3_title">Ekonomik Kalınlık</h3>
+                        <p class="text-sm text-slate-400 mb-8 leading-relaxed group-hover:text-slate-300 transition-colors" data-i18n="card_3_desc">
+                            VDI 2055 standartlarına göre optimum yalıtım kalınlığı belirleme.
+                        </p>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40">
+                            <span data-i18n="btn_calc">HESAPLA</span> <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                </a>
+
+            </div>
         </div>
     </main>
 
@@ -245,11 +286,32 @@
     </footer>
 
     <script>
-        // --- SIDEBAR TOGGLE ---
+        // --- DRAG TO SCROLL FUNCTIONALITY ---
+        const slider = document.getElementById('slider');
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        slider.addEventListener('mousedown', (e) => {
+            isDown = true;
+            slider.classList.add('active');
+            startX = e.pageX - slider.offsetLeft;
+            scrollLeft = slider.scrollLeft;
+        });
+        slider.addEventListener('mouseleave', () => { isDown = false; slider.classList.remove('active'); });
+        slider.addEventListener('mouseup', () => { isDown = false; slider.classList.remove('active'); });
+        slider.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - slider.offsetLeft;
+            const walk = (x - startX) * 2; // Scroll hızı
+            slider.scrollLeft = scrollLeft - walk;
+        });
+
+        // --- SIDEBAR & UI LOGIC ---
         function toggleMenu() {
             const sidebar = document.getElementById('sidebar');
             const backdrop = document.getElementById('backdrop');
-            
             if (sidebar.classList.contains('-translate-x-full')) {
                 sidebar.classList.remove('-translate-x-full');
                 backdrop.classList.remove('hidden');
@@ -276,72 +338,53 @@
 
         const TRANSLATIONS = {
             tr: {
-                nav_home: "Ana Sayfa", nav_contact: "İletişim", nav_blog: "Blog", nav_social: "Sosyal Medya",
-                hero_title_1: "Hesaplama",
-                hero_title_2: "Merkezi",
-                hero_desc: "Tesisinizdeki enerji kayıplarını tespit edin, yatırım geri dönüşlerini (ROI) hesaplayın ve karbon ayak izinizi yönetin.",
-                card_1_title: "Termal İzolasyon & ROI",
-                card_1_desc: "ISO 12241 standartlarına göre boru, vana ve tank yüzeylerinden ısı kaybı ve amortisman hesabı.",
-                btn_calc: "HESAPLA",
-                card_2_title: "Kazan Verimliliği",
-                card_2_desc: "Direkt yöntem ile buhar kazanı verim hesabı ve enerji dengesi analizi.",
-                card_3_title: "Ekonomik Kalınlık",
-                card_3_desc: "Optimum yalıtım kalınlığının VDI 2055 standartlarına göre belirlenmesi.",
-                badge_soon: "YAKINDA",
-                footer: "© 2025 Optimizi Inc. Tüm hakları saklıdır."
+                nav_home: "Ana Sayfa", nav_contact: "İletişim", nav_blog: "Blog",
+                hero_title_1: "Enerji Verimliliği", hero_title_2: "Araçları",
+                hero_desc: "Tesisinizdeki enerji kayıplarını tespit edin, yatırım geri dönüşlerini (ROI) hesaplayın.",
+                card_1_title: "Termal İzolasyon & ROI", card_1_desc: "ISO 12241 standartlarına göre sıcak yüzey yalıtım karlılık ve ısı kaybı hesabı.",
+                card_2_title: "Kazan Verimliliği", card_2_desc: "Direkt yöntem ile buhar kazanı verim hesabı ve enerji dengesi analizi.",
+                card_3_title: "Ekonomik Kalınlık", card_3_desc: "Optimum yalıtım kalınlığının VDI 2055 standartlarına göre belirlenmesi.",
+                card_audit_title: "Saha Kayıp Analizi", card_audit_desc: "Sahada anlık ölçümlerle kayıp/kaçak tespiti yapın, fotoğraflayın ve anında PDF raporu oluşturun.",
+                card_chiller_title: "Soğutma & Chiller ROI", card_chiller_desc: "Soğutma hatlarında yoğuşma kontrolü ve yalıtım amortisman hesabı.",
+                btn_calc: "HESAPLA", btn_audit: "DENETİME BAŞLA", footer: "© 2025 Optimizi Inc. Tüm hakları saklıdır."
             },
             en: {
-                nav_home: "Home", nav_contact: "Contact", nav_blog: "Blog", nav_social: "Social Media",
-                hero_title_1: "Calculation",
-                hero_title_2: "Hub",
-                hero_desc: "Detect energy losses in your facility, calculate return on investment (ROI), and manage your carbon footprint.",
-                card_1_title: "Thermal Insulation & ROI",
-                card_1_desc: "Heat loss and amortization calculation for pipes, valves, and tank surfaces according to ISO 12241.",
-                btn_calc: "CALCULATE",
-                card_2_title: "Boiler Efficiency",
-                card_2_desc: "Steam boiler efficiency calculation and energy balance analysis using the direct method.",
-                card_3_title: "Economic Thickness",
-                card_3_desc: "Determination of optimum insulation thickness according to VDI 2055 standards.",
-                badge_soon: "SOON",
-                footer: "© 2025 Optimizi Inc. All rights reserved."
+                nav_home: "Home", nav_contact: "Contact", nav_blog: "Blog",
+                hero_title_1: "Energy Efficiency", hero_title_2: "Tools",
+                hero_desc: "Detect energy losses in your facility, calculate return on investment (ROI).",
+                card_1_title: "Thermal Insulation & ROI", card_1_desc: "Heat loss and amortization calculation for hot surfaces according to ISO 12241.",
+                card_2_title: "Boiler Efficiency", card_2_desc: "Steam boiler efficiency calculation using direct method.",
+                card_3_title: "Economic Thickness", card_3_desc: "Determination of optimum insulation thickness according to VDI 2055.",
+                card_audit_title: "Field Loss Audit", card_audit_desc: "Detect leaks with instant field measurements, take photos, and generate PDF reports.",
+                card_chiller_title: "Cooling & Chiller ROI", card_chiller_desc: "Condensation control and insulation amortization calculation for cooling lines.",
+                btn_calc: "CALCULATE", btn_audit: "START AUDIT", footer: "© 2025 Optimizi Inc. All rights reserved."
             }
         };
 
         let currentLang = 'tr';
-
         function initApp() {
             document.documentElement.classList.add('dark');
             const storedLang = localStorage.getItem('lang');
-            if (storedLang) { currentLang = storedLang; } else {
+            if (storedLang) currentLang = storedLang;
+            else {
                 const browserLang = navigator.language || navigator.userLanguage;
                 currentLang = browserLang.startsWith('tr') ? 'tr' : 'en';
                 localStorage.setItem('lang', currentLang);
             }
             updateLang();
-            if(typeof lucide !== 'undefined') { lucide.createIcons(); }
+            if(typeof lucide !== 'undefined') lucide.createIcons();
         }
 
-        function toggleLang() { 
-            currentLang = currentLang === 'tr' ? 'en' : 'tr'; 
-            localStorage.setItem('lang', currentLang); 
-            updateLang(); 
-        }
-
+        function toggleLang() { currentLang = currentLang === 'tr' ? 'en' : 'tr'; localStorage.setItem('lang', currentLang); updateLang(); }
         function updateLang() {
             const isTr = currentLang === 'tr';
             document.getElementById('langFlag').innerText = isTr ? '🇬🇧' : '🇹🇷'; 
             document.getElementById('langText').innerText = isTr ? 'EN' : 'TR';
-            
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                if (TRANSLATIONS[currentLang][key]) {
-                    el.innerText = TRANSLATIONS[currentLang][key];
-                }
+                if (TRANSLATIONS[currentLang][key]) el.innerText = TRANSLATIONS[currentLang][key];
             });
         }
     </script>
 </body>
 </html>
-
-
-
