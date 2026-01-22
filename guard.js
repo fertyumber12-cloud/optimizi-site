@@ -2,93 +2,105 @@
     // --- AYARLAR ---
     const CONFIG = {
         user: "inspro",
-        pass: "inspro4455", 
-        title: "Optimizi<span style='color:#6366f1'>.App</span>"
+        pass: "inspro44", 
+        // Logo HTML'ini aşağıda CSS ile hallediyoruz, burası sadece config
     };
 
-    // 1. Zaten giriş yapılmış mı kontrol et
+    // 1. Zaten giriş yapılmışsa dur
     if (localStorage.getItem('optimizi_session') === '1') {
         return; 
     }
 
-    // 2. CSS Stillerini Oluştur
+    // 2. CSS - Apple Style & Premium UI
     const style = document.createElement('style');
     style.innerHTML = `
-        /* Sayfa scroll olmasın */
         body { overflow: hidden !important; }
         
-        /* BUZLU CAM ARKA PLAN KATMANI */
+        /* Arka Plan: Çok hafif flu */
         #optimizi-guard-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            
-            /* Arka planı yarı saydam beyaz yapıyoruz */
-            background-color: rgba(255, 255, 255, 0.4); 
-            
-            /* Arkadaki her şeyi flulaştırır (Buzlu Cam Efekti) */
-            backdrop-filter: blur(15px); 
-            -webkit-backdrop-filter: blur(15px); /* Safari için */
-            
+            background-color: rgba(248, 250, 252, 0.6); 
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             z-index: 2147483647; 
             display: flex; align-items: center; justify-content: center;
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
         }
 
-        /* Ortadaki Kart */
+        /* APPLE STYLE BUZLU CAM KART */
         .guard-card {
-            background: #ffffff; /* Kartın kendisi net beyaz olsun */
-            padding: 3rem; 
-            border-radius: 1.5rem;
-            /* Derin gölge verelim ki havada durduğu belli olsun */
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); 
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            width: 90%; max-width: 420px; 
+            background: rgba(255, 255, 255, 0.65); /* Daha şeffaf beyaz */
+            backdrop-filter: blur(25px) saturate(180%); /* Apple tarzı yoğun blur ve doygunluk */
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            padding: 3rem 2.5rem; 
+            border-radius: 1.75rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 
+                        0 0 0 1px rgba(255, 255, 255, 0.5) inset; /* İçten ince beyaz çizgi */
+            width: 90%; max-width: 380px; 
             text-align: center;
         }
 
-        /* Input Alanları - NET GÖRÜNÜM AYARI */
+        /* Logo Gradyanı */
+        .logo-text {
+            font-size: 2rem; font-weight: 800; color: #1e293b; 
+            margin-bottom: 2rem; letter-spacing: -0.03em;
+        }
+        .logo-gradient {
+            background: linear-gradient(135deg, #6366f1 0%, #f97316 100%); /* İndigo -> Turuncu */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Input Alanları - Yumuşatılmış Siyah */
         .guard-inp {
             width: 100%; 
-            padding: 0.9rem 1rem; 
-            margin-top: 0.5rem; 
-            margin-bottom: 1.25rem;
-            border: 2px solid #e2e8f0; /* Çerçeveyi biraz kalınlaştırdım */
-            border-radius: 0.75rem;
+            padding: 1rem 1.1rem; 
+            margin-bottom: 1rem;
+            border: 1px solid rgba(0,0,0,0.08); /* Çok silik çerçeve */
+            border-radius: 1rem;
             
-            /* Yazı ve Zemin Rengi - KESİN GÖRÜNÜR */
-            background-color: #ffffff !important; 
-            color: #000000 !important; 
+            /* Yazı Rengi: Simsiyah değil, Koyu Antrasit (#334155) */
+            background-color: rgba(255, 255, 255, 0.8); 
+            color: #334155 !important; 
             
-            font-size: 1rem; /* Yazıyı biraz büyüttüm */
-            font-weight: 600;
-            outline: none; 
-            transition: all 0.2s ease;
+            font-size: 0.95rem; font-weight: 600;
+            outline: none; transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
         }
 
         .guard-inp:focus { 
+            background-color: #ffffff;
             border-color: #6366f1; 
             box-shadow: 0 0 0 4px rgba(99,102,241,0.15); 
+            transform: translateY(-1px);
         }
+        
+        .guard-inp::placeholder { color: #94a3b8; font-weight: 500; }
 
+        /* Premium Buton */
         .guard-btn {
-            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-            color: white; width: 100%; padding: 1rem; border: none;
-            border-radius: 0.75rem; font-weight: 800; font-size: 1rem;
-            cursor: pointer; letter-spacing: 0.05em;
-            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
-            transition: transform 0.1s;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); /* Koyu Premium Renk */
+            color: white; width: 100%; padding: 1.1rem; border: none;
+            border-radius: 1rem; font-weight: 700; font-size: 1rem;
+            cursor: pointer; letter-spacing: 0.02em; margin-top: 0.5rem;
+            box-shadow: 0 10px 20px -5px rgba(15, 23, 42, 0.3);
+            transition: all 0.2s;
+            position: relative; overflow: hidden;
+        }
+        
+        /* Buton Hover Efekti */
+        .guard-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px -5px rgba(15, 23, 42, 0.4);
+            background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
         }
         .guard-btn:active { transform: scale(0.98); }
 
         .guard-err { 
-            color: #dc2626; background: #fef2f2; padding: 0.75rem;
-            border-radius: 0.5rem; font-weight: 700; margin-bottom: 1.5rem; 
-            display: none; border: 1px solid #fecaca;
-        }
-        
-        .guard-label {
-            display: block; text-align: left; font-size: 0.75rem; 
-            font-weight: 800; color: #475569; text-transform: uppercase; 
-            letter-spacing: 0.05em; margin-left: 0.25rem;
+            color: #dc2626; background: rgba(254, 226, 226, 0.6); 
+            padding: 0.8rem; border-radius: 0.75rem; font-size: 0.85rem;
+            font-weight: 600; margin-bottom: 1.5rem; display: none;
+            backdrop-filter: blur(4px);
         }
     `;
     document.head.appendChild(style);
@@ -98,37 +110,23 @@
     overlay.id = 'optimizi-guard-overlay';
     overlay.innerHTML = `
         <div class="guard-card">
-            <div style="margin-bottom: 2.5rem;">
-                <h1 style="font-size: 2rem; font-weight: 900; color: #0f172a; margin: 0; letter-spacing: -0.05em;">
-                    ${CONFIG.title}
-                </h1>
-                <p style="font-size: 0.85rem; color: #64748b; margin-top: 0.5rem; font-weight: 600;">
-                    🔒 Güvenli Yönetim Paneli
-                </p>
+            <div class="logo-text">
+                Optimizi<span class="logo-gradient">.App</span>
             </div>
             
             <div>
-                <label class="guard-label">Kullanıcı Adı</label>
-                <input type="text" id="g_user" class="guard-inp" placeholder="Kullanıcı adı" autocomplete="off">
-                
-                <label class="guard-label">Şifre</label>
-                <input type="password" id="g_pass" class="guard-inp" placeholder="••••••" autocomplete="new-password">
+                <input type="text" id="g_user" class="guard-inp" placeholder="Kullanıcı Adı" autocomplete="off">
+                <input type="password" id="g_pass" class="guard-inp" placeholder="Şifre" autocomplete="new-password">
             </div>
 
-            <div id="g_err" class="guard-err">Hatalı giriş, tekrar dene!</div>
+            <div id="g_err" class="guard-err">Hatalı giriş yaptınız.</div>
             
-            <button id="g_btn" class="guard-btn">GİRİŞ YAP</button>
-            
-            <div style="margin-top: 2rem; border-top: 1px solid #f1f5f9; padding-top: 1rem;">
-                <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 600;">
-                    Optimizi Engineering Solutions © 2026
-                </div>
-            </div>
+            <button id="g_btn" class="guard-btn">Giriş Yap</button>
         </div>
     `;
     document.body.appendChild(overlay);
 
-    // 4. Giriş Fonksiyonu
+    // 4. Mantık
     function attemptLogin() {
         const u = document.getElementById('g_user').value;
         const p = document.getElementById('g_pass').value;
@@ -137,17 +135,18 @@
         if(u === CONFIG.user && p === CONFIG.pass) {
             localStorage.setItem('optimizi_session', '1');
             
-            // Açılış Animasyonu
-            overlay.style.transition = 'opacity 0.6s ease, backdrop-filter 0.6s ease';
+            // Çıkış Animasyonu
+            overlay.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
             overlay.style.opacity = '0';
-            overlay.style.backdropFilter = 'blur(0px)'; // Bluru yavaşça kaldır
+            overlay.style.transform = 'scale(1.1)'; // Hafif büyüyerek kaybolsun
             
             setTimeout(() => { 
                 overlay.remove(); 
                 document.body.style.overflow = 'auto'; 
-            }, 600);
+            }, 500);
         } else {
             err.style.display = 'block';
+            // Sallanma efekti
             document.querySelector('.guard-card').animate([
                 { transform: 'translateX(0)' }, { transform: 'translateX(-5px)' }, 
                 { transform: 'translateX(5px)' }, { transform: 'translateX(0)' }
