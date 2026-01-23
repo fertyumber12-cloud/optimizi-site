@@ -5,205 +5,254 @@
         pass: "inspro44"
     };
 
-    // --- 2. KONTROL & KİLİT ---
-    // Eğer daha önce giriş yapıldıysa (localStorage '1' ise) ve süre geçmediyse scripti durdur.
-    if (localStorage.getItem('optimizi_session') === '1') {
-        return; 
-    }
+    // --- 2. KONTROL ---
+    if (localStorage.getItem('optimizi_session') === '1') return;
 
-    // Scroll Kilitle (Sayfa kaymasın)
+    // Scroll Kilitle
     document.body.style.overflow = 'hidden'; 
-    window.scrollTo(0, 0); // En tepeye sabitle
+    window.scrollTo(0, 0);
 
-    // --- 3. PREMIUM APPLE / ICY TASARIM ---
+    // --- 3. CSS (ECO-TECH SAAS THEME) ---
     const style = document.createElement('style');
     style.innerHTML = `
-        /* Ana Kapsayıcı: Tam Ekran */
-        #opt-guard-root {
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap');
+
+        /* Ana Kapsayıcı */
+        #eco-guard-root {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%); /* Çok açık gri-beyaz */
-            z-index: 999999999; /* En üstte olduğundan emin olalım */
+            background-color: #02040a; /* Ultra Dark Navy */
+            z-index: 2147483647;
             display: flex; align-items: center; justify-content: center;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            font-family: 'Manrope', sans-serif;
+            overflow: hidden;
         }
 
-        /* --- HALKA ANİMASYONU (Optimizi Ring) --- */
-        .opt-ring-container {
+        /* --- ARKA PLAN ENERJİ DALGALARI --- */
+        .energy-wave {
             position: absolute;
-            width: 600px; height: 600px;
-            display: flex; align-items: center; justify-content: center;
-            z-index: 0; /* Kartın arkasında */
-            opacity: 0.6;
+            width: 150%; height: 150%;
+            background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.15), transparent 60%),
+                        radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.1), transparent 50%);
+            animation: pulseWave 10s ease-in-out infinite alternate;
+            z-index: 0;
             pointer-events: none;
         }
-
-        .opt-ring-main {
-            position: absolute;
-            width: 100%; height: 100%;
-            border-radius: 50%;
-            border: 1px solid rgba(0, 0, 0, 0.05); /* Çok silik çerçeve */
-            background: conic-gradient(from 180deg at 50% 50%, rgba(255,255,255,0) 0deg, rgba(99, 102, 241, 0.3) 180deg, rgba(255,255,255,0) 360deg);
-            animation: rotateRing 8s linear infinite;
-            filter: blur(40px); /* O "Hüzme" efektini veren blur */
-        }
         
-        .opt-ring-inner {
-            position: absolute;
-            width: 60%; height: 60%;
-            border-radius: 50%;
-            border: 1px solid rgba(99, 102, 241, 0.2);
-            animation: rotateRing 15s linear reverse infinite;
+        .grid-overlay {
+            position: absolute; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 1;
         }
 
-        /* --- APPLE GLASS CARD --- */
-        .opt-glass-card {
+        /* --- STATUS BADGES (Sol Üst) --- */
+        .sys-status {
+            position: absolute; top: 30px; left: 30px; z-index: 10;
+            display: flex; gap: 15px;
+        }
+        .badge {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px; font-weight: 700; letter-spacing: 0.05em;
+            display: flex; align-items: center; gap: 6px;
+            backdrop-filter: blur(4px);
+        }
+        .dot { width: 6px; height: 6px; background: #10b981; border-radius: 50%; animation: blink 2s infinite; }
+
+        /* --- LOGIN PANELİ --- */
+        .saas-card {
             position: relative; z-index: 10;
-            width: 90%; max-width: 380px;
-            padding: 3rem 2.5rem;
-            
-            /* Buzlu Cam Efekti */
-            background: rgba(255, 255, 255, 0.45);
-            backdrop-filter: blur(30px) saturate(180%);
-            -webkit-backdrop-filter: blur(30px) saturate(180%);
-            
+            width: 400px;
+            background: rgba(15, 23, 42, 0.6); /* Yarı saydam koyu */
+            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-top: 1px solid rgba(255, 255, 255, 0.15); /* Üstten ışık vurmuş gibi */
             border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 
-                0 20px 40px rgba(0,0,0,0.05), /* Yumuşak gölge */
-                0 0 0 1px rgba(255,255,255,0.5) inset; /* İç parlama */
-            
+            padding: 40px;
+            box-shadow: 0 50px 100px -20px rgba(0,0,0,0.7);
             text-align: center;
-            transition: transform 0.3s ease;
+            overflow: hidden;
         }
 
-        .opt-logo {
-            font-size: 1.75rem; font-weight: 700; color: #1d1d1f;
-            margin-bottom: 0.2rem; letter-spacing: -0.02em;
-        }
-        .opt-desc {
-            font-size: 0.9rem; color: #86868b; margin-bottom: 2rem; font-weight: 400;
+        /* Enerji Çizgisi (Kartın üstünde) */
+        .saas-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, #10b981, transparent);
+            animation: scanline 3s linear infinite;
         }
 
-        /* Inputlar: Apple Tarzı Temiz */
-        .opt-input {
+        .brand-area { margin-bottom: 30px; }
+        .logo-main {
+            font-size: 28px; font-weight: 800; color: #fff;
+            letter-spacing: -0.03em;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .logo-icon {
+            color: #10b981; /* Optimizi Yeşili */
+            font-size: 24px;
+        }
+        .brand-tag {
+            color: #64748b; font-size: 13px; font-weight: 500; margin-top: 5px;
+        }
+
+        /* Form Elemanları */
+        .input-group { position: relative; margin-bottom: 16px; text-align: left; }
+        
+        .saas-input {
             width: 100%;
-            padding: 16px; margin-bottom: 12px;
-            border-radius: 14px;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            background: rgba(255, 255, 255, 0.5);
-            font-size: 16px; color: #1d1d1f;
+            background: rgba(2, 6, 23, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            padding: 14px 16px;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s ease;
             outline: none;
-            transition: all 0.2s ease;
-            box-sizing: border-box; /* Padding taşmasını önler */
+            box-sizing: border-box;
         }
-        .opt-input:focus {
-            background: #fff;
-            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1); /* Mavi focus hare */
-            border-color: rgba(0, 122, 255, 0.3);
+        .saas-input:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+            background: rgba(2, 6, 23, 0.8);
         }
-        .opt-input::placeholder { color: #a1a1a6; }
+        .saas-input::placeholder { color: #475569; font-weight: 500; }
 
-        /* Buton: Siyah Premium */
-        .opt-btn {
-            width: 100%; padding: 16px;
-            margin-top: 8px;
-            background: #1d1d1f; color: #fff;
-            border: none; border-radius: 14px;
-            font-size: 16px; font-weight: 600;
+        .saas-btn {
+            width: 100%;
+            margin-top: 10px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+            padding: 16px;
+            border: none; border-radius: 12px;
+            font-size: 16px; font-weight: 700;
             cursor: pointer;
-            transition: transform 0.1s, opacity 0.2s;
+            transition: all 0.2s;
+            box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.3);
+            position: relative; overflow: hidden;
         }
-        .opt-btn:hover { opacity: 0.9; }
-        .opt-btn:active { transform: scale(0.98); }
+        .saas-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -5px rgba(16, 185, 129, 0.4);
+        }
+        .saas-btn::after { /* Shine effect */
+            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: skewX(-20deg);
+            transition: 0.5s;
+        }
+        .saas-btn:hover::after { left: 150%; transition: 0.7s ease-in-out; }
 
-        /* Hata Mesajı */
-        .opt-error {
-            color: #ff3b30; font-size: 13px; font-weight: 500;
-            margin-bottom: 15px; display: none;
-            background: rgba(255, 59, 48, 0.1); padding: 8px; border-radius: 8px;
+        .error-msg {
+            color: #ef4444; font-size: 13px; margin-bottom: 15px; font-weight: 600;
+            display: none; background: rgba(239, 68, 68, 0.1); padding: 8px; border-radius: 8px;
         }
 
-        @keyframes rotateRing { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Animations */
+        @keyframes pulseWave { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.1); opacity: 0.8; } }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        @keyframes scanline { 0% { left: -100%; } 100% { left: 100%; } }
     `;
     document.head.appendChild(style);
 
     // --- 4. HTML YAPISI ---
     const overlay = document.createElement('div');
-    overlay.id = 'opt-guard-root'; // Benzersiz ID
+    overlay.id = 'eco-guard-root';
     overlay.innerHTML = `
-        <div class="opt-ring-container">
-            <div class="opt-ring-main"></div>
-            <div class="opt-ring-inner"></div>
+        <div class="energy-wave"></div>
+        <div class="grid-overlay"></div>
+
+        <div class="sys-status">
+            <div class="badge"><div class="dot"></div> SYSTEM ONLINE</div>
+            <div class="badge" style="border-color: rgba(59, 130, 246, 0.3); color: #60a5fa;">
+                ⚡ ENERGY SAVING: ON
+            </div>
         </div>
 
-        <div class="opt-glass-card" id="opt-card">
-            <div class="opt-logo">Optimizi</div>
-            <div class="opt-desc">Secure Access</div>
+        <div class="saas-card" id="saas-card-box">
+            <div class="brand-area">
+                <div class="logo-main">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="logo-icon"><path d="M12 2v8"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m16 6-4 4-4-4"/><path d="M16 18a4 4 0 0 0-8 0"/></svg>
+                    Optimizi.App
+                </div>
+                <div class="brand-tag">Professional Calculation Engine</div>
+            </div>
 
-            <div id="opt-err-msg" class="opt-error">Kullanıcı adı veya şifre hatalı.</div>
+            <div id="saas-err" class="error-msg">Kimlik doğrulama başarısız.</div>
 
-            <input type="text" id="opt_user_inp" class="opt-input" placeholder="Kullanıcı Adı" autocomplete="off">
-            <input type="password" id="opt_pass_inp" class="opt-input" placeholder="Parola" autocomplete="new-password">
+            <div class="input-group">
+                <input type="text" id="s_user" class="saas-input" placeholder="Access ID" autocomplete="off">
+            </div>
+            <div class="input-group">
+                <input type="password" id="s_pass" class="saas-input" placeholder="Secure Key" autocomplete="new-password">
+            </div>
+
+            <button id="s_btn" class="saas-btn">Dashboard Giriş</button>
             
-            <button id="opt_login_btn" class="opt-btn">Giriş Yap</button>
+            <div style="margin-top: 20px; font-size: 11px; color: #475569;">
+                v2.4.1 Stable • Secure Connection
+            </div>
         </div>
     `;
     document.body.appendChild(overlay);
 
-    // --- 5. LOGIC (MANTIK) ---
-    function doLogin() {
-        // Yeni ID'leri seçiyoruz
-        const uVal = document.getElementById('opt_user_inp').value.trim(); // Boşlukları temizle
-        const pVal = document.getElementById('opt_pass_inp').value.trim();
-        const errBox = document.getElementById('opt-err-msg');
+    // --- 5. MANTIK ---
+    function tryLogin() {
+        const u = document.getElementById('s_user').value.trim();
+        const p = document.getElementById('s_pass').value.trim();
+        const err = document.getElementById('saas-err');
 
-        if(uVal === CONFIG.user && pVal === CONFIG.pass) {
-            // Başarılı
+        if(u === CONFIG.user && p === CONFIG.pass) {
             localStorage.setItem('optimizi_session', '1');
             
-            // Kartı yukarı kaydırarak yok et
-            overlay.style.transition = 'opacity 0.5s ease, backdrop-filter 0.5s';
-            document.getElementById('opt-card').style.transform = 'scale(0.95) translateY(10px)';
-            overlay.style.opacity = '0';
+            // Başarılı Animasyonu
+            const btn = document.getElementById('s_btn');
+            btn.innerHTML = 'Doğrulanıyor...';
+            btn.style.background = '#10b981';
             
+            // Panelin yok oluşu
+            const card = document.getElementById('saas-card-box');
+            card.style.transition = 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+            card.style.transform = 'translateY(20px) scale(0.95)';
+            card.style.opacity = '0';
+            
+            overlay.style.transition = 'opacity 0.6s ease';
+            overlay.style.opacity = '0';
+
             setTimeout(() => {
                 overlay.remove();
-                document.body.style.overflow = 'auto'; // Kaydırmayı aç
-            }, 500);
-        } else {
-            // Hatalı
-            errBox.style.display = 'block';
-            
-            // Kartı salla (Shake animation)
-            const card = document.getElementById('opt-card');
-            card.animate([
-                { transform: 'translateX(0)' }, 
-                { transform: 'translateX(-6px)' }, 
-                { transform: 'translateX(6px)' }, 
-                { transform: 'translateX(0)' }
-            ], { duration: 300 });
+                document.body.style.overflow = 'auto'; // Scroll AÇ
+            }, 600);
 
-            // Şifreyi temizle
-            document.getElementById('opt_pass_inp').value = '';
-            document.getElementById('opt_pass_inp').focus();
+        } else {
+            err.style.display = 'block';
+            document.getElementById('s_pass').value = '';
+            
+            // Profesyonel titreme efekti
+            const card = document.getElementById('saas-card-box');
+            card.animate([
+                { transform: 'translate(0, 0)' },
+                { transform: 'translate(-4px, 0)' },
+                { transform: 'translate(4px, 0)' },
+                { transform: 'translate(0, 0)' }
+            ], { duration: 250 });
+            
+            document.getElementById('s_pass').focus();
         }
     }
 
-    // Tıklama Olayı
-    document.getElementById('opt_login_btn').addEventListener('click', doLogin);
-
-    // Enter Tuşu Desteği
-    const inputs = [document.getElementById('opt_user_inp'), document.getElementById('opt_pass_inp')];
-    inputs.forEach(inp => {
-        inp.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') doLogin();
+    document.getElementById('s_btn').addEventListener('click', tryLogin);
+    
+    ['s_user', 's_pass'].forEach(id => {
+        document.getElementById(id).addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') tryLogin();
         });
     });
 
-    // Sayfa yüklendiğinde ilk inputa odaklan
-    setTimeout(() => {
-        const uInp = document.getElementById('opt_user_inp');
-        if(uInp) uInp.focus();
-    }, 100);
+    setTimeout(() => document.getElementById('s_user').focus(), 100);
 
 })();
