@@ -8,12 +8,13 @@
     // --- DENEME HESABI MANTIĞI ---
     function getTrialCredentials() {
         const now = new Date();
+        // Günü ve Ayı 2 haneli hale getir (örn: 5 -> "05")
         const day = String(now.getDate()).padStart(2, '0');
-        const month = String(now.getMonth() + 1).padStart(2, '0'); 
+        const month = String(now.getMonth() + 1).padStart(2, '0'); // Aylar 0'dan başlar
         
         return {
             user: "deneme",
-            pass: "deneme" + day + month 
+            pass: "deneme" + day + month // Örn: deneme2301
         };
     }
 
@@ -24,7 +25,7 @@
     document.body.style.overflow = 'hidden'; 
     window.scrollTo(0, 0);
 
-    // --- STİL ---
+    // --- STİL (DATA ANALYTICS / LIGHT THEME) ---
     const style = document.createElement('style');
     style.innerHTML = `
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -32,9 +33,8 @@
         /* Ana Kapsayıcı */
         #data-guard-root {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            /* Arka planı biraz daha kararttık ki kart patlasın */
-            background-color: rgba(240, 244, 248, 0.7);
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            background-color: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             z-index: 2147483647;
             display: flex; align-items: center; justify-content: center;
             font-family: 'Inter', sans-serif;
@@ -43,11 +43,12 @@
 
         /* --- ARKA PLAN SÜZÜLEN GRAFİKLER --- */
         .floating-obj {
-            position: absolute; opacity: 0.5; z-index: 0; /* Opaklığı kıstım */
+            position: absolute; opacity: 0.6; z-index: 0;
             filter: drop-shadow(0 10px 15px rgba(0,0,0,0.05));
             animation: floatAnim 8s ease-in-out infinite;
         }
 
+        /* Pasta Grafik */
         .chart-pie {
             width: 120px; height: 120px; border-radius: 50%;
             background: conic-gradient(#3b82f6 0% 30%, #f97316 30% 70%, #e2e8f0 70% 100%);
@@ -58,6 +59,7 @@
             background: rgba(255,255,255,0.8); border-radius: 50%; top: 20%; left: 20%;
         }
 
+        /* Bar Grafik */
         .chart-bar-group {
             display: flex; align-items: flex-end; gap: 8px;
             bottom: 15%; left: 15%; width: 140px; height: 100px; animation-delay: 2s;
@@ -67,6 +69,7 @@
         .cb-2 { height: 80%; background: #3b82f6; }
         .cb-3 { height: 60%; background: #94a3b8; }
 
+        /* Kayıp Grafiği */
         .chart-line-loss {
             top: 20%; right: 10%; width: 160px; height: 100px;
             background: rgba(255, 255, 255, 0.5); border-radius: 12px;
@@ -75,83 +78,48 @@
         }
         .loss-svg { width: 100%; height: 100%; color: #ef4444; }
 
-        /* --- VURUCU LOGIN KARTI (BURASI DEĞİŞTİ) --- */
+        /* --- LOGIN KARTI --- */
         .login-card {
             position: relative; z-index: 10;
-            
-            /* Daha opak, neredeyse tam beyaz ve doygun */
-            background: rgba(255, 255, 255, 0.96);
-            backdrop-filter: blur(40px) saturate(150%);
-            
-            /* Keskin, parlak beyaz çerçeve */
-            border: 2px solid #ffffff;
-            
-            /* ÇOK DAHA GÜÇLÜ VE DERİN GÖLGE */
-            box-shadow: 
-                0 30px 60px -12px rgba(0, 0, 0, 0.25), /* Ana derinlik */
-                0 0 0 1px rgba(0, 0, 0, 0.05), /* İnce dış hat */
-                inset 0 1px 1px rgba(255,255,255,1); /* İç üst parlama */
-            
-            padding: 45px; /* Biraz daha geniş iç boşluk */
-            border-radius: 32px; /* Daha yuvarlak köşeler */
-            width: 380px; text-align: center;
-            
-            transition: all 0.3s ease;
-        }
-        
-        /* Hover'da hafifçe kalksın (Vuruculuk efekti) */
-        .login-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 
-                0 40px 80px -15px rgba(0, 0, 0, 0.3),
-                0 0 0 1px rgba(0, 0, 0, 0.05),
-                inset 0 1px 1px rgba(255,255,255,1);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 1);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0,0,0,0.03);
+            padding: 40px; border-radius: 24px; width: 380px; text-align: center;
         }
 
-        .logo-area { margin-bottom: 50px; } /* Boşluk */
-        
-        .logo-text { font-size: 30px; font-weight: 900; color: #0f172a; letter-spacing: -0.04em; }
+        .logo-text { font-size: 28px; font-weight: 800; color: #1e293b; letter-spacing: -0.04em; }
         .logo-grad {
             background: linear-gradient(135deg, #2563eb 0%, #f97316 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-        .logo-sub { font-size: 14px; color: #64748b; font-weight: 600; margin-top: 6px; }
+        .logo-sub { font-size: 13px; color: #64748b; font-weight: 500; margin-top: 4px; }
 
         .inp-field {
-            width: 100%; padding: 16px 18px; margin-bottom: 14px;
-            border: 2px solid #e2e8f0; /* Daha kalın çerçeve */
-            background: #f8fafc; /* Hafif gri arka plan */
-            border-radius: 16px;
-            font-size: 16px; font-weight: 500;
-            color: #334155; outline: none; transition: all 0.2s;
+            width: 100%; padding: 14px 16px; margin-bottom: 12px;
+            border: 1px solid #e2e8f0; background: #fff; border-radius: 12px;
+            font-size: 15px; color: #334155; outline: none; transition: all 0.2s;
             box-sizing: border-box;
         }
-        .inp-field:focus { 
-            border-color: #3b82f6; background: #fff;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); 
-        }
-        .inp-field::placeholder { color: #94a3b8; font-weight: 400; }
+        .inp-field:focus { border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+        .inp-field::placeholder { color: #94a3b8; }
 
         .btn-submit {
-            width: 100%; 
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); /* Gradyan buton */
-            color: white; padding: 18px;
-            border: none; border-radius: 16px; font-size: 17px; font-weight: 700;
-            cursor: pointer; margin-top: 12px; transition: all 0.2s;
-            box-shadow: 0 10px 20px -10px rgba(15, 23, 42, 0.5);
+            width: 100%; background: #0f172a; color: white; padding: 16px;
+            border: none; border-radius: 12px; font-size: 16px; font-weight: 600;
+            cursor: pointer; margin-top: 10px; transition: transform 0.1s;
         }
-        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 15px 30px -10px rgba(15, 23, 42, 0.6); }
         .btn-submit:active { transform: scale(0.98); }
 
         .contact-box {
-            margin-top: 28px; padding-top: 24px; border-top: 2px solid #f1f5f9;
-            font-size: 14px; color: #64748b; line-height: 1.6; font-weight: 500;
+            margin-top: 24px; padding-top: 20px; border-top: 1px solid #f1f5f9;
+            font-size: 13px; color: #64748b; line-height: 1.5;
         }
-        .contact-mail { display: block; color: #2563eb; font-weight: 700; text-decoration: none; margin-top: 4px; }
+        .contact-mail { display: block; color: #3b82f6; font-weight: 600; text-decoration: none; margin-top: 2px; }
         
         .err-msg {
-            color: #d32f2f; font-size: 14px; margin-bottom: 20px; 
-            font-weight: 600; display: none; background: #ffsrsd; padding: 12px; border-radius: 12px; border: 1px solid #ffcdd2;
+            color: #ef4444; font-size: 13px; margin-bottom: 15px; 
+            font-weight: 600; display: none; background: #fef2f2; padding: 10px; border-radius: 8px;
         }
 
         @keyframes floatAnim {
@@ -203,18 +171,23 @@
         const pInput = document.getElementById('l_pass').value.trim();
         const err = document.getElementById('l_err');
 
+        // Günlük Deneme Bilgilerini Al
         const TRIAL_CONFIG = getTrialCredentials();
+        
+        // Konsola yazalım ki test ederken gör (Canlıda bu satırı silebilirsin)
         console.log("Bugünün Deneme Şifresi:", TRIAL_CONFIG.pass);
 
+        // KONTROL: Ya Ana Hesap YA DA Deneme Hesabı doğru olmalı
         const isMaster = (uInput === MASTER_CONFIG.user && pInput === MASTER_CONFIG.pass);
         const isTrial = (uInput === TRIAL_CONFIG.user && pInput === TRIAL_CONFIG.pass);
 
         if(isMaster || isTrial) {
             localStorage.setItem('optimizi_session', '1');
             
+            // Animasyonlu Çıkış
             const box = document.getElementById('lc-box');
-            box.style.transition = 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)'; /* Daha havalı çıkış */
-            box.style.transform = 'translateY(-30px) scale(0.95)';
+            box.style.transition = 'all 0.5s ease';
+            box.style.transform = 'translateY(-20px)';
             box.style.opacity = '0';
             overlay.style.transition = 'opacity 0.5s ease';
             overlay.style.opacity = '0';
@@ -228,8 +201,8 @@
             err.style.display = 'block';
             const box = document.getElementById('lc-box');
             box.animate([
-                { transform: 'translateX(0)' }, { transform: 'translateX(-6px)' },
-                { transform: 'translateX(6px)' }, { transform: 'translateX(0)' }
+                { transform: 'translateX(0)' }, { transform: 'translateX(-5px)' },
+                { transform: 'translateX(5px)' }, { transform: 'translateX(0)' }
             ], { duration: 300 });
 
             document.getElementById('l_pass').value = '';
