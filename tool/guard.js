@@ -8,13 +8,12 @@
     // --- DENEME HESABI MANTIĞI ---
     function getTrialCredentials() {
         const now = new Date();
-        // Günü ve Ayı 2 haneli hale getir (örn: 5 -> "05")
         const day = String(now.getDate()).padStart(2, '0');
-        const month = String(now.getMonth() + 1).padStart(2, '0'); // Aylar 0'dan başlar
+        const month = String(now.getMonth() + 1).padStart(2, '0'); 
         
         return {
             user: "deneme",
-            pass: "deneme" + day + month // Örn: deneme2301
+            pass: "deneme" + day + month 
         };
     }
 
@@ -25,7 +24,7 @@
     document.body.style.overflow = 'hidden'; 
     window.scrollTo(0, 0);
 
-    // --- STİL (DATA ANALYTICS / LIGHT THEME) ---
+    // --- STİL ---
     const style = document.createElement('style');
     style.innerHTML = `
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -48,7 +47,6 @@
             animation: floatAnim 8s ease-in-out infinite;
         }
 
-        /* Pasta Grafik */
         .chart-pie {
             width: 120px; height: 120px; border-radius: 50%;
             background: conic-gradient(#3b82f6 0% 30%, #f97316 30% 70%, #e2e8f0 70% 100%);
@@ -59,7 +57,6 @@
             background: rgba(255,255,255,0.8); border-radius: 50%; top: 20%; left: 20%;
         }
 
-        /* Bar Grafik */
         .chart-bar-group {
             display: flex; align-items: flex-end; gap: 8px;
             bottom: 15%; left: 15%; width: 140px; height: 100px; animation-delay: 2s;
@@ -69,7 +66,6 @@
         .cb-2 { height: 80%; background: #3b82f6; }
         .cb-3 { height: 60%; background: #94a3b8; }
 
-        /* Kayıp Grafiği */
         .chart-line-loss {
             top: 20%; right: 10%; width: 160px; height: 100px;
             background: rgba(255, 255, 255, 0.5); border-radius: 12px;
@@ -88,6 +84,11 @@
             padding: 40px; border-radius: 24px; width: 380px; text-align: center;
         }
 
+        .logo-area { 
+            /* BURAYI DEĞİŞTİRDİM: Aradaki boşluğu artırdım */
+            margin-bottom: 60px; 
+        }
+        
         .logo-text { font-size: 28px; font-weight: 800; color: #1e293b; letter-spacing: -0.04em; }
         .logo-grad {
             background: linear-gradient(135deg, #2563eb 0%, #f97316 100%);
@@ -171,20 +172,16 @@
         const pInput = document.getElementById('l_pass').value.trim();
         const err = document.getElementById('l_err');
 
-        // Günlük Deneme Bilgilerini Al
         const TRIAL_CONFIG = getTrialCredentials();
-        
-        // Konsola yazalım ki test ederken gör (Canlıda bu satırı silebilirsin)
+        // Test amaçlı konsola yazdırma (İstersen kaldırabilirsin)
         console.log("Bugünün Deneme Şifresi:", TRIAL_CONFIG.pass);
 
-        // KONTROL: Ya Ana Hesap YA DA Deneme Hesabı doğru olmalı
         const isMaster = (uInput === MASTER_CONFIG.user && pInput === MASTER_CONFIG.pass);
         const isTrial = (uInput === TRIAL_CONFIG.user && pInput === TRIAL_CONFIG.pass);
 
         if(isMaster || isTrial) {
             localStorage.setItem('optimizi_session', '1');
             
-            // Animasyonlu Çıkış
             const box = document.getElementById('lc-box');
             box.style.transition = 'all 0.5s ease';
             box.style.transform = 'translateY(-20px)';
