@@ -1,231 +1,209 @@
 (function() {
-    // --- AYARLAR ---
+    // --- 1. AYARLAR ---
     const CONFIG = {
         user: "inspro",
-        pass: "inspro44", 
+        pass: "inspro44"
     };
 
-    // 1. Zaten giriş yapılmışsa dur
+    // --- 2. KONTROL & KİLİT ---
+    // Eğer daha önce giriş yapıldıysa (localStorage '1' ise) ve süre geçmediyse scripti durdur.
     if (localStorage.getItem('optimizi_session') === '1') {
         return; 
     }
 
-    // Scroll Kilitle (JS ile)
+    // Scroll Kilitle (Sayfa kaymasın)
     document.body.style.overflow = 'hidden'; 
+    window.scrollTo(0, 0); // En tepeye sabitle
 
-    // 2. CSS - Sci-Fi & Tech UI
+    // --- 3. PREMIUM APPLE / ICY TASARIM ---
     const style = document.createElement('style');
     style.innerHTML = `
-        /* Ana Konteyner */
-        #optimizi-guard-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            z-index: 2147483647; 
+        /* Ana Kapsayıcı: Tam Ekran */
+        #opt-guard-root {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%); /* Çok açık gri-beyaz */
+            z-index: 999999999; /* En üstte olduğundan emin olalım */
             display: flex; align-items: center; justify-content: center;
-            font-family: 'Inter', system-ui, sans-serif;
-            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
         }
 
-        /* --- ARKA PLAN HALKALARI (GYROSCOPE) --- */
-        .orbit-container {
+        /* --- HALKA ANİMASYONU (Optimizi Ring) --- */
+        .opt-ring-container {
             position: absolute;
             width: 600px; height: 600px;
-            display: flex; justify-content: center; align-items: center;
-            z-index: 0;
-            opacity: 0.4;
-            pointer-events: none; /* Tıklamayı engellemesin */
-        }
-        
-        .orbit-ring {
-            position: absolute;
-            border-radius: 50%;
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            box-shadow: 0 0 15px rgba(99, 102, 241, 0.1);
-        }
-
-        .ring-1 {
-            width: 100%; height: 100%;
-            border-top: 2px solid #6366f1;
-            border-bottom: 2px solid transparent;
-            animation: spin-right 12s linear infinite;
-        }
-        
-        .ring-2 {
-            width: 70%; height: 70%;
-            border: 1px solid rgba(249, 115, 22, 0.2);
-            border-left: 2px solid #f97316;
-            border-right: 2px solid transparent;
-            animation: spin-left 8s linear infinite;
-        }
-
-        .ring-3 {
-            width: 40%; height: 40%;
-            border: 1px dashed rgba(255, 255, 255, 0.4);
-            animation: spin-right 20s linear infinite;
-        }
-
-        /* --- FAKE DATA GÖRSELLERİ --- */
-        .tech-stat {
-            position: absolute;
-            font-family: 'Courier New', monospace;
-            font-size: 10px;
-            color: rgba(148, 163, 184, 0.5);
-            line-height: 1.4;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 0; /* Kartın arkasında */
+            opacity: 0.6;
             pointer-events: none;
         }
-        .stat-tl { top: 20px; left: 20px; text-align: left; }
-        .stat-br { bottom: 20px; right: 20px; text-align: right; }
-        
-        .blinking { animation: blink 2s infinite; }
 
-        /* --- KART TASARIMI --- */
-        .guard-card {
-            background: rgba(30, 41, 59, 0.7); /* Koyu Cam */
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 2.5rem; 
-            border-radius: 1.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            width: 90%; max-width: 360px; 
+        .opt-ring-main {
+            position: absolute;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, 0.05); /* Çok silik çerçeve */
+            background: conic-gradient(from 180deg at 50% 50%, rgba(255,255,255,0) 0deg, rgba(99, 102, 241, 0.3) 180deg, rgba(255,255,255,0) 360deg);
+            animation: rotateRing 8s linear infinite;
+            filter: blur(40px); /* O "Hüzme" efektini veren blur */
+        }
+        
+        .opt-ring-inner {
+            position: absolute;
+            width: 60%; height: 60%;
+            border-radius: 50%;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            animation: rotateRing 15s linear reverse infinite;
+        }
+
+        /* --- APPLE GLASS CARD --- */
+        .opt-glass-card {
+            position: relative; z-index: 10;
+            width: 90%; max-width: 380px;
+            padding: 3rem 2.5rem;
+            
+            /* Buzlu Cam Efekti */
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 
+                0 20px 40px rgba(0,0,0,0.05), /* Yumuşak gölge */
+                0 0 0 1px rgba(255,255,255,0.5) inset; /* İç parlama */
+            
             text-align: center;
-            z-index: 10;
-            position: relative;
+            transition: transform 0.3s ease;
         }
 
-        .logo-text {
-            font-size: 1.8rem; font-weight: 800; color: #fff; 
-            margin-bottom: 0.5rem; letter-spacing: -0.02em;
+        .opt-logo {
+            font-size: 1.75rem; font-weight: 700; color: #1d1d1f;
+            margin-bottom: 0.2rem; letter-spacing: -0.02em;
         }
-        
-        .logo-sub {
-            font-size: 0.75rem; color: #94a3b8; letter-spacing: 0.1em;
-            text-transform: uppercase; margin-bottom: 2rem;
+        .opt-desc {
+            font-size: 0.9rem; color: #86868b; margin-bottom: 2rem; font-weight: 400;
         }
 
-        .guard-inp {
-            width: 100%; padding: 0.9rem 1rem; margin-bottom: 0.8rem;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 0.75rem;
-            background-color: rgba(15, 23, 42, 0.6); 
-            color: #e2e8f0 !important; 
-            font-size: 0.9rem;
-            outline: none; transition: all 0.2s ease;
+        /* Inputlar: Apple Tarzı Temiz */
+        .opt-input {
+            width: 100%;
+            padding: 16px; margin-bottom: 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            background: rgba(255, 255, 255, 0.5);
+            font-size: 16px; color: #1d1d1f;
+            outline: none;
+            transition: all 0.2s ease;
+            box-sizing: border-box; /* Padding taşmasını önler */
+        }
+        .opt-input:focus {
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1); /* Mavi focus hare */
+            border-color: rgba(0, 122, 255, 0.3);
+        }
+        .opt-input::placeholder { color: #a1a1a6; }
+
+        /* Buton: Siyah Premium */
+        .opt-btn {
+            width: 100%; padding: 16px;
+            margin-top: 8px;
+            background: #1d1d1f; color: #fff;
+            border: none; border-radius: 14px;
+            font-size: 16px; font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+        .opt-btn:hover { opacity: 0.9; }
+        .opt-btn:active { transform: scale(0.98); }
+
+        /* Hata Mesajı */
+        .opt-error {
+            color: #ff3b30; font-size: 13px; font-weight: 500;
+            margin-bottom: 15px; display: none;
+            background: rgba(255, 59, 48, 0.1); padding: 8px; border-radius: 8px;
         }
 
-        .guard-inp:focus { 
-            background-color: rgba(15, 23, 42, 0.9);
-            border-color: #6366f1; 
-            box-shadow: 0 0 0 2px rgba(99,102,241,0.2); 
-        }
-        
-        .guard-btn {
-            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-            color: white; width: 100%; padding: 1rem; border: none;
-            border-radius: 0.75rem; font-weight: 600; cursor: pointer;
-            margin-top: 0.5rem; letter-spacing: 0.03em;
-            box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
-            transition: all 0.2s;
-        }
-        
-        .guard-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 0 25px rgba(99, 102, 241, 0.6);
-        }
-
-        .guard-err { 
-            color: #fca5a5; font-size: 0.8rem; margin-bottom: 1rem; 
-            display: none;
-        }
-
-        /* Animasyonlar */
-        @keyframes spin-right { 100% { transform: rotate(360deg); } }
-        @keyframes spin-left { 100% { transform: rotate(-360deg); } }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        @keyframes rotateRing { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     `;
     document.head.appendChild(style);
 
-    // 3. HTML Yapısı (Veriler + Halkalar + Form)
+    // --- 4. HTML YAPISI ---
     const overlay = document.createElement('div');
-    overlay.id = 'optimizi-guard-overlay';
+    overlay.id = 'opt-guard-root'; // Benzersiz ID
     overlay.innerHTML = `
-        <div class="orbit-container">
-            <div class="orbit-ring ring-1"></div>
-            <div class="orbit-ring ring-2"></div>
-            <div class="orbit-ring ring-3"></div>
+        <div class="opt-ring-container">
+            <div class="opt-ring-main"></div>
+            <div class="opt-ring-inner"></div>
         </div>
 
-        <div class="tech-stat stat-tl">
-            SYSTEM: SECURE<br>
-            CORE: OPTIMIZI_V2<br>
-            <span class="blinking">STATUS: LOCKED</span>
-        </div>
+        <div class="opt-glass-card" id="opt-card">
+            <div class="opt-logo">Optimizi</div>
+            <div class="opt-desc">Secure Access</div>
 
-        <div class="tech-stat stat-br">
-            CALC_ENGINE: READY<br>
-            MEM: 1024MB OK<br>
-            ID: 44-XF-92
-        </div>
+            <div id="opt-err-msg" class="opt-error">Kullanıcı adı veya şifre hatalı.</div>
 
-        <div class="guard-card">
-            <div class="logo-text">Optimizi.App</div>
-            <div class="logo-sub">Engineering Access Portal</div>
+            <input type="text" id="opt_user_inp" class="opt-input" placeholder="Kullanıcı Adı" autocomplete="off">
+            <input type="password" id="opt_pass_inp" class="opt-input" placeholder="Parola" autocomplete="new-password">
             
-            <input type="text" id="g_user" class="guard-inp" placeholder="Operator ID" autocomplete="off">
-            <input type="password" id="g_pass" class="guard-inp" placeholder="Passcode" autocomplete="new-password">
-
-            <div id="g_err" class="guard-err">Erişim Reddedildi.</div>
-            
-            <button id="g_btn" class="guard-btn">Sistemi Başlat</button>
+            <button id="opt_login_btn" class="opt-btn">Giriş Yap</button>
         </div>
     `;
     document.body.appendChild(overlay);
 
-    // 4. Mantık
-    function attemptLogin() {
-        const u = document.getElementById('g_user').value;
-        const p = document.getElementById('g_pass').value;
-        const err = document.getElementById('g_err');
+    // --- 5. LOGIC (MANTIK) ---
+    function doLogin() {
+        // Yeni ID'leri seçiyoruz
+        const uVal = document.getElementById('opt_user_inp').value.trim(); // Boşlukları temizle
+        const pVal = document.getElementById('opt_pass_inp').value.trim();
+        const errBox = document.getElementById('opt-err-msg');
 
-        if(u === CONFIG.user && p === CONFIG.pass) {
+        if(uVal === CONFIG.user && pVal === CONFIG.pass) {
+            // Başarılı
             localStorage.setItem('optimizi_session', '1');
             
-            // Çıkış Efekti: Halkalar hızlanıp kaybolsun
-            const rings = document.querySelector('.orbit-container');
-            rings.style.transition = 'transform 0.8s ease, opacity 0.8s';
-            rings.style.transform = 'scale(3) rotate(45deg)'; // İçine giriyormuş gibi efekt
-            rings.style.opacity = '0';
-
-            overlay.style.transition = 'opacity 0.6s ease';
+            // Kartı yukarı kaydırarak yok et
+            overlay.style.transition = 'opacity 0.5s ease, backdrop-filter 0.5s';
+            document.getElementById('opt-card').style.transform = 'scale(0.95) translateY(10px)';
             overlay.style.opacity = '0';
             
-            setTimeout(() => { 
-                overlay.remove(); 
-                document.body.style.overflow = 'auto'; // Scroll kilidini aç
-            }, 600);
+            setTimeout(() => {
+                overlay.remove();
+                document.body.style.overflow = 'auto'; // Kaydırmayı aç
+            }, 500);
         } else {
-            err.style.display = 'block';
-            err.innerText = '> ERİŞİM REDDEDİLDİ <';
+            // Hatalı
+            errBox.style.display = 'block';
             
-            // Titreme efekti
-            document.querySelector('.guard-card').animate([
-                { transform: 'translateX(0)' }, { transform: 'translateX(-5px)' }, 
-                { transform: 'translateX(5px)' }, { transform: 'translateX(0)' }
-            ], { duration: 200, iterations: 2 });
-            
-            document.getElementById('g_pass').value = '';
-            document.getElementById('g_pass').focus();
+            // Kartı salla (Shake animation)
+            const card = document.getElementById('opt-card');
+            card.animate([
+                { transform: 'translateX(0)' }, 
+                { transform: 'translateX(-6px)' }, 
+                { transform: 'translateX(6px)' }, 
+                { transform: 'translateX(0)' }
+            ], { duration: 300 });
+
+            // Şifreyi temizle
+            document.getElementById('opt_pass_inp').value = '';
+            document.getElementById('opt_pass_inp').focus();
         }
     }
 
-    document.getElementById('g_btn').addEventListener('click', attemptLogin);
+    // Tıklama Olayı
+    document.getElementById('opt_login_btn').addEventListener('click', doLogin);
 
-    [document.getElementById('g_user'), document.getElementById('g_pass')].forEach(inp => {
-        inp.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') attemptLogin();
+    // Enter Tuşu Desteği
+    const inputs = [document.getElementById('opt_user_inp'), document.getElementById('opt_pass_inp')];
+    inputs.forEach(inp => {
+        inp.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') doLogin();
         });
     });
 
-    setTimeout(() => document.getElementById('g_user').focus(), 100);
+    // Sayfa yüklendiğinde ilk inputa odaklan
+    setTimeout(() => {
+        const uInp = document.getElementById('opt_user_inp');
+        if(uInp) uInp.focus();
+    }, 100);
 
 })();
