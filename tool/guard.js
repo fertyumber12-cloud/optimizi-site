@@ -1,12 +1,4 @@
 (function() {
-    // --- 1. GÜVENLİK (ANTI-FLASH & GİZLEME) ---
-    const cssHide = document.createElement('style');
-    cssHide.innerHTML = `
-        html, body { visibility: hidden !important; background: #0f172a !important; }
-        #square-guard-root { visibility: visible !important; }
-    `;
-    document.head.appendChild(cssHide);
-
     // --- AYARLAR ---
     const MASTER_CONFIG = {
         user: "inspro",
@@ -24,6 +16,10 @@
 
     // --- OTURUM KONTROLÜ ---
     function checkSessionStatus() {
+        // Oturum açıksa scripti hemen durdur
+        if (sessionStorage.getItem('optimizi_session') === '1') return true;
+
+        // Sayaç kontrolü
         let count = parseInt(localStorage.getItem('opt_refresh_count') || '0');
         count++; 
         if (count >= MASTER_CONFIG.refreshLimit) {
@@ -31,140 +27,121 @@
             count = 0;
         }
         localStorage.setItem('opt_refresh_count', count);
-
-        const isLoggedIn = sessionStorage.getItem('optimizi_session') === '1';
-        if (isLoggedIn) {
-            cssHide.remove(); 
-            document.body.style.visibility = 'visible';
-            return true; 
-        }
-        return false; 
+        
+        return false;
     }
 
+    // Eğer zaten giriş yapılıysa hiçbir şey yapma ve çık
     if (checkSessionStatus()) return;
 
-    // Scroll Kilitle
+    // Scroll Kilitle (Sadece scrollu kapatıyoruz, görünürlüğü değil)
     document.body.style.overflow = 'hidden'; 
     window.scrollTo(0, 0);
 
     // --- CSS TASARIM ---
     const style = document.createElement('style');
     style.innerHTML = `
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap');
 
-        /* Ana Kapsayıcı: Tam Ekran */
+        /* Ana Perde */
         #square-guard-root {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            /* Arka planın buğulu görünmesi için */
-            background-color: rgba(15, 23, 42, 0.4); 
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            z-index: 2147483647;
-            display: flex; flex-direction: column; /* Alt alta dizmek için */
+            /* Arka plan: Sitenin üstüne yarı saydam siyah perde + Bulanıklık */
+            background-color: rgba(10, 10, 10, 0.4); 
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            z-index: 2147483647; /* En üst katman */
+            display: flex; flex-direction: column;
             align-items: center; justify-content: center;
             font-family: 'Inter', sans-serif;
-            visibility: visible !important;
         }
 
-        /* --- KARE LOGIN KARTI --- */
+        /* --- KARE KART --- */
         .square-card {
-            width: 320px; /* Biraz daha kompakt */
-            padding: 40px;
-            
-            /* Koyu ve Şeffaf Cam */
-            background: rgba(30, 41, 59, 0.75); 
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            /* Kare Formu: Radius düşük */
-            border-radius: 12px; 
-            
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 340px;
+            background: #ffffff; /* Tam beyaz */
+            padding: 45px 35px;
+            border-radius: 0px; /* Jilet gibi kare */
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
             text-align: center;
-            margin-bottom: 25px; /* Alttaki yazı ile mesafe */
-            
-            /* Hafif parlama efekti */
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+            position: relative;
         }
 
-        /* Logo Stili */
+        /* Logo */
         .card-logo {
-            font-size: 28px; font-weight: 800; color: #fff;
-            margin-bottom: 30px; letter-spacing: -0.5px;
+            font-size: 32px; font-weight: 900; color: #0f172a;
+            margin-bottom: 35px; letter-spacing: -1px;
         }
-        .logo-grad {
-            background: linear-gradient(135deg, #60a5fa 0%, #f472b6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+        .logo-color { color: #2563eb; } /* .App kısmı mavi */
 
         /* Inputlar */
         .sq-input {
             width: 100%;
-            padding: 14px; margin-bottom: 12px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 6px; /* Inputlar da kareye yakın */
-            color: #fff; font-size: 14px;
+            padding: 16px; margin-bottom: 15px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 0px; /* Inputlar da kare */
+            color: #334155; font-size: 15px; font-weight: 600;
             outline: none; transition: all 0.2s;
             box-sizing: border-box;
         }
         .sq-input:focus {
-            border-color: #60a5fa;
-            background: rgba(0, 0, 0, 0.5);
-            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+            border-color: #0f172a; /* Odaklanınca siyah çerçeve */
+            background: #fff;
         }
-        .sq-input::placeholder { color: rgba(255, 255, 255, 0.4); }
+        .sq-input::placeholder { color: #94a3b8; font-weight: 400; }
 
         /* Buton */
         .sq-btn {
-            width: 100%; padding: 14px;
-            margin-top: 8px;
-            background: #fff; color: #0f172a; /* Zıt renk: Beyaz buton, koyu yazı */
-            border: none; border-radius: 6px;
-            font-weight: 700; font-size: 14px; cursor: pointer;
-            transition: transform 0.1s;
+            width: 100%; padding: 18px;
+            margin-top: 10px;
+            background: #0f172a; /* Simsiyah buton */
+            color: #fff;
+            border: none; border-radius: 0px; /* Kare buton */
+            font-weight: 700; font-size: 16px; cursor: pointer;
+            transition: background 0.2s;
+            text-transform: uppercase; letter-spacing: 1px;
         }
-        .sq-btn:hover { background: #f1f5f9; }
-        .sq-btn:active { transform: scale(0.98); }
+        .sq-btn:hover { background: #334155; }
 
-        /* --- DIŞARIDAKİ YAZI ALANI --- */
-        .external-info {
+        /* --- DIŞARIDAKİ YAZI --- */
+        .external-text {
+            margin-top: 30px;
             text-align: center;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 13px; line-height: 1.6;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5); /* Okunabilirlik için gölge */
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px; line-height: 1.6;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            font-weight: 500;
         }
-        .ext-link {
-            color: #60a5fa; text-decoration: none; font-weight: 600;
+        .ext-mail {
+            color: #60a5fa; text-decoration: none; font-weight: 700;
         }
-        .ext-link:hover { text-decoration: underline; }
 
         /* Hata Mesajı */
         .err-sq {
-            background: rgba(220, 38, 38, 0.2);
-            color: #fca5a5; font-size: 13px; padding: 10px;
-            border-radius: 6px; margin-bottom: 15px;
-            display: none; border: 1px solid rgba(239, 68, 68, 0.3);
+            background: #fee2e2; color: #ef4444; 
+            font-size: 14px; padding: 12px; margin-bottom: 20px;
+            display: none; font-weight: 600; border: 1px solid #fca5a5;
         }
     `;
     document.head.appendChild(style);
 
-    // --- HTML YAPISI ---
+    // --- HTML ---
     const overlay = document.createElement('div');
     overlay.id = 'square-guard-root';
     overlay.innerHTML = `
         <div class="square-card" id="main-card">
-            <div class="card-logo">Optimizi<span class="logo-grad">.App</span></div>
+            <div class="card-logo">Optimizi<span class="logo-color">.App</span></div>
 
-            <div id="sq_err" class="err-sq">Hatalı giriş bilgisi.</div>
+            <div id="sq_err" class="err-sq">Hatalı giriş!</div>
 
             <input type="text" id="sq_user" class="sq-input" placeholder="Kullanıcı Adı" autocomplete="off">
             <input type="password" id="sq_pass" class="sq-input" placeholder="Şifre" autocomplete="new-password">
-
-            <button id="sq_btn" class="sq-btn">GİRİŞ YAP</button>
+            <button id="sq_btn" class="sq-btn">Giriş Yap</button>
         </div>
 
-        <div class="external-info">
+        <div class="external-text">
             Bu araç özel yetki gerektirmektedir.<br>
-            Erişim talebi için: <a href="mailto:contact@optimizi.app" class="ext-link">contact@optimizi.app</a>
+            Erişim talebi için: <a href="mailto:contact@optimizi.app" class="ext-mail">contact@optimizi.app</a>
         </div>
     `;
     document.body.appendChild(overlay);
@@ -185,29 +162,23 @@
             sessionStorage.setItem('optimizi_session', '1');
             localStorage.setItem('opt_refresh_count', '0');
 
-            // Çıkış: Hem kart hem alttaki yazı yok olsun
-            overlay.style.transition = 'opacity 0.5s ease';
+            // Çıkış
+            overlay.style.transition = 'opacity 0.4s ease';
             overlay.style.opacity = '0';
-
-            // Kart hafif yukarı kaysın
-            document.getElementById('main-card').style.transform = 'translateY(-20px)';
-            document.getElementById('main-card').style.transition = 'transform 0.5s';
-
+            
             setTimeout(() => {
                 overlay.remove();
-                cssHide.remove();
-                document.body.style.overflow = 'auto';
-                document.body.style.visibility = 'visible';
-            }, 500);
+                document.body.style.overflow = 'auto'; // Scrollu aç
+            }, 400);
 
         } else {
             err.style.display = 'block';
-            // Titreme efekti
+            // Titreme
             const card = document.getElementById('main-card');
             card.animate([
                 { transform: 'translateX(0)' }, { transform: 'translateX(-5px)' },
                 { transform: 'translateX(5px)' }, { transform: 'translateX(0)' }
-            ], { duration: 250 });
+            ], { duration: 200 });
             document.getElementById('sq_pass').value = '';
             document.getElementById('sq_pass').focus();
         }
