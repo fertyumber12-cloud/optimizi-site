@@ -1,11 +1,10 @@
 (function() {
-    // --- 1. GÜVENLİK YAMASI (ANTI-FLASH) ---
-    // Kod çalışır çalışmaz sayfayı komple görünmez yapıyoruz.
-    // Böylece JS yüklenene kadar kimse içeriği göremez.
+    // --- 1. GÜVENLİK (ANTI-FLASH) ---
+    // Sayfa yüklenirken beyaz patlamayı ve içeriğin görünmesini engeller
     const cssHide = document.createElement('style');
     cssHide.innerHTML = `
         html, body { visibility: hidden !important; background: #0f172a !important; }
-        #data-guard-root { visibility: visible !important; }
+        #glass-guard-root { visibility: visible !important; }
     `;
     document.head.appendChild(cssHide);
 
@@ -13,38 +12,8 @@
     const MASTER_CONFIG = {
         user: "inspro",
         pass: "inspro44",
-        refreshLimit: 3 // Kaç yenilemede bir şifre sorsun?
+        refreshLimit: 3
     };
-
-    // --- SAYAÇ & OTURUM MANTIĞI ---
-    function checkSessionStatus() {
-        // 1. Sayaç Kontrolü
-        let count = parseInt(localStorage.getItem('opt_refresh_count') || '0');
-        count++; // Her yenilemede artır
-        
-        console.log("Yenileme Sayısı:", count);
-
-        if (count >= MASTER_CONFIG.refreshLimit) {
-            // Limit dolduysa oturumu öldür ve sayacı sıfırla
-            sessionStorage.removeItem('optimizi_session');
-            count = 0;
-        }
-        
-        // Yeni sayacı kaydet
-        localStorage.setItem('opt_refresh_count', count);
-
-        // 2. Oturum Kontrolü (SessionStorage kullanıyoruz artık)
-        const isLoggedIn = sessionStorage.getItem('optimizi_session') === '1';
-
-        if (isLoggedIn) {
-            // Giriş yapılmışsa gizlemeyi kaldır ve bitir
-            cssHide.remove(); 
-            document.body.style.visibility = 'visible';
-            return true; // Giriş yapılı
-        }
-        
-        return false; // Giriş gerekli
-    }
 
     // --- DENEME HESABI ---
     function getTrialCredentials() {
@@ -54,204 +23,249 @@
         return { user: "deneme", pass: "deneme" + day + month };
     }
 
-    // --- BAŞLATMA ---
-    // Eğer giriş yapılmışsa durdur, yapılmamışsa devam et
+    // --- SAYAÇ & OTURUM KONTROLÜ ---
+    function checkSessionStatus() {
+        let count = parseInt(localStorage.getItem('opt_refresh_count') || '0');
+        count++; 
+        if (count >= MASTER_CONFIG.refreshLimit) {
+            sessionStorage.removeItem('optimizi_session');
+            count = 0;
+        }
+        localStorage.setItem('opt_refresh_count', count);
+
+        const isLoggedIn = sessionStorage.getItem('optimizi_session') === '1';
+        if (isLoggedIn) {
+            cssHide.remove(); 
+            document.body.style.visibility = 'visible';
+            return true; 
+        }
+        return false; 
+    }
+
     if (checkSessionStatus()) return;
 
-    // Scroll Kilitleme
+    // Kilit
     document.body.style.overflow = 'hidden'; 
     window.scrollTo(0, 0);
 
-    // --- STİL ---
+    // --- TASARIM (GLASSMORPHISM & NEBULA) ---
     const style = document.createElement('style');
     style.innerHTML = `
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
-        /* Ana Kapsayıcı - Görünürlük kilidini aşmak için visible atadık */
-        #data-guard-root {
+        #glass-guard-root {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: rgba(240, 244, 248, 0.8); /* Hafif opak */
+            /* Arka planı hafif karartıyoruz ki cam etkisi belli olsun */
+            background-color: rgba(15, 23, 42, 0.6); 
             backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
             z-index: 2147483647;
             display: flex; align-items: center; justify-content: center;
-            font-family: 'Inter', sans-serif;
-            visibility: visible !important; /* ÖNEMLİ: Body gizlense bile bu görünür */
-            opacity: 0; animation: fadeIn 0.3s forwards; /* Yumuşak giriş */
+            font-family: 'Poppins', sans-serif;
+            visibility: visible !important;
+            overflow: hidden;
         }
 
-        @keyframes fadeIn { to { opacity: 1; } }
+        /* --- ARKA PLAN IŞIKLARI (ORBS) --- */
+        .orb {
+            position: absolute; border-radius: 50%;
+            filter: blur(80px); z-index: 0; opacity: 0.6;
+            animation: orbFloat 10s infinite alternate;
+        }
+        .orb-1 {
+            width: 300px; height: 300px;
+            background: linear-gradient(#6366f1, #a855f7); /* Mor-Mavi */
+            top: 20%; left: 30%;
+        }
+        .orb-2 {
+            width: 250px; height: 250px;
+            background: linear-gradient(#ec4899, #f43f5e); /* Pembe-Kırmızı */
+            bottom: 20%; right: 30%;
+            animation-delay: -5s;
+        }
 
-        /* ... Kalan Tasarım Kodları Aynı ... */
-        .floating-obj {
-            position: absolute; opacity: 0.5; z-index: 0;
-            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.05));
-            animation: floatAnim 8s ease-in-out infinite;
-        }
-        .chart-pie {
-            width: 120px; height: 120px; border-radius: 50%;
-            background: conic-gradient(#3b82f6 0% 30%, #f97316 30% 70%, #e2e8f0 70% 100%);
-            top: 15%; left: 10%; animation-delay: 0s;
-        }
-        .chart-pie::after {
-            content: ''; position: absolute; width: 60%; height: 60%; 
-            background: rgba(255,255,255,0.8); border-radius: 50%; top: 20%; left: 20%;
-        }
-        .chart-bar-group {
-            display: flex; align-items: flex-end; gap: 8px;
-            bottom: 15%; left: 15%; width: 140px; height: 100px; animation-delay: 2s;
-        }
-        .c-bar { width: 30px; border-radius: 4px 4px 0 0; }
-        .cb-1 { height: 40%; background: #cbd5e1; }
-        .cb-2 { height: 80%; background: #3b82f6; }
-        .cb-3 { height: 60%; background: #94a3b8; }
-        .chart-line-loss {
-            top: 20%; right: 10%; width: 160px; height: 100px;
-            background: rgba(255, 255, 255, 0.5); border-radius: 12px;
-            padding: 10px; display: flex; align-items: center; justify-content: center;
-            border: 1px solid rgba(0,0,0,0.05); animation-delay: 4s;
-        }
-        .loss-svg { width: 100%; height: 100%; color: #ef4444; }
-
-        .login-card {
+        /* --- CAM KART --- */
+        .glass-card {
             position: relative; z-index: 10;
-            background: rgba(255, 255, 255, 0.96);
-            backdrop-filter: blur(40px) saturate(150%);
-            border: 2px solid #ffffff;
-            box-shadow: 
-                0 30px 60px -12px rgba(0, 0, 0, 0.25), 
-                0 0 0 1px rgba(0, 0, 0, 0.05),
-                inset 0 1px 1px rgba(255,255,255,1);
-            padding: 45px; border-radius: 32px; width: 380px; text-align: center;
-            transition: all 0.3s ease;
-        }
-        .login-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.05);
+            width: 360px;
+            padding: 50px 40px;
+            
+            /* GLASS EFFECT */
+            background: rgba(255, 255, 255, 0.1); /* Çok şeffaf beyaz */
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.4); /* Üstten ışık vurmuş gibi */
+            border-left: 1px solid rgba(255, 255, 255, 0.4);
+            
+            border-radius: 30px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            text-align: center;
+            color: #fff;
         }
 
-        .logo-area { margin-bottom: 50px; }
-        .logo-text { font-size: 30px; font-weight: 900; color: #0f172a; letter-spacing: -0.04em; }
-        .logo-grad {
-            background: linear-gradient(135deg, #2563eb 0%, #f97316 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        .logo-text {
+            font-size: 32px; font-weight: 600; margin-bottom: 5px; letter-spacing: 1px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
-        .logo-sub { font-size: 14px; color: #64748b; font-weight: 600; margin-top: 6px; }
+        .logo-sub {
+            font-size: 13px; font-weight: 300; opacity: 0.8; margin-bottom: 40px; letter-spacing: 0.5px;
+        }
 
-        .inp-field {
-            width: 100%; padding: 16px 18px; margin-bottom: 14px;
-            border: 2px solid #e2e8f0; background: #f8fafc; border-radius: 16px;
-            font-size: 16px; font-weight: 500; color: #334155; outline: none; transition: all 0.2s;
+        /* Input Alanları */
+        .input-group {
+            position: relative; margin-bottom: 20px;
+        }
+        .input-icon {
+            position: absolute; top: 50%; left: 20px;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.7);
+            width: 20px; height: 20px;
+        }
+        .glass-inp {
+            width: 100%;
+            padding: 16px 20px 16px 50px; /* İkon için soldan boşluk */
+            background: rgba(0, 0, 0, 0.2); /* Hafif karartma */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px; /* Tam yuvarlak */
+            color: #fff;
+            font-size: 15px; font-family: inherit;
+            outline: none; transition: all 0.3s ease;
             box-sizing: border-box;
         }
-        .inp-field:focus { border-color: #3b82f6; background: #fff; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); }
-        .inp-field::placeholder { color: #94a3b8; font-weight: 400; }
-
-        .btn-submit {
-            width: 100%; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: white; padding: 18px; border: none; border-radius: 16px; font-size: 17px; font-weight: 700;
-            cursor: pointer; margin-top: 12px; transition: all 0.2s;
-            box-shadow: 0 10px 20px -10px rgba(15, 23, 42, 0.5);
+        .glass-inp::placeholder { color: rgba(255, 255, 255, 0.5); }
+        .glass-inp:focus {
+            background: rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
         }
-        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 15px 30px -10px rgba(15, 23, 42, 0.6); }
-        .btn-submit:active { transform: scale(0.98); }
 
-        .contact-box {
-            margin-top: 28px; padding-top: 24px; border-top: 2px solid #f1f5f9;
-            font-size: 14px; color: #64748b; line-height: 1.6; font-weight: 500;
+        /* Buton */
+        .glass-btn {
+            width: 100%;
+            padding: 16px; margin-top: 10px;
+            border: none; border-radius: 50px;
+            background: linear-gradient(90deg, #8b5cf6, #ec4899); /* Mor Gradient */
+            color: white; font-size: 16px; font-weight: 600;
+            cursor: pointer; letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-        .contact-mail { display: block; color: #2563eb; font-weight: 700; text-decoration: none; margin-top: 4px; }
+        .glass-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.6);
+        }
+        .glass-btn:active { transform: scale(0.98); }
+
+        /* Footer */
+        .footer-txt {
+            margin-top: 30px; font-size: 12px; color: rgba(255, 255, 255, 0.6); line-height: 1.6;
+        }
+        .footer-link {
+            color: #fff; font-weight: 500; text-decoration: none;
+            border-bottom: 1px dashed rgba(255,255,255,0.4);
+            padding-bottom: 2px;
+        }
         
-        .err-msg {
-            color: #d32f2f; font-size: 14px; margin-bottom: 20px; 
-            font-weight: 600; display: none; background: #ffebee; padding: 12px; border-radius: 12px; border: 1px solid #ffcdd2;
+        /* Hata Mesajı */
+        .err-glass {
+            background: rgba(220, 38, 38, 0.25);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: #fca5a5; font-size: 13px; padding: 12px;
+            border-radius: 15px; margin-bottom: 20px;
+            display: none; backdrop-filter: blur(5px);
         }
 
-        @keyframes floatAnim {
-            0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); }
-        }
+        @keyframes orbFloat { 0% { transform: translate(0, 0); } 100% { transform: translate(30px, -30px); } }
     `;
     document.head.appendChild(style);
 
     // --- HTML ---
     const overlay = document.createElement('div');
-    overlay.id = 'data-guard-root';
+    overlay.id = 'glass-guard-root';
     overlay.innerHTML = `
-        <div class="floating-obj chart-pie"></div>
-        <div class="floating-obj chart-bar-group"><div class="c-bar cb-1"></div><div class="c-bar cb-2"></div><div class="c-bar cb-3"></div></div>
-        <div class="floating-obj chart-line-loss">
-            <svg class="loss-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 19l-9-9-4 4-5.5-5.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M19 9h3v10" stroke-linecap="round"/>
-            </svg>
-        </div>
-        <div class="login-card" id="lc-box">
-            <div class="logo-area">
-                <div class="logo-text">Optimizi<span class="logo-grad">.App</span></div>
-                <div class="logo-sub">Gelişmiş Hesaplama & Analiz Aracı</div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+
+        <div class="glass-card" id="glass-card">
+            <div class="logo-text">Giriş Yap</div>
+            <div class="logo-sub">Optimizi.App Hesaplama Aracı</div>
+
+            <div id="g_err" class="err-glass">Hatalı kullanıcı adı veya şifre.</div>
+
+            <div class="input-group">
+                <svg class="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <input type="text" id="g_user" class="glass-inp" placeholder="Kullanıcı Adı" autocomplete="off">
             </div>
-            <div id="l_err" class="err-msg">Kullanıcı adı veya şifre hatalı!</div>
-            <input type="text" id="l_user" class="inp-field" placeholder="Kullanıcı Adı" autocomplete="off">
-            <input type="password" id="l_pass" class="inp-field" placeholder="Şifre" autocomplete="new-password">
-            <button id="l_btn" class="btn-submit">Giriş Yap</button>
-            <div class="contact-box">
-                Bu araç özel erişim gerektirir.<br>Erişim talebi için:
-                <span class="contact-mail">contact@optimizi.app</span>
+
+            <div class="input-group">
+                <svg class="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <input type="password" id="g_pass" class="glass-inp" placeholder="Şifre" autocomplete="new-password">
+            </div>
+
+            <button id="g_btn" class="glass-btn">GİRİŞ</button>
+
+            <div class="footer-txt">
+                Bu araç özel yetki gerektirir.<br>
+                Erişim için: <a href="mailto:contact@optimizi.app" class="footer-link">contact@optimizi.app</a>
             </div>
         </div>
     `;
     document.body.appendChild(overlay);
 
-    // --- GİRİŞ MANTIĞI ---
+    // --- MANTIK ---
     function doLogin() {
-        const uInput = document.getElementById('l_user').value.trim();
-        const pInput = document.getElementById('l_pass').value.trim();
-        const err = document.getElementById('l_err');
+        const u = document.getElementById('g_user').value.trim();
+        const p = document.getElementById('g_pass').value.trim();
+        const err = document.getElementById('g_err');
 
         const TRIAL_CONFIG = getTrialCredentials();
-        console.log("Bugünün Deneme Şifresi:", TRIAL_CONFIG.pass);
+        console.log("Deneme Şifresi:", TRIAL_CONFIG.pass); // Test için
 
-        const isMaster = (uInput === MASTER_CONFIG.user && pInput === MASTER_CONFIG.pass);
-        const isTrial = (uInput === TRIAL_CONFIG.user && pInput === TRIAL_CONFIG.pass);
+        const isMaster = (u === MASTER_CONFIG.user && p === MASTER_CONFIG.pass);
+        const isTrial = (u === TRIAL_CONFIG.user && p === TRIAL_CONFIG.pass);
 
         if(isMaster || isTrial) {
-            // BAŞARILI:
-            sessionStorage.setItem('optimizi_session', '1'); // Oturumu kaydet
-            localStorage.setItem('opt_refresh_count', '0'); // Sayacı sıfırla
+            sessionStorage.setItem('optimizi_session', '1');
+            localStorage.setItem('opt_refresh_count', '0');
 
-            // Animasyonlu Çıkış
-            const box = document.getElementById('lc-box');
-            box.style.transition = 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
-            box.style.transform = 'translateY(-30px) scale(0.95)';
-            box.style.opacity = '0';
-            overlay.style.transition = 'opacity 0.5s ease';
+            // Çıkış Animasyonu
+            const card = document.getElementById('glass-card');
+            card.style.transition = 'all 0.5s ease';
+            card.style.transform = 'scale(0.9) translateY(-20px)';
+            card.style.opacity = '0';
+            
+            overlay.style.transition = 'opacity 0.6s ease';
             overlay.style.opacity = '0';
 
             setTimeout(() => {
                 overlay.remove();
-                cssHide.remove(); // Gizleme stilini kaldır
-                document.body.style.overflow = 'auto'; // Scroll aç
-                document.body.style.visibility = 'visible'; // İçeriği göster
-            }, 500);
+                cssHide.remove();
+                document.body.style.overflow = 'auto';
+                document.body.style.visibility = 'visible';
+            }, 600);
 
         } else {
-            // HATALI
             err.style.display = 'block';
-            const box = document.getElementById('lc-box');
-            box.animate([
+            const card = document.getElementById('glass-card');
+            card.animate([
                 { transform: 'translateX(0)' }, { transform: 'translateX(-6px)' },
                 { transform: 'translateX(6px)' }, { transform: 'translateX(0)' }
             ], { duration: 300 });
-            document.getElementById('l_pass').value = '';
-            document.getElementById('l_pass').focus();
+            document.getElementById('g_pass').value = '';
+            document.getElementById('g_pass').focus();
         }
     }
 
-    document.getElementById('l_btn').addEventListener('click', doLogin);
-    ['l_user', 'l_pass'].forEach(id => {
+    document.getElementById('g_btn').addEventListener('click', doLogin);
+    ['g_user', 'g_pass'].forEach(id => {
         document.getElementById(id).addEventListener('keypress', (e) => {
             if(e.key === 'Enter') doLogin();
         });
     });
 
-    setTimeout(() => document.getElementById('l_user').focus(), 100);
+    setTimeout(() => document.getElementById('g_user').focus(), 100);
+
 })();
