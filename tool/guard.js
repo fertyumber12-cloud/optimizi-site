@@ -1,10 +1,9 @@
 (function() {
-    // --- 1. GÜVENLİK (ANTI-FLASH) ---
-    // Sayfa yüklenirken beyaz patlamayı ve içeriğin görünmesini engeller
+    // --- 1. GÜVENLİK (ANTI-FLASH & GİZLEME) ---
     const cssHide = document.createElement('style');
     cssHide.innerHTML = `
         html, body { visibility: hidden !important; background: #0f172a !important; }
-        #glass-guard-root { visibility: visible !important; }
+        #square-guard-root { visibility: visible !important; }
     `;
     document.head.appendChild(cssHide);
 
@@ -23,7 +22,7 @@
         return { user: "deneme", pass: "deneme" + day + month };
     }
 
-    // --- SAYAÇ & OTURUM KONTROLÜ ---
+    // --- OTURUM KONTROLÜ ---
     function checkSessionStatus() {
         let count = parseInt(localStorage.getItem('opt_refresh_count') || '0');
         count++; 
@@ -44,228 +43,183 @@
 
     if (checkSessionStatus()) return;
 
-    // Kilit
+    // Scroll Kilitle
     document.body.style.overflow = 'hidden'; 
     window.scrollTo(0, 0);
 
-    // --- TASARIM (GLASSMORPHISM & NEBULA) ---
+    // --- CSS TASARIM ---
     const style = document.createElement('style');
     style.innerHTML = `
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
 
-        #glass-guard-root {
+        /* Ana Kapsayıcı: Tam Ekran */
+        #square-guard-root {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            /* Arka planı hafif karartıyoruz ki cam etkisi belli olsun */
-            background-color: rgba(15, 23, 42, 0.6); 
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            /* Arka planın buğulu görünmesi için */
+            background-color: rgba(15, 23, 42, 0.4); 
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             z-index: 2147483647;
-            display: flex; align-items: center; justify-content: center;
-            font-family: 'Poppins', sans-serif;
+            display: flex; flex-direction: column; /* Alt alta dizmek için */
+            align-items: center; justify-content: center;
+            font-family: 'Inter', sans-serif;
             visibility: visible !important;
-            overflow: hidden;
         }
 
-        /* --- ARKA PLAN IŞIKLARI (ORBS) --- */
-        .orb {
-            position: absolute; border-radius: 50%;
-            filter: blur(80px); z-index: 0; opacity: 0.6;
-            animation: orbFloat 10s infinite alternate;
-        }
-        .orb-1 {
-            width: 300px; height: 300px;
-            background: linear-gradient(#6366f1, #a855f7); /* Mor-Mavi */
-            top: 20%; left: 30%;
-        }
-        .orb-2 {
-            width: 250px; height: 250px;
-            background: linear-gradient(#ec4899, #f43f5e); /* Pembe-Kırmızı */
-            bottom: 20%; right: 30%;
-            animation-delay: -5s;
-        }
-
-        /* --- CAM KART --- */
-        .glass-card {
-            position: relative; z-index: 10;
-            width: 360px;
-            padding: 50px 40px;
+        /* --- KARE LOGIN KARTI --- */
+        .square-card {
+            width: 320px; /* Biraz daha kompakt */
+            padding: 40px;
             
-            /* GLASS EFFECT */
-            background: rgba(255, 255, 255, 0.1); /* Çok şeffaf beyaz */
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-top: 1px solid rgba(255, 255, 255, 0.4); /* Üstten ışık vurmuş gibi */
-            border-left: 1px solid rgba(255, 255, 255, 0.4);
-            
-            border-radius: 30px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-            text-align: center;
-            color: #fff;
-        }
-
-        .logo-text {
-            font-size: 32px; font-weight: 600; margin-bottom: 5px; letter-spacing: 1px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
-        .logo-sub {
-            font-size: 13px; font-weight: 300; opacity: 0.8; margin-bottom: 40px; letter-spacing: 0.5px;
-        }
-
-        /* Input Alanları */
-        .input-group {
-            position: relative; margin-bottom: 20px;
-        }
-        .input-icon {
-            position: absolute; top: 50%; left: 20px;
-            transform: translateY(-50%);
-            color: rgba(255, 255, 255, 0.7);
-            width: 20px; height: 20px;
-        }
-        .glass-inp {
-            width: 100%;
-            padding: 16px 20px 16px 50px; /* İkon için soldan boşluk */
-            background: rgba(0, 0, 0, 0.2); /* Hafif karartma */
+            /* Koyu ve Şeffaf Cam */
+            background: rgba(30, 41, 59, 0.75); 
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50px; /* Tam yuvarlak */
-            color: #fff;
-            font-size: 15px; font-family: inherit;
-            outline: none; transition: all 0.3s ease;
+            /* Kare Formu: Radius düşük */
+            border-radius: 12px; 
+            
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            margin-bottom: 25px; /* Alttaki yazı ile mesafe */
+            
+            /* Hafif parlama efekti */
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+
+        /* Logo Stili */
+        .card-logo {
+            font-size: 28px; font-weight: 800; color: #fff;
+            margin-bottom: 30px; letter-spacing: -0.5px;
+        }
+        .logo-grad {
+            background: linear-gradient(135deg, #60a5fa 0%, #f472b6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Inputlar */
+        .sq-input {
+            width: 100%;
+            padding: 14px; margin-bottom: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px; /* Inputlar da kareye yakın */
+            color: #fff; font-size: 14px;
+            outline: none; transition: all 0.2s;
             box-sizing: border-box;
         }
-        .glass-inp::placeholder { color: rgba(255, 255, 255, 0.5); }
-        .glass-inp:focus {
-            background: rgba(0, 0, 0, 0.4);
-            border-color: rgba(255, 255, 255, 0.5);
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+        .sq-input:focus {
+            border-color: #60a5fa;
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
         }
+        .sq-input::placeholder { color: rgba(255, 255, 255, 0.4); }
 
         /* Buton */
-        .glass-btn {
-            width: 100%;
-            padding: 16px; margin-top: 10px;
-            border: none; border-radius: 50px;
-            background: linear-gradient(90deg, #8b5cf6, #ec4899); /* Mor Gradient */
-            color: white; font-size: 16px; font-weight: 600;
-            cursor: pointer; letter-spacing: 1px;
-            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
-            transition: transform 0.2s, box-shadow 0.2s;
+        .sq-btn {
+            width: 100%; padding: 14px;
+            margin-top: 8px;
+            background: #fff; color: #0f172a; /* Zıt renk: Beyaz buton, koyu yazı */
+            border: none; border-radius: 6px;
+            font-weight: 700; font-size: 14px; cursor: pointer;
+            transition: transform 0.1s;
         }
-        .glass-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.6);
-        }
-        .glass-btn:active { transform: scale(0.98); }
+        .sq-btn:hover { background: #f1f5f9; }
+        .sq-btn:active { transform: scale(0.98); }
 
-        /* Footer */
-        .footer-txt {
-            margin-top: 30px; font-size: 12px; color: rgba(255, 255, 255, 0.6); line-height: 1.6;
+        /* --- DIŞARIDAKİ YAZI ALANI --- */
+        .external-info {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px; line-height: 1.6;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5); /* Okunabilirlik için gölge */
         }
-        .footer-link {
-            color: #fff; font-weight: 500; text-decoration: none;
-            border-bottom: 1px dashed rgba(255,255,255,0.4);
-            padding-bottom: 2px;
+        .ext-link {
+            color: #60a5fa; text-decoration: none; font-weight: 600;
         }
-        
+        .ext-link:hover { text-decoration: underline; }
+
         /* Hata Mesajı */
-        .err-glass {
-            background: rgba(220, 38, 38, 0.25);
-            border: 1px solid rgba(239, 68, 68, 0.5);
-            color: #fca5a5; font-size: 13px; padding: 12px;
-            border-radius: 15px; margin-bottom: 20px;
-            display: none; backdrop-filter: blur(5px);
+        .err-sq {
+            background: rgba(220, 38, 38, 0.2);
+            color: #fca5a5; font-size: 13px; padding: 10px;
+            border-radius: 6px; margin-bottom: 15px;
+            display: none; border: 1px solid rgba(239, 68, 68, 0.3);
         }
-
-        @keyframes orbFloat { 0% { transform: translate(0, 0); } 100% { transform: translate(30px, -30px); } }
     `;
     document.head.appendChild(style);
 
-    // --- HTML ---
+    // --- HTML YAPISI ---
     const overlay = document.createElement('div');
-    overlay.id = 'glass-guard-root';
+    overlay.id = 'square-guard-root';
     overlay.innerHTML = `
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
+        <div class="square-card" id="main-card">
+            <div class="card-logo">Optimizi<span class="logo-grad">.App</span></div>
 
-        <div class="glass-card" id="glass-card">
-            <div class="logo-text">Giriş Yap</div>
-            <div class="logo-sub">Optimizi.App Hesaplama Aracı</div>
+            <div id="sq_err" class="err-sq">Hatalı giriş bilgisi.</div>
 
-            <div id="g_err" class="err-glass">Hatalı kullanıcı adı veya şifre.</div>
+            <input type="text" id="sq_user" class="sq-input" placeholder="Kullanıcı Adı" autocomplete="off">
+            <input type="password" id="sq_pass" class="sq-input" placeholder="Şifre" autocomplete="new-password">
 
-            <div class="input-group">
-                <svg class="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                <input type="text" id="g_user" class="glass-inp" placeholder="Kullanıcı Adı" autocomplete="off">
-            </div>
+            <button id="sq_btn" class="sq-btn">GİRİŞ YAP</button>
+        </div>
 
-            <div class="input-group">
-                <svg class="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                <input type="password" id="g_pass" class="glass-inp" placeholder="Şifre" autocomplete="new-password">
-            </div>
-
-            <button id="g_btn" class="glass-btn">GİRİŞ</button>
-
-            <div class="footer-txt">
-                Bu araç özel yetki gerektirir.<br>
-                Erişim için: <a href="mailto:contact@optimizi.app" class="footer-link">contact@optimizi.app</a>
-            </div>
+        <div class="external-info">
+            Bu araç özel yetki gerektirmektedir.<br>
+            Erişim talebi için: <a href="mailto:contact@optimizi.app" class="ext-link">contact@optimizi.app</a>
         </div>
     `;
     document.body.appendChild(overlay);
 
     // --- MANTIK ---
     function doLogin() {
-        const u = document.getElementById('g_user').value.trim();
-        const p = document.getElementById('g_pass').value.trim();
-        const err = document.getElementById('g_err');
+        const u = document.getElementById('sq_user').value.trim();
+        const p = document.getElementById('sq_pass').value.trim();
+        const err = document.getElementById('sq_err');
 
-        const TRIAL_CONFIG = getTrialCredentials();
-        console.log("Deneme Şifresi:", TRIAL_CONFIG.pass); // Test için
+        const TRIAL = getTrialCredentials();
+        console.log("Deneme:", TRIAL.pass);
 
         const isMaster = (u === MASTER_CONFIG.user && p === MASTER_CONFIG.pass);
-        const isTrial = (u === TRIAL_CONFIG.user && p === TRIAL_CONFIG.pass);
+        const isTrial = (u === TRIAL.user && p === TRIAL.pass);
 
         if(isMaster || isTrial) {
             sessionStorage.setItem('optimizi_session', '1');
             localStorage.setItem('opt_refresh_count', '0');
 
-            // Çıkış Animasyonu
-            const card = document.getElementById('glass-card');
-            card.style.transition = 'all 0.5s ease';
-            card.style.transform = 'scale(0.9) translateY(-20px)';
-            card.style.opacity = '0';
-            
-            overlay.style.transition = 'opacity 0.6s ease';
+            // Çıkış: Hem kart hem alttaki yazı yok olsun
+            overlay.style.transition = 'opacity 0.5s ease';
             overlay.style.opacity = '0';
+
+            // Kart hafif yukarı kaysın
+            document.getElementById('main-card').style.transform = 'translateY(-20px)';
+            document.getElementById('main-card').style.transition = 'transform 0.5s';
 
             setTimeout(() => {
                 overlay.remove();
                 cssHide.remove();
                 document.body.style.overflow = 'auto';
                 document.body.style.visibility = 'visible';
-            }, 600);
+            }, 500);
 
         } else {
             err.style.display = 'block';
-            const card = document.getElementById('glass-card');
+            // Titreme efekti
+            const card = document.getElementById('main-card');
             card.animate([
-                { transform: 'translateX(0)' }, { transform: 'translateX(-6px)' },
-                { transform: 'translateX(6px)' }, { transform: 'translateX(0)' }
-            ], { duration: 300 });
-            document.getElementById('g_pass').value = '';
-            document.getElementById('g_pass').focus();
+                { transform: 'translateX(0)' }, { transform: 'translateX(-5px)' },
+                { transform: 'translateX(5px)' }, { transform: 'translateX(0)' }
+            ], { duration: 250 });
+            document.getElementById('sq_pass').value = '';
+            document.getElementById('sq_pass').focus();
         }
     }
 
-    document.getElementById('g_btn').addEventListener('click', doLogin);
-    ['g_user', 'g_pass'].forEach(id => {
+    document.getElementById('sq_btn').addEventListener('click', doLogin);
+    ['sq_user', 'sq_pass'].forEach(id => {
         document.getElementById(id).addEventListener('keypress', (e) => {
             if(e.key === 'Enter') doLogin();
         });
     });
 
-    setTimeout(() => document.getElementById('g_user').focus(), 100);
+    setTimeout(() => document.getElementById('sq_user').focus(), 100);
 
 })();
