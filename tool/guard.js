@@ -1,258 +1,270 @@
 (function() {
-    // --- 1. AYARLAR ---
+    // --- AYARLAR ---
     const CONFIG = {
         user: "inspro",
         pass: "inspro44"
     };
 
-    // --- 2. KONTROL ---
+    // --- KONTROL ---
     if (localStorage.getItem('optimizi_session') === '1') return;
 
-    // Scroll Kilitle
+    // Scroll Kilitleme (Sayfa kaymasın)
     document.body.style.overflow = 'hidden'; 
     window.scrollTo(0, 0);
 
-    // --- 3. CSS (ECO-TECH SAAS THEME) ---
+    // --- STİL (DATA ANALYTICS / LIGHT THEME) ---
     const style = document.createElement('style');
     style.innerHTML = `
-        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
         /* Ana Kapsayıcı */
-        #eco-guard-root {
+        #data-guard-root {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: #02040a; /* Ultra Dark Navy */
+            /* Arka planın görünmesi için yarı saydam beyaz */
+            background-color: rgba(255, 255, 255, 0.65);
+            /* Buzlu Cam Efekti */
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px);
             z-index: 2147483647;
             display: flex; align-items: center; justify-content: center;
-            font-family: 'Manrope', sans-serif;
+            font-family: 'Inter', sans-serif;
             overflow: hidden;
         }
 
-        /* --- ARKA PLAN ENERJİ DALGALARI --- */
-        .energy-wave {
+        /* --- ARKA PLAN SÜZÜLEN GRAFİKLER --- */
+        .floating-obj {
             position: absolute;
-            width: 150%; height: 150%;
-            background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.15), transparent 60%),
-                        radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.1), transparent 50%);
-            animation: pulseWave 10s ease-in-out infinite alternate;
+            opacity: 0.6;
             z-index: 0;
-            pointer-events: none;
-        }
-        
-        .grid-overlay {
-            position: absolute; width: 100%; height: 100%;
-            background-image: 
-                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
-            z-index: 1;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.05));
+            animation: floatAnim 8s ease-in-out infinite;
         }
 
-        /* --- STATUS BADGES (Sol Üst) --- */
-        .sys-status {
-            position: absolute; top: 30px; left: 30px; z-index: 10;
-            display: flex; gap: 15px;
+        /* Pasta Grafik (CSS ile) */
+        .chart-pie {
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #3b82f6 0% 30%, 
+                #f97316 30% 70%, 
+                #e2e8f0 70% 100%
+            );
+            top: 15%; left: 10%;
+            animation-delay: 0s;
         }
-        .badge {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            color: #10b981;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 11px; font-weight: 700; letter-spacing: 0.05em;
-            display: flex; align-items: center; gap: 6px;
-            backdrop-filter: blur(4px);
+        /* Ortası delik olsun (Donut Chart) */
+        .chart-pie::after {
+            content: ''; position: absolute; 
+            width: 60%; height: 60%; 
+            background: rgba(255,255,255,0.8); 
+            border-radius: 50%; 
+            top: 20%; left: 20%;
         }
-        .dot { width: 6px; height: 6px; background: #10b981; border-radius: 50%; animation: blink 2s infinite; }
 
-        /* --- LOGIN PANELİ --- */
-        .saas-card {
+        /* Bar Grafik */
+        .chart-bar-group {
+            display: flex; align-items: flex-end; gap: 8px;
+            bottom: 15%; left: 15%;
+            width: 140px; height: 100px;
+            animation-delay: 2s;
+        }
+        .c-bar { width: 30px; border-radius: 4px 4px 0 0; }
+        .cb-1 { height: 40%; background: #cbd5e1; }
+        .cb-2 { height: 80%; background: #3b82f6; } /* Mavi Yükseliş */
+        .cb-3 { height: 60%; background: #94a3b8; }
+
+        /* Kayıp Grafiği (Düşüş) */
+        .chart-line-loss {
+            top: 20%; right: 10%;
+            width: 160px; height: 100px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            padding: 10px;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid rgba(0,0,0,0.05);
+            animation-delay: 4s;
+        }
+        /* SVG İkon olarak düşüş grafiği */
+        .loss-svg { width: 100%; height: 100%; color: #ef4444; }
+
+        /* --- LOGIN KARTI --- */
+        .login-card {
             position: relative; z-index: 10;
-            width: 400px;
-            background: rgba(15, 23, 42, 0.6); /* Yarı saydam koyu */
-            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-top: 1px solid rgba(255, 255, 255, 0.15); /* Üstten ışık vurmuş gibi */
-            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 1);
+            box-shadow: 
+                0 20px 25px -5px rgba(0, 0, 0, 0.05), 
+                0 8px 10px -6px rgba(0, 0, 0, 0.01),
+                0 0 0 1px rgba(0,0,0,0.03); /* İnce çerçeve */
             padding: 40px;
-            box-shadow: 0 50px 100px -20px rgba(0,0,0,0.7);
+            border-radius: 24px;
+            width: 380px;
             text-align: center;
-            overflow: hidden;
         }
 
-        /* Enerji Çizgisi (Kartın üstünde) */
-        .saas-card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
-            background: linear-gradient(90deg, transparent, #10b981, transparent);
-            animation: scanline 3s linear infinite;
+        .logo-area { margin-bottom: 30px; }
+        .logo-text {
+            font-size: 28px; font-weight: 800; color: #1e293b;
+            letter-spacing: -0.04em;
+        }
+        .logo-grad {
+            background: linear-gradient(135deg, #2563eb 0%, #f59e0b 100%); /* Mavi -> Turuncu */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .logo-sub {
+            font-size: 13px; color: #64748b; font-weight: 500; margin-top: 4px;
         }
 
-        .brand-area { margin-bottom: 30px; }
-        .logo-main {
-            font-size: 28px; font-weight: 800; color: #fff;
-            letter-spacing: -0.03em;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-        }
-        .logo-icon {
-            color: #10b981; /* Optimizi Yeşili */
-            font-size: 24px;
-        }
-        .brand-tag {
-            color: #64748b; font-size: 13px; font-weight: 500; margin-top: 5px;
-        }
-
-        /* Form Elemanları */
-        .input-group { position: relative; margin-bottom: 16px; text-align: left; }
-        
-        .saas-input {
+        .inp-field {
             width: 100%;
-            background: rgba(2, 6, 23, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #e2e8f0;
             padding: 14px 16px;
+            margin-bottom: 12px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
             border-radius: 12px;
             font-size: 15px;
-            transition: all 0.3s ease;
-            outline: none;
+            color: #334155;
+            outline: none; transition: all 0.2s;
             box-sizing: border-box;
         }
-        .saas-input:focus {
-            border-color: #10b981;
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
-            background: rgba(2, 6, 23, 0.8);
+        .inp-field:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
-        .saas-input::placeholder { color: #475569; font-weight: 500; }
+        .inp-field::placeholder { color: #94a3b8; }
 
-        .saas-btn {
+        .btn-submit {
             width: 100%;
-            margin-top: 10px;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: #fff;
+            background: #0f172a; /* Koyu Lacivert/Siyah */
+            color: white;
             padding: 16px;
             border: none; border-radius: 12px;
-            font-size: 16px; font-weight: 700;
+            font-size: 16px; font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.3);
-            position: relative; overflow: hidden;
+            margin-top: 10px;
+            transition: transform 0.1s;
         }
-        .saas-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 30px -5px rgba(16, 185, 129, 0.4);
-        }
-        .saas-btn::after { /* Shine effect */
-            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transform: skewX(-20deg);
-            transition: 0.5s;
-        }
-        .saas-btn:hover::after { left: 150%; transition: 0.7s ease-in-out; }
+        .btn-submit:active { transform: scale(0.98); }
 
-        .error-msg {
-            color: #ef4444; font-size: 13px; margin-bottom: 15px; font-weight: 600;
-            display: none; background: rgba(239, 68, 68, 0.1); padding: 8px; border-radius: 8px;
+        .contact-box {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #f1f5f9;
+            font-size: 13px; color: #64748b;
+            line-height: 1.5;
+        }
+        .contact-mail {
+            display: block;
+            color: #3b82f6;
+            font-weight: 600;
+            text-decoration: none;
+            margin-top: 2px;
+        }
+        
+        .err-msg {
+            color: #ef4444; font-size: 13px; margin-bottom: 15px; 
+            font-weight: 600; display: none;
+            background: #fef2f2; padding: 10px; border-radius: 8px;
         }
 
-        /* Animations */
-        @keyframes pulseWave { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.1); opacity: 0.8; } }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-        @keyframes scanline { 0% { left: -100%; } 100% { left: 100%; } }
+        @keyframes floatAnim {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
     `;
     document.head.appendChild(style);
 
-    // --- 4. HTML YAPISI ---
+    // --- HTML ---
     const overlay = document.createElement('div');
-    overlay.id = 'eco-guard-root';
+    overlay.id = 'data-guard-root';
     overlay.innerHTML = `
-        <div class="energy-wave"></div>
-        <div class="grid-overlay"></div>
-
-        <div class="sys-status">
-            <div class="badge"><div class="dot"></div> SYSTEM ONLINE</div>
-            <div class="badge" style="border-color: rgba(59, 130, 246, 0.3); color: #60a5fa;">
-                ⚡ ENERGY SAVING: ON
-            </div>
+        <div class="floating-obj chart-pie"></div>
+        
+        <div class="floating-obj chart-bar-group">
+            <div class="c-bar cb-1"></div>
+            <div class="c-bar cb-2"></div>
+            <div class="c-bar cb-3"></div>
         </div>
 
-        <div class="saas-card" id="saas-card-box">
-            <div class="brand-area">
-                <div class="logo-main">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="logo-icon"><path d="M12 2v8"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m16 6-4 4-4-4"/><path d="M16 18a4 4 0 0 0-8 0"/></svg>
-                    Optimizi.App
-                </div>
-                <div class="brand-tag">Professional Calculation Engine</div>
+        <div class="floating-obj chart-line-loss">
+            <svg class="loss-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 19l-9-9-4 4-5.5-5.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M19 9h3v10" stroke-linecap="round"/>
+            </svg>
+        </div>
+
+        <div class="login-card" id="lc-box">
+            <div class="logo-area">
+                <div class="logo-text">Optimizi<span class="logo-grad">.App</span></div>
+                <div class="logo-sub">Gelişmiş Hesaplama & Analiz Aracı</div>
             </div>
 
-            <div id="saas-err" class="error-msg">Kimlik doğrulama başarısız.</div>
+            <div id="l_err" class="err-msg">Kullanıcı adı veya şifre hatalı!</div>
 
-            <div class="input-group">
-                <input type="text" id="s_user" class="saas-input" placeholder="Access ID" autocomplete="off">
-            </div>
-            <div class="input-group">
-                <input type="password" id="s_pass" class="saas-input" placeholder="Secure Key" autocomplete="new-password">
-            </div>
+            <input type="text" id="l_user" class="inp-field" placeholder="Kullanıcı Adı" autocomplete="off">
+            <input type="password" id="l_pass" class="inp-field" placeholder="Şifre" autocomplete="new-password">
 
-            <button id="s_btn" class="saas-btn">Dashboard Giriş</button>
-            
-            <div style="margin-top: 20px; font-size: 11px; color: #475569;">
-                v2.4.1 Stable • Secure Connection
+            <button id="l_btn" class="btn-submit">Giriş Yap</button>
+
+            <div class="contact-box">
+                Bu araç özel erişim gerektirir.<br>
+                Erişim talebi için:
+                <span class="contact-mail">contact@optimizi.app</span>
             </div>
         </div>
     `;
     document.body.appendChild(overlay);
 
-    // --- 5. MANTIK ---
-    function tryLogin() {
-        const u = document.getElementById('s_user').value.trim();
-        const p = document.getElementById('s_pass').value.trim();
-        const err = document.getElementById('saas-err');
+    // --- MANTIK ---
+    function doLogin() {
+        const u = document.getElementById('l_user').value.trim();
+        const p = document.getElementById('l_pass').value.trim();
+        const err = document.getElementById('l_err');
 
         if(u === CONFIG.user && p === CONFIG.pass) {
             localStorage.setItem('optimizi_session', '1');
             
-            // Başarılı Animasyonu
-            const btn = document.getElementById('s_btn');
-            btn.innerHTML = 'Doğrulanıyor...';
-            btn.style.background = '#10b981';
+            // Başarılı Animasyonu (Yukarı kaybol)
+            const box = document.getElementById('lc-box');
+            box.style.transition = 'all 0.5s ease';
+            box.style.transform = 'translateY(-20px)';
+            box.style.opacity = '0';
             
-            // Panelin yok oluşu
-            const card = document.getElementById('saas-card-box');
-            card.style.transition = 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
-            card.style.transform = 'translateY(20px) scale(0.95)';
-            card.style.opacity = '0';
-            
-            overlay.style.transition = 'opacity 0.6s ease';
+            overlay.style.transition = 'opacity 0.5s ease';
             overlay.style.opacity = '0';
 
             setTimeout(() => {
                 overlay.remove();
-                document.body.style.overflow = 'auto'; // Scroll AÇ
-            }, 600);
+                document.body.style.overflow = 'auto'; // KİLİDİ AÇ
+            }, 500);
 
         } else {
             err.style.display = 'block';
-            document.getElementById('s_pass').value = '';
             
-            // Profesyonel titreme efekti
-            const card = document.getElementById('saas-card-box');
-            card.animate([
-                { transform: 'translate(0, 0)' },
-                { transform: 'translate(-4px, 0)' },
-                { transform: 'translate(4px, 0)' },
-                { transform: 'translate(0, 0)' }
-            ], { duration: 250 });
-            
-            document.getElementById('s_pass').focus();
+            // Hata Sallanması
+            const box = document.getElementById('lc-box');
+            box.animate([
+                { transform: 'translateX(0)' },
+                { transform: 'translateX(-5px)' },
+                { transform: 'translateX(5px)' },
+                { transform: 'translateX(0)' }
+            ], { duration: 300 });
+
+            document.getElementById('l_pass').value = '';
+            document.getElementById('l_pass').focus();
         }
     }
 
-    document.getElementById('s_btn').addEventListener('click', tryLogin);
+    document.getElementById('l_btn').addEventListener('click', doLogin);
     
-    ['s_user', 's_pass'].forEach(id => {
+    ['l_user', 'l_pass'].forEach(id => {
         document.getElementById(id).addEventListener('keypress', (e) => {
-            if(e.key === 'Enter') tryLogin();
+            if(e.key === 'Enter') doLogin();
         });
     });
 
-    setTimeout(() => document.getElementById('s_user').focus(), 100);
+    setTimeout(() => document.getElementById('l_user').focus(), 100);
 
 })();
