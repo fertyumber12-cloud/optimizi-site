@@ -938,8 +938,36 @@
     }
 
 
-    function getK(matKey,T){if(!MATS[matKey])return 0.04;const m=MATS[matKey];return m.a+(m.b*T)+((m.c||0)*T*T);}
-    function getSurfaceCoeff(std,vWind,Ts,Ta,D_out,isFlat){const dT=Math.abs(Ts-Ta);const sigma=5.67e-8,eps=0.9;let h_rad=eps*sigma*(Math.pow(Ts+273.15,4)-Math.pow(Ta+273.15,4))/(dT||1);if(dT<0.1)h_rad=5;let h_cv=0;if(std==='astm'){if(vWind<0.1){if(isFlat)h_cv=1.95*Math.pow(dT,0.25);else h_cv=1.32*Math.pow(dT/(D_out||1),0.25);}else{h_cv=10.0*Math.pow(vWind,0.6)/Math.pow((D_out||1),0.4);}}else if(std==='vdi'){if(vWind<0.1)h_cv=3.5+0.05*dT;else h_cv=3.9*Math.pow(vWind,0.7)/Math.pow((D_out||1),0.3);}else{if(vWind<0.5){if(isFlat)h_cv=2.2*Math.pow(dT,0.25);else h_cv=1.32*Math.pow(dT/(D_out||1),0.25);}else{h_cv=4+4*vWind;}}if(h_cv<1)h_cv=1;return h_rad+h_cv;}
+   function getSurfaceCoeff(std,vWind,Ts,Ta,D_out,isFlat){
+        const dT=Math.abs(Ts-Ta);
+        const sigma=5.67e-8,eps=0.9;
+        
+        // Radyasyon Hesabı (İkisinde de aynıydı ama garanti olsun)
+        let h_rad=eps*sigma*(Math.pow(Ts+273.15,4)-Math.pow(Ta+273.15,4))/(dT||1);
+        if(dT<0.1)h_rad=5;
+        
+        let h_cv=0;
+        
+        // --- BURASI DEĞİŞTİ --- 
+        // Eski ROI kodunda burası 2.2 ve 4+4*vWind kullanıyordu.
+        // Artık Anlık Kayıp aracıyla aynı ISO 12241 mantığını kullanacak:
+        
+        if (vWind < 0.1) {
+             // Durgun hava (Doğal Konveksiyon)
+             if(isFlat) h_cv = 1.95 * Math.pow(dT, 0.25); // Eskiden 2.2 idi, fark buradaydı
+             else h_cv = 1.32 * Math.pow(dT / (D_out || 1), 0.25);
+        } else {
+             // Rüzgarlı hava (Zorlanmış Konveksiyon)
+             // Borular için genel ISO formülü
+             h_cv = 10 * Math.pow(vWind, 0.6) / Math.pow((D_out || 1), 0.4); 
+             
+             // Düz yüzeyler için Anlık Kayıp'taki özel formül
+             if(isFlat) h_cv = 5.8 + 3.8 * vWind; 
+        }
+        
+        if(h_cv < 1) h_cv = 1;
+        return h_rad+h_cv;
+    }
 
     // ignoreInvestment: Paket modunda ekleme yaparken yatırım sıfır alınsın diye
     function getCalculationResult(ignoreInvestment = false){
