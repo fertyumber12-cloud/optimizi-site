@@ -937,7 +937,11 @@
         alert("Paket başarıyla oluşturuldu ve listeye eklendi!");
     }
 
-function getSurfaceCoeff(std, vWind, Ts, Ta, D_out, isFlat) {
+
+    function getK(matKey,T){if(!MATS[matKey])return 0.04;const m=MATS[matKey];return m.a+(m.b*T)+((m.c||0)*T*T);}
+    
+    // --- GÜNCELLENEN RÜZGAR/KONVEKSİYON MOTORU (ANLIK KAYIP ARACI İLE EŞİTLENDİ) ---
+    function getSurfaceCoeff(std, vWind, Ts, Ta, D_out, isFlat) {
         const dT = Math.abs(Ts - Ta);
         const sigma = 5.67e-8, eps = 0.9;
 
@@ -947,21 +951,25 @@ function getSurfaceCoeff(std, vWind, Ts, Ta, D_out, isFlat) {
 
         let h_cv = 0;
 
-        // Rüzgar ve Konveksiyon Hesabı (Anlık Kayıp Aracı ile Eşitlendi)
+        // Rüzgar ve Konveksiyon Hesabı
         if (vWind < 0.1) {
-            // Durgun Hava
+            // Durgun Hava (Doğal Konveksiyon)
             if (isFlat) h_cv = 1.95 * Math.pow(dT, 0.25);
             else h_cv = 1.32 * Math.pow(dT / (D_out || 1), 0.25);
         } else {
-            // Rüzgarlı Hava
+            // Rüzgarlı Hava (Zorlanmış Konveksiyon)
+            // Borular için genel ISO formülü
             h_cv = 10.0 * Math.pow(vWind, 0.6) / Math.pow((D_out || 1), 0.4);
+            
+            // Düz yüzeyler için
             if (isFlat) h_cv = 5.8 + 3.8 * vWind;
         }
 
         if (h_cv < 1) h_cv = 1;
         return h_rad + h_cv;
     }
-  
+
+    // ignoreInvestment: Paket modunda ekleme yaparken yatırım sıfır alınsın diye
     function getCalculationResult(ignoreInvestment = false){
         const qty=parseFloat(document.getElementById('qty').value)||1;
         const type=document.getElementById('type').value;
