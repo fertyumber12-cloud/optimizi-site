@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Chiller Sistemleri Amortisman Hesaplama</title>
-<meta name="description" content="Profesyonel Chiller yalıtım, yoğuşma riski ve ROI analizi.">
+<title>Optimizi | Chiller Energy Audit</title>
+<meta name="description" content="Chiller ve soğutma hatları yalıtım karlılık analizi.">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -16,8 +16,7 @@
       fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
       extend: {
         colors: { slate: { 850: '#151e2e', 900: '#0f172a', 950: '#020617' } },
-        screens: { 'print': {'raw': 'print'} },
-        animation: { 'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite' }
+        screens: { 'print': {'raw': 'print'} }
       }
     }
   }
@@ -30,6 +29,7 @@
       --glass-border: rgba(6, 182, 212, 0.15);
       --text-main: #0f172a;
   }
+  
   html { scroll-behavior: smooth; }
   body {
       background-color: var(--bg-color);
@@ -38,18 +38,25 @@
       color: var(--text-main);
       -webkit-font-smoothing: antialiased;
   }
+  
   .glass-card {
       background-color: var(--glass-bg);
       backdrop-filter: blur(12px);
       border: 1px solid var(--glass-border);
       box-shadow: 0 4px 20px -5px rgba(6, 182, 212, 0.1);
   }
+  
   .glass-input {
-      transition: all 0.2s; border-radius: 0.5rem; padding: 0.6rem 0.75rem; width: 100%;
-      background-color: #fff; border: 1px solid #e2e8f0; color: var(--text-main); font-size: 0.85rem;
+      transition: all 0.2s;
+      border-radius: 0.5rem;
+      padding: 0.6rem 0.75rem;
+      width: 100%;
+      background-color: #fff;
+      border: 1px solid #e2e8f0;
+      color: var(--text-main);
+      font-size: 0.85rem;
   }
   .glass-input:focus { outline: none; border-color: #06b6d4; box-shadow: 0 0 0 3px rgba(6,182,212,0.1); }
-  .glass-input:disabled { background-color: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
 
   /* PRINT STYLES */
   @media print {
@@ -64,16 +71,9 @@
     .audit-table th { background-color: #f1f5f9 !important; color: #475569 !important; font-weight: 800; text-transform: uppercase; font-size: 8px; padding: 6px; border-bottom: 2px solid #cbd5e1; }
     .audit-table td { border-bottom: 1px solid #e2e8f0; padding: 6px; font-size: 9px; color: #334155; vertical-align: middle; }
     .audit-table tr:nth-child(even) { background-color: #f8fafc !important; }
-    .risk-badge-print { font-weight: bold; padding: 2px 4px; border-radius: 4px; color: white; font-size: 7px; display: inline-block; }
   }
   #print-area { display: none; }
   #qrcode-gen { display: none; }
-  
-  /* Risk Colors */
-  .risk-critical { background-color: #ef4444; color: white; }
-  .risk-high { background-color: #f97316; color: white; }
-  .risk-medium { background-color: #eab308; color: black; }
-  .risk-low { background-color: #10b981; color: white; }
 </style>
 </head>
 <body class="selection:bg-cyan-500/30 selection:text-cyan-700" onload="initApp()">
@@ -82,10 +82,10 @@
     <nav class="sticky top-0 z-50 glass-card !bg-white/90 !border-x-0 !border-t-0 !rounded-none border-b border-cyan-100 backdrop-blur-xl">
       <div class="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-between">
           <div class="flex items-center gap-3">
-              <h1 class="text-xl font-black text-slate-800 tracking-tight">Optimizi<span class="text-cyan-600">.Chiller</span> <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full ml-1 font-bold">PRO v3.5</span></h1>
+              <h1 class="text-xl font-black text-slate-800 tracking-tight">Optimizi<span class="text-cyan-600">.Chiller</span></h1>
           </div>
           <div class="flex items-center gap-3">
-              <label class="hidden md:flex items-center gap-2 cursor-pointer bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-cyan-500 transition select-none mr-2">
+              <label class="flex items-center gap-2 cursor-pointer bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-cyan-500 transition select-none mr-2">
                   <span class="text-[10px] font-bold text-slate-500" data-t="lbl_incl_qr">QR Ekle</span>
                   <input type="checkbox" id="toggleQrInput" checked class="w-4 h-4 accent-cyan-600 cursor-pointer">
               </label>
@@ -111,19 +111,15 @@
             <div class="glass-card p-6 rounded-2xl border-l-4 border-cyan-500">
                <div class="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1" data-t="dash_roi">Ort. Amortisman</div>
                <div class="text-4xl font-black text-slate-800 tracking-tight" id="dashRoi">---</div>
-               <div class="mt-3 text-[10px] text-slate-400 flex items-center gap-1"><i data-lucide="timer" class="w-3 h-3"></i> ROI</div>
+               <div class="mt-3 text-[10px] text-slate-400 flex items-center gap-1"><i data-lucide="info" class="w-3 h-3"></i> ROI</div>
             </div>
             <div class="glass-card p-6 rounded-2xl border-l-4 border-green-500">
                <div class="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1" data-t="dash_save">Yıllık Kazanç</div>
                <div class="text-3xl font-bold text-green-600 tracking-tight" id="dashSave">0</div>
             </div>
-            <div class="glass-card p-6 rounded-2xl border-l-4 border-transparent" id="riskCard">
-               <div class="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1 flex justify-between">
-                   <span data-t="dash_risk">Yoğuşma Riski</span>
-                   <i data-lucide="droplets" class="w-3.5 h-3.5 text-slate-400"></i>
-               </div>
-               <div class="text-2xl font-black text-slate-800 tracking-tight mt-1" id="dashRiskStatus">ANALİZ YOK</div>
-               <div class="text-[10px] text-slate-500 mt-2" id="dashRiskMsg">Dew Point: --</div>
+            <div class="glass-card p-6 rounded-2xl">
+               <div class="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1" data-t="dash_inv">Toplam Yatırım</div>
+               <div class="text-3xl font-bold text-slate-800 tracking-tight" id="dashInv">0</div>
             </div>
             <div class="glass-card p-6 bg-gradient-to-br from-cyan-50 to-white border-cyan-100 rounded-2xl">
                <div class="flex items-center justify-between">
@@ -139,32 +135,32 @@
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
             <div class="xl:col-span-4 space-y-6">
                 <div class="glass-card p-6 rounded-2xl">
-                    <h3 class="text-slate-800 text-xs font-black uppercase mb-4 flex items-center gap-2 tracking-wider"><i data-lucide="settings-2" class="w-4 h-4 text-cyan-600"></i> <span data-t="sec_params">Parametreler</span></h3>
+                   <h3 class="text-slate-800 text-xs font-black uppercase mb-4 flex items-center gap-2 tracking-wider"><i data-lucide="briefcase" class="w-4 h-4 text-cyan-600"></i> <span data-t="sec_project">Firma & Proje</span></h3>
+                   <div class="space-y-4">
+                       <div><label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block" data-t="lbl_prepared">Hazırlayan</label><div class="grid gap-2"><input type="text" id="pName" class="glass-input text-xs" placeholder="..."><input type="text" id="pEng" class="glass-input text-xs" placeholder="..."></div></div>
+                       <div class="h-px bg-slate-100 my-3"></div>
+                       <div><label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block" data-t="lbl_client">Müşteri Bilgileri</label><div class="grid gap-2"><input type="text" id="cName" class="glass-input text-xs" placeholder="..."><input type="text" id="cEng" class="glass-input text-xs" placeholder="..."></div></div>
+                   </div>
+                </div>
+
+                <div class="glass-card p-6 rounded-2xl">
+                    <h3 class="text-slate-800 text-xs font-black uppercase mb-4 flex items-center gap-2 tracking-wider"><i data-lucide="settings" class="w-4 h-4 text-cyan-600"></i> <span data-t="sec_params">Parametreler</span></h3>
                     <div class="grid grid-cols-2 gap-4">
-                        <div><label class="text-[10px] text-slate-500 mb-1 block font-bold" data-t="lbl_tamb">Ortam Sıc. (°C)</label><input type="number" id="tAmb" class="glass-input text-xs" value="30" onchange="updateDynamics()"></div>
-                        <div><label class="text-[10px] text-cyan-600 mb-1 block font-bold" data-t="lbl_rh">Bağıl Nem (%)</label><input type="number" id="rh" class="glass-input text-xs font-bold text-cyan-700" value="65" min="0" max="100" onchange="updateDynamics()"></div>
+                        <div><label class="text-[10px] text-slate-500 mb-1 block" data-t="lbl_tamb">Ortam Sıc. (°C)</label><input type="number" id="tAmb" class="glass-input text-xs" value="30"></div>
+                        <div><label class="text-[10px] text-slate-500 mb-1 block" data-t="lbl_wind">Rüzgar (m/s)</label><input type="number" id="vWind" class="glass-input text-xs" value="0"></div>
                     </div>
                     
                     <div class="mt-4 grid grid-cols-2 gap-4"> 
-                         <div class="col-span-1">
-                             <div class="flex justify-between items-center mb-1">
-                                 <label class="text-[10px] text-slate-500 font-bold">Chiller COP</label>
-                                 <label class="flex items-center gap-1 cursor-pointer">
-                                     <input type="checkbox" id="autoCop" checked onchange="updateDynamics()" class="accent-cyan-600 w-3 h-3">
-                                     <span class="text-[8px] uppercase font-bold text-cyan-600">Auto</span>
-                                 </label>
-                             </div>
+                        <div>
+                             <label class="text-[10px] text-slate-500 mb-1 block font-bold text-cyan-600">Chiller COP</label>
                              <input type="number" id="cop" class="glass-input text-xs font-bold" value="3.5" step="0.1">
                          </div>
-                        <div><label class="text-[10px] text-slate-500 mb-1 block" data-t="lbl_wind">Rüzgar (m/s)</label><input type="number" id="vWind" class="glass-input text-xs" value="0.5" step="0.5"></div>
+                         <div><label class="text-[10px] text-slate-500 mb-1 block" data-t="lbl_hours">Yıllık Saat</label><input type="number" id="hours" class="glass-input text-xs" value="5000"></div>
                     </div>
 
-                    <div class="mt-4 grid grid-cols-2 gap-4">
-                        <div><label class="text-[10px] text-slate-500 mb-1 block" data-t="lbl_hours">Yıllık Saat</label><input type="number" id="hours" class="glass-input text-xs" value="5000"></div>
-                        <div>
-                            <label class="text-[10px] text-slate-500 mb-1 block" data-t="lbl_price">Enerji Fiyatı</label>
-                            <div class="flex gap-1"><input type="number" id="price" class="glass-input text-xs" value="4.50"><select id="energyCurr" class="glass-input !px-1 w-14 text-center text-xs font-bold bg-slate-50"><option value="TL" selected>₺</option><option value="USD">$</option><option value="EUR">€</option></select></div>
-                        </div>
+                    <div class="mt-4">
+                        <label class="text-[10px] text-slate-500 mb-1 block" data-t="lbl_price">Enerji Birim Fiyatı</label>
+                        <div class="flex gap-1"><input type="number" id="price" class="glass-input text-xs" value="4.50"><select id="energyCurr" class="glass-input !px-1 w-16 text-center text-xs font-bold bg-slate-50"><option value="TL" selected>₺ TL</option><option value="USD">$ USD</option><option value="EUR">€ EUR</option></select></div>
                     </div>
                 </div>
 
@@ -213,12 +209,17 @@
                          <input type="text" id="location" class="glass-input text-xs" placeholder="...">
                     </div>
 
-                    <div class="bg-slate-50 rounded-lg p-3 mt-4 border border-slate-200 relative z-10">
-                        <div class="flex justify-between items-center mb-2">
-                            <label class="text-[10px] text-cyan-700 font-bold uppercase" data-t="lbl_ins">İzolasyon Ceketi</label>
-                            <span id="matInfo" class="text-[9px] text-slate-400 cursor-help" title="">ⓘ Info</span>
+                    <div class="mt-4 relative z-10 grid grid-cols-2 gap-2">
+                        <div>
+                             <input type="file" id="imgInp" class="hidden" accept="image/*" onchange="readImg(this)">
+                             <div onclick="document.getElementById('imgInp').click()" class="border border-dashed border-slate-300 rounded-lg p-3 text-center cursor-pointer hover:border-cyan-500 hover:bg-slate-50 transition h-full flex flex-col justify-center items-center"><i data-lucide="camera" class="w-4 h-4 text-slate-400 mb-1"></i><span class="text-[9px] text-slate-400 block" data-t="btn_photo">Fotoğraf</span></div>
                         </div>
-                        <select id="matSelect" class="glass-input text-xs mb-2 bg-white" onchange="updateMatInfo()"></select>
+                        <img id="prevImg" class="hidden w-full h-16 object-cover rounded-lg border border-slate-300">
+                    </div>
+
+                    <div class="bg-slate-50 rounded-lg p-3 mt-4 border border-slate-200 relative z-10">
+                        <label class="text-[10px] text-cyan-700 font-bold uppercase mb-2 block" data-t="lbl_ins">İzolasyon Ceketi</label>
+                        <select id="matSelect" class="glass-input text-xs mb-2 bg-white"></select>
                         <div class="grid grid-cols-2 gap-2 mt-2">
                             <input type="number" id="thk" class="glass-input text-xs" value="19" placeholder="mm">
                             <div class="flex gap-1">
@@ -234,14 +235,6 @@
                         <button id="btnAdd" onclick="calc()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl shadow-lg shadow-slate-900/10 transition active:scale-95 flex items-center justify-center gap-2 text-sm cursor-pointer"><i data-lucide="plus" class="w-4 h-4"></i> <span data-t="btn_add">Listeye Ekle</span></button>
                         <button id="btnUpdate" onclick="finishUpdate()" class="hidden w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-orange-500/20 transition active:scale-95 flex items-center justify-center gap-2 text-sm cursor-pointer"><i data-lucide="check" class="w-4 h-4"></i> <span data-t="btn_update">Güncelle</span></button>
                     </div>
-                </div>
-                
-                 <div class="glass-card p-4 rounded-xl opacity-80 hover:opacity-100 transition">
-                   <h3 class="text-slate-500 text-[10px] font-bold uppercase mb-2" data-t="sec_project">Proje Detayları</h3>
-                   <div class="grid grid-cols-2 gap-2">
-                       <input type="text" id="cName" class="glass-input text-[10px] py-1" placeholder="Firma Adı">
-                       <input type="text" id="pName" class="glass-input text-[10px] py-1" placeholder="Hazırlayan">
-                   </div>
                 </div>
             </div>
 
@@ -260,6 +253,7 @@
                                     <option value="EUR">€ EUR</option>
                                 </select>
                             </div>
+                            <div class="w-px h-4 bg-slate-300 mx-1"></div>
                             <button onclick="clearAll()" class="text-[10px] text-red-500 hover:text-red-700 transition cursor-pointer font-bold px-3 py-1 bg-red-50 rounded hover:bg-red-100" data-t="btn_clear">Temizle</button>
                         </div>
                     </div>
@@ -267,6 +261,7 @@
                         <table class="w-full text-left text-sm" id="grid">
                         <thead class="bg-slate-100 text-[10px] uppercase text-slate-500 font-semibold sticky top-0 backdrop-blur-md z-10">
                             <tr>
+                            <th class="px-4 py-3 text-center" data-t="th_img">Görsel</th>
                             <th class="px-4 py-3" data-t="th_eq">Ekipman</th>
                             <th class="px-4 py-3 text-center" data-t="th_qty">Adet</th>
                             <th class="px-4 py-3 text-center text-red-500" data-t="th_bare">Çıplak<br><span class="text-[9px] opacity-70">(kWh)</span></th>
@@ -274,8 +269,7 @@
                             <th class="px-4 py-3 text-right" data-t="th_inv">Yatırım</th>
                             <th class="px-4 py-3 text-right text-green-600" data-t="th_save">Kazanç</th>
                             <th class="px-4 py-3 text-right" data-t="th_roi">ROI</th>
-                            <th class="px-4 py-3 text-center">Risk</th>
-                            <th class="px-4 py-3 text-right"></th>
+                            <th class="px-4 py-3 text-right" data-t="th_act">İşlem</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200" id="gridBody">
@@ -308,8 +302,9 @@
                     <img id="repQrImage" src="" class="w-16 h-16 bg-white rounded p-1">
                 </div>
             </div>
+
             <h1 class="text-7xl font-black leading-tight text-white mb-6">CHILLER <br><span class="text-cyan-400">INSULATION</span> <br>REPORT</h1>
-            <p class="text-slate-400 text-lg max-w-lg leading-relaxed" data-t="cov_subtitle">Termal kayıp analizi, yoğuşma riski simülasyonu ve karbon ayak izi raporlaması.</p>
+            <p class="text-slate-400 text-lg max-w-lg leading-relaxed" data-t="cov_subtitle">Termal kayıp analizi, yatırım geri dönüş simülasyonu ve karbon ayak izi raporlaması.</p>
         </div>
         <div class="flex-1 flex items-center justify-center relative z-10 w-full px-16">
             <div class="w-full bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-8 rounded-none border-l-4 border-l-cyan-500">
@@ -331,7 +326,7 @@
                  <div>
                      <h3 class="text-xs font-black uppercase text-slate-400 mb-4 tracking-widest" data-t="lbl_client">MÜŞTERİ</h3>
                      <div class="text-2xl font-bold text-slate-900 mb-1" id="covClient">FİRMA ADI</div>
-                     <div class="text-sm text-slate-500 font-medium" id="covContact">...</div>
+                     <div class="text-sm text-slate-500 font-medium" id="covContact">Yetkili</div>
                  </div>
                  <div>
                      <h3 class="text-xs font-black uppercase text-slate-400 mb-4 tracking-widest" data-t="lbl_prepared">HAZIRLAYAN</h3>
@@ -339,9 +334,8 @@
                      <div class="text-sm text-slate-500 font-medium" id="covDate">...</div>
                  </div>
              </div>
-             <div class="mt-12 pt-6 border-t border-slate-200 grid grid-cols-5 gap-6 text-[10px] text-slate-500 uppercase font-bold tracking-wider">
+             <div class="mt-12 pt-6 border-t border-slate-200 grid grid-cols-4 gap-6 text-[10px] text-slate-500 uppercase font-bold tracking-wider">
                  <div><span class="block text-slate-300">T. AMB</span> <span id="covTemp" class="text-slate-800 text-sm">30</span>°C</div>
-                 <div><span class="block text-slate-300">HUMIDITY</span> <span id="covRh" class="text-slate-800 text-sm">65</span>%</div>
                  <div><span class="block text-slate-300">WIND</span> <span id="covWind" class="text-slate-800 text-sm">0</span> m/s</div>
                  <div><span class="block text-slate-300">COP</span> <span id="covCop" class="text-slate-800 text-sm">3.5</span></div>
                  <div><span class="block text-slate-300">PRICE</span> <span id="covPrice" class="text-slate-800 text-sm">4.5</span></div>
@@ -351,27 +345,12 @@
     <div id="p-table" class="print-page p-12 hidden">
         <div class="flex justify-between items-center border-b-2 border-slate-900 pb-4 mb-8">
             <h2 class="text-2xl font-black text-slate-900 uppercase" data-t="print_detail_title">DETAYLI ANALİZ DÖKÜMÜ</h2>
-            <div class="text-xs font-bold text-slate-400">OPTIMIZI PRO</div>
+            <div class="text-xs font-bold text-slate-400">OPTIMIZI.CHILLER</div>
         </div>
         <table class="w-full audit-table mb-8"><thead><tr id="rep_table_head"></tr></thead><tbody id="rTable"></tbody></table>
     </div>
     <div id="p-summary" class="print-page p-12 flex flex-col h-full hidden">
         <h2 class="text-3xl font-black text-slate-900 uppercase mb-8 border-b-4 border-cyan-500 pb-2 inline-block" data-t="print_exec_sum">YÖNETİCİ ÖZETİ</h2>
-        
-        <div class="mb-8 bg-slate-50 border border-slate-200 p-6 flex justify-between items-center">
-            <div>
-                <h4 class="text-xs font-black text-slate-800 uppercase mb-2">YOĞUŞMA VE KOROZYON RİSKİ</h4>
-                <div class="text-[9px] text-slate-500 font-mono space-y-1">
-                    <div>Dew Point: <span id="repDewPoint" class="font-bold text-slate-800">22.5°C</span> (Based on <span id="repRh">65</span>% RH, <span id="repTamb">30</span>°C)</div>
-                    <div>Yüzey Sıcaklığı: <span class="text-slate-800">Analiz Ediliyor...</span></div>
-                </div>
-            </div>
-            <div class="text-right">
-                <div class="text-[9px] uppercase font-bold text-slate-400 mb-1">RİSK DURUMU</div>
-                <div id="repRiskBadge" class="text-2xl font-black text-slate-800">DÜŞÜK</div>
-            </div>
-        </div>
-
         <div class="grid grid-cols-3 gap-6 mb-10">
             <div class="p-6 bg-red-50 border border-red-100 rounded-none">
                 <div class="text-[10px] font-black text-red-400 uppercase tracking-widest mb-2" data-t="print_loss_lbl">MEVCUT YILLIK KAYIP</div>
@@ -416,7 +395,7 @@
              <div class="p-6 border border-slate-200 flex flex-col justify-center">
                 <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">NOTES</div>
                 <p class="text-[8px] text-slate-500 leading-relaxed text-justify" data-t="print_disclaimer">
-                    Bu rapor, ISO 12241 ve McAdams konveksiyon standartlarına dayalıdır.
+                    Bu rapor, ISO 12241 standartlarına dayalı simülasyon verileri içerir. Soğutma hatlarında yalıtım, sadece enerji tasarrufu sağlamakla kalmaz, aynı zamanda yoğuşma kaynaklı korozyonu önleyerek ekipman ömrünü uzatır.
                 </p>
             </div>
         </div>
@@ -424,75 +403,42 @@
 </div>
 
 <script>
-    // --- ADVANCED MATERIAL DB ---
-    const INSULATION_MATERIALS = {
-      elastomeric: {
-        id: "elastomeric", name_tr: "Elastomerik Kauçuk", name_en: "Elastomeric Rubber",
-        k: 0.036, mu: 7000, density: 70, temp_min: -50, temp_max: 110, fire_class: "B2", life: 15,
-        desc_tr: "Mükemmel nem bariyeri, yoğuşma kontrolü için ideal.", desc_en: "Excellent moisture barrier, ideal for condensation control."
-      },
-      rockwool: {
-        id: "rockwool", name_tr: "Taş Yünü (Alu. Folyolu)", name_en: "Rock Wool (Alu. Foil)",
-        k: 0.035, mu: 1.2, density: 100, temp_min: -200, temp_max: 750, fire_class: "A1", life: 25,
-        desc_tr: "Yüksek yangın dayanımı. Buhar bariyeri zedelenirse riskli!", desc_en: "High fire resistance. Risky if vapor barrier is damaged!"
-      },
-      aerogel: {
-        id: "aerogel", name_tr: "Aerogel Battaniye", name_en: "Aerogel Blanket",
-        k: 0.014, mu: 5, density: 150, temp_min: -200, temp_max: 650, fire_class: "A2", life: 30,
-        desc_tr: "En ince kesitte en yüksek performans.", desc_en: "Highest performance in thinnest profile."
-      },
-      glasswool: {
-        id: "glasswool", name_tr: "Cam Yünü (Klima)", name_en: "Glass Wool (HVAC)",
-        k: 0.032, mu: 1.3, density: 48, temp_min: -30, temp_max: 250, fire_class: "A2", life: 20,
-        desc_tr: "Ekonomik çözüm, mekanik dayanımı düşük.", desc_en: "Economic solution, low mechanical strength."
-      },
-      bare: {
-        id: "bare", name_tr: "Yalıtımsız", name_en: "Uninsulated",
-        k: 25, mu: 0, density: 7850, temp_min: -273, temp_max: 1500, fire_class: "-", life: 50,
-        desc_tr: "Çıplak yüzey.", desc_en: "Bare surface."
-      }
-    };
-
     const LANG_DATA = {
         tr: {
-            btn_report: "Rapor Al", dash_roi: "Ort. Amortisman", dash_save: "Yıllık Kazanç", dash_inv: "Toplam Yatırım", dash_co2: "CO2 Azaltım", dash_risk: "Yoğuşma Riski",
+            btn_report: "Rapor Al", dash_roi: "Ort. Amortisman", dash_save: "Yıllık Kazanç", dash_inv: "Toplam Yatırım", dash_co2: "CO2 Azaltım",
             sec_project: "Firma & Proje", lbl_prepared: "Hazırlayan", lbl_client: "Firma Bilgileri",
-            sec_params: "Parametreler", lbl_tamb: "Ortam Sıc. (°C)", lbl_wind: "Rüzgar (m/s)", lbl_hours: "Yıllık Saat", lbl_price: "Enerji Birim Fiyatı", lbl_rh: "Bağıl Nem (%)",
+            sec_params: "Parametreler", lbl_tamb: "Ortam Sıc. (°C)", lbl_wind: "Rüzgar (m/s)", lbl_hours: "Yıllık Saat", lbl_price: "Enerji Birim Fiyatı",
             sec_add: "Yeni Ölçüm Ekle", tab_valve: "Vana", tab_pipe: "Boru", tab_flat: "Düz / Eşanjör",
             lbl_dims: "Yüzey Ölçüleri (cm)", lbl_area: "Toplam Alan:", lbl_tproc: "Akışkan Sıc. (°C)", lbl_qty: "Adet", lbl_loc: "Mahal / Lokasyon", btn_photo: "Fotoğraf Ekle",
             lbl_ins: "İzolasyon Ceketi", btn_add: "Listeye Ekle", btn_update: "Güncelle", lbl_repcurr: "Rapor Kuru:", lbl_incl_qr: "QR Ekle",
             sec_list: "Hesaplama Listesi", btn_clear: "Temizle", msg_empty: "Henüz hesaplama eklenmedi.",
-            th_eq: "Ekipman", th_qty: "Adet", th_bare: "Çıplak", th_ins: "Yalıtımlı", th_inv: "Yatırım", th_save: "Kazanç", th_roi: "ROI",
+            th_img: "Görsel", th_eq: "Ekipman", th_qty: "Adet", th_bare: "Çıplak", th_ins: "Yalıtımlı", th_inv: "Yatırım", th_save: "Kazanç", th_roi: "ROI", th_act: "İşlem",
             print_roi_lbl: "TAHMİNİ GERİ DÖNÜŞ", print_months: "AY", print_save_lbl: "YILLIK TASARRUF",
             print_detail_title: "DETAYLI ANALİZ DÖKÜMÜ", print_exec_sum: "YÖNETİCİ ÖZETİ", 
             print_loss_lbl: "MEVCUT YILLIK KAYIP", print_net_save: "NET KAZANÇ (YILLIK)",
-            print_chart_title: "5 Yıllık Projeksiyon", print_trees: "Ağaç Eşleniği", lbl_env_impact: "ÇEVRESEL ETKİ", 
-            cov_subtitle: "Termal kayıp analizi, yoğuşma riski simülasyonu ve karbon ayak izi raporlaması.",
-            print_disclaimer: "Bu rapor, ISO 12241 ve McAdams konveksiyon standartlarına dayalıdır. Su buharı direnci düşük malzemelerde buhar bariyeri kullanılmazsa yoğuşma riski artar.", 
-            qr_cta: "Bu yatırımın yapılmadığı her saniye fazladan harcanan enerjiyi canlı takip edin.",
-            risk_high: "YÜKSEK RİSK", risk_med: "ORTA RİSK", risk_low: "GÜVENLİ",
+            print_chart_title: "5 Yıllık Projeksiyon", print_trees: "Ağaç Eşleniği", lbl_env_impact: "ÇEVRESEL ETKİ", cov_subtitle: "Termal kayıp analizi, yatırım geri dönüş simülasyonu ve karbon ayak izi raporlaması.",
+            print_disclaimer: "Bu rapor, ISO 12241 standartlarına dayalı simülasyon verileri içerir. Soğutma hatlarında yalıtım, enerji tasarrufu sağlamanın yanı sıra yoğuşma ve korozyonu önler.", qr_cta: "Bu yatırımın yapılmadığı her saniye fazladan harcanan enerjiyi canlı takip edin.",
+            mats: { rubber: "Elastomerik Kauçuk", aerogel: "Aerogel", glasswool: "Cam Yünü", pu: "Poliüretan", bare: "Yalıtımsız" },
             valves: { gate: "Sürgülü Vana", globe: "Glob Vana", ball: "Küresel Vana", butterfly: "Kelebek Vana", check: "Çekvalf", strainer: "Pislik Tutucu", flange: "Flanş Çifti", elbow: "Dirsek (90°)" },
-            flat: "Düz Alan / Eşanjör", pipe: "Boru"
+            flat: "Düz Alan / Eşanjör", pipe: "Boru", uninsulated: "Yalıtımsız"
         },
         en: {
-            btn_report: "Print Report", dash_roi: "Avg. ROI", dash_save: "Annual Savings", dash_inv: "Total Investment", dash_co2: "CO2 Reduction", dash_risk: "Condensation Risk",
+            btn_report: "Print Report", dash_roi: "Avg. ROI", dash_save: "Annual Savings", dash_inv: "Total Investment", dash_co2: "CO2 Reduction",
             sec_project: "Company & Project", lbl_prepared: "Prepared By", lbl_client: "Client Info",
-            sec_params: "Parameters", lbl_tamb: "Amb. Temp (°C)", lbl_wind: "Wind (m/s)", lbl_hours: "Annual Hours", lbl_price: "Energy Unit Price", lbl_rh: "Rel. Humidity (%)",
+            sec_params: "Parameters", lbl_tamb: "Amb. Temp (°C)", lbl_wind: "Wind (m/s)", lbl_hours: "Annual Hours", lbl_price: "Energy Unit Price",
             sec_add: "Add New Item", tab_valve: "Valve", tab_pipe: "Pipe", tab_flat: "Flat / Exch.",
             lbl_dims: "Dimensions (cm)", lbl_area: "Total Area:", lbl_tproc: "Fluid Temp (°C)", lbl_qty: "Qty", lbl_loc: "Location", btn_photo: "Add Photo",
             lbl_ins: "Insulation Jacket", btn_add: "Add to List", btn_update: "Update", lbl_repcurr: "Report Currency:", lbl_incl_qr: "Include QR",
             sec_list: "Calculation List", btn_clear: "Clear All", msg_empty: "No items added yet.",
-            th_eq: "Equipment", th_qty: "Qty", th_bare: "Bare", th_ins: "Insulated", th_inv: "Invest.", th_save: "Saving", th_roi: "ROI",
+            th_img: "Image", th_eq: "Equipment", th_qty: "Qty", th_bare: "Bare", th_ins: "Insulated", th_inv: "Invest.", th_save: "Saving", th_roi: "ROI", th_act: "Action",
             print_roi_lbl: "ESTIMATED ROI", print_months: "MONTHS", print_save_lbl: "ANNUAL SAVINGS",
             print_detail_title: "DETAILED AUDIT ANALYSIS", print_exec_sum: "EXECUTIVE SUMMARY", 
             print_loss_lbl: "CURRENT ANNUAL LOSS", print_net_save: "NET SAVINGS (YEARLY)",
-            print_chart_title: "5-Year Projection", print_trees: "Tree Equivalent", lbl_env_impact: "ENVIRONMENTAL IMPACT", 
-            cov_subtitle: "Thermal loss analysis, condensation risk simulation and carbon footprint reporting.",
-            print_disclaimer: "Report based on ISO 12241 & McAdams standards. Low vapor resistance materials pose high risk if vapor barrier is missing.", 
-            qr_cta: "Scan to track real-time energy waste wasted every second this investment is delayed.",
-            risk_high: "HIGH RISK", risk_med: "MEDIUM RISK", risk_low: "SAFE",
+            print_chart_title: "5-Year Projection", print_trees: "Tree Equivalent", lbl_env_impact: "ENVIRONMENTAL IMPACT", cov_subtitle: "Thermal loss analysis, ROI simulation and carbon footprint reporting.",
+            print_disclaimer: "This report is based on ISO 12241 standards. Insulation on cooling lines not only saves energy but also prevents condensation and corrosion.", qr_cta: "Scan to track real-time energy waste wasted every second this investment is delayed.",
+            mats: { rubber: "Elastomeric Rubber", aerogel: "Aerogel", glasswool: "Glass Wool", pu: "Polyurethane", bare: "Uninsulated" },
             valves: { gate: "Gate Valve", globe: "Globe Valve", ball: "Ball Valve", butterfly: "Butterfly Valve", check: "Check Valve", strainer: "Strainer", flange: "Flange Pair", elbow: "Elbow (90°)" },
-            flat: "Flat Surface / HEX", pipe: "Pipe"
+            flat: "Flat Surface / HEX", pipe: "Pipe", uninsulated: "Uninsulated"
         }
     };
 
@@ -506,143 +452,21 @@
     }
     function applyLang(){
         document.querySelectorAll('[data-t]').forEach(el => { el.innerText = t(el.getAttribute('data-t')); });
-        fillValveList(); fillMatList(); render(); updateMatInfo();
+        fillValveList(); fillMatList(); render();
     }
 
     const PIPES={15:21.3,20:26.7,25:33.4,32:42.2,40:48.3,50:60.3,65:73.0,80:88.9,100:114.3,125:141.3,150:168.3,200:219.1,250:273.0,300:323.9,350:355.6,400:406.4,500:508.0};
+    const MAT_DATA={ rubber:{k:0.034}, aerogel:{k:0.019}, glasswool:{k:0.032}, pu:{k:0.024}, bare:{k:25} };
     const VALVE_FACTORS={gate:1.2,globe:1.4,butterfly:0.6,ball:1.0,strainer:1.5,check:0.9,flange:0.4,elbow:0.3};
     
+    // INITIAL FX WITH FALLBACKS
     let LIST=[], FX={USD:34.50, EUR:36.50, TL:1.0}, currImg=null, editingIndex=null, currentSurfaces=[];
 
     function initApp(){ 
         fillDN('vDN'); fillDN('pDN'); fillValveList(); fillMatList(); setType('valve');
-        setTimeout(lucide.createIcons, 500); getFxSafe(); updateDynamics();
+        setTimeout(lucide.createIcons, 500); getFxSafe();
     }
     
-    // --- PHYSICS ENGINE V2 ---
-    function calculateDewPoint(tAmb, rh) {
-        // Magnus Formula
-        const a = 17.27, b = 237.7;
-        const alpha = ((a * tAmb) / (b + tAmb)) + Math.log(rh / 100);
-        return (b * alpha) / (a - alpha);
-    }
-
-    function calculateDynamicCOP(tAmb, tEvap = 7) {
-        const tAmbK = 273.15 + tAmb;
-        const tEvapK = 273.15 + tEvap;
-        if(tAmbK <= tEvapK) return 5.0; // Fail safe
-        const carnot = tEvapK / (tAmbK - tEvapK);
-        return carnot * 0.45; // 45% real world efficiency
-    }
-
-    function mcAdamsConvection(tSurf, tAmb, vWind, diameter) {
-        // Returns h (W/m2K)
-        // Note: For flat surfaces, diameter is characteristic length
-        const deltaT = Math.abs(tSurf - tAmb);
-        if (vWind < 0.1) {
-            // Natural Convection (simplified)
-            // h = C * (dT / D)^0.25
-            if(diameter <= 0) diameter = 1;
-            return 1.32 * Math.pow(deltaT / diameter, 0.25);
-        } else {
-            // Forced Convection (McAdams)
-            // h = 5.7 * vWind + 3.0 (Old Linear) -> Let's use correlation
-            // But for air at standard conditions, the linear approx h = 2.8 + 3.0*v is actually quite decent for rough surfaces
-            // Let's use the standard Engineering approx for pipe insulation: h = 10 for indoors, h = 25 for outdoors is common practice
-            // But let's stick to a wind dependent formula: h = 5 + 3.4 * vWind
-            return 5 + (3.4 * vWind);
-        }
-    }
-
-    // Iterative Solver for Surface Temp & Heat Loss
-    function solveHeatTransfer(item, matKey, thkMm, tAmb, tProc, vWind) {
-        const mat = INSULATION_MATERIALS[matKey];
-        const k = mat.k;
-        const r_ins = (matKey === 'bare') ? 0 : thkMm / 1000 / k; // Simplified R for flat, for pipe it's log
-        
-        // Geometry Setup
-        let area = 0, diameter = 0;
-        let isPipe = (item.type === 'pipe' || item.type === 'valve');
-        
-        if (item.type === 'tank') {
-             area = item.totalSurfM2 || 1;
-             diameter = Math.sqrt(area); // Characteristic length
-        } else {
-             let dn = (item.type==='valve') ? item.vDN : item.pDN;
-             let mm = PIPES[dn];
-             diameter = mm / 1000;
-             let len = (item.type==='pipe') ? item.pLen : (diameter * 5 * VALVE_FACTORS[item.valveType]);
-             area = Math.PI * diameter * len;
-             // Pipe R correction: R = ln(D_out/D_in) / (2*PI*k*L)
-             if(matKey !== 'bare'){
-                 const D_in = diameter;
-                 const D_out = diameter + 2*(thkMm/1000);
-                 // Unit Area R-value equivalent for iteration logic
-                 // Q = (dT) / (R_ins_eff + 1/h)
-             }
-        }
-
-        // Iteration for T_surface (Outer)
-        // Guess T_surf = T_amb (no heat loss) initially, then converge
-        let tSurf = tAmb;
-        let q_watts = 0;
-        
-        // 3 iterations usually enough for convergence
-        for(let i=0; i<3; i++) {
-             let h = mcAdamsConvection(tSurf, tAmb, vWind, diameter);
-             let r_film = 1 / (h * area); // Total resistance of air film
-             
-             // Total Resistance
-             let r_total = 0;
-             if(isPipe && matKey !== 'bare'){
-                 const D_in = diameter;
-                 const D_out = diameter + 2*(thkMm/1000);
-                 const len = area / (Math.PI * diameter);
-                 let r_material = Math.log(D_out/D_in) / (2 * Math.PI * k * len);
-                 r_total = r_material + (1 / (h * Math.PI * D_out * len)); // Approx film on outer area
-                 q_watts = (tAmb - tProc) / r_total; // Heat Gain
-                 // New T_surf = T_amb - (Q / (h * A_outer))
-                 tSurf = tAmb - (q_watts / (h * Math.PI * D_out * len));
-             } else if (!isPipe && matKey !== 'bare') {
-                 let r_material = (thkMm/1000) / (k * area);
-                 r_total = r_material + r_film;
-                 q_watts = (tAmb - tProc) / r_total;
-                 tSurf = tAmb - (q_watts / (h * area));
-             } else {
-                 // Bare
-                 q_watts = h * area * (tAmb - tProc);
-                 tSurf = tProc; // Approx
-             }
-        }
-        
-        return { q: Math.abs(q_watts), tSurf: tSurf };
-    }
-
-    function updateDynamics() {
-        const tAmb = parseFloat(document.getElementById('tAmb').value) || 30;
-        const rh = parseFloat(document.getElementById('rh').value) || 65;
-        const isAuto = document.getElementById('autoCop').checked;
-        
-        // Update COP if Auto
-        if(isAuto) {
-            const newCop = calculateDynamicCOP(tAmb);
-            document.getElementById('cop').value = newCop.toFixed(2);
-            document.getElementById('cop').disabled = true;
-        } else {
-            document.getElementById('cop').disabled = false;
-        }
-        
-        // Re-render to update risks if ambient changed
-        if(LIST.length > 0) calcAllRisks();
-    }
-
-    function updateMatInfo() {
-        const key = document.getElementById('matSelect').value;
-        const mat = INSULATION_MATERIALS[key];
-        const desc = CUR_LANG === 'tr' ? mat.desc_tr : mat.desc_en;
-        document.getElementById('matInfo').title = `k: ${mat.k}, μ: ${mat.mu}\n${desc}`;
-    }
-
     function fillValveList(){
         const sel = document.getElementById('valveType'); const oldVal = sel.value; sel.innerHTML = '';
         const dict = LANG_DATA[CUR_LANG].valves;
@@ -651,13 +475,9 @@
     }
     function fillMatList(){
         const sel = document.getElementById('matSelect'); const oldVal = sel.value; sel.innerHTML = '';
-        for(const [k,v] of Object.entries(INSULATION_MATERIALS)){ 
-            let o = document.createElement('option'); o.value = k; 
-            o.text = (CUR_LANG === 'tr' ? v.name_tr : v.name_en); 
-            if(k==='bare') o.classList.add('text-red-500','font-bold'); 
-            sel.add(o); 
-        }
-        if(oldVal) sel.value = oldVal; else sel.value = 'elastomeric';
+        const dict = LANG_DATA[CUR_LANG].mats;
+        for(const [k,v] of Object.entries(dict)){ let o = document.createElement('option'); o.value = k; o.text = v; if(k==='bare') o.classList.add('text-red-500','font-bold'); sel.add(o); }
+        if(oldVal) sel.value = oldVal; else sel.value = 'rubber';
     }
     function fillDN(id){
         const el=document.getElementById(id); if(!el) return; el.innerHTML='';
@@ -695,6 +515,7 @@
     }
     function readImg(i){if(i.files&&i.files[0]){const r=new FileReader();r.onload=e=>{currImg=e.target.result;document.getElementById('prevImg').src=currImg;document.getElementById('prevImg').classList.remove('hidden');};r.readAsDataURL(i.files[0]);}}
     
+    // SAFELY GET FX
     async function getFxSafe(){ 
         try{
             const r=await fetch('https://api.frankfurter.app/latest?from=USD&to=TRY'); const d=await r.json(); 
@@ -702,7 +523,7 @@
             const r2=await fetch('https://api.frankfurter.app/latest?from=EUR&to=TRY'); const d2=await r2.json(); 
             if(d2.rates.TRY) FX.EUR=d2.rates.TRY;
             document.getElementById('fxVal').innerText=FX.USD.toFixed(2);
-        }catch(e){ console.log("FX Fetch Failed"); } 
+        }catch(e){ console.log("FX Fetch Failed, using default."); } 
     }
     function fmt(n){ return n.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
@@ -710,9 +531,9 @@
         const type = document.getElementById('type').value;
         const qty = parseFloat(document.getElementById('qty').value) || 1;
         const tAmb = parseFloat(document.getElementById('tAmb').value) || 30;
-        const rh = parseFloat(document.getElementById('rh').value) || 65;
         const tProc = parseFloat(document.getElementById('tProc').value) || 7;
-        const vWind = parseFloat(document.getElementById('vWind').value) || 0.5;
+        const vWindInput = document.getElementById('vWind').value;
+        const vWind = (vWindInput === "" || isNaN(parseFloat(vWindInput))) ? 1 : parseFloat(vWindInput);
         const cop = parseFloat(document.getElementById('cop').value) || 3.5;
         const hours = parseFloat(document.getElementById('hours').value) || 5000;
         const priceVal = parseFloat(document.getElementById('price').value) || 0;
@@ -724,51 +545,69 @@
         const location = document.getElementById('location').value;
 
         // Base Calculation always in TL
-        let pRate = FX[priceCurr] || 1; if(priceCurr !== 'TL' && pRate === 1) pRate = (priceCurr==='USD'?34.5:36.5);
-        let iRate = FX[invCurr] || 1; if(invCurr !== 'TL' && iRate === 1) iRate = (invCurr==='USD'?34.5:36.5);
+        let pRate = FX[priceCurr] || 1; 
+        if(priceCurr === 'USD' && pRate === 1) pRate = 34.5; // Force fallback if 1
+        if(priceCurr === 'EUR' && pRate === 1) pRate = 36.5;
+
+        let iRate = FX[invCurr] || 1;
+        if(invCurr === 'USD' && iRate === 1) iRate = 34.5;
+        if(invCurr === 'EUR' && iRate === 1) iRate = 36.5;
+
         const priceTL = priceVal * pRate; 
         const invUnitTL = invUnit * iRate; 
 
-        // 1. Build Item Object for Solver
-        const itemMock = { type, valveType: document.getElementById('valveType').value, vDN: document.getElementById('vDN').value, pDN: document.getElementById('pDN').value, pLen: parseFloat(document.getElementById('pLen').value)||1, totalSurfM2: parseFloat(document.getElementById('totalSurfArea').innerText)||0 };
+        let surfaceArea = 0, name = "", dPipe = 0, unitLabel = "Adet", multiplier = 1, totalSurfM2 = 0;
+        if(type === 'tank'){
+            if(currentSurfaces.length === 0) { multiplier = 1; name = LANG_DATA[CUR_LANG].flat; unitLabel = "Set"; surfaceArea = 1; totalSurfM2 = 1; } 
+            else { 
+                currentSurfaces.forEach(s => totalSurfM2 += (s.w * s.h) / 10000); 
+                surfaceArea = totalSurfM2; 
+                name = LANG_DATA[CUR_LANG].flat; unitLabel = "Set"; 
+            }
+            dPipe = 1.0; 
+        } else {
+            const dnKey = (type==='valve') ? document.getElementById('vDN').value : document.getElementById('pDN').value;
+            const mm = PIPES[dnKey] || 50; dPipe = mm / 1000; const perimeter = Math.PI * dPipe;
+            if(type === 'pipe'){
+                const len = parseFloat(document.getElementById('pLen').value) || 1;
+                surfaceArea = perimeter * len; name = `${LANG_DATA[CUR_LANG].pipe} (DN ${dnKey})`; multiplier = len; unitLabel = "m";
+            } else {
+                const sel = document.getElementById('valveType');
+                const vTypeName = LANG_DATA[CUR_LANG].valves[sel.value] || sel.value;
+                name = `${vTypeName} (DN ${dnKey})`;
+                let factor = VALVE_FACTORS[sel.value] || 1;
+                surfaceArea = perimeter * (dPipe * 5 * factor); 
+            }
+        }
         
-        // 2. Solve Physics (Bare vs Insulated)
-        const simBare = solveHeatTransfer(itemMock, 'bare', 0, tAmb, tProc, vWind);
-        const simIns = solveHeatTransfer(itemMock, matKey, thk, tAmb, tProc, vWind);
+        const dT = Math.abs(tAmb - tProc);
+        const U_bare = 25 + (2 * vWind); 
+        const Q_watts_bare = U_bare * surfaceArea * dT * qty;
+        let Q_watts_ins = 0;
+        if(matKey === 'bare'){ Q_watts_ins = Q_watts_bare; } else {
+            const k = MAT_DATA[matKey].k; const thkM = thk / 1000;
+            if(type === 'tank') { const R_ins = thkM / k; Q_watts_ins = (surfaceArea * dT * qty) / (R_ins + (1/U_bare)); } 
+            else {
+                const totalLen = (type==='pipe' ? multiplier : (dPipe * 5 * (VALVE_FACTORS[document.getElementById('valveType').value]||1))) * qty;
+                const D_in = dPipe; const D_out = dPipe + 2*thkM;
+                Q_watts_ins = (2 * Math.PI * k * totalLen * dT) / Math.log(D_out/D_in);
+            }
+        }
 
-        // 3. Energy & ROI
-        const kwh_bare = (simBare.q * qty * hours / 1000) / cop;
-        const kwh_ins = (simIns.q * qty * hours / 1000) / cop;
+        const kwh_bare = (Q_watts_bare * hours / 1000) / cop;
+        const kwh_ins = (Q_watts_ins * hours / 1000) / cop;
         const kwh_save = Math.max(0, kwh_bare - kwh_ins);
         const money_save_tl = kwh_save * priceTL;
-        let unitLabel = "Adet"; let multiplier = 1;
-        if(type==='pipe') { unitLabel="m"; multiplier=itemMock.pLen; } else if(type==='tank') unitLabel="Set";
-        
         let invTotal_tl = (type === 'pipe') ? invUnitTL * multiplier : invUnitTL * qty;
         let roiCalc = (money_save_tl > 0.01) ? (invTotal_tl / money_save_tl * 12) : 0;
 
-        // 4. Condensation Risk Analysis
-        const dewPoint = calculateDewPoint(tAmb, rh);
-        let riskLevel = "low";
-        let tSurf = simIns.tSurf;
-        
-        // Logic: if T_surf < DewPoint -> Condensation
-        if (tSurf <= dewPoint) riskLevel = "critical";
-        else if (tSurf <= dewPoint + 2) riskLevel = "high"; // 2 degree safety
-        else if (INSULATION_MATERIALS[matKey].mu < 50 && (tSurf <= dewPoint + 5)) riskLevel = "medium"; // Low Mu risk
-        
         const rawData = { 
-            type, qty, tAmb, rh, tProc, vWind, cop, hours, priceVal, priceCurr, invUnit, invCurr, thk, matKey, location, riskLevel, dewPoint, tSurf,
-            vDN: itemMock.vDN, valveType: itemMock.valveType, pDN: itemMock.pDN, pLen: itemMock.pLen, 
-            surfaces: JSON.parse(JSON.stringify(currentSurfaces)), totalSurfM2: itemMock.totalSurfM2
+            type, qty, tAmb, tProc, vWind, cop, hours, priceVal, priceCurr, invUnit, invCurr, thk, matKey, location,
+            vDN: document.getElementById('vDN').value, valveType: document.getElementById('valveType').value, 
+            pDN: document.getElementById('pDN').value, pLen: document.getElementById('pLen').value, 
+            surfaces: JSON.parse(JSON.stringify(currentSurfaces)), totalSurfM2
         };
-        const matName = CUR_LANG==='tr' ? INSULATION_MATERIALS[matKey].name_tr : INSULATION_MATERIALS[matKey].name_en;
-        
-        let name = "";
-        if(type==='tank') name=LANG_DATA[CUR_LANG].flat;
-        else if(type==='pipe') name=`${LANG_DATA[CUR_LANG].pipe} (DN ${itemMock.pDN})`;
-        else name=`${LANG_DATA[CUR_LANG].valves[itemMock.valveType]} (DN ${itemMock.vDN})`;
-
+        const matName = LANG_DATA[CUR_LANG].mats[matKey];
         const resultObj = {
             name, desc: matKey==='bare' ? LANG_DATA[CUR_LANG].uninsulated : `${matName} (${thk}mm)`,
             qty, unit: unitLabel, kwhBare: kwh_bare, kwhIns: kwh_ins, kwhSave: kwh_save, invTL: invTotal_tl, saveTL: money_save_tl, roi: roiCalc, img: currImg, raw: rawData
@@ -778,50 +617,7 @@
             LIST[editingIndex] = resultObj; editingIndex = null;
             document.getElementById('btnAdd').classList.remove('hidden'); document.getElementById('btnUpdate').classList.add('hidden');
         } else { LIST.push(resultObj); }
-        resetForm(); render(); calcAllRisks();
-    }
-    
-    function calcAllRisks(){
-        // Determine worst case risk for Dashboard
-        let worstRisk = "low";
-        let worstDiff = 100; 
-        
-        LIST.forEach(i => {
-            const r = i.raw.riskLevel;
-            if(r === 'critical') worstRisk = 'critical';
-            else if(r === 'high' && worstRisk !== 'critical') worstRisk = 'high';
-            else if(r === 'medium' && worstRisk === 'low') worstRisk = 'medium';
-        });
-
-        const card = document.getElementById('riskCard');
-        const status = document.getElementById('dashRiskStatus');
-        const msg = document.getElementById('dashRiskMsg');
-        
-        // Reset classes
-        card.className = "glass-card p-6 rounded-2xl border-l-4 transition-all duration-300";
-        
-        if(LIST.length === 0){
-             status.innerText = "ANALİZ YOK";
-             card.classList.add("border-transparent");
-             msg.innerText = "Dew Point: --";
-        } else {
-            const lastItem = LIST[LIST.length-1];
-            msg.innerText = `Dew Point: ${lastItem.raw.dewPoint.toFixed(1)}°C`;
-            
-            if(worstRisk === 'critical') {
-                card.classList.add("border-red-500", "bg-red-50");
-                status.innerText = "⚠️ KRİTİK"; status.classList.add("text-red-600");
-            } else if (worstRisk === 'high') {
-                card.classList.add("border-orange-500", "bg-orange-50");
-                status.innerText = "⚠️ YÜKSEK"; status.classList.add("text-orange-600");
-            } else if (worstRisk === 'medium') {
-                card.classList.add("border-yellow-400", "bg-yellow-50");
-                status.innerText = "ORTA"; status.classList.add("text-yellow-700");
-            } else {
-                card.classList.add("border-emerald-500", "bg-emerald-50");
-                status.innerText = "GÜVENLİ"; status.classList.add("text-emerald-700");
-            }
-        }
+        resetForm(); render();
     }
     
     function finishUpdate(){ calc(); }
@@ -829,7 +625,6 @@
         editingIndex = idx; const item = LIST[idx].raw;
         setType(item.type);
         document.getElementById('qty').value = item.qty; document.getElementById('tAmb').value = item.tAmb;
-        document.getElementById('rh').value = item.rh || 65;
         document.getElementById('vWind').value = item.vWind; document.getElementById('cop').value = item.cop;
         document.getElementById('hours').value = item.hours; document.getElementById('price').value = item.priceVal;
         document.getElementById('energyCurr').value = item.priceCurr; document.getElementById('inv').value = item.invUnit;
@@ -841,8 +636,8 @@
         else if(item.type==='tank'){ currentSurfaces = item.surfaces || []; renderSurfaces(); }
         document.getElementById('btnAdd').classList.add('hidden'); document.getElementById('btnUpdate').classList.remove('hidden');
     }
-    function del(i){ if(confirm('Delete?')){ LIST.splice(i,1); render(); calcAllRisks(); } }
-    function clearAll(){ if(confirm('Clear All?')){ LIST=[]; render(); calcAllRisks(); } }
+    function del(i){ if(confirm('Delete?')){ LIST.splice(i,1); render(); } }
+    function clearAll(){ if(confirm('Clear All?')){ LIST=[]; render(); } }
     function resetForm(){ currImg=null; document.getElementById('prevImg').classList.add('hidden'); document.getElementById('inv').value=''; document.getElementById('location').value=''; currentSurfaces = []; renderSurfaces(); } 
 
     function render(){
@@ -859,10 +654,14 @@
         const currSym = currSymMap[reportCurr]||'';
 
         LIST.forEach((item, idx) => {
-            const matNameRaw = item.raw.matKey; 
-            const matLabel = CUR_LANG==='tr' ? INSULATION_MATERIALS[matNameRaw].name_tr : INSULATION_MATERIALS[matNameRaw].name_en;
+            const matNameRaw = item.raw.matKey; const matLabel = LANG_DATA[CUR_LANG].mats[matNameRaw];
             const desc = matNameRaw==='bare' ? LANG_DATA[CUR_LANG].uninsulated : `${matLabel} (${item.raw.thk}mm)`;
             let name = item.name;
+            if(item.raw.type === 'tank') name = LANG_DATA[CUR_LANG].flat;
+            if(item.raw.type === 'pipe') name = `${LANG_DATA[CUR_LANG].pipe} (DN ${item.raw.pDN})`;
+            if(item.raw.type === 'valve') name = `${LANG_DATA[CUR_LANG].valves[item.raw.valveType]} (DN ${item.raw.vDN})`;
+
+            // Mahal check
             const locText = item.raw.location ? `<div class="mt-0.5 text-[9px] font-medium text-slate-500 italic"><i class="w-2 h-2 inline mr-0.5" data-lucide="map-pin"></i>${item.raw.location}</div>` : '';
 
             const invDisp = item.invTL / reportRate;
@@ -871,28 +670,16 @@
             const roiText = item.roi > 0 ? item.roi.toFixed(1) : "-";
             const imgHtml = item.img ? `<img src="${item.img}" class="w-8 h-8 object-cover rounded">` : `<div class="w-8 h-8 bg-slate-100 rounded flex items-center justify-center text-[8px] text-slate-400">-</div>`;
             
-            // Risk Badge Logic
-            let riskClass = "bg-emerald-100 text-emerald-700";
-            let riskLabel = LANG_DATA[CUR_LANG].risk_low;
-            if(item.raw.riskLevel === 'critical') { riskClass = "bg-red-100 text-red-700 animate-pulse"; riskLabel = "CRITICAL"; }
-            else if(item.raw.riskLevel === 'high') { riskClass = "bg-orange-100 text-orange-700"; riskLabel = LANG_DATA[CUR_LANG].risk_high; }
-            else if(item.raw.riskLevel === 'medium') { riskClass = "bg-yellow-100 text-yellow-700"; riskLabel = LANG_DATA[CUR_LANG].risk_med; }
-
             tb.innerHTML += `
                 <tr class="border-b border-slate-200 hover:bg-slate-50 transition ${idx===editingIndex ? 'bg-cyan-50' : ''}">
-                    <td class="px-3 py-2 font-medium text-slate-800">
-                        <div class="flex items-center gap-2">
-                            ${imgHtml}
-                            <div>${name} ${locText}<div class="text-[9px] text-slate-400 mt-0.5">${desc}</div></div>
-                        </div>
-                    </td>
+                    <td class="px-3 py-2 text-center">${imgHtml}</td>
+                    <td class="px-3 py-2 font-medium text-slate-800">${name} ${locText}<div class="text-[9px] text-slate-400 mt-0.5">${desc}</div></td>
                     <td class="px-3 py-2 text-center text-slate-500">${item.qty} ${item.unit}</td>
                     <td class="px-3 py-2 text-center text-[10px] text-red-400 font-mono">${Math.round(item.kwhBare).toLocaleString()}</td>
                     <td class="px-3 py-2 text-center text-[10px] text-cyan-600 font-mono">${Math.round(item.kwhIns).toLocaleString()}</td>
                     <td class="px-3 py-2 text-right text-[10px] text-slate-600 font-mono">${currSym}${fmt(invDisp)}</td>
                     <td class="px-3 py-2 text-right text-[10px] text-green-600 font-bold font-mono">+${currSym}${fmt(saveDisp)}</td>
                     <td class="px-3 py-2 text-right text-[10px] font-bold text-cyan-600">${roiText}</td>
-                    <td class="px-3 py-2 text-center"><span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${riskClass}">${riskLabel}</span></td>
                     <td class="px-3 py-2 text-right flex gap-1 justify-end">
                         <button onclick="edit(${idx})" class="text-blue-500 hover:text-blue-700 p-1"><i data-lucide="pencil" class="w-3 h-3"></i></button>
                         <button onclick="del(${idx})" class="text-red-500 hover:text-red-700 p-1"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
@@ -931,44 +718,35 @@
         const qrContainer = document.getElementById('cover-qr-container');
         if(isQr){
             qrContainer.classList.remove('hidden');
+            // Mock dynamic URL for "Live Tracking"
             const uniqueUrl = `https://optimizi.app/live-tracker?id=${Date.now()}`;
+            // Generate QR into hidden div first
             const qrGenDiv = document.getElementById('qrcode-gen');
             qrGenDiv.innerHTML = '';
             new QRCode(qrGenDiv, { text: uniqueUrl, width: 100, height: 100 });
+            // Extract and set
             setTimeout(() => {
                 const qrCanvas = qrGenDiv.querySelector('canvas');
-                if(qrCanvas) { document.getElementById('repQrImage').src = qrCanvas.toDataURL(); }
+                if(qrCanvas) {
+                     document.getElementById('repQrImage').src = qrCanvas.toDataURL();
+                }
             }, 100);
-        } else { qrContainer.classList.add('hidden'); }
+        } else {
+            qrContainer.classList.add('hidden');
+        }
 
         let gInv=0, gSave=0, gCo2=0;
-        let worstRisk = "low";
-        
         const computedList = LIST.map(i => {
             const iInv = i.invTL / reportRate; const iSave = i.saveTL / reportRate;
             gInv += iInv; gSave += iSave; gCo2 += (i.kwhSave * 0.44 / 1000);
-            
-            if(i.raw.riskLevel === 'critical') worstRisk = 'critical';
-            else if(i.raw.riskLevel === 'high' && worstRisk !== 'critical') worstRisk = 'high';
-            
             let name = i.name;
-            const matNameRaw = i.raw.matKey; const matLabel = CUR_LANG==='tr' ? INSULATION_MATERIALS[matNameRaw].name_tr : INSULATION_MATERIALS[matNameRaw].name_en;
+            if(i.raw.type === 'tank') name = LANG_DATA[CUR_LANG].flat;
+            if(i.raw.type === 'pipe') name = `${LANG_DATA[CUR_LANG].pipe} (DN ${i.raw.pDN})`;
+            if(i.raw.type === 'valve') name = `${LANG_DATA[CUR_LANG].valves[i.raw.valveType]} (DN ${i.raw.vDN})`;
+            const matNameRaw = i.raw.matKey; const matLabel = LANG_DATA[CUR_LANG].mats[matNameRaw];
             const desc = matNameRaw==='bare' ? LANG_DATA[CUR_LANG].uninsulated : `${matLabel} (${i.raw.thk}mm)`;
             return { ...i, dispInv: iInv, dispSave: iSave, printName: name, printDesc: desc };
         });
-
-        // Set Risk Analysis Badge in Report
-        const repRisk = document.getElementById('repRiskBadge');
-        if(worstRisk === 'critical') { repRisk.innerText = "CRITICAL"; repRisk.className = "text-2xl font-black text-red-600"; }
-        else if(worstRisk === 'high') { repRisk.innerText = "HIGH"; repRisk.className = "text-2xl font-black text-orange-500"; }
-        else { repRisk.innerText = "LOW/SAFE"; repRisk.className = "text-2xl font-black text-emerald-600"; }
-        
-        // Use the first item's logic for the example Dew Point in summary (simplified)
-        if(LIST.length > 0) {
-             document.getElementById('repDewPoint').innerText = LIST[LIST.length-1].raw.dewPoint.toFixed(1) + "°C";
-             document.getElementById('repRh').innerText = LIST[LIST.length-1].raw.rh;
-             document.getElementById('repTamb').innerText = LIST[LIST.length-1].raw.tAmb;
-        }
 
         const ROWS_PER_PAGE = 12;
         const chunks = []; for (let i = 0; i < computedList.length; i += ROWS_PER_PAGE) { chunks.push(computedList.slice(i, i + ROWS_PER_PAGE)); } if(chunks.length === 0) chunks.push([]);
@@ -997,22 +775,17 @@
                     const roi = i.dispSave > 0 ? (i.dispInv/i.dispSave*12).toFixed(1) : "-";
                     const imgTag = i.img ? `<img src="${i.img}" class="w-10 h-10 object-cover border border-slate-200">` : `-`;
                     let surfaceDetails = "";
-                    if(i.raw.type === 'tank') { surfaceDetails = `<div class="text-[9px] text-slate-400 font-mono mt-0.5">Total: ${i.raw.totalSurfM2.toFixed(3)} m²</div>`; }
+                    if(i.raw.type === 'tank') {
+                        // Display TOTAL M2 instead of dimensions
+                        surfaceDetails = `<div class="text-[9px] text-slate-400 font-mono mt-0.5">Total: ${i.raw.totalSurfM2.toFixed(3)} m²</div>`;
+                    }
+                    // Location in print
                     const locPrint = i.raw.location ? `<div class="text-[8px] text-slate-500 italic mt-0.5">${i.raw.location}</div>` : '';
-                    
-                    // Risk Badge Print
-                    let rClass = "bg-emerald-600"; let rTxt="OK";
-                    if(i.raw.riskLevel==='critical'){rClass="bg-red-600"; rTxt="CRIT";}
-                    else if(i.raw.riskLevel==='high'){rClass="bg-orange-500"; rTxt="HIGH";}
 
                     tbody.innerHTML += `<tr>
                         <td class="text-center text-slate-400 font-bold">${(index*ROWS_PER_PAGE)+subIndex+1}</td>
                         <td class="text-center p-1">${imgTag}</td>
-                        <td class="font-bold text-slate-800 text-[9px]">
-                           ${i.printName} <span class="risk-badge-print ${rClass}">${rTxt}</span>
-                           ${locPrint} ${surfaceDetails}
-                           <div class="font-normal text-slate-500">${i.printDesc}</div>
-                        </td>
+                        <td class="font-bold text-slate-800 text-[9px]">${i.printName} ${locPrint} ${surfaceDetails}<div class="font-normal text-slate-500">${i.printDesc}</div></td>
                         <td class="text-center text-[9px]">${i.qty} ${i.unit}</td>
                         <td class="text-center text-[9px] font-mono text-red-500">${Math.round(i.kwhBare).toLocaleString()}</td>
                         <td class="text-center text-[9px] font-mono text-cyan-600">${Math.round(i.kwhIns).toLocaleString()}</td>
@@ -1033,7 +806,6 @@
         document.getElementById('covRoi').innerText = totalRoi > 0 ? totalRoi.toFixed(1) : "---";
         document.getElementById('covSave').innerText = currSym + fmt(gSave);
         document.getElementById('covTemp').innerText = document.getElementById('tAmb').value;
-        document.getElementById('covRh').innerText = document.getElementById('rh').value;
         document.getElementById('covWind').innerText = document.getElementById('vWind').value; 
         document.getElementById('covCop').innerText = document.getElementById('cop').value;
         document.getElementById('covPrice').innerText = document.getElementById('price').value + " " + document.getElementById('energyCurr').value;
@@ -1069,7 +841,5 @@
         setTimeout(()=>{ window.print(); }, 500);
     }
 </script>
-  <script src="guard.js?v=2"></script>
 </body>
 </html>
-
