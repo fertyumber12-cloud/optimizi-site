@@ -202,12 +202,12 @@
                     <h3 class="text-orange-500 dark:text-orange-400 text-xs font-bold uppercase mb-4 flex items-center gap-2"><i data-lucide="flame" class="w-4 h-4"></i> Ortam & Yakıt</h3>
                     <div class="grid grid-cols-2 gap-4">
                         <div><label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Ortam Sıc. (°C)</label><input type="number" id="tAmb" class="glass-input text-xs" value="25"></div>
-                        <div><label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Rüzgar (m/s)</label><input type="number" id="vWind" class="glass-input text-xs" value="0.5" step="0.5"></div>
+                        <div><label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Rüzgar (m/s)</label><input type="number" id="vWind" class="glass-input text-xs" value="0" step="0.5"></div>
                     </div>
                     
                     <div class="mt-4">
                         <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Yakıt Tipi</label>
-                        <select id="fuel" onchange="toggleFuelMode()" class="glass-input text-xs">
+                        <select id="fuel" onchange="toggleFuelMode(); updateGlobalFinancials()" class="glass-input text-xs">
                              <option value="gas">Doğalgaz (8250 kcal/m³)</option>
                              <option value="elec">Elektrik (860 kcal/kWh)</option>
                              <option value="lng">LNG (11500 kcal/kg)</option>
@@ -222,11 +222,11 @@
                          <div class="grid grid-cols-2 gap-3">
                              <div>
                                  <label class="text-[9px] text-slate-500 font-bold mb-1 block">LHV (kcal)</label>
-                                 <input type="number" id="fuelLhv" class="glass-input text-xs" placeholder="Örn: 8250">
+                                 <input type="number" id="fuelLhv" onchange="updateGlobalFinancials()" class="glass-input text-xs" placeholder="Örn: 8250">
                              </div>
                              <div>
                                  <label class="text-[9px] text-slate-500 font-bold mb-1 block">Birim</label>
-                                 <select id="fuelUnit" class="glass-input text-xs">
+                                 <select id="fuelUnit" onchange="updateGlobalFinancials()" class="glass-input text-xs">
                                      <option value="m3">kcal/m³</option>
                                      <option value="kg">kcal/kg</option>
                                      <option value="kwh">kcal/kWh</option>
@@ -237,15 +237,15 @@
                     
                     <div class="mt-4">
                         <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Kazan Verimi %</label>
-                        <input type="number" id="eff" class="glass-input text-center text-xs" value="85">
+                        <input type="number" id="eff" onchange="updateGlobalFinancials()" class="glass-input text-center text-xs" value="85">
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
                             <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Birim Fiyat</label>
-                            <div class="flex gap-1"><input type="number" id="price" class="glass-input text-xs" value="0.15"><select id="energyCurr" class="glass-input !px-1 w-14 text-center text-xs"><option value="TL" selected>₺</option><option value="USD">$</option><option value="EUR">€</option><option value="GBP">£</option></select></div>
+                            <div class="flex gap-1"><input type="number" id="price" onchange="updateGlobalFinancials()" class="glass-input text-xs" value="0.15"><select id="energyCurr" onchange="updateGlobalFinancials()" class="glass-input !px-1 w-14 text-center text-xs"><option value="TL" selected>₺</option><option value="USD">$</option><option value="EUR">€</option><option value="GBP">£</option></select></div>
                         </div>
-                        <div><label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Yıllık Saat</label><input type="number" id="hours" class="glass-input text-xs" value="8000"></div>
+                        <div><label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Yıllık Saat</label><input type="number" id="hours" onchange="updateGlobalFinancials()" class="glass-input text-xs" value="8000"></div>
                     </div>
                 </div>
 
@@ -568,7 +568,8 @@
     const MATS={rockwool:{a:0.035,b:0.00017,c:0},glasswool:{a:0.025,b:0.00015,c:0},ceramic:{a:0.025,b:0.00012,c:1.2e-7},aerogel:{a:0.019,b:0.00004,c:5e-8},rubber:{a:0.034,b:0.000075,c:0},bare:{a:25,b:0,c:0}};
     const VALVE_FACTORS={gate:1.2,globe:1.4,butterfly:0.6,ball:1.0,strainer:1.5,check:0.9,trap_float: 1.6, trap_thermo: 0.8, trap_bimetal: 1.0, trap_bucket: 1.5, flange: 0.35};
     const FUELS={gas: 8250, elec: 860, lng: 11500, fueloil: 9600, coal_imp: 6000, coal_loc: 3500};
-    
+    const CO2_FACTORS={gas: 0.202, elec: 0.440, lng: 0.226, fueloil: 0.279, coal_imp: 0.340, coal_loc: 0.380, manual: 0.300};
+
     let LIST=[],FX={USD:34.50,EUR:36.50,GBP:43.20,TL:1.0},currImg=null,userQrImg=null,editingIndex=null;
     let currentSurfaces = []; 
 
@@ -601,8 +602,6 @@
 
     function getK(matKey,T){if(!MATS[matKey])return 0.04;const m=MATS[matKey];return m.a+(m.b*T)+((m.c||0)*T*T);}
     
-    // --- GÜNCELLENEN ISO 12241 MOTORU ---
-    // ROI dosyasındaki gelişmiş konveksiyon (rüzgar) hesabı buraya entegre edildi.
     function getSurfaceCoeff(std,vWind,Ts,Ta,D_out,isFlat){
         const dT=Math.abs(Ts-Ta);
         const sigma=5.67e-8,eps=0.9;
@@ -610,12 +609,10 @@
         if(dT<0.1)h_rad=5;
         
         let h_cv=0;
-        // Rüzgar etkisi burada devreye giriyor
         if (vWind < 0.1) {
              if(isFlat) h_cv = 1.95 * Math.pow(dT, 0.25);
              else h_cv = 1.32 * Math.pow(dT / (D_out || 1), 0.25);
         } else {
-             // Zorlanmış konveksiyon
              h_cv = 10 * Math.pow(vWind, 0.6) / Math.pow((D_out || 1), 0.4); 
              if(isFlat) h_cv = 5.8 + 3.8 * vWind; 
         }
@@ -630,7 +627,7 @@
         const tProc=parseFloat(document.getElementById('tProc').value)||0;
         const tAmb=parseFloat(document.getElementById('tAmb').value)||25;
         const vWindInput = document.getElementById('vWind').value;
-        const vWind = (vWindInput === "") ? 0.5 : parseFloat(vWindInput);
+        const vWind = (vWindInput === "") ? 0 : parseFloat(vWindInput);
         
         const matKey=document.getElementById('matSelect').value;
         const thk=parseFloat(document.getElementById('thk').value)||0;
@@ -671,7 +668,6 @@
             } else { Name=`Boru (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`; unitLabel="m"; }
         }
         
-        // --- 1. ÇIPLAK YÜZEY KAYBI (BARE LOSS) ---
         let h_bare=getSurfaceCoeff(standard,vWind,tProc,tAmb,dPipe,isFlat);
         let A_bare_unit=isFlat?1:Math.PI*dPipe;
         let Q_bare_unit=h_bare*A_bare_unit*(tProc-tAmb);
@@ -680,7 +676,6 @@
         const vType=document.getElementById('valveType').value;
         if(type==='valve'){ if(vType==='separator'){ Q_bare_total = Q_bare_unit * (multiplier*3) * qty; } else if (vType === 'elbow') { Q_bare_total = Q_bare_unit * multiplier * qty; } else { const factor=VALVE_FACTORS[vType]||1.2; Q_bare_total=Q_bare_unit*factor*qty; } } else if(type==='pipe'){ Q_bare_total=Q_bare_unit*multiplier; } else { Q_bare_total=Q_bare_unit*multiplier*qty; }
 
-        // --- 2. YALITIMLI DURUM (INSULATED LOSS) ---
         const thkM=thk/1000; const thkM2=thk2/1000;
         let minTs=tAmb,maxTs=tProc,Ts=(minTs+maxTs)/2;
         
@@ -709,7 +704,6 @@
         let LHV_Val = 8250; let LHV_Unit = "m3";
         if(fuelType === 'manual') { LHV_Val = parseFloat(document.getElementById('fuelLhv').value) || 0; LHV_Unit = document.getElementById('fuelUnit').value; } else { LHV_Val = FUELS[fuelType]; if(fuelType === 'gas') LHV_Unit = 'm3'; else if(fuelType === 'elec') LHV_Unit = 'kwh'; else LHV_Unit = 'kg'; }
         
-        // --- SONUÇLARIN DERLENMESİ ---
         const energyLostBare_kWh = (Q_bare_total * hours) / 1000;
         const fuelLostBare = (energyLostBare_kWh * 860) / (LHV_Val * eff);
         const moneyLostBare = fuelLostBare * priceInReportCurr; 
@@ -739,8 +733,7 @@
             vWind: vWind 
         };
         
-        const co2Factors = { gas: 0.202, elec: 0.440, lng: 0.226, fueloil: 0.279, coal_imp: 0.340, coal_loc: 0.380, manual: 0.300 };
-        const selectedCo2Factor = co2Factors[fuelType] || 0.3;
+        const selectedCo2Factor = CO2_FACTORS[fuelType] || 0.3;
         
         return{
             name:Name,
@@ -752,18 +745,62 @@
             potentialSave: potentialSaveMoney, 
             fuelLost: fuelLostBare,
             fuelUnit: LHV_Unit,
-            
-            // LİSTE İÇİN DETAYLI VERİLER
             kwhBare: Math.round(energyLostBare_kWh).toLocaleString(), 
             kwhIns: Math.round(energyLostIns_kWh).toLocaleString(),   
             kwhSave: Math.round(potentialSaveKwh).toLocaleString(),   
-            
             rawKwhLoss: energyLostBare_kWh,
+            rawKwhIns: energyLostIns_kWh, // GÜNCELLEME: Global güncelleme için eklendi
             co2: ((Q_bare_total*hours/1000) / eff) * selectedCo2Factor / 1000,
             tSurf: tProc,
             img:currImg,
             inputs
         };
+    }
+
+    // --- YENİ FONKSİYON: GLOBAL PARAMETRELERİ GÜNCELLE ---
+    function updateGlobalFinancials(){
+        // 1. Yeni Global Değerleri Al
+        const eff = (parseFloat(document.getElementById('eff').value)||85)/100;
+        const priceRaw = parseFloat(document.getElementById('price').value)||0;
+        const hours = parseFloat(document.getElementById('hours').value)||8000;
+        const reportCurrencyCode = document.getElementById('curr').value;
+        const reportRate = FX[reportCurrencyCode] || 1; 
+        const energyCurrencyCode = document.getElementById('energyCurr').value;
+        const energyRate = FX[energyCurrencyCode] || 1;
+        const priceInReportCurr = priceRaw * (energyRate / reportRate);
+        
+        const fuelType = document.getElementById('fuel').value;
+        let LHV_Val = 8250; let LHV_Unit = "m3";
+        if(fuelType === 'manual') { LHV_Val = parseFloat(document.getElementById('fuelLhv').value) || 0; LHV_Unit = document.getElementById('fuelUnit').value; } else { LHV_Val = FUELS[fuelType]; if(fuelType === 'gas') LHV_Unit = 'm3'; else if(fuelType === 'elec') LHV_Unit = 'kwh'; else LHV_Unit = 'kg'; }
+        
+        const selectedCo2Factor = CO2_FACTORS[fuelType] || 0.3;
+
+        // 2. Listeyi Dön ve Sadece Finansal Kısmı Yenile (Fizik sabit kalır)
+        LIST.forEach(item => {
+            // Çıplak Kayıp Finansal
+            const energyLostBare_kWh = item.rawKwhLoss; // Sabit fiziksel kayıp
+            const fuelLostBare = (energyLostBare_kWh * 860) / (LHV_Val * eff);
+            item.moneyLoss = fuelLostBare * priceInReportCurr;
+            
+            // Yalıtımlı Kayıp Finansal (Kazanç hesabı için)
+            const energyLostIns_kWh = item.rawKwhIns || 0;
+            const fuelLostIns = (energyLostIns_kWh * 860) / (LHV_Val * eff);
+            const moneyLostIns = fuelLostIns * priceInReportCurr;
+            
+            item.potentialSave = item.moneyLoss - moneyLostIns;
+            item.fuelLost = fuelLostBare;
+            item.fuelUnit = LHV_Unit;
+            item.co2 = (energyLostBare_kWh / eff) * selectedCo2Factor / 1000;
+            
+            // Input bilgilerini de güncelle ki edit yapınca eski değerler gelmesin
+            item.inputs.fuelType = fuelType;
+            item.inputs.fuelLhv = LHV_Val;
+            item.inputs.fuelUnit = LHV_Unit;
+            item.inputs.energyCurr = energyCurrencyCode;
+        });
+
+        // 3. Tabloyu Yenile
+        render();
     }
 
     function init(){fillDN('vDN');fillDN('pDN');getFx();lucide.createIcons(); setType('valve');}
@@ -787,7 +824,7 @@
         document.getElementById('fuel').value = d.fuelType || 'gas'; toggleFuelMode();
         if(d.fuelType === 'manual') { document.getElementById('fuelLhv').value = d.fuelLhv; document.getElementById('fuelUnit').value = d.fuelUnit; }
         
-        document.getElementById('vWind').value = (d.vWind !== undefined) ? d.vWind : 0.5;
+        document.getElementById('vWind').value = (d.vWind !== undefined) ? d.vWind : 0;
 
         if(d.img){ currImg=d.img; document.getElementById('prevImg').src=currImg; document.getElementById('prevImg').classList.remove('hidden'); }
         if(d.type === 'valve'){ document.getElementById('valveType').value = d.valveType; document.getElementById('vDN').value = d.vDN; } 
@@ -797,7 +834,7 @@
     }
 
     function del(i){if(confirm('Silmek istediğine emin misin?')){LIST.splice(i,1);render();}}
-    function resetForm(){ currImg=null; document.getElementById('prevImg').classList.add('hidden'); document.getElementById('location').value=''; document.getElementById('vWind').value=0.5; currentSurfaces = []; renderSurfaces(); } 
+    function resetForm(){ currImg=null; document.getElementById('prevImg').classList.add('hidden'); document.getElementById('location').value=''; document.getElementById('vWind').value=0; currentSurfaces = []; renderSurfaces(); } 
     function clearAll(){if(confirm('Tüm listeyi temizle?')){LIST=[];render();}}
     
     function exportCSV(){
@@ -828,7 +865,8 @@
     function quickUpdate(i, field, val) {
         const oldInputs = LIST[i].inputs;
         setType(oldInputs.type);
-        document.getElementById('tProc').value = oldInputs.tProc; document.getElementById('tAmb').value = oldInputs.tAmb; document.getElementById('matSelect').value = oldInputs.matKey; document.getElementById('thk').value = oldInputs.thk; document.getElementById('calcStd').value = oldInputs.standard; document.getElementById('location').value = oldInputs.location || ""; document.getElementById('vWind').value = (oldInputs.vWind !== undefined) ? oldInputs.vWind : 0.5;
+        document.getElementById('tProc').value = oldInputs.tProc; document.getElementById('tAmb').value = oldInputs.tAmb; document.getElementById('matSelect').value = oldInputs.matKey; document.getElementById('thk').value = oldInputs.thk; document.getElementById('calcStd').value = oldInputs.standard; document.getElementById('location').value = oldInputs.location || ""; 
+        document.getElementById('vWind').value = (oldInputs.vWind !== undefined) ? oldInputs.vWind : 0;
         if(oldInputs.type==='pipe') { document.getElementById('pDN').value = oldInputs.pDN; document.getElementById('pLen').value = oldInputs.pLen; } else if(oldInputs.type==='valve'){ document.getElementById('vDN').value = oldInputs.vDN; document.getElementById('valveType').value = oldInputs.valveType; }
         
         if(field === 'qty') document.getElementById('qty').value = val; else document.getElementById('qty').value = oldInputs.qty; 
@@ -889,7 +927,7 @@
             printArea.innerHTML = printTemplateCache;
             const d = new Date().toLocaleDateString('tr-TR');
             
-            let gLoss=0, gEnergy=0, gCo2=0, gFuelLost=0; let lastFuelUnit=""; // HATA DÜZELTİLDİ: gFuelLost
+            let gLoss=0, gEnergy=0, gCo2=0, gFuelLost=0; let lastFuelUnit=""; 
             const currSymVal = document.getElementById('curr').value;
             const currSymMap = {'USD':'$','EUR':'€','GBP':'£','TL':'₺'};
             const currSym = currSymMap[currSymVal]||'';
@@ -1053,6 +1091,3 @@
   <script src="guard.js?v=2"></script>
 </body>
 </html>
-
-
-
