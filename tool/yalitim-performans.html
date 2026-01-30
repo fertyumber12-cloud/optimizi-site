@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Yalıtım Performans Analizi</title>
+<title>Yalıtım Performans Analizi | Optimizi.App</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -99,13 +99,9 @@
       @page { margin: 0; size: A4; } 
       html, body { height: 100%; background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       
-      /* Ekran elementlerini gizle */
       .main-interface, nav, #report-fab, #companyModal { display: none !important; }
-      
-      /* Baskı alanını göster */
       #print-wrapper { display: block !important; }
       
-      /* Kapak Sayfası Ayarları */
       .print-cover { 
           height: 100vh; 
           width: 100%; 
@@ -114,9 +110,10 @@
           display: flex; 
           flex-direction: column; 
           justify-content: center; 
+          background-image: radial-gradient(#e0e7ff 1px, transparent 1px);
+          background-size: 30px 30px;
       }
       
-      /* İçerik Sayfası Ayarları */
       .print-content-page { 
           padding: 10mm 15mm; 
       }
@@ -169,44 +166,54 @@
 <div id="print-wrapper" class="hidden">
     
     <div class="print-cover bg-white">
-        <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-bl from-indigo-50 via-purple-50 to-white rounded-bl-full opacity-50"></div>
-        <div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-gradient-to-tr from-slate-50 to-white rounded-tr-full"></div>
+        <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-600 to-purple-600"></div>
 
-        <div class="relative z-10 px-16 flex flex-col h-full justify-between py-24">
+        <div class="relative z-10 px-16 flex flex-col h-full justify-center">
             
-            <div>
-                 <div class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] mb-2">TEKNİK ANALİZ RAPORU</div>
-                 <h1 class="text-6xl font-black text-slate-900 tracking-tight leading-none">
+            <div class="mb-16">
+                 <div class="flex items-center gap-3 mb-6">
+                     <div class="h-px w-12 bg-slate-300"></div>
+                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">MÜHENDİSLİK RAPORU</span>
+                 </div>
+                 
+                 <h1 class="text-7xl font-black text-slate-900 tracking-tight leading-none mb-2">
                     Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">.App</span>
                 </h1>
-                <div class="h-1.5 w-24 bg-indigo-600 mt-6 rounded-full"></div>
+                <p class="text-2xl text-slate-400 font-light tracking-wide">Yalıtım Performans Analizi</p>
             </div>
 
-            <div class="space-y-12">
-                <div>
-                    <h2 class="text-3xl font-bold text-slate-800 leading-tight mb-2" id="cover-project">--</h2>
-                    <p class="text-lg text-slate-500 font-light">Yalıtım Performans & Enerji Verimliliği Analizi</p>
-                </div>
-
-                <div class="grid grid-cols-2 gap-12 border-t border-slate-100 pt-8">
+            <div class="bg-white border-l-4 border-indigo-600 p-8 shadow-sm">
+                <div class="grid grid-cols-1 gap-8">
                     <div>
-                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">HAZIRLAYAN</div>
-                        <div class="text-sm font-bold text-slate-900" id="cover-rep">--</div>
-                        <div class="text-xs text-slate-500 mt-0.5" id="cover-provider">--</div>
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">PROJE / MÜŞTERİ</div>
+                        <h2 class="text-3xl font-bold text-slate-800 leading-tight" id="cover-project">--</h2>
                     </div>
-                    <div>
-                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">RAPOR DETAYI</div>
-                        <div class="text-sm font-bold text-slate-900 flex items-center gap-2">
-                             <span id="cover-date">--</span>
+
+                    <div class="grid grid-cols-3 gap-8 pt-6 border-t border-slate-100">
+                        <div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">HAZIRLAYAN</div>
+                            <div class="text-sm font-bold text-slate-900" id="cover-rep">--</div>
+                            <div class="text-xs text-slate-500 mt-0.5" id="cover-provider">--</div>
                         </div>
-                        <div class="text-xs text-slate-500 mt-0.5 font-mono" id="cover-id">--</div>
+                        <div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">TARİH</div>
+                            <div class="text-sm font-bold text-slate-900" id="cover-date">--</div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">RAPOR NO</div>
+                            <div class="text-sm font-mono font-bold text-indigo-600" id="cover-id">--</div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="text-xs text-slate-400 font-medium">
-                <span class="font-bold text-indigo-600">TS EN ISO 12241</span> Isı Yalıtım Hesaplama Standardı ve 
-                <span class="font-bold text-indigo-600">VDI 2055</span> Enerji Verimlilik Kriterlerine uygundur.
+            <div class="absolute bottom-12 left-16 right-16 flex justify-between items-end border-t border-slate-200 pt-6">
+                <div class="text-xs text-slate-400">
+                    <span class="font-bold text-indigo-600">TS EN ISO 12241</span> Isı Yalıtım Hesaplama Standardı
+                </div>
+                <div class="text-[10px] text-slate-300 uppercase font-bold tracking-widest">
+                    POWERED BY OPTIMIZI CALCULATION ENGINE
+                </div>
             </div>
         </div>
     </div>
@@ -563,9 +570,7 @@
                     </div>
                     <div class="relative h-5 flex items-center w-full">
                         <div class="absolute left-0 text-xs font-bold text-red-600 z-10">${item.tProc}°C</div>
-                        <div class="flex-1 mx-10 h-1.5 bg-gradient-to-r from-${colorStart} to-indigo-500 rounded-full relative">
-                            <i data-lucide="chevron-right" class="w-4 h-4 text-indigo-500 absolute -right-2 -top-1.5 bg-white rounded-full"></i>
-                        </div>
+                        <div class="flex-1 mx-10 h-2 bg-gradient-to-r from-${colorStart} to-indigo-500 rounded-full"></div>
                         <div class="absolute right-0 text-xs font-black text-indigo-700 z-10">${item.Ts}°C</div>
                     </div>
                 </div>
