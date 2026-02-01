@@ -1,0 +1,89 @@
+:root {
+    --bg-color: #f8fafc;
+    --glass-bg: #ffffff;
+    --glass-border: rgba(203, 213, 225, 0.4);
+    --input-bg: #f1f5f9;
+    --input-border: #cbd5e1;
+    --text-main: #0f172a; 
+    --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+html { scroll-behavior: smooth; }
+
+body { 
+    background-color: var(--bg-color); 
+    color: var(--text-main); 
+    overflow-x: hidden; 
+}
+
+.app-container { max-width: 1600px; margin: 0 auto; width: 100%; }
+
+.glass-card { 
+    transition: all 0.3s ease; 
+    background-color: var(--glass-bg); 
+    border: 1px solid var(--glass-border); 
+    box-shadow: var(--card-shadow);
+}
+
+.glass-input { 
+    transition: all 0.2s; 
+    border-radius: 0.5rem; 
+    padding: 0.6rem 0.75rem; 
+    width: 100%; 
+    background-color: var(--input-bg); 
+    border: 1px solid var(--input-border); 
+    color: var(--text-main); 
+}
+.glass-input:focus { outline: none; border-color: #6366f1; background-color: #fff; box-shadow: 0 0 0 2px rgba(99,102,241,0.1); }
+.glass-input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.grid-input {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 4px;
+    width: 100%;
+    text-align: center;
+    transition: all 0.2s;
+}
+.grid-input:hover { border-color: #cbd5e1; background-color: #fff; }
+.grid-input:focus { border-color: #6366f1; background-color: #fff; outline: none; }
+
+.table-container {
+    max-height: 650px;
+    overflow-y: auto;
+    position: relative;
+}
+.table-sticky-header th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: #f1f5f9; 
+}
+
+/* QR Gizleme Class */
+.hide-qr-section #covQrCode, .hide-qr-section .qr-wrapper {
+    display: none !important;
+}
+
+/* Print Styles */
+@media print {
+  @page { margin: 0; size: A4; }
+  html, body { width: 210mm; height: 297mm; margin: 0 !important; padding: 0 !important; background: white !important; color: black !important; overflow: visible !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #app-layer, nav, .glass-card, button, input, select { display: none !important; }
+  #print-area { display: block !important; }
+  .print-page { width: 210mm; height: 296mm; position: relative; page-break-after: always; overflow: hidden; background: white; }
+  .print-page:last-child { page-break-after: auto; }
+  
+  .cover-bg { background-color: white !important; color: #1e293b !important; }
+  
+  .audit-table th { background-color: #f8fafc; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 7px; padding: 4px; border-bottom: 2px solid #0f172a; }
+  .audit-table td { border-bottom: 1px solid #e2e8f0; padding: 4px; font-size: 8px; color: #334155; vertical-align: middle; }
+  .audit-table tr:nth-child(even) { background-color: #f8fafc; }
+}
+#print-area { display: none; }
