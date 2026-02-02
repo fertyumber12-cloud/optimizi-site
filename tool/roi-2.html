@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr" class="dark">
+<html lang="tr">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -13,55 +13,29 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script>
   tailwind.config = {
-    darkMode: 'class',
     theme: {
       fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
       extend: {
-        colors: { slate: { 850: '#151e2e', 900: '#0f172a', 950: '#020617' } },
-        animation: { 'float-slow': 'float 8s ease-in-out infinite', 'spin-slow': 'spin 20s linear infinite', 'blob': 'blob 20s infinite', },
-        keyframes: {
-            float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' }, },
-            blob: { '0%': { transform: 'translate(0px, 0px) scale(1)' }, '33%': { transform: 'translate(30px, -50px) scale(1.1)' }, '66%': { transform: 'translate(-20px, 20px) scale(0.9)' }, '100%': { transform: 'translate(0px, 0px) scale(1)' }, }
-        }
+        colors: { slate: { 850: '#151e2e', 900: '#0f172a', 950: '#020617' } }
       }
     }
   }
 </script>
 <style>
   :root {
-      /* LIGHT MODE */
-      --bg-color: #f1f5f9; 
+      /* DÜZ SADE GRİ ARKA PLAN */
+      --bg-color: #f8fafc; /* Slate-50 */
       --glass-bg: #ffffff;
-      --glass-border: rgba(148, 163, 184, 0.4);
-      --input-bg: #f8fafc;
+      --glass-border: rgba(203, 213, 225, 0.4);
+      --input-bg: #f1f5f9;
       --input-border: #cbd5e1;
       --text-main: #0f172a; 
-      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      --grid-color: rgba(0, 0, 0, 0.05);
-  }
-
-  .dark {
-      /* DARK MODE */
-      --bg-color: #0f172a;
-      --glass-bg: rgba(30, 41, 59, 0.4);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      --input-bg: rgba(15, 23, 42, 0.6);
-      --input-border: rgba(255, 255, 255, 0.1);
-      --text-main: #f1f5f9;
-      --card-shadow: none;
-      --grid-color: rgba(255, 255, 255, 0.03);
-  }
-
-  html:not(.dark) .blob-bg { display: none; }
-  
-  html.dark body {
-      background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%);
-      background-attachment: fixed;
+      --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
   }
 
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: #64748b; }
   
   html { scroll-behavior: smooth; }
@@ -70,15 +44,13 @@
       background-color: var(--bg-color); 
       color: var(--text-main); 
       overflow-x: hidden; 
-      transition: background-color 0.3s ease, color 0.3s ease;
   }
   
-  .app-container { max-width: 1440px; margin: 0 auto; width: 100%; }
+  .app-container { max-width: 1600px; margin: 0 auto; width: 100%; }
 
   .glass-card { 
       transition: all 0.3s ease; 
       background-color: var(--glass-bg); 
-      backdrop-filter: blur(16px); 
       border: 1px solid var(--glass-border); 
       box-shadow: var(--card-shadow);
   }
@@ -92,72 +64,72 @@
       border: 1px solid var(--input-border); 
       color: var(--text-main); 
   }
-  .glass-input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,0.1); }
-  
+  .glass-input:focus { outline: none; border-color: #6366f1; background-color: #fff; box-shadow: 0 0 0 2px rgba(99,102,241,0.1); }
   .glass-input:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  .bg-grid { 
-      background-size: 40px 40px; 
-      background-image: 
-          linear-gradient(to right, var(--grid-color) 1px, transparent 1px), 
-          linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px); 
-      mask-image: radial-gradient(circle at center, black 70%, transparent 100%); 
-      pointer-events: none; 
+  .grid-input {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      padding: 4px;
+      width: 100%;
+      text-align: center;
+      transition: all 0.2s;
+  }
+  .grid-input:hover { border-color: #cbd5e1; background-color: #fff; }
+  .grid-input:focus { border-color: #6366f1; background-color: #fff; outline: none; }
+
+  .table-container {
+      max-height: 650px;
+      overflow-y: auto;
+      position: relative;
+  }
+  .table-sticky-header th {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background-color: #f1f5f9; 
   }
 
   /* Print Styles */
   @media print {
     @page { margin: 0; size: A4; }
     html, body { width: 210mm; height: 297mm; margin: 0 !important; padding: 0 !important; background: white !important; color: black !important; overflow: visible !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    #app-layer, .bg-grid, .blob-bg, nav, .glass-card, button, input { display: none !important; }
+    #app-layer, nav, .glass-card, button, input, select { display: none !important; }
     #print-area { display: block !important; }
     .print-page { width: 210mm; height: 296mm; position: relative; page-break-after: always; overflow: hidden; background: white; }
     .print-page:last-child { page-break-after: auto; }
     
     .cover-bg { background-color: white !important; color: #1e293b !important; }
-    .cover-accent { position: absolute; left: 0; top: 0; bottom: 0; width: 12mm; background: #22c55e; z-index: 0; }
-    .cover-content { position: relative; z-index: 10; height: 100%; padding: 20mm 20mm 20mm 35mm; display: flex; flex-direction: column; justify-content: space-between; }
     
-    .audit-table th { background-color: #f1f5f9; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 7px; padding: 4px; border-bottom: 2px solid #e2e8f0; }
+    .audit-table th { background-color: #f8fafc; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 7px; padding: 4px; border-bottom: 2px solid #0f172a; }
     .audit-table td { border-bottom: 1px solid #e2e8f0; padding: 4px; font-size: 8px; color: #334155; vertical-align: middle; }
     .audit-table tr:nth-child(even) { background-color: #f8fafc; }
-    
-    body.hide-qr-section #rep_qr_section { display: none !important; }
   }
   #print-area { display: none; }
 </style>
 </head>
 <body class="antialiased selection:bg-indigo-500/30 selection:text-indigo-400" onload="initApp()">
 
-<div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-    <div class="absolute inset-0 bg-grid"></div>
-    <div class="blob-bg absolute top-0 -left-1/4 w-[900px] h-[900px] bg-indigo-500/20 rounded-full blur-[120px] animate-blob mix-blend-multiply dark:mix-blend-screen"></div>
-    <div class="blob-bg absolute bottom-0 -right-1/4 w-[900px] h-[900px] bg-purple-500/10 rounded-full blur-[120px] animate-blob mix-blend-multiply dark:mix-blend-screen" style="animation-delay: 5s;"></div>
-</div>
-
 <div id="app-layer" class="relative z-10 flex flex-col min-h-screen">
-    <nav class="sticky top-0 z-50 glass-card !bg-white/90 dark:!bg-slate-900/80 !border-x-0 !border-t-0 !rounded-none border-b border-slate-200 dark:border-white/10 backdrop-blur-xl">
+    <nav class="sticky top-0 z-50 glass-card !bg-white/90 !border-x-0 !border-t-0 !rounded-none border-b border-slate-200 backdrop-blur-xl">
       <div class="app-container px-6 h-16 flex items-center justify-between">
           <a href="#" class="flex items-center gap-3 group">
-              <div><h1 class="text-lg font-bold text-slate-800 dark:text-white tracking-wide">Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-orange-500 dark:from-indigo-400 dark:to-orange-400">.App</span></h1></div>
+              <div><h1 class="text-lg font-bold text-slate-800 tracking-wide">Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-orange-500">.App</span></h1></div>
           </a>
           <div class="flex items-center gap-3">
-              <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-xs text-slate-500 dark:text-slate-300">
+              <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-xs text-slate-500">
                   <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                  <span id="fxVal" class="font-bold text-slate-800 dark:text-white">...</span> <span class="text-[10px] opacity-70">TL/USD</span>
-                  <button onclick="getFx()"><i data-lucide="refresh-cw" class="w-3 h-3 ml-1 hover:animate-spin text-slate-400 hover:text-indigo-500 dark:hover:text-white cursor-pointer"></i></button>
+                  <span id="fxVal" class="font-bold text-slate-800">...</span> <span class="text-[10px] opacity-70">TL/USD</span>
+                  <button onclick="getFx()"><i data-lucide="refresh-cw" class="w-3 h-3 ml-1 hover:animate-spin text-slate-400 hover:text-indigo-500 cursor-pointer"></i></button>
               </div>
               
-              <label class="flex items-center gap-2 cursor-pointer bg-slate-100 dark:bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700/50 hover:border-green-500 transition select-none">
-                  <span class="text-[10px] font-bold text-slate-500 dark:text-slate-300">QR Ekle</span>
+              <label class="flex items-center gap-2 cursor-pointer bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-green-500 transition select-none">
+                  <i data-lucide="qr-code" class="w-4 h-4 text-slate-500"></i>
+                  <span class="text-[10px] font-bold text-slate-500">QR Göster</span>
                   <input type="checkbox" id="toggleQrInput" checked class="w-4 h-4 accent-green-500 cursor-pointer" onchange="toggleQrVisibility()">
               </label>
 
-              <button onclick="toggleTheme()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-400 hover:text-indigo-600 dark:hover:text-white transition cursor-pointer">
-                  <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
-                  <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
-              </button>
-              
               <button onclick="printRep()" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition shadow-lg shadow-indigo-600/20 active:scale-95 ml-2 cursor-pointer">
                   <i data-lucide="printer" class="w-4 h-4"></i> Rapor Al
               </button>
@@ -169,54 +141,62 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div class="glass-card p-6 relative overflow-hidden group rounded-2xl">
                <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110"><i data-lucide="timer" class="w-24 h-24 text-indigo-500"></i></div>
-               <div class="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-2">Ort. Amortisman</div>
-               <div class="text-4xl font-bold text-slate-800 dark:text-white tracking-tight" id="dashRoi">---</div>
-               <div class="mt-4 h-1 w-full bg-slate-200 dark:bg-slate-700/50 rounded-full overflow-hidden"><div id="barRoi" class="h-full bg-indigo-500 w-0 transition-all duration-1000 shadow-[0_0_10px_rgba(99,102,241,0.5)]"></div></div>
+               <div class="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-2">Ort. Amortisman</div>
+               <div class="text-4xl font-bold text-slate-800 tracking-tight" id="dashRoi">---</div>
+               <div class="mt-4 h-1 w-full bg-slate-200 rounded-full overflow-hidden"><div id="barRoi" class="h-full bg-indigo-500 w-0 transition-all duration-1000 shadow-[0_0_10px_rgba(99,102,241,0.5)]"></div></div>
             </div>
             <div class="glass-card p-6 relative overflow-hidden group rounded-2xl">
                <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition"><i data-lucide="wallet" class="w-24 h-24 text-green-500"></i></div>
-               <div class="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-2">Yıllık Kazanç</div>
-               <div class="text-3xl font-bold text-green-600 dark:text-green-400 tracking-tight" id="dashSave">0</div>
+               <div class="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-2">Yıllık Kazanç</div>
+               <div class="text-3xl font-bold text-green-600 tracking-tight" id="dashSave">0</div>
             </div>
             <div class="glass-card p-6 relative overflow-hidden rounded-2xl">
-               <div class="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-2">Toplam Yatırım</div>
-               <div class="text-3xl font-bold text-slate-800 dark:text-white tracking-tight" id="dashInv">0</div>
+               <div class="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-2">Toplam Yatırım</div>
+               <div class="flex items-center gap-2">
+                   <input type="number" id="manualTotalInv" class="text-2xl font-bold text-slate-800 tracking-tight bg-transparent border-b-2 border-slate-300 focus:border-indigo-500 outline-none w-full" placeholder="Toplam Yatırım Girin" step="0.01" oninput="updateTotalInvestment()">
+                   <select id="manualInvCurr" class="text-sm font-medium bg-slate-100 border border-slate-300 rounded px-2 py-1" onchange="updateTotalInvestment()">
+                       <option value="TL">₺</option>
+                       <option value="USD">$</option>
+                       <option value="EUR">€</option>
+                   </select>
+               </div>
+               <div class="text-xs text-slate-500 mt-2">Otomatik: <span id="dashInv" class="font-bold">0</span></div>
             </div>
-            <div class="glass-card p-6 !bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 border-orange-500/20 rounded-2xl">
+            <div class="glass-card p-6 !bg-gradient-to-br from-slate-100 to-slate-200 border-orange-500/20 rounded-2xl">
                <div class="flex items-center justify-between">
                   <div>
-                      <div class="text-orange-500 dark:text-orange-400 text-[10px] font-bold uppercase tracking-wider mb-1">CO2 Azaltım</div>
-                      <div class="text-3xl font-bold text-slate-800 dark:text-white" id="dashCo2">0 <span class="text-sm font-normal text-slate-500">Ton</span></div>
+                      <div class="text-orange-500 text-[10px] font-bold uppercase tracking-wider mb-1">CO2 Azaltım</div>
+                      <div class="text-3xl font-bold text-slate-800" id="dashCo2">0 <span class="text-sm font-normal text-slate-500">Ton</span></div>
                   </div>
-                  <div class="p-3 bg-orange-500/10 rounded-xl text-orange-600 dark:text-orange-500 border border-orange-500/20"><i data-lucide="leaf" class="w-6 h-6"></i></div>
+                  <div class="p-3 bg-orange-500/10 rounded-xl text-orange-600 border border-orange-500/20"><i data-lucide="leaf" class="w-6 h-6"></i></div>
                </div>
             </div>
         </div>
 
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
-            <div class="xl:col-span-4 space-y-6">
+            <div class="xl:col-span-3 space-y-6">
                 <div class="glass-card p-6 rounded-2xl">
-                   <h3 class="text-indigo-500 dark:text-indigo-400 text-xs font-bold uppercase mb-4 flex items-center gap-2"><i data-lucide="briefcase" class="w-4 h-4"></i> Proje Detayları</h3>
+                   <h3 class="text-indigo-500 text-xs font-bold uppercase mb-4 flex items-center gap-2"><i data-lucide="briefcase" class="w-4 h-4"></i> Proje Detayları</h3>
                    <div class="space-y-4">
                        <div><label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Hazırlayan</label><div class="grid gap-2"><input type="text" id="pName" class="glass-input text-xs" placeholder="Firma Adı"><input type="text" id="pEng" class="glass-input text-xs" placeholder="Mühendis Adı"></div></div>
                        <div>
                            <label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Saha Denetim Tarihi</label>
-                           <input type="date" id="auditDate" class="glass-input text-xs text-slate-600 dark:text-slate-300">
+                           <input type="date" id="auditDate" class="glass-input text-xs text-slate-600">
                        </div>
-                       <div class="h-px bg-slate-200 dark:bg-white/5 my-3"></div>
+                       <div class="h-px bg-slate-200 my-3"></div>
                        <div><label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Firma Bilgileri</label><div class="grid gap-2"><input type="text" id="cName" class="glass-input text-xs" placeholder="Firma Adı"><input type="text" id="cEng" class="glass-input text-xs" placeholder="Yetkili Kişi / Ünvan"></div></div>
                    </div>
                 </div>
 
                 <div class="glass-card p-6 rounded-2xl">
-                    <h3 class="text-orange-500 dark:text-orange-400 text-xs font-bold uppercase mb-4 flex items-center gap-2"><i data-lucide="flame" class="w-4 h-4"></i> Ortam & Enerji</h3>
+                    <h3 class="text-orange-500 text-xs font-bold uppercase mb-4 flex items-center gap-2"><i data-lucide="flame" class="w-4 h-4"></i> Ortam & Enerji</h3>
                     <div class="grid grid-cols-2 gap-4">
-                        <div><label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Ortam Sıc. (°C)</label><input type="number" id="tAmb" class="glass-input text-xs" value="25"></div>
-                        <div><label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Rüzgar (m/s)</label><input type="number" id="vWind" class="glass-input text-xs" value="1" step="0.5"></div>
+                        <div><label class="text-[10px] text-slate-500 mb-1 block">Ortam Sıc. (°C)</label><input type="number" id="tAmb" class="glass-input text-xs" value="25"></div>
+                        <div><label class="text-[10px] text-slate-500 mb-1 block">Rüzgar (m/s)</label><input type="number" id="vWind" class="glass-input text-xs" value="0" step="0.5"></div>
                     </div>
                     
                     <div class="mt-4">
-                        <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Yakıt Tipi</label>
+                        <label class="text-[10px] text-slate-500 mb-1 block">Yakıt Tipi</label>
                         <select id="fuel" onchange="toggleFuelMode()" class="glass-input text-xs">
                              <option value="gas">Doğalgaz (8250 kcal/m³)</option>
                              <option value="elec">Elektrik (860 kcal/kWh)</option>
@@ -224,18 +204,18 @@
                              <option value="fueloil">Fuel Oil (9600 kcal/kg)</option>
                              <option value="coal_imp">İthal Kömür (6000 kcal/kg)</option>
                              <option value="coal_loc">Yerli Kömür (3500 kcal/kg)</option>
-                             <option value="manual" class="font-bold text-indigo-500 dark:text-indigo-400">⚡ Manuel Giriş</option>
+                             <option value="manual" class="font-bold text-indigo-500">⚡ Manuel Giriş</option>
                         </select>
                     </div>
 
-                    <div id="manualFuelBox" class="hidden mt-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/10">
+                    <div id="manualFuelBox" class="hidden mt-3 p-3 rounded-lg bg-slate-50 border border-slate-200">
                          <div class="grid grid-cols-2 gap-3">
                              <div>
-                                 <label class="text-[9px] text-indigo-500 dark:text-indigo-400 font-bold mb-1 block">LHV (kcal)</label>
+                                 <label class="text-[9px] text-indigo-500 font-bold mb-1 block">LHV (kcal)</label>
                                  <input type="number" id="fuelLhv" class="glass-input text-xs" placeholder="Örn: 8250">
                              </div>
                              <div>
-                                 <label class="text-[9px] text-indigo-500 dark:text-indigo-400 font-bold mb-1 block">Birim</label>
+                                 <label class="text-[9px] text-indigo-500 font-bold mb-1 block">Birim</label>
                                  <select id="fuelUnit" class="glass-input text-xs">
                                      <option value="m3">kcal/m³</option>
                                      <option value="kg">kcal/kg</option>
@@ -246,59 +226,59 @@
                     </div>
                     
                     <div class="mt-4">
-                        <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Kazan Verimi %</label>
+                        <label class="text-[10px] text-slate-500 mb-1 block">Kazan Verimi %</label>
                         <input type="number" id="eff" class="glass-input text-center text-xs" value="85">
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
-                            <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Birim Fiyat</label>
+                            <label class="text-[10px] text-slate-500 mb-1 block">Birim Fiyat</label>
                             <div class="flex gap-1"><input type="number" id="price" class="glass-input text-xs" value="0.15"><select id="energyCurr" class="glass-input !px-1 w-14 text-center text-xs"><option value="TL" selected>₺</option><option value="USD">$</option><option value="EUR">€</option></select></div>
                         </div>
-                        <div><label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Yıllık Saat</label><input type="number" id="hours" class="glass-input text-xs" value="8000"></div>
+                        <div><label class="text-[10px] text-slate-500 mb-1 block">Yıllık Saat</label><input type="number" id="hours" class="glass-input text-xs" value="8000"></div>
                     </div>
                 </div>
 
-                <div id="packagePanel" class="hidden glass-card p-6 rounded-2xl border-2 border-indigo-500/50 bg-indigo-50/50 dark:bg-indigo-900/10">
+                <div id="packagePanel" class="hidden glass-card p-6 rounded-2xl border-2 border-indigo-500/50 bg-indigo-50/50">
                     <div class="flex justify-between items-start mb-4">
-                         <h3 class="text-indigo-600 dark:text-indigo-400 text-sm font-bold uppercase flex items-center gap-2">
+                         <h3 class="text-indigo-600 text-sm font-bold uppercase flex items-center gap-2">
                              <i data-lucide="package" class="w-5 h-5"></i> Paket Oluşturucu
                          </h3>
-                         <div class="bg-indigo-200 dark:bg-indigo-800 text-indigo-700 dark:text-indigo-200 text-[10px] font-bold px-2 py-1 rounded">MOD AKTİF</div>
+                         <div class="bg-indigo-200 text-indigo-700 text-[10px] font-bold px-2 py-1 rounded">MOD AKTİF</div>
                     </div>
                     
                     <div class="space-y-3">
-                        <div class="bg-white dark:bg-slate-900 rounded-lg p-3 max-h-40 overflow-y-auto border border-slate-200 dark:border-white/10">
+                        <div class="bg-white rounded-lg p-3 max-h-40 overflow-y-auto border border-slate-200">
                             <ul id="pkgList" class="space-y-2 text-xs">
                                 <li class="text-slate-400 text-center italic py-2">Henüz sepete ürün eklenmedi.</li>
                             </ul>
                         </div>
                         
                         <div class="grid grid-cols-2 gap-2 text-[10px]">
-                            <div class="text-slate-500 dark:text-slate-400">Sepet Toplamı:</div>
-                            <div class="text-right font-bold text-slate-800 dark:text-white" id="pkgTotalQty">0 Parça</div>
-                            <div class="text-slate-500 dark:text-slate-400">Potansiyel Kazanç:</div>
+                            <div class="text-slate-500">Sepet Toplamı:</div>
+                            <div class="text-right font-bold text-slate-800" id="pkgTotalQty">0 Parça</div>
+                            <div class="text-slate-500">Potansiyel Kazanç:</div>
                             <div class="text-right font-bold text-green-600" id="pkgTotalSave">0 ₺</div>
                         </div>
 
-                        <div class="pt-3 border-t border-indigo-200 dark:border-indigo-800/30">
-                            <label class="text-[10px] text-indigo-600 dark:text-indigo-300 font-bold block mb-1">Paket Adı</label>
+                        <div class="pt-3 border-t border-indigo-200">
+                            <label class="text-[10px] text-indigo-600 font-bold block mb-1">Paket Adı</label>
                             <input type="text" id="pkgName" class="glass-input text-xs mb-2" placeholder="Örn: Kazan Dairesi Seti">
                             
                             <div class="grid grid-cols-2 gap-2 mb-2">
                                 <div>
-                                    <label class="text-[10px] text-indigo-600 dark:text-indigo-300 font-bold block mb-1">Paket Adedi</label>
+                                    <label class="text-[10px] text-indigo-600 font-bold block mb-1">Paket Adedi</label>
                                     <input type="number" id="pkgQty" class="glass-input text-center text-xs font-bold" value="1" placeholder="Adet">
                                 </div>
                                 <div>
-                                    <label class="text-[10px] text-indigo-600 dark:text-indigo-300 font-bold block mb-1">Paket Foto</label>
+                                    <label class="text-[10px] text-indigo-600 font-bold block mb-1">Paket Foto</label>
                                     <input type="file" id="pkgImgInp" class="hidden" accept="image/*" onchange="readPkgImg(this)">
-                                    <button onclick="document.getElementById('pkgImgInp').click()" class="w-full h-[34px] glass-input text-xs flex items-center justify-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><i data-lucide="camera" class="w-3 h-3"></i> Seç</button>
+                                    <button onclick="document.getElementById('pkgImgInp').click()" class="w-full h-[34px] glass-input text-xs flex items-center justify-center gap-2 hover:bg-slate-100 transition"><i data-lucide="camera" class="w-3 h-3"></i> Seç</button>
                                 </div>
                             </div>
                             <img id="pkgPrevImg" class="hidden w-full h-16 object-cover rounded-lg mb-2 border border-indigo-200">
 
-                            <label class="text-[10px] text-indigo-600 dark:text-indigo-300 font-bold block mb-1">Paket (Birim) Yatırım Bedeli</label>
+                            <label class="text-[10px] text-indigo-600 font-bold block mb-1">Paket (Birim) Yatırım Bedeli</label>
                             <div class="flex gap-1 mb-3">
                                 <input type="number" id="pkgInv" class="glass-input text-xs" placeholder="Birim Set Tutar">
                                 <select id="pkgInvCurr" class="glass-input !px-1 w-14 text-center text-xs">
@@ -316,14 +296,14 @@
                     <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none"></div>
                     
                     <div class="flex justify-between items-center mb-4 relative z-10">
-                        <h3 class="text-slate-800 dark:text-white text-sm font-bold uppercase flex items-center gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-indigo-500"></i> Yeni Ölçüm Ekle</h3>
-                        <button onclick="togglePackageMode()" id="btnTogglePkg" class="text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full hover:bg-indigo-100 hover:text-indigo-600 transition font-bold flex items-center gap-1"><i data-lucide="box" class="w-3 h-3"></i> Paket Modunu Aç</button>
+                        <h3 class="text-slate-800 text-sm font-bold uppercase flex items-center gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-indigo-500"></i> Yeni Ölçüm Ekle</h3>
+                        <button onclick="togglePackageMode()" id="btnTogglePkg" class="text-[10px] bg-slate-200 text-slate-600 px-3 py-1 rounded-full hover:bg-indigo-100 hover:text-indigo-600 transition font-bold flex items-center gap-1"><i data-lucide="box" class="w-3 h-3"></i> Paket Modunu Aç</button>
                     </div>
                     
-                    <div class="flex bg-slate-100 dark:bg-slate-900/50 rounded-lg p-1 mb-4 border border-slate-200 dark:border-white/5 relative z-10">
+                    <div class="flex bg-slate-100 rounded-lg p-1 mb-4 border border-slate-200 relative z-10">
                         <button onclick="setType('valve')" id="btn-valve" class="flex-1 py-1.5 text-xs font-medium rounded text-white bg-slate-700 shadow transition-all">Armatür</button>
-                        <button onclick="setType('pipe')" id="btn-pipe" class="flex-1 py-1.5 text-xs font-medium rounded text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">Boru</button>
-                        <button onclick="setType('tank')" id="btn-tank" class="flex-1 py-1.5 text-xs font-medium rounded text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">Tank/Düz</button>
+                        <button onclick="setType('pipe')" id="btn-pipe" class="flex-1 py-1.5 text-xs font-medium rounded text-slate-500 hover:text-slate-900 transition-all">Boru</button>
+                        <button onclick="setType('tank')" id="btn-tank" class="flex-1 py-1.5 text-xs font-medium rounded text-slate-500 hover:text-slate-900 transition-all">Tank/Düz</button>
                     </div>
                     <select id="type" class="hidden"><option value="valve">Valve</option><option value="pipe">Pipe</option><option value="tank">Flat</option></select>
                     
@@ -354,45 +334,52 @@
                     <div id="g-pipe" class="hidden grid grid-cols-2 gap-3 relative z-10"><select id="pDN" class="glass-input text-xs"></select><input type="number" id="pLen" class="glass-input text-xs" placeholder="Boru Uzunluğu (m)" value="1"></div>
                     
                     <div id="g-tank" class="hidden relative z-10">
-                        <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-white/5 mb-3">
-                            <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-2 block font-bold">Yüzey Ölçüleri Ekle (cm)</label>
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 mb-3">
+                            <label class="text-[10px] text-slate-500 mb-2 block font-bold">1. Seçenek: Dikdörtgen Yüzey</label>
                             <div class="flex gap-2 mb-2">
                                 <input type="number" id="surfW" class="glass-input text-xs" placeholder="En (cm)">
                                 <input type="number" id="surfH" class="glass-input text-xs" placeholder="Boy (cm)">
-                                <button onclick="addSurface()" class="bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg px-3 flex items-center justify-center transition"><i data-lucide="plus" class="w-4 h-4"></i></button>
+                                <button onclick="addSurface('rect')" class="bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg px-3 flex items-center justify-center transition"><i data-lucide="plus" class="w-4 h-4"></i></button>
                             </div>
-                            <div id="surfaceList" class="space-y-1 mb-2 max-h-24 overflow-y-auto">
+
+                            <label class="text-[10px] text-slate-500 mb-2 block font-bold border-t border-slate-200 pt-2 mt-2">2. Seçenek: Daire Yüzey</label>
+                            <div class="flex gap-2 mb-2">
+                                <input type="number" id="surfD" class="glass-input text-xs" placeholder="Çap (cm)">
+                                <button onclick="addSurface('circle')" class="bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg px-3 flex items-center justify-center transition"><i data-lucide="circle" class="w-4 h-4"></i></button>
+                            </div>
+
+                            <div id="surfaceList" class="space-y-1 mb-2 max-h-24 overflow-y-auto mt-2">
                                 </div>
-                            <div class="text-right text-[10px] text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-white/5 pt-2">
-                                Toplam Alan: <span id="totalSurfArea" class="font-bold text-slate-800 dark:text-white text-xs">0.00</span> m²
+                            <div class="text-right text-[10px] text-slate-500 border-t border-slate-200 pt-2">
+                                Toplam Alan: <span id="totalSurfArea" class="font-bold text-slate-800 text-xs">0.00</span> m²
                             </div>
                         </div>
                     </div>
                     
                     <div class="grid grid-cols-2 gap-3 mt-4 relative z-10">
-                        <div><label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">İşletme Sıc. (°C)</label><div class="relative"><input type="number" id="tProc" class="glass-input pl-8 text-xs" value="160"><i data-lucide="thermometer" class="w-3 h-3 text-red-500 dark:text-red-400 absolute left-2.5 top-2.5"></i></div></div>
-                        <div><label id="lblQty" class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Adet</label><input type="number" id="qty" class="glass-input text-center font-bold text-xs" value="1"></div>
+                        <div><label class="text-[10px] text-slate-500 mb-1 block">İşletme Sıc. (°C)</label><div class="relative"><input type="number" id="tProc" class="glass-input pl-8 text-xs" value="160"><i data-lucide="thermometer" class="w-3 h-3 text-red-500 absolute left-2.5 top-2.5"></i></div></div>
+                        <div><label id="lblQty" class="text-[10px] text-slate-500 mb-1 block">Adet</label><input type="number" id="qty" class="glass-input text-center font-bold text-xs" value="1"></div>
                     </div>
                     
                     <div class="mt-4 relative z-10">
-                         <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Mahal / Lokasyon</label>
+                         <label class="text-[10px] text-slate-500 mb-1 block">Mahal / Lokasyon</label>
                          <input type="text" id="location" class="glass-input text-xs" placeholder="Örn: Kazan Dairesi">
                     </div>
 
                     <div class="mt-4 relative z-10">
                         <input type="file" id="imgInp" class="hidden" accept="image/*" onchange="readImg(this)">
-                        <div onclick="document.getElementById('imgInp').click()" class="border border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-3 text-center cursor-pointer hover:border-indigo-500 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition group"><i data-lucide="camera" class="w-4 h-4 text-slate-400 dark:text-slate-500 mx-auto group-hover:text-indigo-500 dark:group-hover:text-indigo-400 mb-1"></i><span class="text-[10px] text-slate-400 block">Termal Foto Seç</span></div>
-                        <img id="prevImg" class="hidden w-full h-24 object-cover rounded-lg mt-2 border border-slate-300 dark:border-slate-600">
+                        <div onclick="document.getElementById('imgInp').click()" class="border border-dashed border-slate-300 rounded-lg p-3 text-center cursor-pointer hover:border-indigo-500 hover:bg-slate-100 transition group"><i data-lucide="camera" class="w-4 h-4 text-slate-400 mx-auto group-hover:text-indigo-500 mb-1"></i><span class="text-[10px] text-slate-400 block">Termal Foto Seç</span></div>
+                        <img id="prevImg" class="hidden w-full h-24 object-cover rounded-lg mt-2 border border-slate-300">
                     </div>
 
                     <div class="mt-4 relative z-10">
                         <input type="file" id="qrInp" class="hidden" accept="image/*" onchange="readQr(this)">
-                        <div onclick="document.getElementById('qrInp').click()" class="border border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-3 text-center cursor-pointer hover:border-green-500 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition group"><i data-lucide="qr-code" class="w-4 h-4 text-slate-400 dark:text-slate-500 mx-auto group-hover:text-green-500 mb-1"></i><span class="text-[10px] text-slate-400 block">Rapor QR'ı Yükle</span></div>
+                        <div onclick="document.getElementById('qrInp').click()" class="border border-dashed border-slate-300 rounded-lg p-3 text-center cursor-pointer hover:border-green-500 hover:bg-slate-100 transition group"><i data-lucide="qr-code" class="w-4 h-4 text-slate-400 mx-auto group-hover:text-green-500 mb-1"></i><span class="text-[10px] text-slate-400 block">Rapor QR'ı Yükle</span></div>
                     </div>
 
-                    <div class="bg-slate-100 dark:bg-slate-900/50 rounded-lg p-3 mt-4 border border-slate-200 dark:border-white/5 relative z-10">
-                        <label class="text-[10px] text-green-600 dark:text-green-400 font-bold uppercase mb-2 block">İzolasyon Özellikleri</label>
-                        <div class="mb-2"><select id="calcStd" class="glass-input text-[10px] !py-1 !h-7 text-slate-500 dark:text-slate-300"><option value="iso">ISO 12241 (Standard)</option><option value="astm">ASTM C680 (USA)</option><option value="vdi">VDI 2055 (German)</option></select></div>
+                    <div class="bg-slate-100 rounded-lg p-3 mt-4 border border-slate-200 relative z-10">
+                        <label class="text-[10px] text-green-600 font-bold uppercase mb-2 block">İzolasyon Özellikleri</label>
+                        <div class="mb-2"><select id="calcStd" class="glass-input text-[10px] !py-1 !h-7 text-slate-500"><option value="iso">ISO 12241 (Standard)</option><option value="astm">ASTM C680 (USA)</option><option value="vdi">VDI 2055 (German)</option></select></div>
                         
                         <div class="text-[9px] text-slate-400 uppercase font-bold mb-1">1. Katman</div>
                         <select id="matSelect" class="glass-input text-xs mb-2">
@@ -401,26 +388,25 @@
                             <option value="rubber">Elastomerik Kauçuk</option>
                             <option value="aerogel">Aerogel</option>
                             <option value="ceramic">Seramik Yünü</option>
-                            <option value="bare" class="font-bold text-red-500 dark:text-red-400">⚠️ Yalıtımsız (Çıplak)</option>
+                            <option value="bare" class="font-bold text-red-500">⚠️ Yalıtımsız (Çıplak)</option>
                         </select>
                         <div class="grid grid-cols-2 gap-2 mt-2 mb-2">
                             <input type="number" id="thk" class="glass-input text-xs" value="50" placeholder="Kalınlık (mm)">
                             <div id="singleInvBox">
-                                <div class="flex gap-1">
-                                    <input type="number" id="inv" class="glass-input text-xs" placeholder="Yatırım">
-                                    <select id="invCurr" class="glass-input !px-1 w-14 text-center text-xs">
-                                        <option value="TL">₺</option>
-                                        <option value="USD">$</option>
-                                        <option value="EUR">€</option>
-                                    </select>
-                                </div>
+                                <!-- Yatırım alanı kaldırıldı - Toplam Yatırım Bedeli bölümünden girilecek -->
+                                <input type="hidden" id="inv" value="0">
+                                <select id="invCurr" class="hidden">
+                                    <option value="TL">₺</option>
+                                    <option value="USD">$</option>
+                                    <option value="EUR">€</option>
+                                </select>
                             </div>
                         </div>
 
-                        <div class="mt-2 pt-2 border-t border-slate-300 dark:border-white/10">
+                        <div class="mt-2 pt-2 border-t border-slate-300">
                             <label class="flex items-center gap-2 cursor-pointer mb-2">
                                 <input type="checkbox" id="useL2" onchange="toggleL2()" class="w-3 h-3 rounded border-slate-400 text-indigo-500">
-                                <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold">2. Katman Ekle (Kompozit)</span>
+                                <span class="text-[10px] text-slate-500 font-bold">2. Katman Ekle (Kompozit)</span>
                             </label>
                             <div id="layer2Box" class="hidden">
                                 <select id="matSelect2" class="glass-input text-xs mb-2">
@@ -445,45 +431,38 @@
                         <button id="btnUpdate" onclick="finishUpdate()" class="hidden w-full bg-orange-500 hover:bg-orange-400 text-white font-bold py-3 rounded-xl shadow-lg shadow-orange-500/20 transition active:scale-95 flex items-center justify-center gap-2 text-sm cursor-pointer"><i data-lucide="check" class="w-4 h-4"></i> Güncellemeyi Bitir</button>
                     </div>
                 </div>
-
-                <div class="glass-card p-4 rounded-xl border-l-4 border-l-yellow-500/50 bg-yellow-500/5">
-                    <div class="flex gap-3">
-                        <i data-lucide="info" class="w-5 h-5 text-yellow-600 dark:text-yellow-500 shrink-0 mt-0.5"></i>
-                        <p class="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed text-justify">Bu yazılım ISO 12241 mühendislik standartlarına dayalı teorik termal simülasyonlar sunar.</p>
-                    </div>
-                </div>
             </div>
 
-            <div class="xl:col-span-8">
-                <div class="glass-card p-0 overflow-hidden min-h-[600px] flex flex-col rounded-2xl">
-                    <div class="p-4 border-b border-slate-200 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-slate-900/30">
-                        <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2"><i data-lucide="list" class="w-4 h-4 text-green-500"></i> Hesaplama Listesi</h3>
+            <div class="xl:col-span-9">
+                <div class="glass-card p-0 overflow-hidden flex flex-col rounded-2xl h-[calc(100vh-100px)]">
+                    <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50 shrink-0">
+                        <h3 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="list" class="w-4 h-4 text-green-500"></i> Hesaplama Listesi</h3>
                         
                         <div class="flex gap-2">
                              <input type="file" id="csvInput" class="hidden" accept=".csv" onchange="importCSV(this)">
-                             <button onclick="document.getElementById('csvInput').click()" class="flex items-center gap-1 text-[10px] bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-2 py-1 rounded transition cursor-pointer dark:bg-emerald-900/30 dark:text-emerald-400 dark:hover:bg-emerald-900/50"><i data-lucide="upload" class="w-3 h-3"></i> Excel Yükle</button>
-                             <button onclick="exportCSV()" class="flex items-center gap-1 text-[10px] bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded transition cursor-pointer dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"><i data-lucide="download" class="w-3 h-3"></i> Excel İndir</button>
-                             <div class="w-px h-4 bg-slate-300 dark:bg-slate-700 mx-1"></div>
-                             <button onclick="clearAll()" class="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition cursor-pointer">Temizle</button>
+                             <button onclick="document.getElementById('csvInput').click()" class="flex items-center gap-1 text-[10px] bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-2 py-1 rounded transition cursor-pointer"><i data-lucide="upload" class="w-3 h-3"></i> Excel Yükle</button>
+                             <button onclick="exportCSV()" class="flex items-center gap-1 text-[10px] bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded transition cursor-pointer"><i data-lucide="download" class="w-3 h-3"></i> Excel İndir</button>
+                             <div class="w-px h-4 bg-slate-300 mx-1"></div>
+                             <button onclick="clearAll()" class="text-xs text-red-500 hover:text-red-700 transition cursor-pointer">Temizle</button>
                         </div>
                     </div>
-                    <div class="overflow-x-auto flex-1">
+                    <div class="overflow-auto flex-1 table-container">
                         <table class="w-full text-left text-sm" id="grid">
-                        <thead class="bg-slate-100 dark:bg-slate-900/80 text-[10px] uppercase text-slate-500 dark:text-slate-400 font-semibold sticky top-0 backdrop-blur-md">
+                        <thead class="table-sticky-header bg-slate-100 text-[10px] uppercase text-slate-500 font-semibold shadow-sm">
                             <tr>
                             <th class="px-6 py-3">Görsel</th>
                             <th class="px-6 py-3">Ekipman</th>
                             <th class="px-6 py-3">Detay</th>
-                            <th class="px-6 py-3 text-center">Miktar</th>
-                            <th class="px-6 py-3 text-center text-red-500 dark:text-red-400">Çıplak Yüzey Sıc.<br><span class="text-[9px]">(Kayıp kWh)</span></th>
-                            <th class="px-6 py-3 text-center text-orange-500 dark:text-orange-400">İzolasyonlu Yüzey Sıc.<br><span class="text-[9px]">(Kayıp kWh)</span></th>
-                            <th class="px-6 py-3 text-center text-green-600 dark:text-green-400">Kazanç<br><span class="text-[9px]">(Fark kWh)</span></th>
-                            <th class="px-6 py-3 text-right">Yatırım</th><th class="px-6 py-3 text-right text-green-600 dark:text-green-400">Kazanç (Tutar)</th>
+                            <th class="px-6 py-3 text-center w-24">Miktar</th>
+                            <th class="px-6 py-3 text-center text-red-500">Çıplak Yüzey Sıc.<br><span class="text-[9px]">(Kayıp kWh)</span></th>
+                            <th class="px-6 py-3 text-center text-orange-500">İzolasyonlu Yüzey Sıc.<br><span class="text-[9px]">(Kayıp kWh)</span></th>
+                            <th class="px-6 py-3 text-center text-green-600">Kazanç<br><span class="text-[9px]">(Fark kWh)</span></th>
+                            <th class="px-6 py-3 text-right w-32">Yatırım</th><th class="px-6 py-3 text-right text-green-600">Kazanç (Tutar)</th>
                             <th class="px-6 py-3 text-right">ROI</th><th class="px-6 py-3 text-right">İşlem</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-200 dark:divide-slate-700/50" id="gridBody">
-                            <tr><td colspan="10" class="px-6 py-20 text-center text-slate-500"><i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-20"></i><span id="emptyMsg">Henüz hesaplama eklenmedi.</span></td></tr>
+                        <tbody class="divide-y divide-slate-200" id="gridBody">
+                            <tr><td colspan="11" class="px-6 py-20 text-center text-slate-500"><i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-20"></i><span id="emptyMsg">Henüz hesaplama eklenmedi.</span></td></tr>
                         </tbody>
                         </table>
                     </div>
@@ -494,108 +473,95 @@
 </div>
 
 <div id="print-area">
-    <div id="p-cover" class="print-page cover-bg">
-        <div class="cover-accent"></div>
-        <div class="cover-content">
-            <div>
-                <div class="flex justify-between items-start">
+    <div id="p-cover" class="print-page cover-bg relative overflow-hidden flex">
+        <div class="w-1/3 bg-slate-900 text-white p-12 flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+            <div class="absolute top-0 right-0 w-64 h-64 bg-green-500 rounded-full blur-[100px] opacity-20 -mr-32 -mt-32"></div>
+            
+            <div class="relative z-10">
+                <div class="text-3xl font-black tracking-tighter mb-1">Optimizi<span class="text-green-500">.App</span></div>
+                <div class="text-[10px] uppercase tracking-[4px] text-slate-400">Engineering Solutions</div>
+                
+                <div class="mt-20 space-y-8">
                     <div>
-                        <div class="text-sm tracking-[5px] text-slate-500 uppercase mb-2 opacity-90">Enerji Verimliliği & ISG Raporu</div>
-                        <h1 class="text-6xl font-black leading-tight text-slate-900">ENDÜSTRİYEL <br><span class="text-green-600">YALITIM</span> <br>ANALİZİ</h1>
+                        <div class="text-[10px] uppercase text-slate-500 font-bold mb-1">Firma / Müşteri</div>
+                        <div class="text-2xl font-bold text-white leading-tight" id="covClient">FİRMA ADI</div>
+                        <div class="text-sm text-slate-400 mt-1" id="covContact">Yetkili Kişi</div>
                     </div>
-                    <div class="text-right border-r-4 border-green-600 pr-4">
-                        <div class="text-xs uppercase opacity-60 mb-1">Firma</div>
-                        <div class="text-2xl font-bold mb-1 text-slate-800" id="covClient">FİRMA ADI</div>
-                        <div class="text-xs text-slate-500 font-medium uppercase tracking-wider" id="covContact">YETKİLİ</div>
-                        <div class="mt-4 text-xs uppercase opacity-60 mb-1">Rapor Tarihi</div>
-                        <div class="text-lg font-bold text-slate-800" id="covDate">...</div>
-                        <div class="text-xs text-slate-400 mt-1" id="covProv">TEDARİKÇİ</div>
+                    <div>
+                        <div class="text-[10px] uppercase text-slate-500 font-bold mb-1">Tedarikçi / Hazırlayan</div>
+                        <div class="text-xl font-bold text-white" id="covProv">TEDARİKÇİ</div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] uppercase text-slate-500 font-bold mb-1">Rapor Tarihi</div>
+                        <div class="text-xl font-bold text-white font-mono" id="covDate">...</div>
                     </div>
                 </div>
             </div>
-            
-            <div class="flex-1 flex flex-col justify-center py-8">
-                <p class="text-sm text-slate-700 font-medium mb-6 leading-relaxed text-justify border-l-4 border-red-500 pl-4 bg-red-50 p-4 rounded-r-lg">
-                    <span id="covIntroDate" class="font-bold text-slate-900">...</span> tarihli saha denetiminden edinilen termal veriler ışığında; tesisinizdeki yalıtımsız ekipmanlardan kaynaklı enerji kaçakları tespit edilmiştir. Mevcut durum, sadece finansal kayıp değil, aynı zamanda ciddi bir <strong>Karbon Salınımı</strong> ve <strong>İş Güvenliği Riski</strong> oluşturmaktadır. 
-                    <br><br>
-                    Aşağıdaki tabloda, şu an atmosfere karışan <span id="covFuelType" class="font-black text-red-600 uppercase">...</span> yakıt miktarının zamana yayılmış dökümü sunulmuştur:
+
+            <div class="relative z-10">
+                <div class="p-4 bg-white/5 rounded-xl border border-white/10 backdrop-blur-sm">
+                    <img id="covQrCode" src="" class="w-24 h-24 object-contain opacity-50 mb-2 mix-blend-screen" alt="QR">
+                    <div class="text-[9px] text-slate-400 leading-tight">Mevcut ısı kayıplarının tesisinize anlık maliyetini takip etmek için kodu taratın.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-2/3 p-12 bg-white flex flex-col relative">
+             <div class="absolute top-0 right-0 p-12 opacity-5"><i data-lucide="activity" class="w-64 h-64 text-slate-900"></i></div>
+
+             <div class="flex-1 flex flex-col justify-center relative z-10">
+                <div class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded text-[10px] font-bold uppercase tracking-wider w-max mb-4">ISO 12241 Temelli Isı Kaybı Kaynaklı Kayıp Simülasyonu</div>
+                <h1 class="text-6xl font-black text-slate-900 leading-none mb-6">ENDÜSTRİYEL <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-800">YALITIM</span> ANALİZİ</h1>
+                
+                <p class="text-sm text-slate-500 leading-relaxed mb-6 max-w-lg text-justify">
+                    <span id="covIntroDate" class="font-bold text-slate-900">...</span> tarihinde tesisinizde gerçekleştirilen termal denetimler sonucunda; yalıtımsız ekipmanlardan kaynaklanan ısı kayıpları, finansal maliyetler ve karbon ayak izi hesaplanmıştır. Aşağıdaki veriler mevcut durumun özetidir.
                 </p>
 
-                <div class="grid grid-cols-4 gap-4 mb-8">
-                    <div class="bg-slate-100 p-4 rounded-xl text-center border-b-4 border-slate-300">
-                        <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">GÜNLÜK KAYIP</div>
-                        <div class="text-xl font-black text-slate-800" id="covFuelDay">0</div>
-                        <div class="text-[9px] text-slate-400 fuel-unit-label">...</div>
-                        <div class="mt-2 border-t border-slate-300 pt-1">
-                            <span class="text-[9px] font-bold text-slate-500" id="covKwhDay">0</span>
-                            <span class="text-[8px] text-slate-400">kWh</span>
-                        </div>
+                <div class="flex flex-col gap-3 mb-6">
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wide w-24">GÜNLÜK</div>
+                         <div class="text-xl font-black text-slate-700 text-right flex-1" id="covFuelDay">0</div>
+                         <div class="text-[10px] text-slate-400 fuel-unit-label ml-2 w-12">...</div>
+                         <div class="bg-slate-200 rounded px-2 py-1 ml-4 w-24 text-center">
+                             <div class="text-[10px] font-bold text-slate-600"><span id="covKwhDay">0</span> kWh</div>
+                         </div>
                     </div>
-                    <div class="bg-slate-100 p-4 rounded-xl text-center border-b-4 border-slate-300">
-                        <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">HAFTALIK KAYIP</div>
-                        <div class="text-xl font-black text-slate-800" id="covFuelWeek">0</div>
-                        <div class="text-[9px] text-slate-400 fuel-unit-label">...</div>
-                        <div class="mt-2 border-t border-slate-300 pt-1">
-                            <span class="text-[9px] font-bold text-slate-500" id="covKwhWeek">0</span>
-                            <span class="text-[8px] text-slate-400">kWh</span>
-                        </div>
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wide w-24">HAFTALIK</div>
+                         <div class="text-xl font-black text-slate-700 text-right flex-1" id="covFuelWeek">0</div>
+                         <div class="text-[10px] text-slate-400 fuel-unit-label ml-2 w-12">...</div>
+                         <div class="bg-slate-200 rounded px-2 py-1 ml-4 w-24 text-center">
+                             <div class="text-[10px] font-bold text-slate-600"><span id="covKwhWeek">0</span> kWh</div>
+                         </div>
                     </div>
-                    <div class="bg-slate-100 p-4 rounded-xl text-center border-b-4 border-slate-300">
-                        <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">AYLIK KAYIP</div>
-                        <div class="text-xl font-black text-slate-800" id="covFuelMonth">0</div>
-                        <div class="text-[9px] text-slate-400 fuel-unit-label">...</div>
-                        <div class="mt-2 border-t border-slate-300 pt-1">
-                            <span class="text-[9px] font-bold text-slate-500" id="covKwhMonth">0</span>
-                            <span class="text-[8px] text-slate-400">kWh</span>
-                        </div>
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wide w-24">AYLIK</div>
+                         <div class="text-xl font-black text-slate-700 text-right flex-1" id="covFuelMonth">0</div>
+                         <div class="text-[10px] text-slate-400 fuel-unit-label ml-2 w-12">...</div>
+                         <div class="bg-slate-200 rounded px-2 py-1 ml-4 w-24 text-center">
+                             <div class="text-[10px] font-bold text-slate-600"><span id="covKwhMonth">0</span> kWh</div>
+                         </div>
                     </div>
-                    <div class="bg-red-600 p-4 rounded-xl text-center border-b-4 border-red-800 text-white shadow-lg transform scale-105">
-                        <div class="text-[10px] uppercase font-bold text-red-200 tracking-wider mb-1">YILLIK TOPLAM</div>
-                        <div class="text-2xl font-black text-white" id="covFuelYear">0</div>
-                        <div class="text-[9px] text-red-200 fuel-unit-label">...</div>
-                        <div class="mt-2 border-t border-red-400 pt-1">
-                            <span class="text-[9px] font-bold text-red-100" id="covKwhYear">0</span>
-                            <span class="text-[8px] text-red-200">kWh</span>
-                        </div>
+                    <div class="p-3 bg-red-50 rounded-xl border border-red-100 flex items-center justify-between relative overflow-hidden">
+                         <div class="text-xs font-bold text-red-400 uppercase tracking-wide w-24">YILLIK</div>
+                         <div class="text-2xl font-black text-red-600 text-right flex-1" id="covFuelYear">0</div>
+                         <div class="text-[10px] text-red-400 fuel-unit-label ml-2 w-12">...</div>
+                         <div class="bg-red-100 rounded px-2 py-1 ml-4 w-24 text-center">
+                             <div class="text-[10px] font-bold text-red-700"><span id="covKwhYear">0</span> kWh</div>
+                         </div>
                     </div>
                 </div>
+             </div>
 
-                <div class="flex gap-6 items-stretch">
-                    <div class="flex-1 bg-slate-900 text-white p-5 rounded-xl flex items-center gap-4 relative overflow-hidden">
-                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-green-500 rounded-full blur-2xl opacity-20"></div>
-                        <div class="bg-white p-2 rounded-lg shrink-0 w-24 h-24">
-                             <img id="covQrCode" src="" class="w-full h-full object-contain opacity-20" alt="QR">
-                        </div>
-                        <div>
-                            <h4 class="text-lg font-bold text-green-400 leading-tight mb-1">CANLI TAKİP SİSTEMİ</h4>
-                            <p class="text-[10px] text-slate-300 leading-snug">
-                                Isı kayıplarının işletmenize olan kümülatif maliyetini anlık olarak izlemek için QR kodu tarayınız.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="w-1/3 bg-orange-100 border border-orange-200 p-5 rounded-xl flex flex-col justify-center items-center text-center">
-                        <i data-lucide="triangle-alert" class="w-8 h-8 text-orange-600 mb-2"></i>
-                        <div class="text-[10px] font-black uppercase text-orange-700 mb-1">İŞ GÜVENLİĞİ RİSKİ</div>
-                        <p class="text-[9px] text-orange-800 leading-tight">
-                            Tespit edilen yüzeylerde <span class="font-bold text-black" id="covMaxTemp">---</span>°C'ye varan sıcaklıklar ölçülmüştür. Yanık ve iş kazası riski oluşturmaktadır.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="border-t border-slate-200 pt-4 flex justify-between items-end">
-                <div class="w-2/3">
-                    <div class="text-[9px] uppercase font-bold text-slate-400 mb-1">Rapor Parametreleri</div>
-                    <p class="text-[9px] text-slate-500 leading-relaxed text-justify" id="covNarrative">
-                        ...
-                    </p>
-                </div>
+             <div class="mt-auto border-t-2 border-slate-900 pt-6 flex justify-between items-end">
+                <div class="text-[10px] text-slate-500 w-2/3 leading-relaxed" id="covNarrative">...</div>
                 <div class="text-right">
-                    <div class="text-[40px] font-black text-slate-200 leading-none" id="covRoi">---</div>
-                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">AY AMORTİSMAN</div>
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Amortisman (ROI)</div>
+                    <div class="text-7xl font-black text-slate-900 leading-none" id="covRoiBig">---</div>
+                    <div class="text-sm font-bold text-slate-400 mt-1 uppercase">AY</div>
                 </div>
-            </div>
+             </div>
         </div>
     </div>
     
@@ -608,38 +574,47 @@
     <div id="p-summary" class="print-page p-12 flex flex-col h-full">
         <h2 class="text-2xl font-black text-slate-900 uppercase mb-8 border-b-2 border-slate-900 pb-4">Yönetici Özeti</h2>
         
-        <div class="flex flex-col gap-6 mb-12">
-            <div class="pl-6 border-l-4 border-red-500 py-2">
-                <div class="text-xs font-bold text-red-400 uppercase tracking-widest mb-1">MEVCUT YILLIK KAYIP</div>
-                <div class="flex items-end gap-4">
-                    <div class="text-5xl font-black text-red-600 tracking-tight leading-none" id="sumLoss">0</div>
-                    <div class="text-lg font-bold text-slate-500 mb-1" id="sumFuelLost"></div>
+        <div class="flex flex-col mb-12">
+            <div class="py-6 border-b border-slate-200 flex justify-between items-center group">
+                <div>
+                    <div class="text-sm text-red-500 font-bold uppercase tracking-widest flex items-center gap-2"><i data-lucide="flame" class="w-4 h-4"></i> Mevcut Yıllık Kayıp</div>
+                    <div class="text-xs text-slate-400 mt-1 font-medium" id="sumFuelLost">...</div>
                 </div>
-                <div class="text-[9px] text-red-800 mt-1 font-bold opacity-70">Müdahale edilmezse kaybedilecek tutar.</div>
+                <div class="text-5xl font-black text-red-600" id="sumLoss">0</div>
             </div>
-            
-            <div class="pl-6 border-l-4 border-slate-400 py-2">
-                <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">TOPLAM YATIRIM</div>
-                <div class="text-5xl font-black text-slate-800 tracking-tight leading-none" id="tabInv">0</div>
+
+            <div class="py-6 border-b border-slate-200 flex justify-between items-center group">
+                <div>
+                    <div class="text-sm text-slate-500 font-bold uppercase tracking-widest flex items-center gap-2"><i data-lucide="wallet" class="w-4 h-4"></i> Toplam Yatırım Bedeli</div>
+                    <div class="text-xs text-slate-400 mt-1">Malzeme ve İşçilik Dahil</div>
+                </div>
+                <div class="text-5xl font-black text-slate-800" id="sumInvSummary">0</div>
             </div>
-            
-            <div class="pl-6 border-l-4 border-green-500 py-2">
-                <div class="text-xs font-bold text-green-400 uppercase tracking-widest mb-1">NET KAZANÇ (YILLIK)</div>
-                <div class="text-5xl font-black text-green-600 tracking-tight leading-none" id="sumSave">0</div>
+
+            <div class="py-6 border-b border-slate-200 flex justify-between items-center group">
+                <div>
+                    <div class="text-sm text-green-600 font-bold uppercase tracking-widest flex items-center gap-2"><i data-lucide="sprout" class="w-4 h-4"></i> Yıllık Net Kazanç</div>
+                    <div class="text-xs text-slate-400 mt-1">Enerji Tasarrufu Sonrası</div>
+                </div>
+                <div class="text-5xl font-black text-green-600" id="sumNetSaveSummary">0</div>
+            </div>
+
+            <div class="py-6 border-b border-slate-900 flex justify-between items-center group">
+                <div>
+                    <div class="text-sm text-indigo-600 font-bold uppercase tracking-widest flex items-center gap-2"><i data-lucide="timer" class="w-4 h-4"></i> Geri Dönüş Süresi (ROI)</div>
+                    <div class="text-xs text-slate-400 mt-1">Amortisman</div>
+                </div>
+                <div class="text-5xl font-black text-indigo-600" id="sumRoiSummary">---</div>
             </div>
         </div>
 
         <div class="mb-8"><h3 class="text-sm font-bold text-slate-900 uppercase mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-4 h-4"></i> Finansal Projeksiyon (5 Yıl)</h3><table class="w-full text-xs text-right border-collapse"><thead><tr class="bg-slate-100 text-slate-500"><th class="p-2 text-left">Senaryo</th><th class="p-2">Yıl 1</th><th class="p-2">Yıl 2</th><th class="p-2">Yıl 3</th><th class="p-2">Yıl 4</th><th class="p-2">Yıl 5</th><th class="p-2 font-black">TOPLAM</th></tr></thead><tbody class="font-mono" id="projTable"></tbody></table></div>
         
         <div class="flex gap-8 mb-4">
-             <div class="flex-1 bg-blue-50 border border-blue-100 rounded-xl p-6 flex flex-col justify-center"><span class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-1">Yatırım Geri Dönüş (ROI)</span><div class="text-4xl font-black text-blue-600" id="txtRoi">---</div><div class="h-2 bg-blue-200 rounded-full overflow-hidden mt-2 w-full"><div id="visualBar" class="h-full bg-blue-600 w-0 transition-all"></div></div></div>
-             <div class="flex-1 flex flex-col">
-                 <div class="flex-1 bg-emerald-900 rounded-xl p-6 text-white flex items-center justify-between relative overflow-hidden h-full">
-                      <div class="absolute right-0 bottom-0 opacity-10 pointer-events-none translate-x-4 translate-y-4"><i data-lucide="sprout" class="w-32 h-32 text-white"></i></div>
-                     <div class="z-10"><div class="text-[10px] text-emerald-300 font-bold uppercase tracking-widest">KARBON AYAK İZİ</div><div class="text-3xl font-black mt-1"><span id="sumCo2">0</span> Ton</div></div>
-                     <div class="text-right z-10 border-l border-emerald-700 pl-6"><div class="text-3xl font-black"><span id="sumTrees">0</span></div><div class="text-[9px] text-emerald-400 mt-1">Ağaç Eşdeğeri</div></div>
-                 </div>
-                 <div class="text-[8px] text-slate-400 text-right mt-1 italic leading-tight">* CO₂ Faktörü yakıt tipine göre hesaplanmıştır.</div>
+             <div class="flex-1 bg-emerald-900 rounded-xl p-6 text-white flex items-center justify-between relative overflow-hidden h-full">
+                  <div class="absolute right-0 bottom-0 opacity-10 pointer-events-none translate-x-4 translate-y-4"><i data-lucide="sprout" class="w-48 h-48 text-white"></i></div>
+                 <div class="z-10"><div class="text-sm text-emerald-300 font-bold uppercase tracking-widest">KARBON AYAK İZİ AZALTIMI</div><div class="text-5xl font-black mt-2"><span id="sumCo2">0</span> <span class="text-2xl font-normal text-emerald-400">Ton/Yıl</span></div></div>
+                 <div class="text-right z-10 border-l border-emerald-700 pl-8"><div class="text-5xl font-black"><span id="sumTrees">0</span></div><div class="text-sm text-emerald-400 mt-1">Ağaç Eşdeğeri</div></div>
              </div>
          </div>
 
@@ -650,10 +625,6 @@
 </div>
 
 <script>
-    function toggleTheme() {
-        document.documentElement.classList.toggle('dark');
-    }
-
     function toggleQrVisibility() {
         const isChecked = document.getElementById('toggleQrInput').checked;
         const body = document.body;
@@ -662,6 +633,22 @@
         } else {
             body.classList.remove('hide-qr-section');
         }
+    }
+    
+    // Manuel toplam yatırım bedeli güncelleme fonksiyonu
+    function updateTotalInvestment() {
+        const inputVal = parseFloat(document.getElementById('manualTotalInv').value);
+        const currVal = document.getElementById('manualInvCurr').value;
+        
+        if (inputVal && inputVal > 0) {
+            // Girilen değeri TL'ye çevir
+            const rateToTL = FX[currVal] || 1;
+            manualTotalInvestment = inputVal * rateToTL;
+        } else {
+            manualTotalInvestment = null;
+        }
+        
+        render(); // Tabloyu yeniden render et
     }
     
     function toggleL2() {
@@ -685,8 +672,8 @@
         document.getElementById('g-'+t).classList.remove('hidden');
         document.getElementById('type').value=t;
         const buttons={valve:document.getElementById('btn-valve'),pipe:document.getElementById('btn-pipe'),tank:document.getElementById('btn-tank')};
-        const activeClass="bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow";
-        const inactiveClass="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
+        const activeClass="bg-white text-slate-900 shadow";
+        const inactiveClass="text-slate-500 hover:text-slate-900";
         
         Object.values(buttons).forEach(btn=>{btn.className="flex-1 py-1.5 text-xs font-medium rounded transition-all "+inactiveClass;});
         buttons[t].className="flex-1 py-1.5 text-xs font-medium rounded transition-all "+activeClass;
@@ -718,17 +705,24 @@
     
     let LIST=[], PACKAGE_BASKET=[], isPackageMode=false;
     let FX={USD:34.50,EUR:36.50,TL:1.0},currImg=null,userQrImg=null,currPkgImg=null,editingIndex=null;
+    let manualTotalInvestment = null; // Manuel toplam yatırım bedeli
     
     let currentSurfaces = []; 
 
-    function addSurface(){
-        const w = parseFloat(document.getElementById('surfW').value);
-        const h = parseFloat(document.getElementById('surfH').value);
-        if(!w || !h){ alert("Lütfen En ve Boy giriniz."); return; }
-        
-        currentSurfaces.push({w: w, h: h});
-        document.getElementById('surfW').value = '';
-        document.getElementById('surfH').value = '';
+    function addSurface(type){
+        if (type === 'rect') {
+            const w = parseFloat(document.getElementById('surfW').value);
+            const h = parseFloat(document.getElementById('surfH').value);
+            if(!w || !h){ alert("Lütfen En ve Boy giriniz."); return; }
+            currentSurfaces.push({type: 'rect', w: w, h: h});
+            document.getElementById('surfW').value = '';
+            document.getElementById('surfH').value = '';
+        } else if (type === 'circle') {
+            const d = parseFloat(document.getElementById('surfD').value);
+            if(!d){ alert("Lütfen Çap giriniz."); return; }
+            currentSurfaces.push({type: 'circle', d: d});
+            document.getElementById('surfD').value = '';
+        }
         renderSurfaces();
     }
     
@@ -744,11 +738,25 @@
         let totalAreaM2 = 0;
         
         currentSurfaces.forEach((s, idx) => {
-            const m2 = (s.w * s.h) / 10000;
+            let m2 = 0;
+            let label = "";
+            
+            if(s.type === 'circle') {
+                // Pi * r^2. r = d/2. d cm -> m için 100'e böl. r = d/200.
+                m2 = Math.PI * Math.pow((s.d / 200), 2);
+                label = `Ø ${s.d} cm Daire`;
+            } else {
+                // Default Rect (veya eski veri)
+                const w = s.w; 
+                const h = s.h;
+                m2 = (w * h) / 10000;
+                label = `${w} x ${h} cm`;
+            }
+
             totalAreaM2 += m2;
             const div = document.createElement('div');
-            div.className = "flex justify-between items-center bg-white dark:bg-white/10 p-1.5 rounded border border-slate-200 dark:border-white/5";
-            div.innerHTML = `<span>${s.w} x ${s.h} cm</span> <button onclick="removeSurface(${idx})" class="text-red-500 hover:text-red-700"><i data-lucide="x" class="w-3 h-3"></i></button>`;
+            div.className = "flex justify-between items-center bg-white p-1.5 rounded border border-slate-200";
+            div.innerHTML = `<span>${label}</span> <button onclick="removeSurface(${idx})" class="text-red-500 hover:text-red-700"><i data-lucide="x" class="w-3 h-3"></i></button>`;
             listEl.appendChild(div);
         });
         
@@ -770,7 +778,6 @@
             panel.classList.remove('hidden');
             btnToggle.classList.replace('bg-slate-200', 'bg-indigo-600');
             btnToggle.classList.replace('text-slate-600', 'text-white');
-            btnToggle.classList.replace('dark:bg-slate-700', 'bg-indigo-600'); 
             btnToggle.innerHTML = `<i data-lucide="box" class="w-3 h-3"></i> Paket Modunu Kapat`;
             btnAdd.innerText = "Sepete Ekle";
             
@@ -806,13 +813,12 @@
         let totalSave = 0;
         let totalQty = 0;
 
-        // Kur bilgisi
         const currSymVal=document.getElementById('curr')?document.getElementById('curr').value:'TL';
         const reportRate = FX[currSymVal] || 1; 
 
         PACKAGE_BASKET.forEach((item, idx) => {
             const li = document.createElement('li');
-            li.className = "flex justify-between items-center border-b border-slate-100 dark:border-white/5 pb-1 last:border-0";
+            li.className = "flex justify-between items-center border-b border-slate-100 pb-1 last:border-0";
             li.innerHTML = `<span>${item.qty} ${item.unit} ${item.name}</span> <button onclick="removeFromBasket(${idx})" class="text-red-400 hover:text-red-600"><i data-lucide="x" class="w-3 h-3"></i></button>`;
             ul.appendChild(li);
             
@@ -873,7 +879,6 @@
             itemsDesc.push(`${item.qty}x ${item.name}`);
 
             // YÜZEY SICAKLIĞI KONTROLÜ
-            // item.Ts genelde çıplak yüzey sıcaklığıdır.
             let tVal = parseFloat(item.Ts);
             if(!isNaN(tVal) && tVal > maxTemp){
                 maxTemp = tVal;
@@ -914,7 +919,7 @@
             kwhIns: Math.round(totalKwhIns).toLocaleString('tr-TR'),
             kwhSave: Math.round(totalKwhSave).toLocaleString('tr-TR'),
             co2: totalCo2,
-            Ts: displayTs, // ARTIK MAX SICAKLIK GÖRÜNECEK
+            Ts: displayTs, 
             Tins: displayTins,
             img: currPkgImg, 
             roi: roiCalc,
@@ -958,7 +963,35 @@
 
 
     function getK(matKey,T){if(!MATS[matKey])return 0.04;const m=MATS[matKey];return m.a+(m.b*T)+((m.c||0)*T*T);}
-    function getSurfaceCoeff(std,vWind,Ts,Ta,D_out,isFlat){const dT=Math.abs(Ts-Ta);const sigma=5.67e-8,eps=0.9;let h_rad=eps*sigma*(Math.pow(Ts+273.15,4)-Math.pow(Ta+273.15,4))/(dT||1);if(dT<0.1)h_rad=5;let h_cv=0;if(std==='astm'){if(vWind<0.1){if(isFlat)h_cv=1.95*Math.pow(dT,0.25);else h_cv=1.32*Math.pow(dT/(D_out||1),0.25);}else{h_cv=10.0*Math.pow(vWind,0.6)/Math.pow((D_out||1),0.4);}}else if(std==='vdi'){if(vWind<0.1)h_cv=3.5+0.05*dT;else h_cv=3.9*Math.pow(vWind,0.7)/Math.pow((D_out||1),0.3);}else{if(vWind<0.5){if(isFlat)h_cv=2.2*Math.pow(dT,0.25);else h_cv=1.4*Math.pow(dT/(D_out||1),0.25);}else{h_cv=4+4*vWind;}}if(h_cv<1)h_cv=1;return h_rad+h_cv;}
+    
+    // --- GÜNCELLENEN RÜZGAR/KONVEKSİYON MOTORU (ANLIK KAYIP ARACI İLE EŞİTLENDİ) ---
+    function getSurfaceCoeff(std, vWind, Ts, Ta, D_out, isFlat) {
+        const dT = Math.abs(Ts - Ta);
+        const sigma = 5.67e-8, eps = 0.9;
+
+        // Radyasyon
+        let h_rad = eps * sigma * (Math.pow(Ts + 273.15, 4) - Math.pow(Ta + 273.15, 4)) / (dT || 1);
+        if (dT < 0.1) h_rad = 5;
+
+        let h_cv = 0;
+
+        // Rüzgar ve Konveksiyon Hesabı
+        if (vWind < 0.1) {
+            // Durgun Hava (Doğal Konveksiyon)
+            if (isFlat) h_cv = 1.95 * Math.pow(dT, 0.25);
+            else h_cv = 1.32 * Math.pow(dT / (D_out || 1), 0.25);
+        } else {
+            // Rüzgarlı Hava (Zorlanmış Konveksiyon)
+            // Borular için genel ISO formülü
+            h_cv = 10.0 * Math.pow(vWind, 0.6) / Math.pow((D_out || 1), 0.4);
+            
+            // Düz yüzeyler için
+            if (isFlat) h_cv = 5.8 + 3.8 * vWind;
+        }
+
+        if (h_cv < 1) h_cv = 1;
+        return h_rad + h_cv;
+    }
 
     // ignoreInvestment: Paket modunda ekleme yaparken yatırım sıfır alınsın diye
     function getCalculationResult(ignoreInvestment = false){
@@ -969,10 +1002,8 @@
         const tAmb=parseFloat(document.getElementById('tAmb').value)||25;
         
         // --- RÜZGAR DÜZELTMESİ (User Fix) ---
-        // Input'tan değeri al, boşsa 0 al (önceki hata 1 yapıyordu)
         const vWindInput = document.getElementById('vWind').value;
         const vWind = (vWindInput === "") ? 0 : parseFloat(vWindInput);
-        // ------------------------------------
         
         const matKey=document.getElementById('matSelect').value;
         const thk=parseFloat(document.getElementById('thk').value)||0;
@@ -990,7 +1021,6 @@
         let invTotalTL = 0;
         let invRaw = 0;
         let invCurrencyCode = 'TL';
-        let isLumpSum = false;
 
         if(!ignoreInvestment) {
             invRaw=parseFloat(document.getElementById('inv').value)||0;
@@ -998,7 +1028,12 @@
             const invRate = FX[invCurrencyCode] || 1; 
             
             let invUnitTL = invRaw * invRate;
-            if(type==='pipe'){ invTotalTL = invUnitTL * multiplier; } else { invTotalTL = invUnitTL * qty; }
+            
+            // --- BORU FİYAT MANTIĞI GÜNCELLEMESİ ---
+            // Eski: invTotalTL = invUnitTL * multiplier; (Metreyle çarpıyordu)
+            // Yeni: Girdiği fiyat = O parçanın fiyatı. Sadece adetle çarpıyoruz.
+            invTotalTL = invUnitTL * qty; 
+            // ----------------------------------------
         }
         
         const eff=(parseFloat(document.getElementById('eff').value)||85)/100;
@@ -1022,11 +1057,18 @@
                 let totalArea = 0;
                 let dims = [];
                 currentSurfaces.forEach(s => {
-                    totalArea += (s.w * s.h) / 10000;
-                    dims.push(`${s.w}x${s.h}cm`);
+                    if(s.type === 'circle'){
+                        let m2 = Math.PI * Math.pow((s.d / 200), 2);
+                        totalArea += m2;
+                        dims.push(`Ø${s.d}`);
+                    } else {
+                        // RECT Default
+                        totalArea += (s.w * s.h) / 10000;
+                        dims.push(`${s.w}x${s.h}`);
+                    }
                 });
                 multiplier = totalArea;
-                Name = `Düz Yüzey (${dims.join(' + ')})`;
+                Name = `Yüzey (${dims.join(' + ')})`;
                 unitLabel = "Set";
             }
             dPipe=1.0; D_ext=1.0; 
@@ -1124,7 +1166,6 @@
         } else if(type==='pipe'){ Q_bare_total=Q_bare_unit*multiplier; } 
         else { Q_bare_total=Q_bare_unit*multiplier*qty; }
 
-        // --- YENİ YAKIT & CO2 HESABI ---
         const fuelType = document.getElementById('fuel').value;
         let LHV_Val = 8250;
         let co2Factor = 0.202; // Default Gas
@@ -1254,14 +1295,12 @@
         editingIndex=i;
         const d=LIST[i].inputs;
 
-        // Paket düzenlenemez (şimdilik)
         if(d.type === 'package') {
             alert("Paketler şu an düzenlenemez, silip tekrar oluşturunuz.");
             editingIndex = null;
             return;
         }
 
-        // Paket modu açıksa kapat
         if(isPackageMode) togglePackageMode();
 
         setType(d.type);
@@ -1274,10 +1313,7 @@
         document.getElementById('location').value = d.location || ""; 
         document.getElementById('useL2').checked = d.useL2 || false;
         
-        // --- RÜZGAR DÜZELTMESİ ---
-        // 0 değerini "yok" saymaması için !== undefined kontrolü yapıldı
         document.getElementById('vWind').value = (d.vWind !== undefined && d.vWind !== null) ? d.vWind : 1; 
-        // --------------------------
         
         toggleL2();
         if(d.useL2) {
@@ -1311,14 +1347,18 @@
     }
 
     function del(i){if(confirm('Silmek istediğine emin misin?')){LIST.splice(i,1);render();}}
+    
     function resetForm(){
         currImg=null;
         document.getElementById('prevImg').classList.add('hidden');
         document.getElementById('inv').value='';
         document.getElementById('location').value='';
+        document.getElementById('vWind').value = 0; 
+        
         currentSurfaces = [];
         renderSurfaces();
     } 
+
     function clearAll(){if(confirm('Tüm listeyi temizle?')){LIST=[];render();}}
     
     function exportCSV(){
@@ -1330,14 +1370,16 @@
             const i = row.inputs;
             let surfStr = "";
             if(i.surfaces && i.surfaces.length > 0){
-                surfStr = i.surfaces.map(s => `${s.w}x${s.h}`).join('|');
+                // EĞER CIRCLE İSE C:50, DEĞİLSE 100x50
+                surfStr = i.surfaces.map(s => {
+                    if(s.type === 'circle') return `C:${s.d}`;
+                    return `${s.w}x${s.h}`;
+                }).join('|');
             }
             
             const pkgName = i.type === 'package' ? row.name.replace("📦 PAKET: ", "") : "";
             const subCount = i.type === 'package' ? i.subItems.length : 0;
             
-            // PAKETLERİ ŞİFRELEYEREK CSV'YE EKLE (BASE64)
-            // Bu sayede içe aktarırken paketi tekrar oluşturabileceğiz.
             const subItemsDump = i.type === 'package' ? btoa(unescape(encodeURIComponent(JSON.stringify(i.subItems)))) : "";
 
             const r = [
@@ -1363,14 +1405,11 @@
         const reader = new FileReader();
         reader.onload = function(e){
             const text = e.target.result;
-            // Satırlara böl
             const rows = text.split('\n');
-            // Başlık satırını at
             rows.shift();
             
             let addedCount = 0;
 
-            // DOM elemanlarını referans al (Döngüde kullanacağız)
             const el = {
                 type: document.getElementById('type'),
                 qty: document.getElementById('qty'),
@@ -1396,28 +1435,19 @@
                 vWind: document.getElementById('vWind')
             };
 
-            // Paket modu açıksa kapatalım ki form düzgün dolsun
             if(isPackageMode) togglePackageMode();
 
             rows.forEach(row => {
                 if(!row.trim()) return;
                 
-                // Excel Türkçe ayarda ; ile ayırabilir, normal CSV , ile ayrılır.
                 let cols = row.split(',');
-                if(cols.length < 5) cols = row.split(';'); // Virgül yoksa noktalı virgül dene
+                if(cols.length < 5) cols = row.split(';');
 
-                if(cols.length < 10) return; // Hatalı satır
+                if(cols.length < 10) return;
 
                 try {
-                    // CSV SÜTUN SIRASI:
-                    // 0:Type, 1:Qty, 2:PipeLen, 3:tProc, 4:tAmb, 5:Mat, 6:Thk, 7:Inv, 8:Std, 
-                    // 9:vDN, 10:pDN, 11:vType, 12:Surfaces, 13:InvCurr, 14:EnergyCurr, 15:Loc, 
-                    // 16:UseL2, 17:Mat2, 18:Thk2, 19:FuelType, 20:LHV, 21:Unit, 22:PkgName, 23:SubCount, 
-                    // 24:Wind, 25:SubItemsDump (Base64)
-
                     const type = cols[0];
 
-                    // --- PAKET İÇE AKTARMA MANTIĞI ---
                     if (type === 'package' && cols[25] && cols[25].length > 5) {
                         try {
                             const subItemsJson = decodeURIComponent(escape(window.atob(cols[25])));
@@ -1431,16 +1461,14 @@
                             const compositeItem = buildPackageItem(basket, pkgName, pkgQty, pkgInv, pkgInvCurr);
                             LIST.push(compositeItem);
                             addedCount++;
-                            return; // Paket eklendi, döngünün sonuna git
+                            return; 
                         } catch (pkgErr) {
                             console.error("Paket parse hatası:", pkgErr);
-                            // Paket parse edilemezse normal devam etmesin, hata versin veya atlasın
                             return; 
                         }
                     }
 
-                    // --- NORMAL ÜRÜN İÇE AKTARMA MANTIĞI ---
-                    setType(type); // Formu o tipe göre ayarlar (valve/pipe/tank)
+                    setType(type);
 
                     el.qty.value = cols[1];
                     el.pLen.value = cols[2];
@@ -1462,8 +1490,13 @@
                         currentSurfaces = []; 
                         const sList = cols[12].split('|');
                         sList.forEach(s => {
-                            const dims = s.split('x');
-                            if(dims.length===2) currentSurfaces.push({w: parseFloat(dims[0]), h: parseFloat(dims[1])});
+                            if(s.startsWith('C:')){
+                                const dVal = parseFloat(s.split(':')[1]);
+                                currentSurfaces.push({type: 'circle', d: dVal});
+                            } else {
+                                const dims = s.split('x');
+                                if(dims.length===2) currentSurfaces.push({type: 'rect', w: parseFloat(dims[0]), h: parseFloat(dims[1])});
+                            }
                         });
                     }
 
@@ -1517,15 +1550,12 @@
     function render(){
         const tb=document.getElementById('gridBody');tb.innerHTML='';let gInv=0,gSave=0,gCo2=0;
         
-        // DİNAMİK KUR SİSTEMİ
         const currSymVal=document.getElementById('curr')?document.getElementById('curr').value:'TL';
         const reportRate = FX[currSymVal] || 1; 
-
         const currSymMap={'USD':'$','EUR':'€','TL':'₺'};
         const currSym=currSymMap[currSymVal]||'';
 
         LIST.forEach((i,x)=>{
-            // ANLIK ÇEVİRİM YAPILIYOR
             const invDisp = i.invTL / reportRate;
             const saveDisp = i.saveTL / reportRate;
 
@@ -1533,36 +1563,87 @@
             
             const roiSuffix="Ay";
             const roi=i.roi > 0 ? i.roi.toFixed(1)+" "+roiSuffix : "-";
-            const imgTag=i.img?`<img src="${i.img}" class="w-10 h-10 object-cover rounded">`:`<div class="w-10 h-10 bg-slate-200 dark:bg-slate-800 rounded flex items-center justify-center text-xs text-slate-500">${i.inputs.type==='package'?'PKG':'-'}</div>`;
+            const imgTag=i.img?`<img src="${i.img}" class="w-10 h-10 object-cover rounded">`:`<div class="w-10 h-10 bg-slate-200 rounded flex items-center justify-center text-xs text-slate-500">${i.inputs.type==='package'?'PKG':'-'}</div>`;
             const locTag = i.location ? `<div class="text-[9px] text-indigo-500 font-bold mt-1 uppercase"><i data-lucide="map-pin" class="w-3 h-3 inline"></i> ${i.location}</div>` : '';
 
-            // Paket satırı için özel stil
-            const rowClass = i.inputs.type === 'package' ? "bg-indigo-50/50 dark:bg-indigo-900/10 border-l-4 border-l-indigo-500" : "";
+            const rowClass = i.inputs.type === 'package' ? "bg-indigo-50/50 border-l-4 border-l-indigo-500" : "";
 
-            tb.insertAdjacentHTML('beforeend',`<tr class="hover:bg-slate-100 dark:hover:bg-slate-800/30 transition border-b border-slate-200 dark:border-slate-700/50 ${x===editingIndex?'bg-indigo-50 dark:bg-indigo-900/20':''} ${rowClass}">
+            const qtyInput = `<input type="number" class="grid-input font-bold text-slate-800" value="${i.qty}" onchange="quickUpdate(${x}, 'qty', this.value)">`;
+            const invInput = `<div class="flex items-center gap-1 justify-end text-xs"><span class="text-slate-400">${currSym}</span><input type="number" class="grid-input text-right text-slate-600 w-20" value="${invDisp.toFixed(2)}" onchange="quickUpdate(${x}, 'inv', this.value)"></div>`;
+
+            tb.insertAdjacentHTML('beforeend',`<tr class="hover:bg-slate-100 transition border-b border-slate-200 ${x===editingIndex?'bg-indigo-50':''} ${rowClass}">
             <td class="px-6 py-4">${imgTag}</td>
-            <td class="px-6 py-4 font-bold text-slate-800 dark:text-white">${i.name} ${locTag}</td>
-            <td class="px-6 py-4 text-slate-500 dark:text-slate-400 text-xs">${i.desc}</td>
-            <td class="px-6 py-4 text-center text-slate-800 dark:text-white">${i.qty} ${i.unit}</td>
-            <td class="px-6 py-4 text-center"><div class="font-bold text-slate-700 dark:text-white">${i.Ts}</div><div class="text-[10px] font-bold text-red-500 dark:text-red-400">${i.kwhBare} kWh</div></td>
-            <td class="px-6 py-4 text-center"><div class="font-bold text-slate-700 dark:text-white">${i.Tins}</div><div class="text-[10px] font-bold text-orange-500 dark:text-orange-400">${i.kwhIns} kWh</div></td>
-            <td class="px-6 py-4 text-center"><div class="font-bold text-green-600 dark:text-green-400">+${i.kwhSave} kWh</div></td>
-            <td class="px-6 py-4 text-right text-slate-600 dark:text-slate-300">${currSym}${fmt(invDisp)}</td><td class="px-6 py-4 text-right text-green-600 dark:text-green-400">${i.inputs.matKey!=='bare'?'+'+currSym+fmt(saveDisp):'-'}</td><td class="px-6 py-4 text-right font-bold text-indigo-500 dark:text-indigo-400">${roi}</td><td class="px-6 py-4 text-right"><button onclick="edit(${x})" class="text-indigo-500 dark:text-indigo-400 mr-2 hover:text-slate-900 dark:hover:text-white"><i data-lucide="pencil" class="w-4 h-4"></i></button><button onclick="del(${x})" class="text-red-500 dark:text-red-400 hover:text-slate-900 dark:hover:text-white"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td></tr>`);
+            <td class="px-6 py-4 font-bold text-slate-800">${i.name} ${locTag}</td>
+            <td class="px-6 py-4 text-slate-500 text-xs">${i.desc}</td>
+            <td class="px-6 py-4 text-center">${qtyInput} <span class="text-[9px] text-slate-400 block">${i.unit}</span></td>
+            <td class="px-6 py-4 text-center"><div class="font-bold text-slate-700">${i.Ts}</div><div class="text-[10px] font-bold text-red-500">${i.kwhBare} kWh</div></td>
+            <td class="px-6 py-4 text-center"><div class="font-bold text-slate-700">${i.Tins}</div><div class="text-[10px] font-bold text-orange-500">${i.kwhIns} kWh</div></td>
+            <td class="px-6 py-4 text-center"><div class="font-bold text-green-600">+${i.kwhSave} kWh</div></td>
+            <td class="px-6 py-4 text-right">${invInput}</td>
+            <td class="px-6 py-4 text-right text-green-600 font-bold">${i.inputs.matKey!=='bare'?'+'+currSym+fmt(saveDisp):'-'}</td><td class="px-6 py-4 text-right font-bold text-indigo-500">${roi}</td><td class="px-6 py-4 text-right"><button onclick="edit(${x})" class="text-indigo-500 mr-2 hover:text-slate-900"><i data-lucide="pencil" class="w-4 h-4"></i></button><button onclick="del(${x})" class="text-red-500 hover:text-slate-900"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td></tr>`);
         });
-        if(LIST.length===0)tb.innerHTML=`<tr><td colspan="10" class="px-6 py-20 text-center text-slate-500"><i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-20"></i><span id="emptyMsg">Henüz hesaplama eklenmedi.</span></td></tr>`;
+        if(LIST.length===0)tb.innerHTML=`<tr><td colspan="11" class="px-6 py-20 text-center text-slate-500"><i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-20"></i><span id="emptyMsg">Henüz hesaplama eklenmedi.</span></td></tr>`;
         
-        document.getElementById('dashInv').innerText=currSym+fmt(gInv);
+        // Manuel yatırım bedeli girilmişse onu kullan, yoksa otomatik toplamı kullan
+        const finalInv = (manualTotalInvestment !== null && manualTotalInvestment > 0) 
+            ? (manualTotalInvestment / reportRate) 
+            : gInv;
+        
+        document.getElementById('dashInv').innerText=currSym+fmt(finalInv);
         document.getElementById('dashSave').innerText=currSym+fmt(gSave);
         document.getElementById('dashCo2').innerHTML=gCo2.toFixed(1)+' Ton';
-        const totalRoi=gSave>0?(gInv/gSave*12):0;
+        const totalRoi=gSave>0?(finalInv/gSave*12):0;
         document.getElementById('dashRoi').innerHTML=totalRoi>0?totalRoi.toFixed(1)+` <span class="text-lg text-slate-500 font-normal">Ay</span>`:'---';
         document.getElementById('barRoi').style.width=totalRoi>0?Math.min((totalRoi/24)*100,100)+'%':'0%';
         lucide.createIcons();
     }
 
+    function quickUpdate(i, field, val) {
+        if(LIST[i].inputs.type === 'package' && field === 'qty') {
+             if(confirm("Paketlerin adedini değiştirmek için paketi silip yeniden oluşturmalısınız.")) {
+                 render(); 
+                 return;
+             }
+        }
+        
+        const oldInputs = LIST[i].inputs;
+        if(oldInputs.type === 'package') return;
+
+        setType(oldInputs.type);
+        document.getElementById('tProc').value = oldInputs.tProc;
+        document.getElementById('tAmb').value = oldInputs.tAmb;
+        document.getElementById('matSelect').value = oldInputs.matKey;
+        document.getElementById('thk').value = oldInputs.thk;
+        document.getElementById('calcStd').value = oldInputs.standard;
+        document.getElementById('location').value = oldInputs.location || "";
+        document.getElementById('vWind').value = oldInputs.vWind || 0; 
+        
+        if(oldInputs.type==='pipe') {
+             document.getElementById('pDN').value = oldInputs.pDN;
+             document.getElementById('pLen').value = oldInputs.pLen;
+        } else if(oldInputs.type==='valve'){
+             document.getElementById('vDN').value = oldInputs.vDN;
+             document.getElementById('valveType').value = oldInputs.valveType;
+        }
+        
+        if(field === 'qty') document.getElementById('qty').value = val;
+        else document.getElementById('qty').value = oldInputs.qty; 
+        
+        if(field === 'inv') {
+            document.getElementById('inv').value = val;
+            document.getElementById('invCurr').value = document.getElementById('curr').value; 
+        } else {
+            document.getElementById('inv').value = oldInputs.inv;
+            document.getElementById('invCurr').value = oldInputs.invCurr;
+        }
+        
+        LIST[i] = getCalculationResult(false);
+        resetForm();
+        render();
+    }
+
     let printTemplateCache = null;
 
-    // OTOMATİK SAYFALAMA MANTIĞI İLE YENİLENMİŞ PRINT FONKSİYONU
     function printRep(){
         try{
             const printArea = document.getElementById('print-area');
@@ -1571,7 +1652,6 @@
             }
             printArea.innerHTML = printTemplateCache;
             
-            // --- TARİH AYARLAMALARI ---
             const today = new Date().toLocaleDateString('tr-TR');
             const auditInput = document.getElementById('auditDate').value;
             let auditDateStr = today; 
@@ -1586,7 +1666,7 @@
             const currSym = currSymMap[currSymVal]||'';
 
             let gInv=0, gSave=0, gCo2=0, gLoss=0, gFuelLost=0;
-            let gTotalKwh = 0; // YENİ EKLENEN TOPLAM KWH
+            let gTotalKwh = 0; 
             let lastFuelUnit = "";
             let maxTempDetected = 0; 
 
@@ -1605,16 +1685,8 @@
                     allWinds.push(i.inputs.vWind || 1);
                 }
 
-                // --- TOPLAM KWH HESAPLAMA (DÜZELTİLDİ) ---
-                // Mevcut kayıp durumuna göre (Eğer izolasyon yoksa çıplak kaybı, varsa o anki kaybı al)
-                // Ama rapor "Mevcut Durum" raporu ise, ve biz bir "Öneri" sunuyorsak (matKey !== bare),
-                // o zaman "Current Loss" olarak BARE halini almalıyız ki müşteri ne kadar kaybettiğini görsün.
-                // Eğer zaten bare olarak eklemişsek, yine bare halini almalıyız.
-                // Kısaca: Her zaman kwhBare'i topluyoruz.
-                
                 const rawKwh = parseFloat(i.kwhBare.replace(/\./g,'').replace(',','.'));
                 gTotalKwh += rawKwh;
-                // -----------------------------------------
 
                 if(i.inputs.matKey!=='bare'){
                     gInv += invDisp;
@@ -1639,7 +1711,6 @@
                 windNarrativeBit = `<strong>${val} m/s</strong> rüzgar hızı koşullarında`;
             }
 
-            // --- AKILLI SAYFALAMA MANTIĞI (GHOST TABLE) ---
             const ghostContainer = document.createElement('div');
             ghostContainer.style.width = '210mm'; 
             ghostContainer.style.padding = '40px'; 
@@ -1743,17 +1814,23 @@
                 document.getElementById('print-area').insertBefore(newPage, summaryPage);
             });
 
-            // KAPAK VERİLERİ
-            const totalRoi = gSave>0 ? (gInv/gSave*12) : 0;
+            // KAPAK VERİLERİ (GÜNCEL)
+            // Manuel yatırım bedeli varsa onu kullan
+            const finalInvForReport = (manualTotalInvestment !== null && manualTotalInvestment > 0) 
+                ? (manualTotalInvestment / reportRate) 
+                : gInv;
+            const totalRoi = gSave>0 ? (finalInvForReport/gSave*12) : 0;
             
             document.getElementById('covClient').innerText = document.getElementById('cName').value || "FİRMA ADI";
             document.getElementById('covContact').innerText = document.getElementById('cEng').value || "";
             document.getElementById('covProv').innerText = document.getElementById('pName').value || "TEDARİKÇİ";
             document.getElementById('covDate').innerText = today; 
             document.getElementById('covIntroDate').innerText = auditDateStr; 
-            document.getElementById('covRoi').innerText = totalRoi>0 ? totalRoi.toFixed(1) : "---";
-            document.getElementById('covMaxTemp').innerText = maxTempDetected.toFixed(0);
-
+            
+            // ROI YENİ YERİNDE
+            document.getElementById('covRoiBig').innerText = totalRoi>0 ? totalRoi.toFixed(1) : "---";
+            
+            // --- YENİ EKLENEN DAILY/WEEKLY/MONTHLY HESAPLAMALAR ---
             const fuelYearly = gFuelLost;
             const fuelMonthly = gFuelLost / 12;
             const fuelWeekly = gFuelLost / 52;
@@ -1764,20 +1841,20 @@
             document.getElementById('covFuelWeek').innerText = Math.round(fuelWeekly).toLocaleString();
             document.getElementById('covFuelDay').innerText = Math.round(fuelDaily).toLocaleString();
             
-            // --- KWH VERİLERİNİ YAZDIR (DÜZELTİLDİ) ---
-            document.getElementById('covKwhYear').innerText = Math.round(gTotalKwh).toLocaleString();
-            document.getElementById('covKwhMonth').innerText = Math.round(gTotalKwh/12).toLocaleString();
-            document.getElementById('covKwhWeek').innerText = Math.round(gTotalKwh/52).toLocaleString();
-            document.getElementById('covKwhDay').innerText = Math.round(gTotalKwh/365).toLocaleString();
-            // ------------------------------------
+            const kwhYearly = gTotalKwh;
+            const kwhMonthly = gTotalKwh / 12;
+            const kwhWeekly = gTotalKwh / 52;
+            const kwhDaily = gTotalKwh / 365;
+
+            document.getElementById('covKwhYear').innerText = Math.round(kwhYearly).toLocaleString();
+            document.getElementById('covKwhMonth').innerText = Math.round(kwhMonthly).toLocaleString();
+            document.getElementById('covKwhWeek').innerText = Math.round(kwhWeekly).toLocaleString();
+            document.getElementById('covKwhDay').innerText = Math.round(kwhDaily).toLocaleString();
+            // --------------------------------------------------------
 
             const fuelLabels = document.querySelectorAll('.fuel-unit-label');
             fuelLabels.forEach(el => el.innerText = lastFuelUnit);
             
-            const fType = document.getElementById('fuel').value;
-            let fuelDisp = fType === 'manual' ? "ÖZEL YAKIT" : document.getElementById('fuel').options[document.getElementById('fuel').selectedIndex].text.split('(')[0].toUpperCase();
-            document.getElementById('covFuelType').innerText = fuelDisp;
-
             const tAmb = document.getElementById('tAmb').value;
             const eff = document.getElementById('eff').value;
             const price = document.getElementById('price').value;
@@ -1789,16 +1866,18 @@
 
             const qrImgEl = document.getElementById('covQrCode');
             if (userQrImg) { qrImgEl.src = userQrImg; qrImgEl.classList.remove('opacity-20'); } 
-            else { qrImgEl.src = ""; qrImgEl.classList.add('opacity-20'); }
+            else { qrImgEl.src = ""; qrImgEl.classList.add('opacity-50'); }
 
             document.getElementById('sumLoss').innerText = currSym + fmt(gLoss);
             document.getElementById('sumFuelLost').innerText = `(${Math.round(gFuelLost).toLocaleString()} ${lastFuelUnit})`;
-            document.getElementById('sumSave').innerText = currSym + fmt(gSave);
-            document.getElementById('tabInv').innerText = currSym + fmt(gInv);
-            document.getElementById('txtRoi').innerText = totalRoi>0 ? totalRoi.toFixed(1) + " Ay" : "---";
-            document.getElementById('visualBar').style.width = totalRoi>0 ? Math.min((totalRoi/24)*100,100) + '%' : '0%';
+            
             document.getElementById('sumCo2').innerText = gCo2.toFixed(1);
             document.getElementById('sumTrees').innerText = Math.round(gCo2*40).toLocaleString();
+
+            // YÖNETİCİ ÖZETİ SAYFASINDAKİ YENİ ALANLARI DOLDUR
+            document.getElementById('sumInvSummary').innerText = currSym + fmt(finalInvForReport);
+            document.getElementById('sumNetSaveSummary').innerText = currSym + fmt(gSave);
+            document.getElementById('sumRoiSummary').innerText = totalRoi>0 ? totalRoi.toFixed(1) + " AY" : "---";
 
             const pt = document.getElementById('projTable');
             pt.innerHTML = '';
@@ -1807,7 +1886,7 @@
             for(let y=1; y<=5; y++){ tL += gLoss; rowL += `<td class="p-2 text-red-500">-${currSym}${fmt(tL)}</td>`; }
             rowL += `<td class="p-2 font-black text-red-700">-${currSym}${fmt(tL)}</td></tr>`;
             let rowG = `<tr><td class="p-2 text-left font-bold text-green-600">Yatırım Sonrası (Kümülatif Kazanç)</td>`;
-            let tG = -gInv;
+            let tG = -finalInvForReport;
             for(let y=1; y<=5; y++){ tG += gSave; rowG += `<td class="p-2 ${tG>=0?'text-green-600':'text-red-400'}">${currSym}${fmt(tG)}</td>`; }
             rowG += `<td class="p-2 font-black ${tG>=0?'text-green-700':'text-red-700'}">${tG>0?'+':''}${currSym}${fmt(tG)}</td></tr>`;
             pt.innerHTML = rowL + rowG;
@@ -1817,6 +1896,6 @@
         }catch(e){ alert('Rapor oluşturulurken hata oluştu: ' + e.message); console.error(e); }
     }
 </script>
+  <script src="guard.js?v=2"></script>
 </body>
 </html>
-
