@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Yoğuşma Önleme Pro | Optimizi</title>
+<title>Yoğuşma Hesaplama</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -49,9 +49,9 @@
   }
 
   .glass-input { 
-    transition: all 0.2s; border-radius: 0.5rem; padding: 0.6rem 0.8rem; width: 100%; 
+    transition: all 0.2s; border-radius: 0.5rem; padding: 0.5rem 0.7rem; width: 100%; 
     background-color: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-main);
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
   .glass-input:focus { outline: none; border-color: #06b6d4; box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1); }
 
@@ -126,7 +126,7 @@
     .print-page { 
       page-break-after: always; 
       page-break-inside: avoid;
-      padding: 45px 50px 60px 50px;
+      padding: 35px 45px 45px 45px;
       height: 297mm;
       width: 210mm;
       box-sizing: border-box;
@@ -167,13 +167,13 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-bottom: 15px;
+      padding-bottom: 10px;
       border-bottom: 2px solid #e0e7ff;
-      margin-bottom: 25px;
+      margin-bottom: 16px;
     }
 
     .print-section {
-      margin-bottom: 20px;
+      margin-bottom: 14px;
       page-break-inside: avoid;
       break-inside: avoid;
       orphans: 3;
@@ -183,8 +183,8 @@
     .audit-table {
       width: 100%;
       border-collapse: collapse;
-      margin: 15px 0;
-      font-size: 9px;
+      margin: 10px 0;
+      font-size: 8px;
       page-break-inside: auto;
     }
 
@@ -193,204 +193,231 @@
       color: #0891b2 !important;
       font-weight: 700;
       text-transform: uppercase;
-      font-size: 7px;
-      padding: 8px;
-      border: 1px solid #a5f3fc;
-      page-break-after: avoid;
-      page-break-inside: avoid;
+      font-size: 6.5px;
+      padding: 5px;
+      border: 1px solid #cffafe !important;
+      text-align: left;
     }
 
     .audit-table td {
-      padding: 6px 8px;
-      border: 1px solid #e2e8f0;
-      color: #334155;
-      page-break-inside: avoid;
+      padding: 5px;
+      border: 1px solid #e2e8f0 !important;
+      color: #1e293b !important;
+      vertical-align: top;
     }
-    
-    .audit-table tr {
-      page-break-inside: avoid;
-      page-break-after: auto;
-    }
-    
+
     .audit-table tr:nth-child(even) {
       background-color: #f8fafc !important;
     }
-  }
 
-  #print-wrapper { display: none; }
+    .print-footer {
+      position: absolute; 
+      bottom: 18px; 
+      left: 45px; 
+      right: 45px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      border-top: 1px solid #e2e8f0; 
+      padding-top: 6px;
+    }
+  }
 </style>
 </head>
-<body class="antialiased">
+<body>
 
-<!-- NAVIGATION -->
-<nav class="sticky top-0 z-50 bg-white/80 border-b border-slate-200 backdrop-blur-xl main-interface">
-  <div class="max-w-[1600px] mx-auto px-6 h-16 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <div class="w-9 h-9 bg-gradient-to-br from-cyan-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-200">
-        <i data-lucide="droplets" class="text-white w-5 h-5"></i>
+<!-- NAV -->
+<nav class="glass-card sticky top-3 mx-4 mb-6 z-50 rounded-2xl p-4 shadow-xl">
+  <div class="max-w-7xl mx-auto flex items-center justify-between">
+    <div class="flex items-center space-x-2">
+      <div class="w-9 h-9 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+        <i data-lucide="droplets" class="w-5 h-5 text-white"></i>
       </div>
       <div>
-        <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-600">.Yoğuşma</span></h1>
-        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Soğuk Hat Optimizasyonu</p>
+        <h1 class="text-xl font-black bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">Optimizi.App</h1>
+        <p class="text-xs text-slate-500 font-semibold">Yoğuşma Kontrolü</p>
       </div>
-    </div>
-    <div class="flex items-center gap-3">
-      <button onclick="showReportModal()" class="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg font-bold text-sm hover:shadow-lg transition-all flex items-center gap-2">
-        <i data-lucide="printer" class="w-4 h-4"></i>
-        Rapor Al
-      </button>
     </div>
   </div>
 </nav>
 
-<!-- MAIN CONTENT -->
-<div class="main-interface max-w-[1600px] mx-auto px-6 py-8">
-  <div class="grid lg:grid-cols-3 gap-6">
+<!-- MAIN INTERFACE -->
+<div class="main-interface max-w-7xl mx-auto px-4 pb-12">
+  
+  <!-- GİRİŞ PARAMETRELERİ -->
+  <div class="glass-card rounded-2xl p-6 mb-6 shadow-2xl">
+    <div class="flex items-center mb-4">
+      <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mr-3 shadow-lg">
+        <i data-lucide="sliders" class="w-5 h-5 text-white"></i>
+      </div>
+      <h2 class="text-xl font-black text-slate-900">Sistem Parametreleri</h2>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Boru Çapı (DN)</label>
+        <select id="dn" onchange="calculate()" class="glass-input font-mono font-bold">
+          <!-- Dinamik olarak doldurulacak -->
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Ortam Sıc. (°C)</label>
+        <input type="number" id="t_ort" value="25" onchange="calculate()" class="glass-input font-mono font-bold">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Bağıl Nem (%)</label>
+        <input type="number" id="rh" value="70" min="0" max="100" onchange="calculate()" class="glass-input font-mono font-bold">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">İç Akış. Sıc. (°C)</label>
+        <input type="number" id="t_ic" value="7" onchange="calculate()" class="glass-input font-mono font-bold">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Hava Hızı (m/s)</label>
+        <input type="number" id="v_hava" value="0.5" step="0.1" min="0" onchange="calculate()" class="glass-input font-mono font-bold">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Emisivite (ε)</label>
+        <input type="number" id="emis" value="0.9" step="0.05" min="0.1" max="1" onchange="calculate()" class="glass-input font-mono font-bold">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Boru Uzun. (m)</label>
+        <input type="number" id="pipe_length" value="1" step="0.1" min="0.1" onchange="calculate()" class="glass-input font-mono font-bold">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Güv. Marjı (°C)</label>
+        <input type="number" id="safety_margin" value="3" step="0.5" min="0" onchange="calculate()" class="glass-input font-mono font-bold">
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     
-    <!-- LEFT PANEL: INPUT -->
+    <!-- SOL: HESAPLAMA SONUÇLARI + MANUEL -->
     <div class="lg:col-span-1 space-y-6">
-      <div class="glass-card rounded-2xl p-6">
-        <div class="flex items-center gap-2 mb-5">
-          <div class="w-8 h-8 bg-cyan-100 rounded-lg flex items-center justify-center">
-            <i data-lucide="sliders" class="w-4 h-4 text-cyan-600"></i>
+      
+      <!-- HESAPLAMA SONUÇLARI -->
+      <div class="glass-card rounded-2xl p-5 shadow-2xl">
+        <div class="flex items-center mb-4">
+          <div class="w-9 h-9 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center mr-3 shadow-lg">
+            <i data-lucide="calculator" class="w-5 h-5 text-white"></i>
           </div>
-          <h2 class="text-lg font-bold text-slate-900">Giriş Parametreleri</h2>
+          <h2 class="text-lg font-black text-slate-900">Sonuçlar</h2>
         </div>
 
-        <div class="space-y-4">
+        <div id="results" class="space-y-3">
+          <!-- Dinamik olarak doldurulacak -->
+        </div>
+      </div>
+
+      <!-- MANUEL HESAPLAMA -->
+      <div class="glass-card rounded-2xl p-5 shadow-2xl">
+        <div class="flex items-center mb-4">
+          <div class="w-9 h-9 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center mr-3 shadow-lg">
+            <i data-lucide="ruler" class="w-5 h-5 text-white"></i>
+          </div>
+          <h2 class="text-lg font-black text-slate-900">Manuel Hesap</h2>
+        </div>
+
+        <div class="space-y-3">
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">Boru Çapı (DN)</label>
-            <select id="dn" class="glass-input" onchange="calculate()">
+            <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Dolgu Malzemesi</label>
+            <select id="manual_insulation" class="glass-input font-mono font-bold text-xs">
               <!-- Dinamik olarak doldurulacak -->
             </select>
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">Proses Sıcaklığı (°C)</label>
-            <input type="number" id="tProc" value="5" step="0.5" class="glass-input" onchange="calculate()">
+            <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Kalınlık (mm)</label>
+            <input type="number" id="manual_thickness" value="30" min="1" max="200" step="1" class="glass-input font-mono font-bold">
           </div>
 
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">Ortam Sıcaklığı (°C)</label>
-            <input type="number" id="tAmb" value="25" step="0.5" class="glass-input" onchange="calculate()">
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">Ortam Bağıl Nem (%)</label>
-            <input type="number" id="rhAmb" value="70" step="1" min="0" max="100" class="glass-input" onchange="calculate()">
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">Rüzgar Hızı (m/s)</label>
-            <input type="number" id="vWind" value="0.5" step="0.1" min="0" class="glass-input" onchange="calculate()">
-            <p class="text-[9px] text-slate-500 mt-1">İç mekan: 0-0.5 m/s | Dış mekan: 1-5 m/s</p>
-          </div>
-        </div>
-
-        <div class="mt-6 p-4 bg-cyan-50 rounded-xl border border-cyan-200">
-          <div class="flex items-start gap-2">
-            <i data-lucide="thermometer" class="w-5 h-5 text-cyan-600 mt-0.5"></i>
-            <div>
-              <p class="text-xs font-bold text-cyan-900 mb-1">ÇİY NOKTASI</p>
-              <p id="dewPointDisplay" class="text-2xl font-black text-cyan-600">--</p>
-              <p class="text-[10px] text-cyan-700 mt-1">Hedef Yüzey: <span id="targetTempDisplay" class="font-bold">--</span></p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MIDDLE PANEL: SELECTION -->
-    <div class="lg:col-span-1 space-y-6">
-      <div class="glass-card rounded-2xl p-6">
-        <div class="flex items-center justify-between mb-5">
-          <div class="flex items-center gap-2">
-            <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
-              <i data-lucide="package" class="w-4 h-4 text-emerald-600"></i>
-            </div>
-            <h2 class="text-lg font-bold text-slate-900">İzolasyon Seçimi</h2>
-          </div>
-        </div>
-
-        <div id="selectionArea" class="space-y-3 max-h-[calc(100vh-280px)] overflow-y-auto pr-2">
-          <!-- Dinamik olarak doldurulacak -->
-        </div>
-      </div>
-    </div>
-
-    <!-- RIGHT PANEL: ADDED LIST -->
-    <div class="lg:col-span-1 space-y-6">
-      <div class="glass-card rounded-2xl p-6">
-        <div class="flex items-center justify-between mb-5">
-          <div class="flex items-center gap-2">
-            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-              <i data-lucide="list-checks" class="w-4 h-4 text-blue-600"></i>
-            </div>
-            <h2 class="text-lg font-bold text-slate-900">Seçilen Çözümler</h2>
-          </div>
-          <button onclick="clearAllSelections()" class="text-xs font-bold text-red-600 hover:text-red-700 px-3 py-1 rounded-lg hover:bg-red-50 transition-all">
-            Tümünü Temizle
+          <button onclick="calculateManual()" class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-black py-2.5 px-4 rounded-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-sm">
+            <i data-lucide="play" class="w-4 h-4 inline mr-1"></i>
+            Hesapla
           </button>
         </div>
 
-        <div id="selectedList" class="space-y-3 max-h-[calc(100vh-280px)] overflow-y-auto pr-2">
-          <div class="text-center py-12 text-slate-400">
-            <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-30"></i>
-            <p class="text-sm font-medium">Henüz seçim yapılmadı</p>
-            <p class="text-xs mt-1">Soldaki listeden ekleyin</p>
+        <div id="manualResults" class="hidden mt-4">
+          <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-4 border-2 border-slate-200">
+            <h3 class="text-xs font-black text-slate-700 mb-2 uppercase tracking-wide">Sonuç</h3>
+            <div class="space-y-1.5 text-xs mb-3">
+              <div class="flex justify-between">
+                <span class="text-slate-600">Yüzey Sıc.:</span>
+                <span id="manual_surface_temp" class="font-mono font-bold text-slate-900"></span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-600">Çiğ Noktası:</span>
+                <span id="manual_dew_point" class="font-mono font-bold text-slate-900"></span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-600">Fark:</span>
+                <span id="manual_diff" class="font-mono font-bold text-slate-900"></span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-600">Isı Kaybı:</span>
+                <span id="manual_heat_loss" class="font-mono font-bold text-slate-900"></span>
+              </div>
+            </div>
+            <div id="manual_status" class="rounded-lg p-3 text-center text-xs">
+              <!-- Dinamik olarak doldurulacak -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAĞ: OTOMATİK ÇÖZÜMLER -->
+    <div class="lg:col-span-2 glass-card rounded-2xl p-5 shadow-2xl">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center">
+          <div class="w-9 h-9 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center mr-3 shadow-lg">
+            <i data-lucide="layers" class="w-5 h-5 text-white"></i>
+          </div>
+          <h2 class="text-lg font-black text-slate-900">Otomatik Çözümler</h2>
+        </div>
+      </div>
+
+      <div id="selectionArea" class="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[500px] overflow-y-auto pr-2 mb-4">
+        <!-- Dinamik olarak doldurulacak -->
+      </div>
+
+      <div class="border-t-2 border-slate-200 pt-4">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-base font-black text-slate-900">Seçili Çözümler</h3>
+          <button onclick="generateReport()" class="bg-gradient-to-r from-violet-600 to-purple-600 text-white font-black py-2 px-5 rounded-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center space-x-1.5 text-sm">
+            <i data-lucide="file-text" class="w-4 h-4"></i>
+            <span>PDF Rapor</span>
+          </button>
+        </div>
+
+        <div id="selectedList" class="space-y-2.5 max-h-[300px] overflow-y-auto pr-2">
+          <div class="text-center text-slate-400 py-8">
+            <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-50"></i>
+            <p class="font-bold text-sm">Henüz çözüm seçilmedi</p>
+            <p class="text-xs mt-1">Yukarıdaki kartlardan seçin</p>
           </div>
         </div>
       </div>
     </div>
 
   </div>
+
 </div>
 
-<!-- PRINT WRAPPER -->
-<div id="print-wrapper"></div>
-
-<!-- MODAL FOR COMPANY INFO -->
-<div id="reportModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
-  <div class="glass-card rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
-    <div class="flex items-center gap-3 mb-6">
-      <div class="w-10 h-10 bg-cyan-100 rounded-xl flex items-center justify-center">
-        <i data-lucide="building-2" class="w-5 h-5 text-cyan-600"></i>
-      </div>
-      <h3 class="text-xl font-bold text-slate-900">Rapor Bilgileri</h3>
-    </div>
-    
-    <div class="space-y-4">
-      <div>
-        <label class="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">Proje Adı</label>
-        <input type="text" id="projectName" class="glass-input" placeholder="Örn: Fabrika Soğutma Sistemi Yalıtımı">
-      </div>
-      
-      <div>
-        <label class="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">Firma Adı</label>
-        <input type="text" id="companyName" class="glass-input" placeholder="Örn: ABC Mühendislik A.Ş.">
-      </div>
-      
-      <div>
-        <label class="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">Yetkili Kişi</label>
-        <input type="text" id="contactPerson" class="glass-input" placeholder="Örn: Ahmet Yılmaz">
-      </div>
-    </div>
-    
-    <div class="flex gap-3 mt-6">
-      <button onclick="closeReportModal()" class="flex-1 px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg font-bold text-sm transition-all">
-        İptal
-      </button>
-      <button onclick="proceedWithReport()" class="flex-1 px-4 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white rounded-lg font-bold text-sm transition-all flex items-center justify-center gap-2">
-        <i data-lucide="check" class="w-4 h-4"></i>
-        Rapor Oluştur
-      </button>
-    </div>
-  </div>
-</div>
+<!-- PRINT WRAPPER (Hidden) -->
+<div id="print-wrapper" style="display: none;"></div>
 
 <script>
 // ====================================
-// VERİ YAPILARI
+// VERİ TANIMLARI
 // ====================================
 const PIPES = {
   25: 33.7, 32: 42.4, 40: 48.3, 50: 60.3, 65: 76.1, 80: 88.9,
@@ -406,579 +433,542 @@ const INSULATIONS = [
   { name: 'Aerogel', lambda: 0.015, thicknesses: [5, 10, 15, 20] }
 ];
 
-const STEFANBOLTZ = 5.67e-8;
-const EMISSIVITY_INSULATION = 0.9;
-
 let selectedSolutions = [];
-let currentInputs = {};
 
 // ====================================
-// ÇİY NOKTASI HESAPLAMA
+// HESAPLAMA FONKSİYONLARI
 // ====================================
-function dewPoint(t, rh) {
-  const a = 17.27, b = 237.7;
-  const alpha = ((a * t) / (b + t)) + Math.log(rh / 100.0);
+function calculateDewPoint(t, rh) {
+  const a = 17.27;
+  const b = 237.7;
+  const alpha = ((a * t) / (b + t)) + Math.log(rh / 100);
   return (b * alpha) / (a - alpha);
 }
 
-// ====================================
-// ISI TRANSFERİ HESAPLAMA
-// ====================================
-function calculateSurfaceTemp(tProc, tAmb, pipeOD, insThick, lambda, vWind) {
-  const r1 = pipeOD / 2000;
-  const r2 = r1 + (insThick / 1000);
+function calculateConvectionCoeff(v) {
+  return 10.45 - v + 10 * Math.sqrt(v);
+}
+
+function calculateRadiationCoeff(t_surf, t_amb, emis) {
+  const sigma = 5.67e-8;
+  const T_surf_K = t_surf + 273.15;
+  const T_amb_K = t_amb + 273.15;
+  return emis * sigma * (Math.pow(T_surf_K, 2) + Math.pow(T_amb_K, 2)) * (T_surf_K + T_amb_K);
+}
+
+function calculateSurfaceTemp(r1, r2, lambda, t_ic, t_ort, h_conv, h_rad, L) {
+  const R_ins = Math.log(r2 / r1) / (2 * Math.PI * lambda * L);
+  const R_ext = 1 / (2 * Math.PI * r2 * (h_conv + h_rad) * L);
   
-  // Konveksiyon katsayısı - rüzgar hızına bağlı
-  const hConv = 10.45 - vWind + 10 * Math.sqrt(vWind);
+  const iterations = 10;
+  let t_surf = t_ort;
   
-  const hRad = EMISSIVITY_INSULATION * STEFANBOLTZ * 
-    (Math.pow((tAmb + 273.15), 2) + Math.pow((tProc + 273.15), 2)) *
-    ((tAmb + 273.15) + (tProc + 273.15));
+  for (let i = 0; i < iterations; i++) {
+    const h_rad_calc = calculateRadiationCoeff(t_surf, t_ort, 0.9);
+    const R_ext_new = 1 / (2 * Math.PI * r2 * (h_conv + h_rad_calc) * L);
+    const R_total = R_ins + R_ext_new;
+    t_surf = t_ic + (t_ort - t_ic) * (R_ins / R_total);
+  }
   
-  const hTotal = hConv + hRad;
-  
-  const Rins = Math.log(r2 / r1) / (2 * Math.PI * lambda);
-  const Rext = 1 / (2 * Math.PI * r2 * hTotal);
-  const Rtotal = Rins + Rext;
-  
-  const q = (tProc - tAmb) / Rtotal;
-  const tSurf = tAmb + (q * Rext);
-  
-  return tSurf;
+  return t_surf;
+}
+
+function calculateHeatLoss(r1, r2, lambda, t_ic, t_surf, L) {
+  const R_ins = Math.log(r2 / r1) / (2 * Math.PI * lambda * L);
+  return (t_surf - t_ic) / R_ins;
 }
 
 // ====================================
-// HESAPLAMA
+// ANA HESAPLAMA
 // ====================================
 function calculate() {
-  const dn = document.getElementById('dn').value;
-  const tProc = parseFloat(document.getElementById('tProc').value);
-  const tAmb = parseFloat(document.getElementById('tAmb').value);
-  const rhAmb = parseFloat(document.getElementById('rhAmb').value);
-  const vWind = parseFloat(document.getElementById('vWind').value) || 0.5;
-  
-  const pipeOD = PIPES[dn];
-  const tDew = dewPoint(tAmb, rhAmb);
-  const tTarget = tDew + 3;
-  
-  currentInputs = { dn, tProc, tAmb, rhAmb, vWind, pipeOD, tDew, tTarget };
-  
-  document.getElementById('dewPointDisplay').textContent = tDew.toFixed(1) + '°C';
-  document.getElementById('targetTempDisplay').textContent = tTarget.toFixed(1) + '°C';
-  
-  renderSelectionArea();
-}
+  const dn = parseInt(document.getElementById('dn').value);
+  const t_ort = parseFloat(document.getElementById('t_ort').value);
+  const rh = parseFloat(document.getElementById('rh').value);
+  const t_ic = parseFloat(document.getElementById('t_ic').value);
+  const v_hava = parseFloat(document.getElementById('v_hava').value);
+  const emis = parseFloat(document.getElementById('emis').value);
+  const L = parseFloat(document.getElementById('pipe_length').value);
+  const safety_margin = parseFloat(document.getElementById('safety_margin').value);
 
-// ====================================
-// SEÇİM ALANI OLUŞTURMA
-// ====================================
-function renderSelectionArea() {
-  const container = document.getElementById('selectionArea');
-  container.innerHTML = '';
+  const od = PIPES[dn];
+  const r1 = od / 2000; // mm -> m
   
-  INSULATIONS.forEach((insul, insulIdx) => {
+  const t_dew = calculateDewPoint(t_ort, rh);
+  const h_conv = calculateConvectionCoeff(v_hava);
+
+  // SONUÇLARI GÖSTER
+  const resultsDiv = document.getElementById('results');
+  resultsDiv.innerHTML = `
+    <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-4 border-2 border-blue-200">
+      <div class="text-xs font-bold text-blue-700 uppercase tracking-wide mb-1">Çiğ Noktası</div>
+      <div class="text-2xl font-black text-blue-900">${t_dew.toFixed(2)}°C</div>
+    </div>
+    
+    <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-4 border-2 border-emerald-200">
+      <div class="text-xs font-bold text-emerald-700 uppercase tracking-wide mb-1">Min. Yüzey Sıc.</div>
+      <div class="text-2xl font-black text-emerald-900">${(t_dew + safety_margin).toFixed(2)}°C</div>
+    </div>
+    
+    <div class="bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl p-4 border-2 border-purple-200">
+      <div class="text-xs font-bold text-purple-700 uppercase tracking-wide mb-1">Konveksiyon Kat.</div>
+      <div class="text-2xl font-black text-purple-900">${h_conv.toFixed(2)}</div>
+      <div class="text-xs text-purple-600 font-semibold">W/m²K</div>
+    </div>
+  `;
+
+  // ÇÖZÜM ÜRETİMİ
+  const solutions = [];
+  
+  INSULATIONS.forEach(mat => {
+    mat.thicknesses.forEach(thick => {
+      const r2 = r1 + thick / 1000;
+      const h_rad = calculateRadiationCoeff(t_ort, t_ort, emis);
+      const t_surf = calculateSurfaceTemp(r1, r2, mat.lambda, t_ic, t_ort, h_conv, h_rad, L);
+      const q_loss = calculateHeatLoss(r1, r2, mat.lambda, t_ic, t_surf, L);
+      const safe = t_surf >= (t_dew + safety_margin);
+      
+      solutions.push({
+        material: mat.name,
+        lambda: mat.lambda,
+        thickness: thick,
+        surfaceTemp: t_surf,
+        heatLoss: q_loss,
+        safe: safe,
+        dewPoint: t_dew,
+        minTemp: t_dew + safety_margin
+      });
+    });
+  });
+
+  // KARTLARI GÖSTER
+  const selectionArea = document.getElementById('selectionArea');
+  selectionArea.innerHTML = '';
+  
+  solutions.forEach((sol, idx) => {
     const card = document.createElement('div');
-    card.className = 'glass-card rounded-xl p-4 space-y-3';
+    card.className = `selection-card glass-card rounded-xl p-4 ${sol.safe ? 'safe' : 'insufficient'}`;
+    card.onclick = () => toggleSelection(sol, card);
+    
+    const statusBadge = sol.safe
+      ? '<div class="inline-flex items-center space-x-1 bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-black"><i data-lucide="check" class="w-3 h-3"></i><span>GÜVENLİ</span></div>'
+      : '<div class="inline-flex items-center space-x-1 bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-black"><i data-lucide="x" class="w-3 h-3"></i><span>YETERSİZ</span></div>';
     
     card.innerHTML = `
-      <div class="flex items-center justify-between">
-        <h3 class="font-bold text-sm text-slate-900">${insul.name}</h3>
-        <span class="text-xs font-mono text-slate-600 bg-slate-100 px-2 py-1 rounded">λ=${insul.lambda.toFixed(3)}</span>
+      <div class="flex items-start justify-between mb-3">
+        <div>
+          <h3 class="text-sm font-black text-slate-900">${sol.material}</h3>
+          <p class="text-xs text-slate-500 font-semibold">λ=${sol.lambda}</p>
+        </div>
+        ${statusBadge}
       </div>
-      <div class="grid grid-cols-2 gap-2" id="thickness-grid-${insulIdx}"></div>
+      
+      <div class="bg-white bg-opacity-50 rounded-lg p-3 mb-3">
+        <div class="text-2xl font-black text-cyan-600 mb-0.5">${sol.thickness} mm</div>
+        <div class="text-xs text-slate-600 font-bold">Kalınlık</div>
+      </div>
+      
+      <div class="space-y-1 text-xs">
+        <div class="flex justify-between">
+          <span class="text-slate-600">Yüzey:</span>
+          <span class="font-mono font-bold ${sol.safe ? 'text-emerald-600' : 'text-red-600'}">${sol.surfaceTemp.toFixed(2)}°C</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-600">Min:</span>
+          <span class="font-mono font-bold text-slate-900">${sol.minTemp.toFixed(2)}°C</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-600">Kayıp:</span>
+          <span class="font-mono font-bold text-slate-900">${Math.abs(sol.heatLoss).toFixed(2)}W</span>
+        </div>
+      </div>
     `;
     
-    container.appendChild(card);
-    
-    const grid = document.getElementById(`thickness-grid-${insulIdx}`);
-    
-    insul.thicknesses.forEach(thick => {
-      const tSurf = calculateSurfaceTemp(
-        currentInputs.tProc,
-        currentInputs.tAmb,
-        currentInputs.pipeOD,
-        thick,
-        insul.lambda,
-        currentInputs.vWind
-      );
-      
-      const margin = tSurf - currentInputs.tDew;
-      const isSafe = margin >= 3;
-      
-      const btn = document.createElement('button');
-      btn.className = `selection-card p-3 rounded-lg ${isSafe ? 'safe' : 'insufficient'} text-left`;
-      btn.innerHTML = `
-        <div class="text-lg font-black ${isSafe ? 'text-emerald-600' : 'text-red-600'}">${thick}mm</div>
-        <div class="text-xs text-slate-600 mt-1">
-          <div class="font-mono">${tSurf.toFixed(1)}°C</div>
-          <div class="font-bold ${margin >= 3 ? 'text-emerald-600' : 'text-red-600'}">
-            ${isSafe ? '✓' : '✗'} ${margin >= 0 ? '+' : ''}${margin.toFixed(1)}°C
-          </div>
-        </div>
-      `;
-      
-      btn.onclick = () => addToList({
-        material: insul.name,
-        lambda: insul.lambda,
-        thickness: thick,
-        surfTemp: tSurf,
-        margin: margin,
-        safe: isSafe,
-        ...currentInputs
-      });
-      
-      grid.appendChild(btn);
-    });
+    selectionArea.appendChild(card);
   });
   
   lucide.createIcons();
 }
 
 // ====================================
-// LİSTEYE EKLEME
+// MANUEL HESAPLAMA
 // ====================================
-function addToList(solution) {
-  // Aynı kombinasyon var mı kontrol et
-  const exists = selectedSolutions.some(s => 
-    s.material === solution.material && 
-    s.thickness === solution.thickness &&
-    s.dn === solution.dn
+function calculateManual() {
+  const dn = parseInt(document.getElementById('dn').value);
+  const t_ort = parseFloat(document.getElementById('t_ort').value);
+  const rh = parseFloat(document.getElementById('rh').value);
+  const t_ic = parseFloat(document.getElementById('t_ic').value);
+  const v_hava = parseFloat(document.getElementById('v_hava').value);
+  const emis = parseFloat(document.getElementById('emis').value);
+  const L = parseFloat(document.getElementById('pipe_length').value);
+  const safety_margin = parseFloat(document.getElementById('safety_margin').value);
+  
+  const manualSelect = document.getElementById('manual_insulation');
+  const lambda = parseFloat(manualSelect.value);
+  const thickness = parseFloat(document.getElementById('manual_thickness').value);
+  
+  const od = PIPES[dn];
+  const r1 = od / 2000;
+  const r2 = r1 + thickness / 1000;
+  
+  const t_dew = calculateDewPoint(t_ort, rh);
+  const h_conv = calculateConvectionCoeff(v_hava);
+  const h_rad = calculateRadiationCoeff(t_ort, t_ort, emis);
+  const t_surf = calculateSurfaceTemp(r1, r2, lambda, t_ic, t_ort, h_conv, h_rad, L);
+  const q_loss = calculateHeatLoss(r1, r2, lambda, t_ic, t_surf, L);
+  const min_temp = t_dew + safety_margin;
+  const safe = t_surf >= min_temp;
+  const diff = t_surf - t_dew;
+  
+  // Sonuçları göster
+  document.getElementById('manual_surface_temp').textContent = `${t_surf.toFixed(2)}°C`;
+  document.getElementById('manual_dew_point').textContent = `${t_dew.toFixed(2)}°C`;
+  document.getElementById('manual_diff').textContent = `${diff.toFixed(2)}°C`;
+  document.getElementById('manual_heat_loss').textContent = `${Math.abs(q_loss).toFixed(2)} W`;
+  
+  const statusDiv = document.getElementById('manual_status');
+  if (safe) {
+    statusDiv.className = 'rounded-lg p-3 text-center bg-gradient-to-br from-emerald-50 to-green-50 border-2 border-emerald-500';
+    statusDiv.innerHTML = `
+      <div class="flex items-center justify-center space-x-2 mb-1">
+        <i data-lucide="check-circle" class="w-6 h-6 text-emerald-600"></i>
+        <span class="text-lg font-black text-emerald-900">GÜVENLİ</span>
+      </div>
+      <p class="text-xs text-emerald-700">Yoğuşma önleme için yeterli</p>
+      <p class="text-xs text-emerald-600 mt-1 font-bold">Marjı: +${(t_surf - min_temp).toFixed(2)}°C</p>
+    `;
+  } else {
+    statusDiv.className = 'rounded-lg p-3 text-center bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-500';
+    statusDiv.innerHTML = `
+      <div class="flex items-center justify-center space-x-2 mb-1">
+        <i data-lucide="alert-triangle" class="w-6 h-6 text-red-600"></i>
+        <span class="text-lg font-black text-red-900">YETERSİZ</span>
+      </div>
+      <p class="text-xs text-red-700">Yoğuşma önleme için yetersiz</p>
+      <p class="text-xs text-red-600 mt-1 font-bold">Eksik: ${(min_temp - t_surf).toFixed(2)}°C</p>
+    `;
+  }
+  
+  document.getElementById('manualResults').classList.remove('hidden');
+  lucide.createIcons();
+}
+
+// ====================================
+// SEÇİM YÖNETİMİ
+// ====================================
+function toggleSelection(solution, cardElement) {
+  const exists = selectedSolutions.find(s => 
+    s.material === solution.material && s.thickness === solution.thickness
   );
   
   if (exists) {
-    showNotification('Bu çözüm zaten listede!', 'warning');
-    return;
+    selectedSolutions = selectedSolutions.filter(s => 
+      !(s.material === solution.material && s.thickness === solution.thickness)
+    );
+    showNotification(`${solution.material} ${solution.thickness}mm kaldırıldı`, 'info');
+  } else {
+    selectedSolutions.push(solution);
+    showNotification(`${solution.material} ${solution.thickness}mm eklendi`, 'success');
   }
   
-  selectedSolutions.push(solution);
-  renderSelectedList();
-  showNotification('Listeye eklendi!', 'success');
+  updateSelectedList();
 }
 
-// ====================================
-// SEÇİLİ LİSTE RENDER
-// ====================================
-function renderSelectedList() {
-  const container = document.getElementById('selectedList');
+function updateSelectedList() {
+  const listDiv = document.getElementById('selectedList');
   
   if (selectedSolutions.length === 0) {
-    container.innerHTML = `
-      <div class="text-center py-12 text-slate-400">
-        <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-30"></i>
-        <p class="text-sm font-medium">Henüz seçim yapılmadı</p>
-        <p class="text-xs mt-1">Soldaki listeden ekleyin</p>
+    listDiv.innerHTML = `
+      <div class="text-center text-slate-400 py-8">
+        <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-50"></i>
+        <p class="font-bold text-sm">Henüz çözüm seçilmedi</p>
+        <p class="text-xs mt-1">Yukarıdaki kartlardan seçin</p>
       </div>
     `;
-    lucide.createIcons();
-    return;
-  }
-  
-  container.innerHTML = selectedSolutions.map((sol, idx) => `
-    <div class="added-item glass-card rounded-xl p-4 ${sol.safe ? 'border-2 border-emerald-500' : 'border-2 border-red-500'}">
-      <div class="flex items-start justify-between mb-3">
+  } else {
+    listDiv.innerHTML = selectedSolutions.map((sol, idx) => `
+      <div class="added-item glass-card rounded-xl p-3 flex items-center justify-between">
         <div class="flex-1">
-          <div class="font-bold text-sm text-slate-900">${sol.material}</div>
-          <div class="text-xs text-slate-600 mt-1">DN${sol.dn} • ${sol.thickness}mm</div>
-        </div>
-        <button onclick="removeFromList(${idx})" class="text-red-600 hover:text-red-700 p-1 rounded hover:bg-red-50">
-          <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
-      </div>
-      
-      <div class="grid grid-cols-2 gap-2 text-xs">
-        <div>
-          <div class="text-slate-600">Yüzey Sıc.</div>
-          <div class="font-bold text-slate-900">${sol.surfTemp.toFixed(1)}°C</div>
-        </div>
-        <div>
-          <div class="text-slate-600">Marj</div>
-          <div class="font-bold ${sol.margin >= 3 ? 'text-emerald-600' : 'text-red-600'}">
-            ${sol.margin >= 0 ? '+' : ''}${sol.margin.toFixed(1)}°C
+          <div class="flex items-center space-x-2 mb-1.5">
+            <h4 class="text-sm font-black text-slate-900">${sol.material} - ${sol.thickness}mm</h4>
+            ${sol.safe 
+              ? '<span class="inline-flex items-center bg-emerald-500 text-white px-1.5 py-0.5 rounded text-xs font-black">✓</span>'
+              : '<span class="inline-flex items-center bg-red-500 text-white px-1.5 py-0.5 rounded text-xs font-black">✗</span>'
+            }
+          </div>
+          <div class="grid grid-cols-3 gap-2 text-xs">
+            <div>
+              <span class="text-slate-600">Yüzey:</span>
+              <span class="font-mono font-bold ml-1 ${sol.safe ? 'text-emerald-600' : 'text-red-600'}">${sol.surfaceTemp.toFixed(2)}°C</span>
+            </div>
+            <div>
+              <span class="text-slate-600">Min:</span>
+              <span class="font-mono font-bold ml-1">${sol.minTemp.toFixed(2)}°C</span>
+            </div>
+            <div>
+              <span class="text-slate-600">Kayıp:</span>
+              <span class="font-mono font-bold ml-1">${Math.abs(sol.heatLoss).toFixed(2)}W</span>
+            </div>
           </div>
         </div>
+        <button onclick="removeSelection(${idx})" class="ml-3 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center justify-center transition-all">
+          <i data-lucide="trash-2" class="w-4 h-4"></i>
+        </button>
       </div>
-      
-      <div class="mt-3 pt-3 border-t border-slate-200">
-        <div class="flex items-center gap-2 text-xs">
-          ${sol.safe ? 
-            '<i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i><span class="font-bold text-emerald-600">GÜVENLİ</span>' : 
-            '<i data-lucide="alert-circle" class="w-4 h-4 text-red-600"></i><span class="font-bold text-red-600">YETERSİZ</span>'
-          }
-        </div>
-      </div>
-    </div>
-  `).join('');
+    `).join('');
+  }
   
   lucide.createIcons();
 }
 
-// ====================================
-// LİSTEDEN ÇIKARMA
-// ====================================
-function removeFromList(index) {
+function removeSelection(index) {
+  const removed = selectedSolutions[index];
   selectedSolutions.splice(index, 1);
-  renderSelectedList();
-  showNotification('Listeden çıkarıldı', 'info');
-}
-
-function clearAllSelections() {
-  if (selectedSolutions.length === 0) return;
-  
-  if (confirm('Tüm seçimleri temizlemek istediğinizden emin misiniz?')) {
-    selectedSolutions = [];
-    renderSelectedList();
-    showNotification('Tüm seçimler temizlendi', 'info');
-  }
-}
-
-// ====================================
-// MODAL FONKSİYONLARI
-// ====================================
-function showReportModal() {
-  if (selectedSolutions.length === 0) {
-    alert('Lütfen en az bir çözüm seçin!');
-    return;
-  }
-  
-  document.getElementById('reportModal').classList.remove('hidden');
-  lucide.createIcons();
-}
-
-function closeReportModal() {
-  document.getElementById('reportModal').classList.add('hidden');
-}
-
-function proceedWithReport() {
-  const projectName = document.getElementById('projectName').value.trim();
-  const companyName = document.getElementById('companyName').value.trim();
-  const contactPerson = document.getElementById('contactPerson').value.trim();
-  
-  if (!projectName || !companyName || !contactPerson) {
-    alert('Lütfen tüm bilgileri giriniz!');
-    return;
-  }
-  
-  closeReportModal();
-  generateReport(projectName, companyName, contactPerson);
+  showNotification(`${removed.material} ${removed.thickness}mm kaldırıldı`, 'info');
+  updateSelectedList();
 }
 
 // ====================================
 // RAPOR OLUŞTURMA
 // ====================================
-function generateReport(projectName, companyName, contactPerson) {
-  // Grup by DN
-  const groupedByDN = {};
-  selectedSolutions.forEach(sol => {
-    if (!groupedByDN[sol.dn]) {
-      groupedByDN[sol.dn] = [];
-    }
-    groupedByDN[sol.dn].push(sol);
-  });
+function generateReport() {
+  if (selectedSolutions.length === 0) {
+    showNotification('Lütfen en az bir çözüm seçin', 'warning');
+    return;
+  }
+
+  const dn = parseInt(document.getElementById('dn').value);
+  const t_ort = parseFloat(document.getElementById('t_ort').value);
+  const rh = parseFloat(document.getElementById('rh').value);
+  const t_ic = parseFloat(document.getElementById('t_ic').value);
+  const v_hava = parseFloat(document.getElementById('v_hava').value);
+  const L = parseFloat(document.getElementById('pipe_length').value);
+  const safety_margin = parseFloat(document.getElementById('safety_margin').value);
+
+  const od = PIPES[dn];
+  const t_dew = calculateDewPoint(t_ort, rh);
   
+  const today = new Date().toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
   const wrapper = document.getElementById('print-wrapper');
-  const today = new Date().toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  const totalPages = Object.keys(groupedByDN).length + 2; // +2 çünkü kapak ve metodoloji sayfası var
   
-  let pagesHTML = `
-    <!-- COVER PAGE -->
+  // SAYFA SAYISI HESAPLAMA - Her sayfada maksimum 4 çözüm
+  const solutionsPerPage = 4;
+  const solutionPages = Math.ceil(selectedSolutions.length / solutionsPerPage);
+  const totalPages = 2 + solutionPages; // Kapak + Metodoloji + Çözüm sayfaları
+  
+  let pagesHTML = '';
+  
+  // KAPAK SAYFASI
+  pagesHTML += `
     <div class="print-page cover-bg">
       <div class="cover-accent"></div>
       <div class="cover-content">
-        <!-- Üst Kısım - Başlık ve Alt Başlık -->
-        <div style="padding-top: 40px;">
-          <h1 style="font-size: 56px; font-weight: 900; color: #0f172a; line-height: 1; margin: 0 0 8px 0; letter-spacing: -1px;">
-            YOĞUŞMA<br>ÖNLEYİCİ<br>YALITIM RAPORU
+        <div>
+          <div style="width: 55px; height: 55px; background: linear-gradient(135deg, #06b6d4, #3b82f6); border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 25px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+          </div>
+          
+          <h1 style="font-size: 42px; font-weight: 900; color: #0f172a; margin: 0 0 18px 0; line-height: 1.1;">
+            Yoğuşma Önleme<br>Analiz Raporu
           </h1>
-          <p style="font-size: 13px; color: #64748b; line-height: 1.6; margin: 0; font-weight: 500; max-width: 450px;">
-            Termal yalıtım analizi, yüzey sıcaklığı hesaplamaları ve yalıtım altı korozyon (YAK) risk değerlendirmesi.
-          </p>
-        </div>
-        
-        <!-- Orta Kısım - Proje Kartı -->
-        <div style="background: white; padding: 30px 35px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,0.06); margin: 40px 0;">
-          <div style="font-size: 9px; color: #06b6d4; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px;">
-            PROJE BİLGİLERİ
-          </div>
           
-          <div style="margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid #f1f5f9;">
-            <div style="font-size: 10px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Proje Adı</div>
-            <div style="font-size: 18px; color: #0f172a; font-weight: 900; line-height: 1.3;">${projectName}</div>
-          </div>
+          <div style="width: 75px; height: 4px; background: linear-gradient(90deg, #06b6d4, #3b82f6); border-radius: 10px; margin-bottom: 25px;"></div>
           
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-bottom: 22px;">
-            <div>
-              <div style="font-size: 9px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px;">Müşteri</div>
-              <div style="font-size: 14px; color: #0f172a; font-weight: 800;">${companyName}</div>
-            </div>
-            <div>
-              <div style="font-size: 9px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px;">İlgili Kişi</div>
-              <div style="font-size: 14px; color: #0f172a; font-weight: 800;">${contactPerson}</div>
-            </div>
-          </div>
-          
-          <div style="background: #f8fafc; padding: 16px 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: center;">
-              <div>
-                <div style="font-size: 9px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Hazırlayan</div>
-                <div style="font-size: 13px; color: #0f172a; font-weight: 800;">Optimizi.App</div>
-              </div>
-              <div>
-                <div style="font-size: 9px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Tarih</div>
-                <div style="font-size: 13px; color: #0f172a; font-weight: 800;">${today}</div>
-              </div>
-            </div>
+          <div style="background: rgba(6, 182, 212, 0.08); border-left: 4px solid #06b6d4; padding: 18px; border-radius: 10px; margin-bottom: 25px;">
+            <table style="width: 100%; font-size: 10px; color: #0f172a;">
+              <tr><td style="padding: 7px 0; font-weight: 600; color: #64748b; width: 170px;">Boru Çapı:</td><td style="font-weight: 800;">DN ${dn} (Ø ${od}mm)</td></tr>
+              <tr><td style="padding: 7px 0; font-weight: 600; color: #64748b;">Ortam Sıcaklığı:</td><td style="font-weight: 800;">${t_ort}°C</td></tr>
+              <tr><td style="padding: 7px 0; font-weight: 600; color: #64748b;">Bağıl Nem:</td><td style="font-weight: 800;">${rh}%</td></tr>
+              <tr><td style="padding: 7px 0; font-weight: 600; color: #64748b;">İç Akışkan Sıcaklığı:</td><td style="font-weight: 800;">${t_ic}°C</td></tr>
+              <tr><td style="padding: 7px 0; font-weight: 600; color: #64748b;">Çiğ Noktası:</td><td style="font-weight: 800; color: #0891b2;">${t_dew.toFixed(2)}°C</td></tr>
+              <tr><td style="padding: 7px 0; font-weight: 600; color: #64748b;">Min. Yüzey Sıcaklığı:</td><td style="font-weight: 800; color: #059669;">${(t_dew + safety_margin).toFixed(2)}°C</td></tr>
+            </table>
           </div>
         </div>
         
-        <!-- Alt Kısım - Logo ve Copyright -->
-        <div style="margin-top: auto; padding-top: 30px;">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-            <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-              </svg>
-            </div>
-            <div>
-              <div style="font-size: 20px; font-weight: 900; color: #0f172a; line-height: 1;">
-                Optimizi<span style="background: linear-gradient(135deg, #06b6d4, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">.App</span>
-              </div>
-              <div style="font-size: 8px; color: #94a3b8; font-weight: 600; letter-spacing: 1.5px; margin-top: 2px;">YOĞUŞMA ÖNLEYİCİ YALITIM MODÜLÜ</div>
-            </div>
+        <div>
+          <div style="margin-bottom: 22px;">
+            <div style="font-size: 9px; color: #64748b; font-weight: 600; margin-bottom: 6px;">RAPOR TARİHİ</div>
+            <div style="font-size: 13px; color: #0f172a; font-weight: 800;">${today}</div>
           </div>
-          <div style="font-size: 8px; color: #cbd5e1; line-height: 1.5;">
-            © ${new Date().getFullYear()} Optimizi.Yoğuşma - Tüm hakları saklıdır<br>
-            Bu rapor Optimizi.App termal analiz yazılımı kullanılarak oluşturulmuştur
+          
+          <div style="border-top: 2px solid #e2e8f0; padding-top: 18px;">
+            <div style="font-size: 8px; color: #94a3b8; margin-bottom: 4px;">OLUŞTURAN</div>
+            <div style="font-size: 15px; font-weight: 900; background: linear-gradient(135deg, #06b6d4, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Optimizi</div>
+            <div style="font-size: 8px; color: #64748b; font-weight: 600; margin-top: 2px;">Yoğuşma Önleme Pro</div>
           </div>
         </div>
       </div>
     </div>
   `;
   
-  let pageNum = 1;
-  Object.keys(groupedByDN).forEach(dn => {
-    pageNum++;
-    const solutions = groupedByDN[dn];
-    const firstSol = solutions[0];
+  // ÇÖZÜM SAYFALARI
+  for (let pageNum = 0; pageNum < solutionPages; pageNum++) {
+    const startIdx = pageNum * solutionsPerPage;
+    const endIdx = Math.min(startIdx + solutionsPerPage, selectedSolutions.length);
+    const pageSolutions = selectedSolutions.slice(startIdx, endIdx);
     
     pagesHTML += `
       <div class="print-page">
         <div class="print-header">
           <div>
-            <div style="font-size: 9px; color: #06b6d4; font-weight: 700; letter-spacing: 1px; margin-bottom: 3px;">YOĞUŞMA ÖNLEME ANALİZİ</div>
-            <h2 style="font-size: 18px; font-weight: 900; color: #0f172a; margin: 0;">DN${dn} - Boru Çapı Analizi</h2>
+            <div style="font-size: 8px; color: #06b6d4; font-weight: 700; letter-spacing: 1px; margin-bottom: 2px;">ÇÖZÜM ANALİZİ</div>
+            <h2 style="font-size: 16px; font-weight: 900; color: #0f172a; margin: 0;">Yalıtım Çözümleri ${pageNum > 0 ? `(${pageNum + 1})` : ''}</h2>
           </div>
           <div style="text-align: right;">
-            <div style="font-size: 8px; color: #94a3b8; margin-bottom: 2px;">${today}</div>
-            <div style="font-size: 8px; color: #94a3b8;">Sayfa ${pageNum} / ${totalPages}</div>
+            <div style="font-size: 7px; color: #94a3b8; margin-bottom: 2px;">${today}</div>
+            <div style="font-size: 7px; color: #94a3b8;">Sayfa ${pageNum + 2} / ${totalPages}</div>
           </div>
         </div>
         
-        <div class="print-section">
-          <div style="background: linear-gradient(135deg, #ecfeff, #dbeafe); padding: 15px; border-radius: 10px; border-left: 4px solid #06b6d4; margin-bottom: 20px;">
-            <h3 style="font-size: 11px; font-weight: 800; color: #0e7490; text-transform: uppercase; margin: 0 0 12px 0; letter-spacing: 0.5px;">
-              📋 Proje Parametreleri
-            </h3>
-            <table style="width: 100%; font-size: 9px;">
+        <table class="audit-table">
+          <thead>
+            <tr>
+              <th style="width: 15%;">Malzeme</th>
+              <th style="width: 10%;">λ (W/mK)</th>
+              <th style="width: 11%;">Kalınlık</th>
+              <th style="width: 12%;">T<sub>yüzey</sub></th>
+              <th style="width: 12%;">T<sub>çiğ</sub></th>
+              <th style="width: 10%;">Fark</th>
+              <th style="width: 15%;">Isı Kaybı</th>
+              <th style="width: 15%;">Durum</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${pageSolutions.map(sol => `
               <tr>
-                <td style="padding: 5px 0; color: #475569; width: 140px;">Boru Çapı</td>
-                <td style="padding: 5px 0; font-weight: 700; color: #0f172a; width: 140px;">DN${dn} (Dış Çap: ${firstSol.pipeOD}mm)</td>
-                <td style="padding: 5px 0; color: #475569; width: 140px;">Proses Sıcaklığı</td>
-                <td style="padding: 5px 0; font-weight: 700; color: #dc2626;">${firstSol.tProc}°C</td>
+                <td style="font-weight: 800;">${sol.material}</td>
+                <td style="font-family: monospace;">${sol.lambda}</td>
+                <td style="font-family: monospace; font-weight: 700;">${sol.thickness} mm</td>
+                <td style="font-family: monospace; font-weight: 700; color: ${sol.safe ? '#059669' : '#dc2626'};">${sol.surfaceTemp.toFixed(2)}°C</td>
+                <td style="font-family: monospace;">${sol.dewPoint.toFixed(2)}°C</td>
+                <td style="font-family: monospace; font-weight: 700; color: ${sol.safe ? '#059669' : '#dc2626'};">${(sol.surfaceTemp - sol.dewPoint).toFixed(2)}°C</td>
+                <td style="font-family: monospace;">${Math.abs(sol.heatLoss).toFixed(2)} W</td>
+                <td style="font-weight: 800; color: ${sol.safe ? '#059669' : '#dc2626'};">
+                  ${sol.safe ? '✓ GÜVENLİ' : '⚠️ YETERSİZ'}
+                </td>
               </tr>
-              <tr>
-                <td style="padding: 5px 0; color: #475569;">Ortam Sıcaklığı</td>
-                <td style="padding: 5px 0; font-weight: 700; color: #2563eb;">${firstSol.tAmb}°C</td>
-                <td style="padding: 5px 0; color: #475569;">Ortam Bağıl Nem</td>
-                <td style="padding: 5px 0; font-weight: 700; color: #0f172a;">${firstSol.rhAmb}%</td>
-              </tr>
-              <tr>
-                <td style="padding: 5px 0; color: #475569;">Rüzgar Hızı</td>
-                <td style="padding: 5px 0; font-weight: 700; color: #0f172a;">${firstSol.vWind} m/s</td>
-                <td style="padding: 5px 0; color: #475569;">Ortam Tipi</td>
-                <td style="padding: 5px 0; font-weight: 700; color: #0f172a;">${firstSol.vWind <= 0.5 ? 'İç Mekan' : 'Dış Mekan'}</td>
-              </tr>
-              <tr style="background: #fef3c7;">
-                <td style="padding: 8px 5px; color: #92400e; font-weight: 700;">Çiy Noktası (Kritik)</td>
-                <td style="padding: 8px 5px; font-weight: 900; color: #b45309; font-size: 11px;">${firstSol.tDew.toFixed(1)}°C</td>
-                <td style="padding: 8px 5px; color: #92400e; font-weight: 700;">Hedef Yüzey Sıcaklığı</td>
-                <td style="padding: 8px 5px; font-weight: 900; color: #059669; font-size: 11px;">${firstSol.tTarget.toFixed(1)}°C (Çiy + 3°C)</td>
-              </tr>
-            </table>
-          </div>
-        </div>
+            `).join('')}
+          </tbody>
+        </table>
         
-        <div class="print-section">
-          <h3 style="font-size: 11px; font-weight: 800; color: #0e7490; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.5px;">
-            🎯 Seçilen İzolasyon Çözümleri
-          </h3>
-          <table class="audit-table" style="width: 100%; border-collapse: collapse;">
-            <thead>
-              <tr>
-                <th style="text-align: center; width: 30px;">#</th>
-                <th style="text-align: left;">İzolasyon Malzemesi</th>
-                <th style="text-align: center; width: 70px;">λ (W/m·K)</th>
-                <th style="text-align: center; width: 60px;">Kalınlık</th>
-                <th style="text-align: center; width: 70px;">Yüzey Sıc.</th>
-                <th style="text-align: center; width: 70px;">Güv. Marjı</th>
-                <th style="text-align: center; width: 70px;">Durum</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${solutions.map((sol, idx) => `
-                <tr ${!sol.safe ? 'style="background-color: #fee2e2 !important;"' : ''}>
-                  <td style="text-align: center; font-weight: 700; color: #64748b;">${idx + 1}</td>
-                  <td style="font-weight: 700; color: #0f172a;">${sol.material}</td>
-                  <td style="text-align: center; font-family: monospace; color: #475569;">${sol.lambda.toFixed(3)}</td>
-                  <td style="text-align: center; font-weight: 700; font-size: 9px; color: #0f172a;">${sol.thickness}mm</td>
-                  <td style="text-align: center; font-weight: 700; font-size: 9px; color: #0f172a;">${sol.surfTemp.toFixed(1)}°C</td>
-                  <td style="text-align: center; font-weight: 700; font-size: 9px; color: ${sol.margin >= 3 ? '#059669' : '#dc2626'};">
-                    ${sol.margin >= 0 ? '+' : ''}${sol.margin.toFixed(1)}°C
-                  </td>
-                  <td style="text-align: center; font-weight: 700; font-size: 9px;">
-                    ${sol.safe ? '<span style="color: #059669;">✓ GÜVENLİ</span>' : '<span style="color: #dc2626;">✗ YETERSİZ</span>'}
-                  </td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-        
-        <div style="margin-top: 20px; padding: 12px; background: #f0f9ff; border-radius: 8px; border: 1px solid #bae6fd;">
-          <p style="font-size: 8px; color: #075985; margin: 0; line-height: 1.5;">
-            <strong style="font-size: 9px;">📌 Teknik Not:</strong> Hesaplamalar ISO 12241 standardına göre yapılmıştır. 
-            Radyasyon ve doğal konveksiyon ısı transferi dahil edilmiştir. Güvenlik marjı 3°C olarak alınmıştır.
-            ${solutions.filter(s => s.safe).length > 0 ? 
-              `<br><strong style="color: #059669; font-size: 9px;">✓ Bu sayfada ${solutions.filter(s => s.safe).length} adet güvenli çözüm bulunmaktadır.</strong>` : 
-              `<br><strong style="color: #dc2626; font-size: 9px;">⚠️ Seçilen çözümlerin hiçbiri yoğuşma önleme için yeterli değildir.</strong>`
+        <div style="background: #f8fafc; padding: 14px; border-radius: 8px; border-left: 3px solid #06b6d4; margin-top: 14px;">
+          <h3 style="font-size: 9px; font-weight: 800; color: #0f172a; margin: 0 0 7px 0;">📊 Analiz Notları</h3>
+          <p style="font-size: 8px; color: #475569; margin: 0; line-height: 1.5;">
+            Radyasyon ve doğal konveksiyon ısı transferi dahil edilmiştir. Güvenlik marjı ${safety_margin}°C olarak alınmıştır.
+            ${pageSolutions.filter(s => s.safe).length > 0 ? 
+              `<br><strong style="color: #059669; font-size: 8px;">✓ Bu sayfada ${pageSolutions.filter(s => s.safe).length} adet güvenli çözüm bulunmaktadır.</strong>` : 
+              `<br><strong style="color: #dc2626; font-size: 8px;">⚠️ Bu sayfadaki çözümler yetersizdir.</strong>`
             }
           </p>
         </div>
         
-        <div style="position: absolute; bottom: 20px; left: 50px; right: 50px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 10px;">
+        <div class="print-footer">
           <div style="font-size: 7px; color: #94a3b8;">Optimizi.Yoğuşma © ${new Date().getFullYear()}</div>
-          <div style="font-size: 7px; color: #94a3b8;">Sayfa ${pageNum} / ${totalPages}</div>
+          <div style="font-size: 7px; color: #94a3b8;">Sayfa ${pageNum + 2} / ${totalPages}</div>
         </div>
       </div>
     `;
-  });
+  }
   
-  // METODOLOJİ VE CUI RİSK SAYFASI
+  // METODOLOJİ VE YAK RİSK SAYFASI
   pagesHTML += `
     <div class="print-page">
       <div class="print-header">
         <div>
-          <div style="font-size: 9px; color: #06b6d4; font-weight: 700; letter-spacing: 1px; margin-bottom: 3px;">TEKNİK METODOLOJİ</div>
-          <h2 style="font-size: 18px; font-weight: 900; color: #0f172a; margin: 0;">Hesaplama Standartları & YAK Risk Değerlendirmesi</h2>
+          <div style="font-size: 8px; color: #06b6d4; font-weight: 700; letter-spacing: 1px; margin-bottom: 2px;">TEKNİK METODOLOJİ</div>
+          <h2 style="font-size: 16px; font-weight: 900; color: #0f172a; margin: 0;">Hesaplama Standartları & YAK Risk Değerlendirmesi</h2>
         </div>
         <div style="text-align: right;">
-          <div style="font-size: 8px; color: #94a3b8; margin-bottom: 2px;">${today}</div>
-          <div style="font-size: 8px; color: #94a3b8;">Sayfa ${totalPages} / ${totalPages}</div>
+          <div style="font-size: 7px; color: #94a3b8; margin-bottom: 2px;">${today}</div>
+          <div style="font-size: 7px; color: #94a3b8;">Sayfa ${totalPages} / ${totalPages}</div>
         </div>
       </div>
       
-      <!-- HESAPLAMA METODOLOJİSİ -->
       <div class="print-section">
-        <h3 style="font-size: 12px; font-weight: 800; color: #0e7490; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.5px;">
+        <h3 style="font-size: 10px; font-weight: 800; color: #0e7490; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">
           📐 Hesaplama Metodu
         </h3>
         
-        <div style="background: #f8fafc; padding: 18px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 15px;">
-          <h4 style="font-size: 10px; font-weight: 800; color: #0f172a; margin: 0 0 10px 0;">1. Çiğ Noktası Hesaplaması (Magnus Formülü)</h4>
-          <p style="font-size: 9px; color: #475569; margin: 0 0 8px 0; line-height: 1.6;">
-            Çiğ noktası sıcaklığı Magnus-Tetens yaklaşım formülü ile hesaplanır:
+        <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 10px;">
+          <h4 style="font-size: 8.5px; font-weight: 800; color: #0f172a; margin: 0 0 6px 0;">1. Çiğ Noktası (Magnus Formülü)</h4>
+          <p style="font-size: 7.5px; color: #475569; margin: 0 0 5px 0; line-height: 1.4;">
+            Çiğ noktası sıcaklığı Magnus-Tetens formülü ile hesaplanır:
           </p>
-          <div style="background: white; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0; font-family: monospace; font-size: 9px; color: #0f172a; margin-bottom: 8px;">
-            T_çiğ = (b × α) / (a − α)<br>
-            burada: α = (a × T) / (b + T) + ln(RH/100)<br>
-            a = 17.27, b = 237.7°C
+          <div style="background: white; padding: 8px; border-radius: 5px; border: 1px solid #e2e8f0; font-family: monospace; font-size: 7.5px; color: #0f172a; margin-bottom: 5px;">
+            T_çiğ = (b × α) / (a − α), α = (a × T) / (b + T) + ln(RH/100), a = 17.27, b = 237.7°C
           </div>
-          <p style="font-size: 8px; color: #64748b; margin: 0; line-height: 1.5;">
-            <strong>Standart:</strong> HVAC şartlarında ±0.4°C doğrulukla meteorolojide yaygın kullanılan formül.
-          </p>
         </div>
         
-        <div style="background: #f8fafc; padding: 18px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 15px;">
-          <h4 style="font-size: 10px; font-weight: 800; color: #0f172a; margin: 0 0 10px 0;">2. Isı Transferi & Yüzey Sıcaklığı (ISO 12241)</h4>
-          <p style="font-size: 9px; color: #475569; margin: 0 0 8px 0; line-height: 1.6;">
+        <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 10px;">
+          <h4 style="font-size: 8.5px; font-weight: 800; color: #0f172a; margin: 0 0 6px 0;">2. Isı Transferi & Yüzey Sıcaklığı (ISO 12241)</h4>
+          <p style="font-size: 7.5px; color: #475569; margin: 0 0 5px 0; line-height: 1.4;">
             Yüzey sıcaklığı termal direnç ağı ile hesaplanır:
           </p>
-          <div style="background: white; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0; font-family: monospace; font-size: 8px; color: #0f172a; margin-bottom: 8px; line-height: 1.8;">
-            R_yal = ln(r₂/r₁) / (2π × λ × L)<br>
-            R_dış = 1 / (2π × r₂ × h_toplam × L)<br>
-            h_toplam = h_konv + h_rad<br><br>
-            <strong>Konveksiyon:</strong> h_konv = 10.45 − v + 10√v (McAdams korelasyonu)<br>
-            <strong>Radyasyon:</strong> h_rad = ε × σ × (T_ort² + T_yüz²) × (T_ort + T_yüz)
+          <div style="background: white; padding: 8px; border-radius: 5px; border: 1px solid #e2e8f0; font-family: monospace; font-size: 7px; color: #0f172a; margin-bottom: 5px; line-height: 1.5;">
+            R_yal = ln(r₂/r₁) / (2π × λ × L), R_dış = 1 / (2π × r₂ × h_toplam × L)<br>
+            h_konv = 10.45 − v + 10√v, h_rad = ε × σ × (T_ort² + T_yüz²) × (T_ort + T_yüz)
           </div>
-          <p style="font-size: 8px; color: #64748b; margin: 0; line-height: 1.5;">
-            <strong>Standartlar:</strong> ISO 12241 (Bina ekipmanı termal yalıtımı), ASTM C680 (Isı kaybı hesaplama), EN ISO 12241.
-          </p>
         </div>
         
-        <div style="background: #f8fafc; padding: 18px; border-radius: 10px; border: 1px solid #e2e8f0;">
-          <h4 style="font-size: 10px; font-weight: 800; color: #0f172a; margin: 0 0 10px 0;">3. Güvenlik Marjı & Tasarım Kriterleri</h4>
-          <p style="font-size: 9px; color: #475569; margin: 0; line-height: 1.6;">
-            Yüzey sıcaklığı minimum <strong>T_çiğ + 3°C</strong> seviyesinde tutulmalıdır. Bu değer:<br>
-            • Tüm çalışma şartlarında yoğuşma oluşumunu önler<br>
-            • Nem dalgalanmaları için güvenlik marjı sağlar<br>
-            • ASHRAE ve CIBSE standartlarına uygunluk sağlar
+        <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 10px;">
+          <h4 style="font-size: 8.5px; font-weight: 800; color: #0f172a; margin: 0 0 5px 0;">3. Güvenlik Marjı</h4>
+          <p style="font-size: 7.5px; color: #475569; margin: 0; line-height: 1.4;">
+            Yüzey sıcaklığı min. <strong>T_çiğ + ${safety_margin}°C</strong> tutulmalıdır. ASHRAE & CIBSE standartlarına uygundur.
           </p>
         </div>
       </div>
       
-      <!-- YAK RİSK DEĞERLENDİRMESİ -->
       <div class="print-section">
-        <h3 style="font-size: 12px; font-weight: 800; color: #dc2626; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.5px;">
-          ⚠️ YAK Risk Değerlendirmesi (Yalıtım Altı Korozyon)
+        <h3 style="font-size: 10px; font-weight: 800; color: #dc2626; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">
+          ⚠️ YAK Risk (Yalıtım Altı Korozyon)
         </h3>
         
-        <div style="background: #fef2f2; padding: 18px; border-radius: 10px; border-left: 4px solid #dc2626; margin-bottom: 12px;">
-          <h4 style="font-size: 10px; font-weight: 800; color: #991b1b; margin: 0 0 10px 0;">YAK Nedir?</h4>
-          <p style="font-size: 9px; color: #7f1d1d; margin: 0; line-height: 1.7;">
-            Yalıtım Altı Korozyon (YAK), soğuk boru sistemlerindeki en ciddi ve maliyetli bütünlük tehdididir. 
-            Nem, yalıtım bariyerlerinden geçerek boru yüzeyinde yoğuştuğunda, görsel denetimle tespit edilemeyen 
-            elektrokimyasal bir korozyon hücresi oluşturur. Yoğuşma, korozyonun tetikleyicisidir.
+        <div style="background: #fef2f2; padding: 12px; border-radius: 7px; border-left: 3px solid #dc2626; margin-bottom: 9px;">
+          <h4 style="font-size: 8.5px; font-weight: 800; color: #991b1b; margin: 0 0 6px 0;">YAK Nedir?</h4>
+          <p style="font-size: 7.5px; color: #7f1d1d; margin: 0; line-height: 1.4;">
+            Soğuk boru sistemlerindeki en ciddi tehdit. Nem, yalıtımdan geçerek boru yüzeyinde yoğuşur ve 
+            görsel denetimle tespit edilemeyen korozyon oluşturur.
           </p>
         </div>
         
-        <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #fee2e2; margin-bottom: 12px;">
-          <h4 style="font-size: 10px; font-weight: 800; color: #dc2626; margin: 0 0 10px 0;">Birincil Risk Faktörleri:</h4>
-          <div style="font-size: 8px; color: #475569; line-height: 1.8;">
-            <strong>1. Yetersiz Yalıtım Kalınlığı:</strong> Yüzey sıcaklığı çiğ noktasının altına düştüğünde yoğuşma kaçınılmazdır<br>
-            <strong>2. Hatalı Buhar Bariyeri Uygulaması:</strong> Boşluklar, yırtıklar veya sızdırmaz olmayan bağlantılar nem girişine izin verir<br>
-            <strong>3. Sıcaklık Dalgalanmaları:</strong> Tekrarlayan termal genleşme/büzülme mekanik stres ve conta arızalarına neden olur<br>
-            <strong>4. Yüksek Nem Ortamları:</strong> Yüksek çiğ noktaları daha kalın yalıtım sistemleri gerektirir<br>
-            <strong>5. Açık Hava/Dış Ortam:</strong> Yağmur, rüzgar kaynaklı nem ve UV bozunması bariyer arızasını hızlandırır
+        <div style="background: white; padding: 10px; border-radius: 7px; border: 1px solid #fee2e2; margin-bottom: 9px;">
+          <h4 style="font-size: 8.5px; font-weight: 800; color: #dc2626; margin: 0 0 6px 0;">Risk Faktörleri:</h4>
+          <div style="font-size: 7px; color: #475569; line-height: 1.5;">
+            <strong>1.</strong> Yetersiz yalıtım kalınlığı<br>
+            <strong>2.</strong> Hatalı buhar bariyeri uygulaması<br>
+            <strong>3.</strong> Sıcaklık dalgalanmaları<br>
+            <strong>4.</strong> Yüksek nem ortamları<br>
+            <strong>5.</strong> Açık hava/dış ortam
           </div>
         </div>
         
-        <div style="background: #fff7ed; padding: 15px; border-radius: 8px; border: 1px solid #fed7aa; margin-bottom: 12px;">
-          <h4 style="font-size: 10px; font-weight: 800; color: #c2410c; margin: 0 0 8px 0;">YAK'ın Sonuçları:</h4>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 8px; color: #7c2d12;">
+        <div style="background: #fff7ed; padding: 10px; border-radius: 7px; border: 1px solid #fed7aa; margin-bottom: 9px;">
+          <h4 style="font-size: 8.5px; font-weight: 800; color: #c2410c; margin: 0 0 5px 0;">Sonuçlar:</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 7px; color: #7c2d12; line-height: 1.4;">
             <div>
-              • <strong>Yapısal Hasar:</strong> Boru duvar incelmesi, sızıntılar, patlama<br>
-              • <strong>Güvenlik Tehlikeleri:</strong> Soğuk akışkan sızıntısı, kayma riskleri<br>
-              • <strong>Üretim Kaybı:</strong> Planlanmamış duruşlar, onarımlar
+              • Yapısal hasar<br>
+              • Güvenlik tehlikeleri<br>
+              • Üretim kaybı
             </div>
             <div>
-              • <strong>Ekonomik Etki:</strong> Değiştirme maliyeti önlemenin 5-10 katı<br>
-              • <strong>Çevresel Risk:</strong> Soğutucu akışkan sızıntısı cezaları<br>
-              • <strong>Mevzuat Uyumsuzluğu:</strong> Kod ihlalleri, para cezaları
+              • Yüksek ekonomik etki<br>
+              • Çevresel risk<br>
+              • Mevzuat uyumsuzluğu
             </div>
           </div>
         </div>
         
-        <div style="background: #ecfdf5; padding: 15px; border-radius: 8px; border-left: 4px solid #059669;">
-          <h4 style="font-size: 10px; font-weight: 800; color: #065f46; margin: 0 0 8px 0;">Doğru Tasarım ile Yoğuşma Önleme:</h4>
-          <p style="font-size: 8px; color: #064e3b; margin: 0; line-height: 1.7;">
-            Bu rapor, yüzey sıcaklıklarını kritik çiğ noktası eşiğinin üzerinde tutan bilimsel olarak hesaplanmış yalıtım 
-            kalınlıkları sunar. <strong style="color: #059669;">"GÜVENLİ"</strong> işaretli çözümleri seçerek, yoğuşma kaynaklı 
-            YAK'a karşı uzun vadeli koruma sağlar, varlık ömrünü 15-20 yıl uzatır ve maliyetli onarım döngülerini ortadan kaldırırsınız. 
-            Sürekli buhar bariyerli uygun montaj, sistem performansı için eşit derecede kritiktir.
+        <div style="background: #ecfdf5; padding: 10px; border-radius: 7px; border-left: 3px solid #059669;">
+          <h4 style="font-size: 8.5px; font-weight: 800; color: #065f46; margin: 0 0 5px 0;">Doğru Tasarım ile Önleme:</h4>
+          <p style="font-size: 7px; color: #064e3b; margin: 0; line-height: 1.4;">
+            <strong style="color: #059669;">"GÜVENLİ"</strong> çözümleri seçerek YAK'a karşı uzun vadeli koruma sağlar, 
+            varlık ömrünü 15-20 yıl uzatır ve maliyetli onarımları önlersiniz.
           </p>
         </div>
       </div>
       
-      <div style="position: absolute; bottom: 20px; left: 50px; right: 50px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 10px;">
+      <div class="print-footer">
         <div style="font-size: 7px; color: #94a3b8;">Optimizi.Yoğuşma © ${new Date().getFullYear()}</div>
         <div style="font-size: 7px; color: #94a3b8;">Sayfa ${totalPages} / ${totalPages}</div>
       </div>
@@ -1003,7 +993,7 @@ function showNotification(message, type = 'success') {
   };
   
   const notification = document.createElement('div');
-  notification.className = `fixed top-24 right-8 ${colors[type]} text-white px-6 py-3 rounded-xl shadow-2xl font-bold text-sm z-50`;
+  notification.className = `fixed top-20 right-6 ${colors[type]} text-white px-5 py-2.5 rounded-xl shadow-2xl font-bold text-sm z-50`;
   notification.innerHTML = `
     <i data-lucide="${type === 'success' ? 'check-circle' : type === 'warning' ? 'alert-triangle' : 'info'}" class="w-4 h-4 inline mr-2"></i>
     ${message}
@@ -1032,6 +1022,15 @@ function initApp() {
     select.add(opt);
   }
   select.value = '100';
+  
+  // Manuel izolasyon seçeneklerini doldur
+  const manualSelect = document.getElementById('manual_insulation');
+  INSULATIONS.forEach(ins => {
+    const opt = document.createElement('option');
+    opt.value = ins.lambda;
+    opt.text = `${ins.name} (λ=${ins.lambda})`;
+    manualSelect.add(opt);
+  });
   
   lucide.createIcons();
   calculate();
