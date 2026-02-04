@@ -564,11 +564,7 @@
         document.getElementById('qty').value = 1;
     }
 
-    // ⚠️⚠️⚠️ KRİTİK HESAPLAMA VERİLERİ GOOGLE SUNUCUSUNDA - GÜVENLİ! ⚠️⚠️⚠️
-    // Formüller, sabitler, hesaplamalar artık Google Apps Script'te saklanıyor
-    // Kimse bu hesaplama mantığını göremez veya kopyalayamaz!
     
-    // 🔥 ÖNEMLİ: Aşağıdaki satırı Google Apps Script URL'iniz ile değiştirin (Adım 5)
 const API_URL = "https://script.google.com/macros/s/AKfycby8NK-oA7ZWrsfywEpW7NQBo8H7pwqIcknbp0bafqbDV0c_HYzQ140-HitGKHQTr6cE/exec";
     
     // Sadece UI için gerekli DN değerleri (hesaplama için değil, sadece dropdown için)
@@ -698,12 +694,12 @@ const API_URL = "https://script.google.com/macros/s/AKfycby8NK-oA7ZWrsfywEpW7NQB
         };
         
         try {
-            // 🚀 GOOGLE API ÇAĞRISI - TÜM HESAPLAMALAR BURADA YAPILIYOR!
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(apiParams)
-            });
+            
+           const response = await fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify(apiParams),
+    redirect: 'follow' 
+});
             
             if (!response.ok) {
                 throw new Error('API çağrısı başarısız: ' + response.status);
