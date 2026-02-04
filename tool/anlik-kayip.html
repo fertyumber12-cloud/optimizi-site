@@ -563,12 +563,11 @@
         document.getElementById('qty').value = 1;
     }
 
+    
+const API_URL = "https://script.google.com/macros/s/AKfycby8NK-oA7ZWrsfywEpW7NQBo8H7pwqIcknbp0bafqbDV0c_HYzQ140-HitGKHQTr6cE/exec";
+    
+    // Sadece UI için gerekli DN değerleri (hesaplama için değil, sadece dropdown için)
     const PIPES={15:21.3,20:26.7,25:33.4,32:42.2,40:48.3,50:60.3,65:73.0,80:88.9,100:114.3,125:141.3,150:168.3,200:219.1,250:273.0,300:323.9,350:355.6,400:406.4,500:508.0};
-    const SEPARATORS = {15:0.15, 20:0.18, 25:0.22, 32:0.28, 40:0.35, 50:0.45, 65:0.60, 80:0.75, 100:1.10, 125:1.45, 150:1.90, 200:2.80};
-    const MATS={rockwool:{a:0.035,b:0.00017,c:0},glasswool:{a:0.025,b:0.00015,c:0},ceramic:{a:0.025,b:0.00012,c:1.2e-7},aerogel:{a:0.019,b:0.00004,c:5e-8},rubber:{a:0.034,b:0.000075,c:0},bare:{a:25,b:0,c:0}};
-    const VALVE_FACTORS={gate:1.2,globe:1.4,butterfly:0.6,ball:1.0,strainer:1.5,check:0.9,trap_float: 1.6, trap_thermo: 0.8, trap_bimetal: 1.0, trap_bucket: 1.5, flange: 0.35};
-    const FUELS={gas: 8250, elec: 860, lng: 11500, fueloil: 9600, coal_imp: 6000, coal_loc: 3500};
-    const CO2_FACTORS={gas: 0.202, elec: 0.440, lng: 0.226, fueloil: 0.279, coal_imp: 0.340, coal_loc: 0.380, manual: 0.300};
 
     let LIST=[],FX={USD:34.50,EUR:36.50,GBP:43.20,TL:1.0},currImg=null,userQrImg=null,editingIndex=null;
     let currentSurfaces = []; 
@@ -600,27 +599,15 @@
         lucide.createIcons();
     }
 
-    function getK(matKey,T){if(!MATS[matKey])return 0.04;const m=MATS[matKey];return m.a+(m.b*T)+((m.c||0)*T*T);}
+    // getK fonksiyonu Google Apps Script'te - güvenli!
     
-    function getSurfaceCoeff(std,vWind,Ts,Ta,D_out,isFlat){
-        const dT=Math.abs(Ts-Ta);
-        const sigma=5.67e-8,eps=0.9;
-        let h_rad=eps*sigma*(Math.pow(Ts+273.15,4)-Math.pow(Ta+273.15,4))/(dT||1);
-        if(dT<0.1)h_rad=5;
-        
-        let h_cv=0;
-        if (vWind < 0.1) {
-             if(isFlat) h_cv = 1.95 * Math.pow(dT, 0.25);
-             else h_cv = 1.32 * Math.pow(dT / (D_out || 1), 0.25);
-        } else {
-             h_cv = 10 * Math.pow(vWind, 0.6) / Math.pow((D_out || 1), 0.4); 
-             if(isFlat) h_cv = 5.8 + 3.8 * vWind; 
-        }
-        if(h_cv < 1) h_cv = 1;
-        return h_rad+h_cv;
-    }
+    // getSurfaceCoeff fonksiyonu Google Apps Script'te - güvenli!
 
-    function getCalculationResult(){
+    async function getCalculationResult(){
+        // ⚡ Bu fonksiyon artık Google Apps Script'e istek atıyor!
+        // Tüm kritik hesaplamalar Google'ın sunucusunda yapılıyor.
+        
+        // UI'dan verileri topla
         const qty=parseFloat(document.getElementById('qty').value)||1;
         const type=document.getElementById('type').value;
         const location=document.getElementById('location').value||"";
@@ -635,11 +622,8 @@
         const matKey2 = useL2 ? document.getElementById('matSelect2').value : null;
         const thk2 = useL2 ? (parseFloat(document.getElementById('thk2').value)||0) : 0;
         const standard=document.getElementById('calcStd').value;
-        const pLen = parseFloat(document.getElementById('pLen').value)||1; 
+        const pLen = parseFloat(document.getElementById('pLen').value)||1;
         
-        let multiplier=1; 
-        if(type==='pipe'){ multiplier = pLen * qty; }
-
         const reportCurrencyCode = document.getElementById('curr').value;
         const reportRate = FX[reportCurrencyCode] || 1; 
         const eff=(parseFloat(document.getElementById('eff').value)||85)/100;
@@ -649,112 +633,126 @@
         const priceInReportCurr = priceRaw * (energyRate / reportRate);
         const hours=parseFloat(document.getElementById('hours').value)||8000;
         
-        let isFlat=(type==='tank');
-        let dPipe=0,D_ext=0,Name="",unitLabel="Adet";
-
-        if(isFlat){
-            if(currentSurfaces.length === 0) { multiplier = 1; Name = `Tank/Düz (Ölçüsüz)`; unitLabel = "Set"; } 
-            else { let totalArea = 0; currentSurfaces.forEach(s => { totalArea += (s.w * s.h) / 10000; }); multiplier = totalArea; Name = `Düz Yüzey`; unitLabel = "Set"; }
-            dPipe=1.0; D_ext=1.0; 
-        } else {
-            const dn=(type==='valve')?document.getElementById('vDN').value:document.getElementById('pDN').value;
-            const mm=parseFloat(dn)||100; dPipe=mm/1000; D_ext=dPipe;
-            if(type==='valve'){
-                const vType=document.getElementById('valveType').value;
-                if(vType === 'separator'){ const sepArea = SEPARATORS[Object.keys(PIPES).find(k=>PIPES[k]==mm)] || 0.5; multiplier = sepArea; Name=`Buhar Separatörü (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`; } 
-                else if(vType === 'elbow') { multiplier = 2.36 * dPipe; Name=`Dirsek 90° (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`; } 
-                else { multiplier=1; const sel = document.getElementById('valveType'); const txt = sel.options[sel.selectedIndex].text; Name=`${txt} (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`; }
-                unitLabel="Adet";
-            } else { Name=`Boru (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`; unitLabel="m"; }
-        }
-        
-        let h_bare=getSurfaceCoeff(standard,vWind,tProc,tAmb,dPipe,isFlat);
-        let A_bare_unit=isFlat?1:Math.PI*dPipe;
-        let Q_bare_unit=h_bare*A_bare_unit*(tProc-tAmb);
-        let Q_bare_total=0;
-        
-        const vType=document.getElementById('valveType').value;
-        if(type==='valve'){ if(vType==='separator'){ Q_bare_total = Q_bare_unit * (multiplier*3) * qty; } else if (vType === 'elbow') { Q_bare_total = Q_bare_unit * multiplier * qty; } else { const factor=VALVE_FACTORS[vType]||1.2; Q_bare_total=Q_bare_unit*factor*qty; } } else if(type==='pipe'){ Q_bare_total=Q_bare_unit*multiplier; } else { Q_bare_total=Q_bare_unit*multiplier*qty; }
-
-        const thkM=thk/1000; const thkM2=thk2/1000;
-        let minTs=tAmb,maxTs=tProc,Ts=(minTs+maxTs)/2;
-        
-        for(let i=0;i<50;i++){
-            const Tm=(tProc+Ts)/2; const k1=getK(matKey,Tm);
-            let R1 = 0, R2 = 0;
-            if(isFlat) { R1 = thkM / k1; if(useL2) { const Tm2 = (Tm + Ts)/2 - 10; const k2 = getK(matKey2, Tm2); R2 = thkM2 / k2; } } 
-            else { R1 = Math.log((dPipe + 2*thkM)/dPipe) / (2*Math.PI*k1); if(useL2) { const Tm2 = (Tm + Ts)/2 - 10; const k2 = getK(matKey2, Tm2); R2 = Math.log((dPipe + 2*thkM + 2*thkM2) / (dPipe + 2*thkM)) / (2*Math.PI*k2); } }
-            const R_total = R1 + R2; const Q_cond=(tProc-Ts)/R_total;
-            let D_out = isFlat ? 1.0 : dPipe + 2*(thkM + thkM2);
-            const h_total=getSurfaceCoeff(standard,vWind,Ts,tAmb,D_out,isFlat);
-            let A_surf=isFlat?1:2*Math.PI*(D_out/2);
-            const Q_conv=h_total*A_surf*(Ts-tAmb);
-            if(Q_cond>Q_conv)minTs=Ts;else maxTs=Ts;Ts=(minTs+maxTs)/2;
-        }
-        const finalTs=Ts;
-        let D_out_final = isFlat ? 1.0 : dPipe + 2*(thkM + thkM2);
-        const h_final=getSurfaceCoeff(standard,vWind,finalTs,tAmb,D_out_final,isFlat);
-        let A_outer_unit=isFlat?1:Math.PI*D_out_final;
-        const Q_unit=h_final*A_outer_unit*(finalTs-tAmb); 
-        
-        let Q_ins_total=0;
-        if(type==='valve'){ if(vType === 'separator'){ Q_ins_total = Q_unit * (multiplier*3) * qty; } else if(vType === 'elbow') { Q_ins_total = Q_unit * multiplier * qty; } else { const factor=VALVE_FACTORS[vType]||1.2; Q_ins_total=Q_unit*factor*qty; } } else if(type==='pipe'){ Q_ins_total=Q_unit*multiplier; } else { Q_ins_total=Q_unit*multiplier*qty; }
-
         const fuelType = document.getElementById('fuel').value;
-        let LHV_Val = 8250; let LHV_Unit = "m3";
-        if(fuelType === 'manual') { LHV_Val = parseFloat(document.getElementById('fuelLhv').value) || 0; LHV_Unit = document.getElementById('fuelUnit').value; } else { LHV_Val = FUELS[fuelType]; if(fuelType === 'gas') LHV_Unit = 'm3'; else if(fuelType === 'elec') LHV_Unit = 'kwh'; else LHV_Unit = 'kg'; }
-        
-        const energyLostBare_kWh = (Q_bare_total * hours) / 1000;
-        const fuelLostBare = (energyLostBare_kWh * 860) / (LHV_Val * eff);
-        const moneyLostBare = fuelLostBare * priceInReportCurr; 
-
-        const energyLostIns_kWh = (Q_ins_total * hours) / 1000;
-        const fuelLostIns = (energyLostIns_kWh * 860) / (LHV_Val * eff);
-        const moneyLostIns = fuelLostIns * priceInReportCurr;
-
-        const potentialSaveMoney = moneyLostBare - moneyLostIns;
-        const potentialSaveKwh = energyLostBare_kWh - energyLostIns_kWh;
+        let fuelLhv = 8250, fuelUnit = "m3";
+        if(fuelType === 'manual') {
+            fuelLhv = parseFloat(document.getElementById('fuelLhv').value) || 0;
+            fuelUnit = document.getElementById('fuelUnit').value;
+        }
         
         const savedSurfaces = JSON.parse(JSON.stringify(currentSurfaces));
-
-        const inputs={
-            type,qty,pLen,location,
-            tProc,tAmb,matKey,thk,
-            useL2, matKey2, thk2,
-            vDN:document.getElementById('vDN').value,
-            pDN:document.getElementById('pDN').value,
+        
+        // İsim ve birim hesapla (sadece görüntüleme için)
+        let Name="", unitLabel="Adet", displayQty=qty;
+        const isFlat=(type==='tank');
+        
+        if(isFlat){
+            if(currentSurfaces.length === 0) {
+                Name = `Tank/Düz (Ölçüsüz)`;
+                unitLabel = "Set";
+            } else {
+                Name = `Düz Yüzey`;
+                unitLabel = "Set";
+            }
+        } else {
+            const dn=(type==='valve')?document.getElementById('vDN').value:document.getElementById('pDN').value;
+            const mm=parseFloat(dn)||100;
+            if(type==='valve'){
+                const vType=document.getElementById('valveType').value;
+                if(vType === 'separator'){
+                    const dnKey = Object.keys(PIPES).find(k=>PIPES[k]==mm);
+                    Name=`Buhar Separatörü (DN${dnKey})`;
+                } else if(vType === 'elbow') {
+                    const dnKey = Object.keys(PIPES).find(k=>PIPES[k]==mm);
+                    Name=`Dirsek 90° (DN${dnKey})`;
+                } else {
+                    const sel = document.getElementById('valveType');
+                    const txt = sel.options[sel.selectedIndex].text;
+                    const dnKey = Object.keys(PIPES).find(k=>PIPES[k]==mm);
+                    Name=`${txt} (DN${dnKey})`;
+                }
+                unitLabel="Adet";
+            } else {
+                const dnKey = Object.keys(PIPES).find(k=>PIPES[k]==mm);
+                Name=`Boru (DN${dnKey})`;
+                unitLabel="m";
+                displayQty = pLen * qty;
+            }
+        }
+        
+        // Google API'ye gönderilecek parametreler
+        const apiParams = {
+            type, qty, pLen, tProc, tAmb, vWind,
+            matKey, thk, useL2, matKey2, thk2,
+            vDN: document.getElementById('vDN').value,
+            pDN: document.getElementById('pDN').value,
             valveType: document.getElementById('valveType').value,
             surfaces: savedSurfaces,
-            img:currImg,
-            energyCurr: energyCurrencyCode,
-            fuelType: fuelType,
-            fuelLhv: LHV_Val,
-            fuelUnit: LHV_Unit,
-            vWind: vWind 
+            eff, priceInReportCurr, hours,
+            fuelType, fuelLhv, fuelUnit, standard
         };
         
-        const selectedCo2Factor = CO2_FACTORS[fuelType] || 0.3;
-        
-        return{
-            name:Name,
-            desc: `Ölçülen: ${tProc}°C`,
-            location: location,
-            qty: (type==='pipe' ? multiplier : qty),
-            unit: unitLabel,
-            moneyLoss: moneyLostBare, 
-            potentialSave: potentialSaveMoney, 
-            fuelLost: fuelLostBare,
-            fuelUnit: LHV_Unit,
-            kwhBare: Math.round(energyLostBare_kWh).toLocaleString(), 
-            kwhIns: Math.round(energyLostIns_kWh).toLocaleString(),   
-            kwhSave: Math.round(potentialSaveKwh).toLocaleString(),   
-            rawKwhLoss: energyLostBare_kWh,
-            rawKwhIns: energyLostIns_kWh, // GÜNCELLEME: Global güncelleme için eklendi
-            co2: ((Q_bare_total*hours/1000) / eff) * selectedCo2Factor / 1000,
-            tSurf: tProc,
-            img:currImg,
-            inputs
-        };
+        try {
+            
+           const response = await fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify(apiParams),
+    redirect: 'follow' 
+});
+            
+            if (!response.ok) {
+                throw new Error('API çağrısı başarısız: ' + response.status);
+            }
+            
+            const apiResult = await response.json();
+            
+            if (apiResult.error) {
+                throw new Error(apiResult.error);
+            }
+            
+            // Google'dan gelen sonuçları kullan
+            const inputs = {
+                type,qty,pLen,location,tProc,tAmb,matKey,thk,
+                useL2, matKey2, thk2,
+                vDN:document.getElementById('vDN').value,
+                pDN:document.getElementById('pDN').value,
+                valveType: document.getElementById('valveType').value,
+                surfaces: savedSurfaces,
+                img:currImg,
+                energyCurr: energyCurrencyCode,
+                fuelType: fuelType,
+                fuelLhv: fuelLhv,
+                fuelUnit: fuelUnit,
+                vWind: vWind 
+            };
+            
+            return {
+                name: Name,
+                desc: `Ölçülen: ${tProc}°C`,
+                location: location,
+                qty: displayQty,
+                unit: unitLabel,
+                moneyLoss: apiResult.moneyLoss,
+                potentialSave: apiResult.potentialSave,
+                fuelLost: apiResult.fuelLost,
+                fuelUnit: apiResult.fuelUnit,
+                kwhBare: apiResult.kwhBare.toLocaleString(),
+                kwhIns: apiResult.kwhIns.toLocaleString(),
+                kwhSave: apiResult.kwhSave.toLocaleString(),
+                rawKwhLoss: apiResult.rawKwhLoss,
+                rawKwhIns: apiResult.rawKwhIns,
+                co2: apiResult.co2,
+                tSurf: tProc,
+                img: currImg,
+                inputs
+            };
+            
+        } catch (error) {
+            console.error('Hesaplama hatası:', error);
+            alert('Hesaplama sırasında hata oluştu: ' + error.message + '\n\nAPI URL doğru mu kontrol edin!');
+            throw error;
+        }
+
     }
 
     // --- YENİ FONKSİYON: GLOBAL PARAMETRELERİ GÜNCELLE ---
@@ -807,8 +805,51 @@
     function fillDN(id){const el=document.getElementById(id);el.innerHTML='';for(const[k,v]of Object.entries(PIPES)){let o=document.createElement('option');o.value=v;o.text=`DN ${k}`;el.add(o);}if(id==='vDN')el.value=60.3;if(id==='pDN')el.value=88.9;}
     function readImg(i){if(i.files&&i.files[0]){const r=new FileReader();r.onload=e=>{currImg=e.target.result;document.getElementById('prevImg').src=currImg;document.getElementById('prevImg').classList.remove('hidden');};r.readAsDataURL(i.files[0]);}}
     async function getFx(){try{const r=await fetch('https://api.frankfurter.app/latest?from=USD&to=TRY');const d=await r.json();FX.USD=d.rates.TRY;const r2=await fetch('https://api.frankfurter.app/latest?from=EUR&to=TRY');const d2=await r2.json();FX.EUR=d2.rates.TRY;const r3=await fetch('https://api.frankfurter.app/latest?from=GBP&to=TRY');const d3=await r3.json();FX.GBP=d3.rates.TRY;document.getElementById('fxVal').innerText=FX.USD.toFixed(2);}catch(e){}}
-    function calc(){LIST.push(getCalculationResult());resetForm();render();}
-    function finishUpdate(){if(editingIndex!==null)LIST[editingIndex]=getCalculationResult();editingIndex=null;document.getElementById('btnAdd').classList.remove('hidden');document.getElementById('btnUpdate').classList.add('hidden');resetForm();render();}
+    async function calc(){
+        try {
+            const btnAdd = document.getElementById('btnAdd');
+            btnAdd.disabled = true;
+            btnAdd.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Hesaplanıyor...';
+            
+            const result = await getCalculationResult();
+            LIST.push(result);
+            resetForm();
+            render();
+            
+            btnAdd.disabled = false;
+            btnAdd.innerHTML = '<i data-lucide="plus" class="w-4 h-4"></i> Hesapla & Listeye Ekle';
+            lucide.createIcons();
+        } catch(error) {
+            const btnAdd = document.getElementById('btnAdd');
+            btnAdd.disabled = false;
+            btnAdd.innerHTML = '<i data-lucide="plus" class="w-4 h-4"></i> Hesapla & Listeye Ekle';
+            lucide.createIcons();
+        }
+    }
+    async function finishUpdate(){
+        if(editingIndex===null) return;
+        try {
+            const btnUpdate = document.getElementById('btnUpdate');
+            btnUpdate.disabled = true;
+            btnUpdate.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Güncelleniyor...';
+            
+            LIST[editingIndex] = await getCalculationResult();
+            editingIndex=null;
+            document.getElementById('btnAdd').classList.remove('hidden');
+            document.getElementById('btnUpdate').classList.add('hidden');
+            resetForm();
+            render();
+            
+            btnUpdate.disabled = false;
+            btnUpdate.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> Güncellemeyi Bitir';
+            lucide.createIcons();
+        } catch(error) {
+            const btnUpdate = document.getElementById('btnUpdate');
+            btnUpdate.disabled = false;
+            btnUpdate.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> Güncellemeyi Bitir';
+            lucide.createIcons();
+        }
+    }
     
     function edit(i){
         editingIndex=i; const d=LIST[i].inputs;
