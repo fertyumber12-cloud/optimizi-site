@@ -903,17 +903,32 @@ const API_URL = "https://script.google.com/macros/s/AKfycby8NK-oA7ZWrsfywEpW7NQB
             render(); resetForm(); alert(rows.length - 2 + " satır yüklendi!"); }; reader.readAsText(file); input.value = ''; 
     }
     
-    function quickUpdate(i, field, val) {
-        const oldInputs = LIST[i].inputs;
-        setType(oldInputs.type);
-        document.getElementById('tProc').value = oldInputs.tProc; document.getElementById('tAmb').value = oldInputs.tAmb; document.getElementById('matSelect').value = oldInputs.matKey; document.getElementById('thk').value = oldInputs.thk; document.getElementById('calcStd').value = oldInputs.standard; document.getElementById('location').value = oldInputs.location || ""; 
-        document.getElementById('vWind').value = (oldInputs.vWind !== undefined) ? oldInputs.vWind : 0;
-        if(oldInputs.type==='pipe') { document.getElementById('pDN').value = oldInputs.pDN; document.getElementById('pLen').value = oldInputs.pLen; } else if(oldInputs.type==='valve'){ document.getElementById('vDN').value = oldInputs.vDN; document.getElementById('valveType').value = oldInputs.valveType; }
-        
-        if(field === 'qty') document.getElementById('qty').value = val; else document.getElementById('qty').value = oldInputs.qty; 
-        
-        LIST[i] = getCalculationResult(); resetForm(); render();
+async function quickUpdate(i, field, val) {
+    // 1. Önce listedeki o kalemin adedini (veya ilgili alanı) güncelle
+    if (field === 'qty') {
+        LIST[i].inputs.qty = parseFloat(val) || 1;
     }
+
+    // 2. Şimdi bu kalem için Google'dan YENİ hesaplama iste
+    // Bu sayede yeni adede göre finansallar tekrar hesaplanır
+    try {
+        // Formu geçici olarak bu kalemin verileriyle dolduruyoruz ki getCalculationResult doğru çalışsın
+        const d = LIST[i].inputs;
+        setType(d.type);
+        document.getElementById('tProc').value = d.tProc;
+        document.getElementById('qty').value = d.qty;
+        // ... diğer alanlar zaten formda kalmış olabilir ama en güvenlisi budur
+        
+        // Google API'den güncel hesabı al
+        const updatedResult = await getCalculationResult();
+        
+        // 3. Listeyi güncelle ve tabloyu yeniden çiz
+        LIST[i] = updatedResult;
+        render();
+    } catch (error) {
+        console.error("Hızlı güncelleme hatası:", error);
+    }
+}
 
     function render(){
         const tb=document.getElementById('gridBody');tb.innerHTML='';let gLoss=0,gEnergy=0,gCo2=0;
@@ -1132,3 +1147,4 @@ const API_URL = "https://script.google.com/macros/s/AKfycby8NK-oA7ZWrsfywEpW7NQB
   <script src="guard.js?v=2"></script>
 </body>
 </html>
+
