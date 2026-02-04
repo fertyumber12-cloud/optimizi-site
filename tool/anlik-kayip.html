@@ -15,8 +15,10 @@
 <body class="antialiased" onload="initApp()">
 <script>
     // ⚠️ GÜVENLİK AYARLARI
-    const API_URL = "https://script.google.com/macros/s/AKfycby8NK-oA7ZWrsfywEpW7NQBo8H7pwqIcknbp0bafqbDV0c_HYzQ140-HitGKHQTr6cE/exec";
-    const OZEL_ANAHTAR = "onurguner1999"; // Backend ile aynı olmalı
+   // Güvenlik Bilgileri (Maskelenmiş)
+const _0x4a2b = ["b251cmd1bmVyMTk5OQ==", "aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J5OE5LLW9BN1pXcnNmeUVwVzdOUUJvOEg3cHdxSWNrbmJwMGJhZnFiRFYwY19IWXpRMTQwLUhpdEdLSFFUcjZjRS9leGVj"];
+const OZEL_ANAHTAR = atob(_0x4a2b[0]); 
+const API_URL = atob(_0x4a2b[1]);
 
     let LIST=[],FX={USD:34.50,EUR:36.50,GBP:43.20,TL:1.0},currImg=null,editingIndex=null;
     let currentSurfaces = []; 
@@ -160,3 +162,4 @@
 </script>
 </body>
 </html>
+
