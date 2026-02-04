@@ -156,16 +156,24 @@
   /* Print Styles */
   @media print {
     @page { margin: 0; size: A4; }
+    
+    /* Dark mode'u print'te tamamen devre dışı bırak */
+    html.dark, html.dark *, html.dark *::before, html.dark *::after { 
+        background: white !important; 
+        color: black !important; 
+        border-color: #e5e7eb !important;
+    }
+    
     html, body { width: 210mm; height: 297mm; margin: 0 !important; padding: 0 !important; background: white !important; color: black !important; overflow: visible !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     #app-layer, nav, .glass-card, button, input, select { display: none !important; }
     #print-area { display: block !important; }
-    .print-page { width: 210mm; height: 296mm; position: relative; page-break-after: always; overflow: hidden; background: white; }
+    .print-page { width: 210mm; height: 296mm; position: relative; page-break-after: always; overflow: hidden; background: white !important; }
     .print-page:last-child { page-break-after: auto; }
     
     .cover-bg { background-color: white !important; color: #1e293b !important; }
     
-    .audit-table th { background-color: #f8fafc; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 7px; padding: 4px; border-bottom: 2px solid #0f172a; }
-    .audit-table td { border-bottom: 1px solid #e2e8f0; padding: 4px; font-size: 8px; color: #334155; vertical-align: middle; }
+    .audit-table th { background-color: #f8fafc !important; color: #475569 !important; font-weight: 700; text-transform: uppercase; font-size: 7px; padding: 4px; border-bottom: 2px solid #0f172a !important; }
+    .audit-table td { border-bottom: 1px solid #e2e8f0 !important; padding: 4px; font-size: 8px; color: #334155 !important; vertical-align: middle; }
     .audit-table tr:nth-child(even) { background-color: #f8fafc; }
   }
   #print-area { display: none; }
@@ -258,7 +266,7 @@
         </div>
 
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
-            <div class="xl:col-span-3 space-y-6">
+            <div class="xl:col-span-3 space-y-6 max-h-[calc(100vh-180px)] overflow-y-auto pr-2">
                 <div class="glass-card p-6 rounded-2xl">
                    <h3 class="text-indigo-500 dark:text-red-500 dark:text-red-500 text-xs font-bold uppercase mb-4 flex items-center gap-2"><i data-lucide="briefcase" class="w-4 h-4"></i> Proje Detayları</h3>
                    <div class="space-y-4">
