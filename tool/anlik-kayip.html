@@ -681,7 +681,7 @@ const _x = atob("b251cmd1bmVyMTk5OQ==");
             }
         }
         
-        // Google API'ye gönderilecek parametreler
+       // Google API'ye gönderilecek parametreler
 const apiParams = {
     type, qty, pLen, tProc, tAmb, vWind,
     matKey, thk, useL2, matKey2, thk2,
@@ -691,16 +691,21 @@ const apiParams = {
     surfaces: savedSurfaces,
     eff, priceInReportCurr, hours,
     fuelType, fuelLhv, fuelUnit, standard,
-    _tk: _x  
+    _tk: _x  // Token
 };
-        
-        try {
-            
-           const response = await fetch(API_URL, {
-    method: 'POST',
-    body: JSON.stringify(apiParams),
-    redirect: 'follow' 
-});
+
+try {
+    // Referer'ı URL parametresi olarak gönder
+    const urlWithReferer = `${API_URL}?referer=${encodeURIComponent(window.location.origin)}`;
+    
+    const response = await fetch(urlWithReferer, {
+        method: 'POST',
+        body: JSON.stringify(apiParams),
+        redirect: 'follow'
+    });
+    
+    // ... geri kalan kod aynı
+}
             
             if (!response.ok) {
                 throw new Error('API çağrısı başarısız: ' + response.status);
@@ -1149,4 +1154,5 @@ async function quickUpdate(i, field, val) {
   <script src="guard.js?v=2"></script>
 </body>
 </html>
+
 
