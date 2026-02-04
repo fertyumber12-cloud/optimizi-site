@@ -563,9 +563,8 @@
         document.getElementById('qty').value = 1;
     }
 
-const _0x4a2b = ["b251cmd1bmVyMTk5OQ==", "aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J5OE5LLW9BN1pXcnNmeUVwVzdOUUJvOEg3cHdxSWNrbmJwMGJhZnFiRFYwY19IWXpRMTQwLUhpdEdLSFFUcjZjRS9leGVj"];
-const OZEL_ANAHTAR = atob(_0x4a2b[0]); 
-const API_URL = atob(_0x4a2b[1]);
+    
+const API_URL = "https://script.google.com/macros/s/AKfycby8NK-oA7ZWrsfywEpW7NQBo8H7pwqIcknbp0bafqbDV0c_HYzQ140-HitGKHQTr6cE/exec";
     
     // Sadece UI için gerekli DN değerleri (hesaplama için değil, sadece dropdown için)
     const PIPES={15:21.3,20:26.7,25:33.4,32:42.2,40:48.3,50:60.3,65:73.0,80:88.9,100:114.3,125:141.3,150:168.3,200:219.1,250:273.0,300:323.9,350:355.6,400:406.4,500:508.0};
@@ -604,58 +603,157 @@ const API_URL = atob(_0x4a2b[1]);
     
     // getSurfaceCoeff fonksiyonu Google Apps Script'te - güvenli!
 
-async function getCalculationResult(customInputs = null) {
-    const d = customInputs || {
-        type: document.getElementById('type').value,
-        qty: parseFloat(document.getElementById('qty').value) || 1,
-        pLen: parseFloat(document.getElementById('pLen').value) || 1,
-        tProc: parseFloat(document.getElementById('tProc').value) || 0,
-        tAmb: parseFloat(document.getElementById('tAmb').value) || 25,
-        vWind: parseFloat(document.getElementById('vWind').value) || 0,
-        matKey: document.getElementById('matSelect').value,
-        thk: parseFloat(document.getElementById('thk').value) || 0,
-        useL2: document.getElementById('useL2').checked,
-        matKey2: document.getElementById('matSelect2').value,
-        thk2: parseFloat(document.getElementById('thk2').value) || 0,
-        vDN: document.getElementById('vDN').value,
-        pDN: document.getElementById('pDN').value,
-        valveType: document.getElementById('valveType').value,
-        surfaces: JSON.parse(JSON.stringify(currentSurfaces)),
-        eff: (parseFloat(document.getElementById('eff').value) || 85) / 100,
-        hours: parseFloat(document.getElementById('hours').value) || 8000,
-        fuelType: document.getElementById('fuel').value,
-        standard: document.getElementById('calcStd').value,
-        location: document.getElementById('location').value
-    };
+    async function getCalculationResult(){
+        // ⚡ Bu fonksiyon artık Google Apps Script'e istek atıyor!
+        // Tüm kritik hesaplamalar Google'ın sunucusunda yapılıyor.
+        
+        // UI'dan verileri topla
+        const qty=parseFloat(document.getElementById('qty').value)||1;
+        const type=document.getElementById('type').value;
+        const location=document.getElementById('location').value||"";
+        const tProc=parseFloat(document.getElementById('tProc').value)||0;
+        const tAmb=parseFloat(document.getElementById('tAmb').value)||25;
+        const vWindInput = document.getElementById('vWind').value;
+        const vWind = (vWindInput === "") ? 0 : parseFloat(vWindInput);
+        
+        const matKey=document.getElementById('matSelect').value;
+        const thk=parseFloat(document.getElementById('thk').value)||0;
+        const useL2 = document.getElementById('useL2').checked;
+        const matKey2 = useL2 ? document.getElementById('matSelect2').value : null;
+        const thk2 = useL2 ? (parseFloat(document.getElementById('thk2').value)||0) : 0;
+        const standard=document.getElementById('calcStd').value;
+        const pLen = parseFloat(document.getElementById('pLen').value)||1;
+        
+        const reportCurrencyCode = document.getElementById('curr').value;
+        const reportRate = FX[reportCurrencyCode] || 1; 
+        const eff=(parseFloat(document.getElementById('eff').value)||85)/100;
+        const priceRaw=parseFloat(document.getElementById('price').value)||0;
+        const energyCurrencyCode = document.getElementById('energyCurr').value;
+        const energyRate = FX[energyCurrencyCode] || 1;
+        const priceInReportCurr = priceRaw * (energyRate / reportRate);
+        const hours=parseFloat(document.getElementById('hours').value)||8000;
+        
+        const fuelType = document.getElementById('fuel').value;
+        let fuelLhv = 8250, fuelUnit = "m3";
+        if(fuelType === 'manual') {
+            fuelLhv = parseFloat(document.getElementById('fuelLhv').value) || 0;
+            fuelUnit = document.getElementById('fuelUnit').value;
+        }
+        
+        const savedSurfaces = JSON.parse(JSON.stringify(currentSurfaces));
+        
+        // İsim ve birim hesapla (sadece görüntüleme için)
+        let Name="", unitLabel="Adet", displayQty=qty;
+        const isFlat=(type==='tank');
+        
+        if(isFlat){
+            if(currentSurfaces.length === 0) {
+                Name = `Tank/Düz (Ölçüsüz)`;
+                unitLabel = "Set";
+            } else {
+                Name = `Düz Yüzey`;
+                unitLabel = "Set";
+            }
+        } else {
+            const dn=(type==='valve')?document.getElementById('vDN').value:document.getElementById('pDN').value;
+            const mm=parseFloat(dn)||100;
+            if(type==='valve'){
+                const vType=document.getElementById('valveType').value;
+                if(vType === 'separator'){
+                    const dnKey = Object.keys(PIPES).find(k=>PIPES[k]==mm);
+                    Name=`Buhar Separatörü (DN${dnKey})`;
+                } else if(vType === 'elbow') {
+                    const dnKey = Object.keys(PIPES).find(k=>PIPES[k]==mm);
+                    Name=`Dirsek 90° (DN${dnKey})`;
+                } else {
+                    const sel = document.getElementById('valveType');
+                    const txt = sel.options[sel.selectedIndex].text;
+                    const dnKey = Object.keys(PIPES).find(k=>PIPES[k]==mm);
+                    Name=`${txt} (DN${dnKey})`;
+                }
+                unitLabel="Adet";
+            } else {
+                const dnKey = Object.keys(PIPES).find(k=>PIPES[k]==mm);
+                Name=`Boru (DN${dnKey})`;
+                unitLabel="m";
+                displayQty = pLen * qty;
+            }
+        }
+        
+        // Google API'ye gönderilecek parametreler
+        const apiParams = {
+            type, qty, pLen, tProc, tAmb, vWind,
+            matKey, thk, useL2, matKey2, thk2,
+            vDN: document.getElementById('vDN').value,
+            pDN: document.getElementById('pDN').value,
+            valveType: document.getElementById('valveType').value,
+            surfaces: savedSurfaces,
+            eff, priceInReportCurr, hours,
+            fuelType, fuelLhv, fuelUnit, standard
+        };
+        
+        try {
+            
+           const response = await fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify(apiParams),
+    redirect: 'follow' 
+});
+            
+            if (!response.ok) {
+                throw new Error('API çağrısı başarısız: ' + response.status);
+            }
+            
+            const apiResult = await response.json();
+            
+            if (apiResult.error) {
+                throw new Error(apiResult.error);
+            }
+            
+            // Google'dan gelen sonuçları kullan
+            const inputs = {
+                type,qty,pLen,location,tProc,tAmb,matKey,thk,
+                useL2, matKey2, thk2,
+                vDN:document.getElementById('vDN').value,
+                pDN:document.getElementById('pDN').value,
+                valveType: document.getElementById('valveType').value,
+                surfaces: savedSurfaces,
+                img:currImg,
+                energyCurr: energyCurrencyCode,
+                fuelType: fuelType,
+                fuelLhv: fuelLhv,
+                fuelUnit: fuelUnit,
+                vWind: vWind 
+            };
+            
+            return {
+                name: Name,
+                desc: `Ölçülen: ${tProc}°C`,
+                location: location,
+                qty: displayQty,
+                unit: unitLabel,
+                moneyLoss: apiResult.moneyLoss,
+                potentialSave: apiResult.potentialSave,
+                fuelLost: apiResult.fuelLost,
+                fuelUnit: apiResult.fuelUnit,
+                kwhBare: apiResult.kwhBare.toLocaleString(),
+                kwhIns: apiResult.kwhIns.toLocaleString(),
+                kwhSave: apiResult.kwhSave.toLocaleString(),
+                rawKwhLoss: apiResult.rawKwhLoss,
+                rawKwhIns: apiResult.rawKwhIns,
+                co2: apiResult.co2,
+                tSurf: tProc,
+                img: currImg,
+                inputs
+            };
+            
+        } catch (error) {
+            console.error('Hesaplama hatası:', error);
+            alert('Hesaplama sırasında hata oluştu: ' + error.message + '\n\nAPI URL doğru mu kontrol edin!');
+            throw error;
+        }
 
-    const priceRaw = parseFloat(document.getElementById('price').value) || 0;
-    // API'ye giden paket (apiKey eklendi)
-    const apiParams = { apiKey: OZEL_ANAHTAR, ...d, priceInReportCurr: priceRaw };
-
-    const response = await fetch(API_URL, { 
-        method: 'POST', 
-        body: JSON.stringify(apiParams), 
-        redirect: 'follow' 
-    });
-    
-    const apiResult = await response.json();
-    if (apiResult.error) throw new Error(apiResult.error);
-
-    let typeName = d.type === 'tank' ? "Düz Yüzey" : (d.type === 'valve' ? "Armatür" : "Boru");
-    return {
-        name: typeName,
-        unit: d.type === 'pipe' ? "m" : "Adet",
-        qty: d.type === 'pipe' ? (d.pLen * d.qty) : d.qty,
-        moneyLoss: apiResult.moneyLoss,
-        rawKwhLoss: apiResult.rawKwhLoss,
-        co2: apiResult.co2,
-        kwhBare: apiResult.kwhBare.toLocaleString(),
-        kwhIns: apiResult.kwhIns.toLocaleString(),
-        kwhSave: apiResult.kwhSave.toLocaleString(),
-        img: currImg,
-        inputs: d 
-    };
-}
+    }
 
     // --- YENİ FONKSİYON: GLOBAL PARAMETRELERİ GÜNCELLE ---
     function updateGlobalFinancials(){
@@ -805,20 +903,30 @@ async function getCalculationResult(customInputs = null) {
             render(); resetForm(); alert(rows.length - 2 + " satır yüklendi!"); }; reader.readAsText(file); input.value = ''; 
     }
     
-async function quickUpdate(idx, field, val) {
+async function quickUpdate(i, field, val) {
+    // 1. Önce listedeki o kalemin adedini (veya ilgili alanı) güncelle
     if (field === 'qty') {
-        LIST[idx].inputs.qty = parseFloat(val) || 1;
-        const row = document.querySelectorAll('#gridBody tr')[idx];
-        if (row) row.style.opacity = "0.5";
-        try {
-            const updated = await getCalculationResult(LIST[idx].inputs);
-            LIST[idx] = updated;
-            render();
-        } catch (e) { 
-            console.error("Hata:", e); 
-        } finally {
-            if (row) row.style.opacity = "1";
-        }
+        LIST[i].inputs.qty = parseFloat(val) || 1;
+    }
+
+    // 2. Şimdi bu kalem için Google'dan YENİ hesaplama iste
+    // Bu sayede yeni adede göre finansallar tekrar hesaplanır
+    try {
+        // Formu geçici olarak bu kalemin verileriyle dolduruyoruz ki getCalculationResult doğru çalışsın
+        const d = LIST[i].inputs;
+        setType(d.type);
+        document.getElementById('tProc').value = d.tProc;
+        document.getElementById('qty').value = d.qty;
+        // ... diğer alanlar zaten formda kalmış olabilir ama en güvenlisi budur
+        
+        // Google API'den güncel hesabı al
+        const updatedResult = await getCalculationResult();
+        
+        // 3. Listeyi güncelle ve tabloyu yeniden çiz
+        LIST[i] = updatedResult;
+        render();
+    } catch (error) {
+        console.error("Hızlı güncelleme hatası:", error);
     }
 }
 
@@ -1039,5 +1147,3 @@ async function quickUpdate(idx, field, val) {
   <script src="guard.js?v=2"></script>
 </body>
 </html>
-
-
