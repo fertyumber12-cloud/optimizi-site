@@ -173,9 +173,37 @@
 
         document.getElementById('startDate').innerText = `${day} ${month} ${year} ${hour}:${minute}`;
 
+        // --- ÇALIŞMA SAATLERİ KONTROLÜ ---
+        const params = new URLSearchParams(window.location.search);
+        const workStartParam = params.get('ws') || '00:00'; // Varsayılan: 7/24
+        const workEndParam = params.get('we') || '23:59';
+        const workDaysParam = params.get('wd') || '1,2,3,4,5,6,7'; // Varsayılan: Her gün
+        
+        const workDays = workDaysParam.split(',').map(d => parseInt(d));
+        
+        function isWorkingHours(currentDate) {
+            // Gün kontrolü (1=Pzt, 7=Paz)
+            const dayOfWeek = currentDate.getDay() === 0 ? 7 : currentDate.getDay();
+            if (!workDays.includes(dayOfWeek)) {
+                return false;
+            }
+            
+            // Saat kontrolü
+            const [startHour, startMin] = workStartParam.split(':').map(n => parseInt(n));
+            const [endHour, endMin] = workEndParam.split(':').map(n => parseInt(n));
+            
+            const currentMinutes = currentDate.getHours() * 60 + currentDate.getMinutes();
+            const startMinutes = startHour * 60 + startMin;
+            const endMinutes = endHour * 60 + endMin;
+            
+            return currentMinutes >= startMinutes && currentMinutes <= endMinutes;
+        }
+
         // --- SAYAÇ MOTORU ---
         const counterEl = document.getElementById('counter');
         const elapsedEl = document.getElementById('elapsedTime');
+
+        let totalWorkSeconds = 0; // Toplam çalışma süresi
 
         function updateCounter() {
             const now = new Date();
@@ -188,7 +216,20 @@
                 return;
             }
 
-            const currentLoss = diffSeconds * burnPerSecond;
+            // Çalışma saatleri kontrolü
+            const isWorking = isWorkingHours(now);
+            
+            // CANLI göstergesini güncelle
+            const liveIndicator = document.querySelector('.bg-slate-800\\/50');
+            if (isWorking) {
+                liveIndicator.classList.remove('opacity-50');
+                totalWorkSeconds += 1; // Her saniye çalışma süresine ekle
+            } else {
+                liveIndicator.classList.add('opacity-50');
+            }
+
+            // Kayıp sadece çalışma saatlerinde artar
+            const currentLoss = totalWorkSeconds * burnPerSecond;
 
             counterEl.innerText = currentLoss.toLocaleString('tr-TR', {
                 minimumFractionDigits: 4,
@@ -200,7 +241,9 @@
             const m = Math.floor((diffSeconds % 3600) / 60);
             const s = Math.floor(diffSeconds % 60);
             
-            elapsedEl.innerText = `${d}g ${h}sa ${m}dk ${s}sn`;
+            // Mesai durumunu geçen süreye ekle
+            const statusText = isWorking ? ' • ÇALIŞIYOR' : ' • DURAKLADI';
+            elapsedEl.innerHTML = `${d}g ${h}sa ${m}dk ${s}sn<span class="text-${isWorking ? 'green' : 'yellow'}-400 text-[9px] ml-1">${statusText}</span>`;
 
             requestAnimationFrame(updateCounter);
         }
@@ -210,4 +253,3 @@
     </script>
 </body>
 </html>
-
