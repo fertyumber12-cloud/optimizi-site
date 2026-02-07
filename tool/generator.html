@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Optimizi Kayıp Simülatörü v2</title>
+    <title>Optimizi Kayıp Simülatörü QR Oluşturucu</title>
     <link rel="icon" href="favicon.png" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -111,6 +111,32 @@
                 <input type="time" id="installTime" class="w-full bg-white border border-slate-200 rounded-xl px-2 py-2 text-sm font-bold text-slate-700 outline-none text-center">
             </div>
 
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <label class="text-[10px] font-bold text-slate-400 uppercase mb-2 block">⏰ Çalışma Saatleri (Sayaç Sadece Bu Saatlerde Çalışır)</label>
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div>
+                        <label class="text-[9px] text-slate-400 uppercase">Vardiya Başlangıç</label>
+                        <input type="time" id="workStart" value="08:00" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-slate-700 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-[9px] text-slate-400 uppercase">Vardiya Bitiş</label>
+                        <input type="time" id="workEnd" value="17:00" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-slate-700 outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[9px] text-slate-400 uppercase mb-1 block">Çalışma Günleri</label>
+                    <div class="flex gap-1">
+                        <label class="flex-1"><input type="checkbox" id="day1" checked class="mr-1"><span class="text-[10px] font-bold">Pzt</span></label>
+                        <label class="flex-1"><input type="checkbox" id="day2" checked class="mr-1"><span class="text-[10px] font-bold">Sal</span></label>
+                        <label class="flex-1"><input type="checkbox" id="day3" checked class="mr-1"><span class="text-[10px] font-bold">Çar</span></label>
+                        <label class="flex-1"><input type="checkbox" id="day4" checked class="mr-1"><span class="text-[10px] font-bold">Per</span></label>
+                        <label class="flex-1"><input type="checkbox" id="day5" checked class="mr-1"><span class="text-[10px] font-bold">Cum</span></label>
+                        <label class="flex-1"><input type="checkbox" id="day6" class="mr-1"><span class="text-[10px] font-bold">Cmt</span></label>
+                        <label class="flex-1"><input type="checkbox" id="day7" class="mr-1"><span class="text-[10px] font-bold">Paz</span></label>
+                    </div>
+                </div>
+            </div>
+
             <button onclick="generateQR()" class="w-full bg-slate-900 hover:bg-red-600 text-white p-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-red-600/30 transition transform active:scale-[0.98] flex items-center justify-center gap-2 group">
                 <i data-lucide="qr-code" class="group-hover:rotate-180 transition duration-500"></i> Simülasyonu Başlat
             </button>
@@ -179,6 +205,18 @@
             const timeStr = document.getElementById('installTime').value; 
             const fullDateTime = `${dateStr}-${timeStr.replace(':', '-')}`; 
 
+            // Çalışma saatleri
+            const workStart = document.getElementById('workStart').value;
+            const workEnd = document.getElementById('workEnd').value;
+            
+            // Çalışma günlerini topla (1=Pzt, 7=Paz)
+            const workDays = [];
+            for(let i = 1; i <= 7; i++) {
+                if(document.getElementById('day' + i).checked) {
+                    workDays.push(i);
+                }
+            }
+
             rawVal = rawVal.replace(/\./g, '').replace(',', '.');
             const totalVal = parseFloat(rawVal);
 
@@ -190,8 +228,8 @@
             const burnPerSecond = totalVal / secondsInWorkYear;
 
             const baseUrl = "https://optimizi.app/track.html";
-            // bps (Burn Per Second) parametresi eklendi.
-            let finalUrl = `${baseUrl}?c=${encodeURIComponent(client)}&s=${encodeURIComponent(serial)}&v=${totalVal}&up=${uPrice}&wh=${wHours}&f=${fuel}&d=${fullDateTime}&bps=${burnPerSecond.toFixed(6)}`;
+            // bps (Burn Per Second) + ws (Work Start) + we (Work End) + wd (Work Days) parametreleri eklendi.
+            let finalUrl = `${baseUrl}?c=${encodeURIComponent(client)}&s=${encodeURIComponent(serial)}&v=${totalVal}&up=${uPrice}&wh=${wHours}&f=${fuel}&d=${fullDateTime}&bps=${burnPerSecond.toFixed(6)}&ws=${workStart}&we=${workEnd}&wd=${workDays.join(',')}`;
 
             if(fuel === 'manual') {
                 let cLabel = document.getElementById('customFuelLabel').value || 'Paçal Kömür';
