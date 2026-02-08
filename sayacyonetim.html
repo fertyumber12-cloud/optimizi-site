@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimizi Sayaç Yönetim Paneli</title>
+    <link rel="icon" href="favicon.png" type="image/png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } } }</script>
+    <style>
+        body { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(20px); 
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        .gradient-border {
+            background: linear-gradient(white, white) padding-box,
+                        linear-gradient(135deg, #667eea, #764ba2) border-box;
+            border: 2px solid transparent;
+        }
+        .day-card { transition: all 0.2s ease; }
+        .day-card:hover { transform: translateY(-2px); }
+        .day-card.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        
+        <!-- Header -->
+        <div class="glass-card rounded-3xl p-6 mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                        Optimizi Sayaç Yönetim Paneli
+                    </h1>
+                    <p class="text-sm text-slate-500 mt-1">Profesyonel Enerji Kayıp İzleme Sistemi</p>
+                </div>
+                <div class="hidden md:flex items-center gap-3">
+                    <div class="text-right">
+                        <p class="text-xs text-slate-500">Panel Versiyonu</p>
+                        <p class="font-bold text-slate-700">v3.0 Pro</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                        <i data-lucide="settings" class="w-6 h-6 text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ana Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Sol Panel - Genel Bilgiler -->
+            <div class="lg:col-span-1 space-y-6">
+                
+                <!-- Müşteri Bilgileri -->
+                <div class="glass-card rounded-2xl p-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i data-lucide="building-2" class="w-5 h-5 text-purple-600"></i>
+                        <h2 class="font-bold text-slate-800">Müşteri Bilgileri</h2>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Firma Adı</label>
+                            <input type="text" id="client" placeholder="ABC Tesisleri" 
+                                   class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-purple-500 outline-none transition font-semibold">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Rapor No</label>
+                            <input type="text" id="serial" value="LSS-001" 
+                                   class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-purple-500 outline-none transition font-semibold">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kayıp Bilgileri -->
+                <div class="glass-card rounded-2xl p-6 gradient-border">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i data-lucide="trending-down" class="w-5 h-5 text-red-600"></i>
+                        <h2 class="font-bold text-slate-800">Kayıp Verileri</h2>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Yıllık Toplam Kayıp</label>
+                            <div class="relative">
+                                <input type="text" id="totalValue" oninput="calculatePreview()" placeholder="530272" 
+                                       class="w-full mt-1 px-4 py-4 rounded-xl border-2 border-red-200 focus:border-red-500 outline-none transition font-bold text-2xl text-red-600">
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">TL/Yıl</span>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Çalışma Saati</label>
+                                <input type="number" id="workHours" value="4800" oninput="calculatePreview()"
+                                       class="w-full mt-1 px-3 py-2 rounded-lg border-2 border-slate-200 focus:border-purple-500 outline-none transition font-bold">
+                                <p class="text-xs text-slate-400 mt-1">saat/yıl</p>
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Birim Fiyat</label>
+                                <input type="number" id="unitPrice" placeholder="16.00" step="0.01"
+                                       class="w-full mt-1 px-3 py-2 rounded-lg border-2 border-slate-200 focus:border-purple-500 outline-none transition font-bold">
+                                <p class="text-xs text-slate-400 mt-1">TL</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Önizleme -->
+                <div id="previewCard" class="glass-card rounded-2xl p-6 bg-gradient-to-br from-orange-50 to-red-50 border-2 border-red-200 hidden">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i data-lucide="activity" class="w-5 h-5 text-red-600"></i>
+                        <h2 class="font-bold text-red-800">Canlı Önizleme</h2>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex items-baseline gap-2">
+                            <span id="previewMin" class="text-3xl font-black text-red-600">0.00</span>
+                            <span class="text-sm font-semibold text-slate-600">TL/Dakika</span>
+                        </div>
+                        <div class="flex items-baseline gap-2">
+                            <span id="previewHour" class="text-xl font-bold text-slate-700">0.00</span>
+                            <span class="text-xs font-semibold text-slate-500">TL/Saat</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Yakıt & Tarih -->
+                <div class="glass-card rounded-2xl p-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i data-lucide="calendar-clock" class="w-5 h-5 text-purple-600"></i>
+                        <h2 class="font-bold text-slate-800">Ek Bilgiler</h2>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Yakıt Tipi</label>
+                            <select id="fuel" onchange="toggleManualFuel()" 
+                                    class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-purple-500 outline-none transition font-semibold">
+                                <option value="gas">🔥 Doğalgaz (m³)</option>
+                                <option value="elec">⚡ Elektrik (kWh)</option>
+                                <option value="lng">❄️ LNG (kg)</option>
+                                <option value="fueloil">🛢️ Fuel Oil (kg)</option>
+                                <option value="coal_imp">🪨 İthal Kömür (kg)</option>
+                                <option value="coal_loc">🪨 Yerli Kömür (kg)</option>
+                                <option value="manual">⚙️ Paçal Kömür / Özel</option>
+                            </select>
+                        </div>
+                        
+                        <div id="manualFuelFields" class="hidden space-y-2 p-3 bg-slate-50 rounded-lg">
+                            <input type="text" id="customFuelLabel" placeholder="Yakıt Adı" 
+                                   class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none text-sm">
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="number" id="customFuelLhv" placeholder="Kalori (kcal/kg)" 
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none text-sm">
+                                <input type="number" id="customFuelCo2" placeholder="CO2 (kg/br)" step="0.001"
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none text-sm">
+                            </div>
+                            <input type="hidden" id="customFuelUnit" value="kg">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Tarih</label>
+                                <input type="date" id="installDate" 
+                                       class="w-full mt-1 px-3 py-2 rounded-lg border-2 border-slate-200 focus:border-purple-500 outline-none transition text-sm font-semibold">
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Saat</label>
+                                <input type="time" id="installTime" 
+                                       class="w-full mt-1 px-3 py-2 rounded-lg border-2 border-slate-200 focus:border-purple-500 outline-none transition text-sm font-semibold">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Orta & Sağ Panel - Vardiya Yönetimi -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Vardiya Planlayıcı -->
+                <div class="glass-card rounded-2xl p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="calendar-range" class="w-6 h-6 text-purple-600"></i>
+                            <h2 class="text-xl font-bold text-slate-800">Haftalık Vardiya Planı</h2>
+                        </div>
+                        <button onclick="toggleAllDays()" class="px-4 py-2 rounded-lg bg-purple-100 hover:bg-purple-200 text-purple-700 font-semibold text-sm transition">
+                            Tümünü Seç/Kaldır
+                        </button>
+                    </div>
+
+                    <!-- Gün Kartları -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                        
+                        <!-- Pazartesi -->
+                        <div class="day-card glass-card rounded-xl p-4 border-2 border-slate-200" id="card1">
+                            <div class="flex items-center gap-2 mb-3">
+                                <input type="checkbox" id="day1" checked onchange="toggleDayCard(1)" 
+                                       class="w-5 h-5 rounded accent-purple-600">
+                                <label for="day1" class="font-bold text-sm cursor-pointer">Pazartesi</label>
+                            </div>
+                            <div class="space-y-2">
+                                <input type="time" id="start1" value="08:00" 
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-semibold">
+                                <input type="time" id="end1" value="17:00" 
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-semibold">
+                            </div>
+                        </div>
+
+                        <!-- Salı -->
+                        <div class="day-card glass-card rounded-xl p-4 border-2 border-slate-200" id="card2">
+                            <div class="flex items-center gap-2 mb-3">
+                                <input type="checkbox" id="day2" checked onchange="toggleDayCard(2)" 
+                                       class="w-5 h-5 rounded accent-purple-600">
+                                <label for="day2" class="font-bold text-sm cursor-pointer">Salı</label>
+                            </div>
+                            <div class="space-y-2">
+                                <input type="time" id="start2" value="08:00" 
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-semibold">
+                                <input type="time" id="end2" value="17:00" 
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-semibold">
+                            </div>
+                        </div>
+
+                        <!-- Çarşamba -->
+                        <div class="day-card glass-card rounded-xl p-4 border-2 border-slate-200" id="card3">
+                            <div class="flex items-center gap-2 mb-3">
+                                <input type="checkbox" id="day3" checked onchange="toggleDayCard(3)" 
+                                       class="w-5 h-5 rounded accent-purple-600">
+                                <label for="day3" class="font-bold text-sm cursor-pointer">Çarşamba</label>
+                            </div>
+                            <div class="space-y-2">
+                                <input type="time" id="start3" value="08:00" 
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-semibold">
+                                <input type="time" id="end3" value="17:00" 
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-semibold">
+                            </div>
+                        </div>
+
+                        <!-- Perşembe -->
+                        <div class="day-card glass-card rounded-xl p-4 border-2 border-slate-200" id="card4">
+                            <div class="flex items-center gap-2 mb-3">
+                                <input type="checkbox" id="day4" checked onchange="toggleDayCard(4)" 
+                                       class="w-5 h-5 rounded accent-purple-600">
+                                <label for="day4" class="font-bold text-sm cursor-pointer">Perşembe</label>
+                            </div>
+                            <div class="space-y-2">
+                                <input type="time" id="start4" value="08:00" 
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-semibold">
+                                <input type="time" id="end4" value="17:00" 
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-semibold">
+                            </div>
+                        </div>
+
+                        <!-- Cuma -->
+                        <div class="day-card glass-card rounded-xl p-4 border-2 border-slate-200" id="card5">
+                            <div class="flex items-center gap-2 mb-3">
+                                <input type="checkbox" id="day5" checked onchange="toggleDayCard(5)" 
+                                       class="w-5 h-5 rounded accent-purple-600">
+                                <label for="day5" class="font-bold text-sm cursor-pointer">Cuma</label>
+                            </div>
+                            <div class="space-y-2">
+                                <input type="time" id="start5" value="08:00" 
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-semibold">
+                                <input type="time" id="end5" value="17:00" 
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-semibold">
+                            </div>
+                        </div>
+
+                        <!-- Cumartesi -->
+                        <div class="day-card glass-card rounded-xl p-4 border-2 border-slate-200 opacity-50" id="card6">
+                            <div class="flex items-center gap-2 mb-3">
+                                <input type="checkbox" id="day6" onchange="toggleDayCard(6)" 
+                                       class="w-5 h-5 rounded accent-purple-600">
+                                <label for="day6" class="font-bold text-sm cursor-pointer">Cumartesi</label>
+                            </div>
+                            <div class="space-y-2">
+                                <input type="time" id="start6" value="08:00" 
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-semibold">
+                                <input type="time" id="end6" value="17:00" 
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-semibold">
+                            </div>
+                        </div>
+
+                        <!-- Pazar -->
+                        <div class="day-card glass-card rounded-xl p-4 border-2 border-slate-200 opacity-50" id="card7">
+                            <div class="flex items-center gap-2 mb-3">
+                                <input type="checkbox" id="day7" onchange="toggleDayCard(7)" 
+                                       class="w-5 h-5 rounded accent-purple-600">
+                                <label for="day7" class="font-bold text-sm cursor-pointer">Pazar</label>
+                            </div>
+                            <div class="space-y-2">
+                                <input type="time" id="start7" value="08:00" 
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-semibold">
+                                <input type="time" id="end7" value="17:00" 
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-semibold">
+                            </div>
+                        </div>
+
+                        <!-- Hızlı Ayarlar -->
+                        <div class="glass-card rounded-xl p-4 border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
+                            <div class="h-full flex flex-col justify-center gap-2">
+                                <p class="text-xs font-bold text-purple-800 mb-2">⚡ Hızlı Ayarlar</p>
+                                <button onclick="setPreset('weekday')" class="px-3 py-2 bg-white rounded-lg text-xs font-semibold hover:bg-purple-100 transition">
+                                    Pzt-Cum 08:00-17:00
+                                </button>
+                                <button onclick="setPreset('6day')" class="px-3 py-2 bg-white rounded-lg text-xs font-semibold hover:bg-purple-100 transition">
+                                    Pzt-Cmt 08:00-17:00
+                                </button>
+                                <button onclick="setPreset('everyday')" class="px-3 py-2 bg-white rounded-lg text-xs font-semibold hover:bg-purple-100 transition">
+                                    Her Gün 08:00-17:00
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- QR Oluştur Butonu -->
+                <button onclick="generateQR()" 
+                        class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white p-6 rounded-2xl font-bold text-xl shadow-2xl hover:shadow-purple-500/50 transition transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3">
+                    <i data-lucide="qr-code" class="w-8 h-8"></i>
+                    <span>Sayaç Simülasyonu Oluştur</span>
+                </button>
+
+                <!-- QR Sonuç -->
+                <div id="resultCard" class="hidden glass-card rounded-2xl p-8">
+                    <div class="text-center">
+                        <div class="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-full font-semibold mb-6">
+                            <i data-lucide="check-circle" class="w-5 h-5"></i>
+                            <span>Sayaç Başarıyla Oluşturuldu!</span>
+                        </div>
+                        <div id="qrcode" class="flex justify-center mb-6 p-6 bg-white rounded-2xl inline-block"></div>
+                        <p class="text-sm text-slate-600 mb-4">Bu QR kodu taratarak anlık kayıp sayacına ulaşabilirsiniz</p>
+                        <code id="linkText" class="block text-xs bg-slate-100 p-4 rounded-lg mb-4 break-all text-slate-600 font-mono">...</code>
+                        <a id="downloadBtn" download="optimizi_kayip.png" href="#" 
+                           class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold hover:shadow-lg transition">
+                            <i data-lucide="download" class="w-5 h-5"></i>
+                            QR Kodunu İndir
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        lucide.createIcons();
+        const now = new Date();
+        document.getElementById('installDate').valueAsDate = now;
+        
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mm = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('installTime').value = `${hh}:${mm}`;
+
+        // Gün kartı toggle
+        function toggleDayCard(day) {
+            const card = document.getElementById(`card${day}`);
+            const checkbox = document.getElementById(`day${day}`);
+            
+            if (checkbox.checked) {
+                card.classList.remove('opacity-50');
+                card.classList.add('active');
+            } else {
+                card.classList.add('opacity-50');
+                card.classList.remove('active');
+            }
+        }
+
+        // Tümünü seç/kaldır
+        function toggleAllDays() {
+            const allChecked = document.getElementById('day1').checked;
+            for (let i = 1; i <= 7; i++) {
+                document.getElementById(`day${i}`).checked = !allChecked;
+                toggleDayCard(i);
+            }
+        }
+
+        // Preset ayarlar
+        function setPreset(type) {
+            // Hepsini kapat
+            for (let i = 1; i <= 7; i++) {
+                document.getElementById(`day${i}`).checked = false;
+                document.getElementById(`start${i}`).value = '08:00';
+                document.getElementById(`end${i}`).value = '17:00';
+                toggleDayCard(i);
+            }
+            
+            // Preset'e göre aç
+            if (type === 'weekday') {
+                for (let i = 1; i <= 5; i++) {
+                    document.getElementById(`day${i}`).checked = true;
+                    toggleDayCard(i);
+                }
+            } else if (type === '6day') {
+                for (let i = 1; i <= 6; i++) {
+                    document.getElementById(`day${i}`).checked = true;
+                    toggleDayCard(i);
+                }
+            } else if (type === 'everyday') {
+                for (let i = 1; i <= 7; i++) {
+                    document.getElementById(`day${i}`).checked = true;
+                    toggleDayCard(i);
+                }
+            }
+        }
+
+        // İlk yükleme
+        for (let i = 1; i <= 7; i++) {
+            toggleDayCard(i);
+        }
+
+        // Önizleme hesapla
+        function calculatePreview() {
+            let rawVal = document.getElementById('totalValue').value;
+            rawVal = rawVal.replace(/\./g, '').replace(',', '.');
+            const totalVal = parseFloat(rawVal);
+            const wHours = parseFloat(document.getElementById('workHours').value) || 0;
+            const previewCard = document.getElementById('previewCard');
+
+            if (totalVal > 0 && wHours > 0) {
+                const hourlyLoss = totalVal / wHours;
+                const minutelyLoss = hourlyLoss / 60;
+                
+                document.getElementById('previewHour').innerText = hourlyLoss.toLocaleString('tr-TR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' TL';
+                document.getElementById('previewMin').innerText = minutelyLoss.toLocaleString('tr-TR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                
+                previewCard.classList.remove('hidden');
+            } else {
+                previewCard.classList.add('hidden');
+            }
+        }
+
+        function toggleManualFuel() {
+            const fuelSelect = document.getElementById('fuel').value;
+            const manualFields = document.getElementById('manualFuelFields');
+            if(fuelSelect === 'manual') {
+                manualFields.classList.remove('hidden');
+                document.getElementById('customFuelLabel').value = "Paçal Kömür";
+                document.getElementById('customFuelCo2').value = "0.36";
+            } else {
+                manualFields.classList.add('hidden');
+            }
+        }
+
+        function generateQR() {
+            const client = document.getElementById('client').value.trim();
+            const serial = document.getElementById('serial').value.trim();
+            let rawVal = document.getElementById('totalValue').value;
+            const uPrice = document.getElementById('unitPrice').value;
+            const wHours = document.getElementById('workHours').value;
+            const fuel = document.getElementById('fuel').value;
+            
+            const dateStr = document.getElementById('installDate').value; 
+            const timeStr = document.getElementById('installTime').value; 
+            const fullDateTime = `${dateStr}-${timeStr.replace(':', '-')}`; 
+
+            rawVal = rawVal.replace(/\./g, '').replace(',', '.');
+            const totalVal = parseFloat(rawVal);
+
+            if(!totalVal || !uPrice) { 
+                alert("❌ Lütfen kayıp tutarını ve birim fiyatı giriniz."); 
+                return; 
+            }
+
+            // Vardiyaları topla
+            const shifts = [];
+            for (let i = 1; i <= 7; i++) {
+                if (document.getElementById(`day${i}`).checked) {
+                    const start = document.getElementById(`start${i}`).value;
+                    const end = document.getElementById(`end${i}`).value;
+                    if (start && end) {
+                        shifts.push({ days: [i], start: start, end: end });
+                    }
+                }
+            }
+
+            if (shifts.length === 0) {
+                alert("❌ Lütfen en az bir çalışma günü seçin!");
+                return;
+            }
+
+            // Hesaplama
+            const secondsInWorkYear = wHours * 3600;
+            const burnPerSecond = totalVal / secondsInWorkYear;
+
+            const baseUrl = "https://optimizi.app/anliksayac.html";
+            let finalUrl = `${baseUrl}?c=${encodeURIComponent(client)}&s=${encodeURIComponent(serial)}&v=${totalVal}&up=${uPrice}&wh=${wHours}&f=${fuel}&d=${fullDateTime}&bps=${burnPerSecond.toFixed(6)}&shifts=${encodeURIComponent(JSON.stringify(shifts))}`;
+
+            if(fuel === 'manual') {
+                let cLabel = document.getElementById('customFuelLabel').value || 'Paçal Kömür';
+                const cUnit = document.getElementById('customFuelUnit').value || 'kg';
+                const cCo2 = document.getElementById('customFuelCo2').value || '0.36';
+                const cLhv = document.getElementById('customFuelLhv').value;
+                if(cLhv) { cLabel += ` (${cLhv} kcal)`; }
+                finalUrl += `&fl=${encodeURIComponent(cLabel)}&fu=${encodeURIComponent(cUnit)}&fc=${encodeURIComponent(cCo2)}`;
+            }
+
+            const resultCard = document.getElementById('resultCard');
+            resultCard.classList.remove('hidden');
+            resultCard.scrollIntoView({ behavior: 'smooth' });
+
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+
+            new QRCode(qrContainer, { 
+                text: finalUrl, 
+                width: 200, 
+                height: 200, 
+                colorDark : "#7c3aed", 
+                colorLight : "#ffffff", 
+                correctLevel : QRCode.CorrectLevel.H 
+            });
+
+            document.getElementById('linkText').innerText = finalUrl;
+            
+            setTimeout(() => { 
+                const img = qrContainer.querySelector("img");
+                if(img) {
+                    document.getElementById('downloadBtn').href = img.src;
+                    lucide.createIcons();
+                }
+            }, 200);
+        }
+    </script>
+</body>
+</html>
