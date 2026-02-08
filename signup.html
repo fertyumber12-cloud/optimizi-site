@@ -69,6 +69,74 @@
       border-radius: 2px;
       transition: all 0.3s ease;
     }
+    
+    /* Modal Styles */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      animation: fadeIn 0.3s ease;
+    }
+    .modal-overlay.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px;
+      max-width: 700px;
+      max-height: 80vh;
+      width: 90%;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      animation: slideUp 0.3s ease;
+    }
+    .modal-header {
+      padding: 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+      max-height: calc(80vh - 80px);
+      scrollbar-width: thin;
+      scrollbar-color: rgba(129, 140, 248, 0.3) rgba(15, 23, 42, 0.3);
+    }
+    .modal-body::-webkit-scrollbar {
+      width: 8px;
+    }
+    .modal-body::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.3);
+      border-radius: 4px;
+    }
+    .modal-body::-webkit-scrollbar-thumb {
+      background: rgba(129, 140, 248, 0.3);
+      border-radius: 4px;
+    }
+    .modal-body::-webkit-scrollbar-thumb:hover {
+      background: rgba(129, 140, 248, 0.5);
+    }
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   </style>
 </head>
 <body class="antialiased">
@@ -245,8 +313,8 @@
                 <label class="flex items-start gap-3 cursor-pointer text-slate-400 hover:text-white transition">
                     <input type="checkbox" id="termsCheckbox" class="mt-0.5 rounded border-white/10 bg-slate-800 text-indigo-600 focus:ring-indigo-500" required>
                     <span class="text-xs">
-                        <a href="#" class="text-indigo-400 hover:text-indigo-300 font-semibold">Kullanım Şartları</a>'nı ve 
-                        <a href="#" class="text-indigo-400 hover:text-indigo-300 font-semibold">Gizlilik Politikası</a>'nı okudum, kabul ediyorum.
+                        <a href="#" onclick="openModal('termsModal'); return false;" class="text-indigo-400 hover:text-indigo-300 font-semibold">Kullanım Şartları</a>'nı ve 
+                        <a href="#" onclick="openModal('privacyModal'); return false;" class="text-indigo-400 hover:text-indigo-300 font-semibold">Gizlilik Politikası</a>'nı okudum, kabul ediyorum.
                     </span>
                 </label>
             </div>
@@ -273,10 +341,155 @@
     </div>
   </div>
 
+  <!-- KULLANIM ŞARTLARI MODAL -->
+  <div id="termsModal" class="modal-overlay" onclick="closeModalOnOverlay(event, 'termsModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="text-2xl font-bold text-white">Kullanım Şartları</h2>
+        <button onclick="closeModal('termsModal')" class="text-slate-400 hover:text-white transition">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body text-slate-300 space-y-4 text-sm leading-relaxed">
+        <p class="text-xs text-slate-500 italic">Son Güncelleme: 8 Şubat 2025</p>
+        
+        <h3 class="text-lg font-bold text-white mt-6">1. Hizmetin Kapsamı</h3>
+        <p>Optimizi.App, endüstriyel enerji verimliliği hesaplama araçları sunan bir SaaS platformudur. Platform üzerinden ısı kaybı, ROI, yalıtım kalınlığı ve diğer enerji verimliliği hesaplamalarını yapabilirsiniz.</p>
+        
+        <h3 class="text-lg font-bold text-white mt-6">2. Kullanıcı Hesabı</h3>
+        <p>Platform kullanımı için kayıt olmanız gerekmektedir. Hesap bilgilerinizin güvenliğinden siz sorumlusunuz. Hesabınızın yetkisiz kullanımını derhal bize bildirmelisiniz.</p>
+        
+        <h3 class="text-lg font-bold text-white mt-6">3. Hesaplama Sonuçları</h3>
+        <p>Platformumuzda yapılan tüm hesaplamalar ISO 12241, ASTM C680 ve VDI 2055 gibi mühendislik standartlarına dayanmaktadır. Ancak, hesaplama sonuçları bilgilendirme amaçlıdır ve profesyonel mühendislik onayı gerektiren durumlarda yetkili kişilerle çalışılması önerilir.</p>
+        
+        <h3 class="text-lg font-bold text-white mt-6">4. Fikri Mülkiyet Hakları</h3>
+        <p>Platform üzerindeki tüm içerik, yazılım, tasarım ve hesaplama algoritmaları Optimizi Inc.'e aittir. İzinsiz kopyalama, dağıtma veya ticari kullanım yasaktır.</p>
+        
+        <h3 class="text-lg font-bold text-white mt-6">5. Abonelik ve Ödeme</h3>
+        <p>Seçtiğiniz pakete göre aylık veya yıllık ödeme yaparsınız. Ödemeler otomatik olarak yenilenir. İptal talebiniz bir sonraki fatura döneminde geçerli olur.</p>
+        
+        <h3 class="text-lg font-bold text-white mt-6">6. Hizmetin Durdurulması</h3>
+        <p>Optimizi.App, kullanım şartlarını ihlal eden kullanıcıların hesaplarını askıya alma veya sonlandırma hakkını saklı tutar.</p>
+        
+        <h3 class="text-lg font-bold text-white mt-6">7. Sorumluluk Sınırlaması</h3>
+        <p>Platformumuz "olduğu gibi" sunulmaktadır. Hesaplama sonuçlarının kullanımından doğacak zararlardan Optimizi Inc. sorumlu tutulamaz.</p>
+        
+        <h3 class="text-lg font-bold text-white mt-6">8. Değişiklikler</h3>
+        <p>Bu kullanım şartları zaman zaman güncellenebilir. Önemli değişiklikler e-posta ile bildirilecektir.</p>
+        
+        <div class="mt-8 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
+          <p class="text-xs text-indigo-300">
+            <strong>İletişim:</strong> Sorularınız için <a href="mailto:contact@optimizi.app" class="underline">contact@optimizi.app</a> adresinden bize ulaşabilirsiniz.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GİZLİLİK POLİTİKASI MODAL -->
+  <div id="privacyModal" class="modal-overlay" onclick="closeModalOnOverlay(event, 'privacyModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="text-2xl font-bold text-white">Gizlilik Politikası</h2>
+        <button onclick="closeModal('privacyModal')" class="text-slate-400 hover:text-white transition">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body text-slate-300 space-y-4 text-sm leading-relaxed">
+        <p class="text-xs text-slate-500 italic">Son Güncelleme: 8 Şubat 2025</p>
+        <p>Optimizi Inc. olarak kişisel verilerinizin gizliliğini korumayı taahhüt ediyoruz. Bu politika, hangi verileri topladığımızı, nasıl kullandığımızı ve haklarınızı açıklamaktadır.</p>
+        
+        <h3 class="text-lg font-bold text-white mt-6">1. Toplanan Veriler</h3>
+        <p><strong>Hesap Bilgileri:</strong> Ad, soyad, e-posta adresi, şirket adı</p>
+        <p><strong>Hesaplama Verileri:</strong> Yaptığınız hesaplamalar, girdiğiniz parametreler ve sonuçlar</p>
+        <p><strong>Teknik Veriler:</strong> IP adresi, tarayıcı bilgisi, kullanım istatistikleri</p>
+        
+        <h3 class="text-lg font-bold text-white mt-6">2. Verilerin Kullanım Amacı</h3>
+        <ul class="list-disc list-inside space-y-2 ml-4">
+          <li>Hesabınızı oluşturmak ve yönetmek</li>
+          <li>Hesaplama geçmişinizi saklamak</li>
+          <li>Size teknik destek sağlamak</li>
+          <li>Platformu geliştirmek ve iyileştirmek</li>
+          <li>Yasal yükümlülükleri yerine getirmek</li>
+        </ul>
+        
+        <h3 class="text-lg font-bold text-white mt-6">3. Veri Güvenliği</h3>
+        <p>Verileriniz şifrelenmiş sunucularda saklanır. Supabase altyapısını kullanarak endüstri standardı güvenlik önlemleri uygularız. Şifreleriniz kriptografik hash algoritmaları ile korunur.</p>
+        
+        <h3 class="text-lg font-bold text-white mt-6">4. Veri Paylaşımı</h3>
+        <p>Kişisel verilerinizi üçüncü taraflarla <strong>paylaşmıyoruz</strong>, satmıyoruz veya kiralamıyoruz. Aşağıdaki durumlar haricinde:</p>
+        <ul class="list-disc list-inside space-y-2 ml-4">
+          <li>Yasal zorunluluk durumunda (mahkeme kararı, resmi talep)</li>
+          <li>Hizmet sağlayıcılarımız (Supabase, sunucu sağlayıcıları) - sadece hizmet sunumu için</li>
+        </ul>
+        
+        <h3 class="text-lg font-bold text-white mt-6">5. KVKK Uyarınca Haklarınız</h3>
+        <p>6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamında:</p>
+        <ul class="list-disc list-inside space-y-2 ml-4">
+          <li>Verilerinizin işlenip işlenmediğini öğrenme</li>
+          <li>İşlenmişse bilgi talep etme</li>
+          <li>Verilerin düzeltilmesini isteme</li>
+          <li>Verilerin silinmesini veya yok edilmesini isteme</li>
+          <li>İşleme faaliyetine itiraz etme</li>
+        </ul>
+        
+        <h3 class="text-lg font-bold text-white mt-6">6. Çerezler (Cookies)</h3>
+        <p>Platformumuz, kullanıcı deneyimini iyileştirmek için çerezler kullanır. Oturum çerezleri, giriş durumunuzu saklar. İsterseniz tarayıcı ayarlarınızdan çerezleri devre dışı bırakabilirsiniz.</p>
+        
+        <h3 class="text-lg font-bold text-white mt-6">7. Veri Saklama Süresi</h3>
+        <p>Hesap bilgileriniz, hesabınız aktif olduğu sürece saklanır. Hesap silme talebinde bulunduğunuzda, verileriniz 30 gün içinde sistemden kalıcı olarak silinir.</p>
+        
+        <h3 class="text-lg font-bold text-white mt-6">8. İletişim</h3>
+        <p>Gizlilik ile ilgili sorularınız veya haklarınızı kullanmak için:</p>
+        <div class="mt-4 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
+          <p class="text-xs text-indigo-300">
+            <strong>E-posta:</strong> <a href="mailto:contact@optimizi.app" class="underline">contact@optimizi.app</a><br>
+            <strong>Adres:</strong> Optimizi Inc., [Adresiniz buraya gelecek]
+          </p>
+        </div>
+        
+        <div class="mt-6 p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl">
+          <p class="text-xs text-orange-300">
+            <strong>Not:</strong> Bu politika örnek amaçlıdır. Gerçek kullanım için mutlaka bir hukuk uzmanına danışmanız önerilir.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Supabase Config -->
   <script src="supabase-config.js"></script>
   
   <script>
+    // Modal Functions
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add('active');
+      document.body.style.overflow = 'hidden'; // Prevent background scroll
+    }
+    
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+      document.body.style.overflow = 'auto'; // Restore scroll
+    }
+    
+    function closeModalOnOverlay(event, modalId) {
+      if (event.target.id === modalId) {
+        closeModal(modalId);
+      }
+    }
+    
+    // Close modal on ESC key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeModal('termsModal');
+        closeModal('privacyModal');
+      }
+    });
+    
     // Password Toggle Function
     function togglePassword(inputId, eyeId, eyeOffId) {
       const passwordInput = document.getElementById(inputId);
