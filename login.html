@@ -202,8 +202,17 @@
     </div>
   </div>
 
-  <!-- Supabase Config -->
-  <script src="supabase-config.js"></script>
+  <!-- Supabase Config - Inline -->
+  <script>
+    // Supabase Configuration
+    const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
+    
+    // Supabase client'ı başlat
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    console.log('✅ Supabase bağlantısı kuruldu');
+  </script>
   
   <script>
     // Password Toggle Function
@@ -297,7 +306,7 @@
       
       try {
         // Supabase ile giriş yap
-        const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
           email: email,
           password: password,
         });
@@ -338,7 +347,7 @@
     document.getElementById('passwordInput').addEventListener('input', hideError);
     
     // Check if user is already logged in
-    window.supabaseClient.auth.getSession().then(({ data: { session } }) => {
+    supabaseClient.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         // Already logged in, redirect to dashboard
         window.location.href = 'dashboard.html';
