@@ -7,6 +7,23 @@
 <meta name="description" content="ISO 12241 standardına göre boru, vana ve tank yüzeylerinden ısı kaybını hesaplayın.">
 
 <link rel="icon" type="image/png" href="favicon.png">
+  <!-- AUTH GUARD - Sayfa Koruma -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/auth-guard.js"></script>
+    
+    <!-- Flash Problemi Çözümü -->
+    <style>
+      body {
+        opacity: 0;
+        visibility: hidden;
+      }
+      body.auth-checked {
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 0.3s ease;
+      }
+    </style>
+</head>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -2015,4 +2032,5 @@
   <script src="guard.js?v=2"></script>
 </body>
 </html>
+
 
