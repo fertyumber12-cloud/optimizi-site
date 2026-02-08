@@ -45,7 +45,8 @@ function redirectToLogin() {
   sessionStorage.setItem('redirectAfterLogin', currentPath);
   
   // Login sayfasına yönlendir
-  window.location.href = '/login.html';
+  // replace kullanarak history'den sil (geri tuşu ile dönemesin)
+  window.location.replace('/login');
 }
 
 // Çıkış fonksiyonu (tüm sayfalarda kullanılabilir)
@@ -57,12 +58,54 @@ async function logout() {
     alert('Çıkış yapılırken bir hata oluştu.');
   } else {
     console.log('✅ Çıkış yapıldı');
-    window.location.href = '/login.html';
+    window.location.replace('/login');
+  }
+}
+
+// Sayfa görünür olduğunda tekrar kontrol et
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden) {
+    // Sayfa tekrar görünür oldu, auth kontrolü yap
+    checkAuthenticationSync();
+  }
+});
+
+// Sayfa focus aldığında tekrar kontrol et (geri tuşu için)
+window.addEventListener('focus', function() {
+  checkAuthenticationSync();
+});
+
+// Senkron auth kontrolü (hızlı kontrol)
+async function checkAuthenticationSync() {
+  try {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    
+    if (!session) {
+      console.log('❌ Oturum bulunamadı - yönlendiriliyor...');
+      redirectToLogin();
+    }
+  } catch (err) {
+    console.error('Auth check error:', err);
+    redirectToLogin();
   }
 }
 
 // Global olarak erişilebilir yap
 window.logout = logout;
 window.supabaseClient = supabaseClient;
+
+// Logo tıklama yönlendirmesi için helper fonksiyon
+window.handleLogoClick = function(event) {
+  // Eğer currentUser varsa (giriş yapmışsa)
+  if (window.currentUser) {
+    // Dashboard'a git (varsayılan href zaten dashboard)
+    return true;
+  } else {
+    // Giriş yapmamış, ana sayfaya git
+    event.preventDefault();
+    window.location.href = '/index.html';
+    return false;
+  }
+};
 
 console.log('🔐 Auth Guard aktif');
