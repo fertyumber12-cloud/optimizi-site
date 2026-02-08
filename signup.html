@@ -381,7 +381,7 @@
         
         <div class="mt-8 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
           <p class="text-xs text-indigo-300">
-            <strong>İletişim:</strong> Sorularınız için <a href="mailto:contact@optimizi.app" class="underline">contact@optimizi.app</a> adresinden bize ulaşabilirsiniz.
+            <strong>İletişim:</strong> Sorularınız için <a href="mailto:destek@optimizi.app" class="underline">destek@optimizi.app</a> adresinden bize ulaşabilirsiniz.
           </p>
         </div>
       </div>
@@ -447,8 +447,8 @@
         <p>Gizlilik ile ilgili sorularınız veya haklarınızı kullanmak için:</p>
         <div class="mt-4 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
           <p class="text-xs text-indigo-300">
-            <strong>E-posta:</strong> <a href="mailto:contact@optimizi.app" class="underline">contact@optimizi.app</a><br>
-            <strong>Adres:</strong> Optimizi Inc.
+            <strong>E-posta:</strong> <a href="mailto:kvkk@optimizi.app" class="underline">kvkk@optimizi.app</a><br>
+            <strong>Adres:</strong> Optimizi Inc., [Adresiniz buraya gelecek]
           </p>
         </div>
         
@@ -660,12 +660,27 @@
           console.error('Signup error:', error);
         } else {
           console.log('✅ Kayıt başarılı:', data);
-          showSuccess();
           
-          // 2 saniye sonra login sayfasına yönlendir
+          // Email doğrulama mesajı göster
+          const successMessage = document.getElementById('successMessage');
+          const successText = document.getElementById('successText');
+          
+          successText.innerHTML = `
+            <strong>🎉 Kayıt Başarılı!</strong><br>
+            <span class="text-sm">Email adresinize bir doğrulama linki gönderdik. Lütfen email kutunuzu kontrol edin ve linke tıklayarak hesabınızı aktifleştirin.</span><br>
+            <span class="text-xs text-green-200/60 mt-2 block">Not: Email bulunamıyorsa spam klasörünü kontrol edin.</span>
+          `;
+          successMessage.classList.remove('hidden');
+          
+          setLoading(false);
+          
+          // Form'u temizle
+          document.getElementById('signupForm').reset();
+          
+          // 8 saniye sonra login sayfasına yönlendir
           setTimeout(() => {
             window.location.href = 'login.html';
-          }, 2000);
+          }, 8000);
         }
       } catch (err) {
         setLoading(false);
