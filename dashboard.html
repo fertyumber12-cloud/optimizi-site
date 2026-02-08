@@ -10,7 +10,7 @@
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
+<link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -117,7 +117,7 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
       <!-- Card 1 -->
       <div class="glass-card p-6 rounded-2xl">
         <div class="flex items-center gap-4">
@@ -136,6 +136,21 @@
       <!-- Card 2 -->
       <div class="glass-card p-6 rounded-2xl">
         <div class="flex items-center gap-4">
+          <div class="p-3 bg-green-500/20 rounded-xl">
+            <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+            </svg>
+          </div>
+          <div>
+            <p class="text-3xl font-bold text-white" id="monthCalc">0</p>
+            <p class="text-sm text-slate-400">Bu Ay</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="glass-card p-6 rounded-2xl">
+        <div class="flex items-center gap-4">
           <div class="p-3 bg-orange-500/20 rounded-xl">
             <svg class="w-8 h-8 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
@@ -148,19 +163,169 @@
         </div>
       </div>
 
-      <!-- Card 3 -->
+      <!-- Card 4 -->
       <div class="glass-card p-6 rounded-2xl">
         <div class="flex items-center gap-4">
-          <div class="p-3 bg-green-500/20 rounded-xl">
-            <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="p-3 bg-purple-500/20 rounded-xl">
+            <svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
           </div>
           <div>
-            <p class="text-3xl font-bold text-white">Aktif</p>
-            <p class="text-sm text-slate-400">Hesap Durumu</p>
+            <p class="text-3xl font-bold text-white">Pro</p>
+            <p class="text-sm text-slate-400">Paket</p>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Notifications / Alerts -->
+    <div class="mb-12" id="notificationsSection">
+      <div class="glass-card p-6 rounded-2xl border-l-4 border-indigo-500">
+        <div class="flex items-start gap-4">
+          <div class="p-2 bg-indigo-500/20 rounded-lg mt-1">
+            <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-lg font-bold text-white mb-1">Hoşgeldiniz! 🎉</h3>
+            <p class="text-sm text-slate-300">Hesaplama araçlarımızla enerji verimliliği analizlerinizi profesyonel standartlarda yapabilirsiniz. Tüm hesaplamalarınız otomatik olarak kaydedilir.</p>
+          </div>
+          <button onclick="closeNotification()" class="text-slate-400 hover:text-white transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Two Column Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+      
+      <!-- Left Column - Recent Calculations (2/3 width) -->
+      <div class="lg:col-span-2">
+        <div class="glass-card p-8 rounded-2xl">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-white">Son Hesaplamalar</h2>
+            <a href="endustriyel-enerji-kaybi-hesaplama.html" class="text-sm text-indigo-400 hover:text-indigo-300 font-semibold transition">
+              Tümünü Gör →
+            </a>
+          </div>
+          
+          <!-- Recent Calculations List -->
+          <div id="recentCalculations" class="space-y-4">
+            <!-- Empty State -->
+            <div class="text-center py-12">
+              <div class="inline-flex items-center justify-center w-16 h-16 bg-slate-700/30 rounded-full mb-4">
+                <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                </svg>
+              </div>
+              <h3 class="text-lg font-bold text-white mb-2">Henüz hesaplama yapmadınız</h3>
+              <p class="text-sm text-slate-400 mb-6">İlk hesaplamanızı yapmak için aşağıdaki araçlardan birini seçin</p>
+              <a href="endustriyel-enerji-kaybi-hesaplama.html" class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Hesaplama Yap
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column - Activity & Stats (1/3 width) -->
+      <div class="space-y-6">
+        
+        <!-- Profile Completion -->
+        <div class="glass-card p-6 rounded-2xl">
+          <h3 class="text-lg font-bold text-white mb-4">Profil Tamamlama</h3>
+          <div class="mb-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm text-slate-400">Tamamlanma</span>
+              <span class="text-sm font-bold text-white" id="profilePercent">60%</span>
+            </div>
+            <div class="w-full bg-slate-700/50 rounded-full h-2">
+              <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full transition-all duration-500" style="width: 60%"></div>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <div class="flex items-center gap-2 text-sm">
+              <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span class="text-slate-300">Hesap oluşturuldu</span>
+            </div>
+            <div class="flex items-center gap-2 text-sm">
+              <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span class="text-slate-300">İsim bilgisi eklendi</span>
+            </div>
+            <div class="flex items-center gap-2 text-sm">
+              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+              <span class="text-slate-500">Şirket adresi ekle</span>
+            </div>
+            <div class="flex items-center gap-2 text-sm">
+              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+              <span class="text-slate-500">İlk hesaplama yap</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="glass-card p-6 rounded-2xl">
+          <h3 class="text-lg font-bold text-white mb-4">Son Aktivite</h3>
+          <div class="space-y-4">
+            <div class="flex items-start gap-3">
+              <div class="p-1.5 bg-green-500/20 rounded-lg mt-0.5">
+                <svg class="w-3.5 h-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm text-white font-semibold">Hesap oluşturuldu</p>
+                <p class="text-xs text-slate-500">Az önce</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Most Used Tools -->
+        <div class="glass-card p-6 rounded-2xl">
+          <h3 class="text-lg font-bold text-white mb-4">Popüler Araçlar</h3>
+          <div class="space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="flex-1 flex items-center gap-3">
+                <div class="p-2 bg-indigo-500/20 rounded-lg">
+                  <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                  </svg>
+                </div>
+                <span class="text-sm text-white">ROI Hesaplama</span>
+              </div>
+              <span class="text-xs text-slate-500">En çok kullanılan</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="flex-1 flex items-center gap-3">
+                <div class="p-2 bg-orange-500/20 rounded-lg">
+                  <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                  </svg>
+                </div>
+                <span class="text-sm text-white">Saha Analizi</span>
+              </div>
+              <span class="text-xs text-slate-500">Popüler</span>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -178,8 +343,8 @@
               </svg>
             </div>
             <div class="flex-1">
-              <h3 class="text-lg font-bold text-white mb-2 group-hover:text-indigo-400 transition">Enerji Kaybı Hesaplama</h3>
-              <p class="text-sm text-slate-400">Endüstriyel tesislerdeki ısı kayıplarını hesaplayın</p>
+              <h3 class="text-lg font-bold text-white mb-2 group-hover:text-indigo-400 transition">Saha Kayıp Analizi</h3>
+              <p class="text-sm text-slate-400">Tesisinizdeki ısı kayıplarını sahada analiz edin</p>
             </div>
           </div>
         </a>
@@ -199,32 +364,32 @@
           </div>
         </a>
 
-        <!-- Tool 3: Thickness -->
-        <a href="tool/thickness.html" class="glass-card p-6 rounded-2xl block group">
+        <!-- Tool 3: Yalıtım Performans -->
+        <a href="tool/yalitim-performans.html" class="glass-card p-6 rounded-2xl block group">
           <div class="flex items-start gap-4">
             <div class="p-3 bg-orange-500/20 rounded-xl group-hover:bg-orange-500/30 transition">
               <svg class="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
               </svg>
             </div>
             <div class="flex-1">
-              <h3 class="text-lg font-bold text-white mb-2 group-hover:text-orange-400 transition">Yalıtım Kalınlığı</h3>
-              <p class="text-sm text-slate-400">Ekonomik yalıtım kalınlığını belirleyin</p>
+              <h3 class="text-lg font-bold text-white mb-2 group-hover:text-orange-400 transition">Yalıtım Performans</h3>
+              <p class="text-sm text-slate-400">Mevcut yalıtımın performansını analiz edin</p>
             </div>
           </div>
         </a>
 
-        <!-- Tool 4: Air Leak -->
-        <a href="tool/air.html" class="glass-card p-6 rounded-2xl block group">
+        <!-- Tool 4: Yoğuşma Hesabı -->
+        <a href="tool/yogusma-hesaplama.html" class="glass-card p-6 rounded-2xl block group">
           <div class="flex items-start gap-4">
             <div class="p-3 bg-purple-500/20 rounded-xl group-hover:bg-purple-500/30 transition">
               <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
               </svg>
             </div>
             <div class="flex-1">
-              <h3 class="text-lg font-bold text-white mb-2 group-hover:text-purple-400 transition">Hava Kaçağı</h3>
-              <p class="text-sm text-slate-400">Basınçlı hava kaçağı maliyetlerini hesaplayın</p>
+              <h3 class="text-lg font-bold text-white mb-2 group-hover:text-purple-400 transition">Yoğuşma Hesabı</h3>
+              <p class="text-sm text-slate-400">Yoğuşma riskini değerlendirin ve önleyin</p>
             </div>
           </div>
         </a>
@@ -303,6 +468,11 @@
   </script>
   
   <script>
+    // Close notification
+    function closeNotification() {
+      document.getElementById('notificationsSection').style.display = 'none';
+    }
+    
     // Check authentication and load user data
     async function checkAuth() {
       const { data: { session }, error } = await supabaseClient.auth.getSession();
