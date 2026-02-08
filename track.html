@@ -173,57 +173,12 @@
 
         document.getElementById('startDate').innerText = `${day} ${month} ${year} ${hour}:${minute}`;
 
-        // --- ÇALIŞMA SAATLERİ KONTROLÜ (GERİYE UYUMLU) ---
-        const shiftsParam = params.get('shifts');
-        let shifts = [];
-        let hasShifts = false;
-        
-        if (shiftsParam) {
-            try {
-                shifts = JSON.parse(decodeURIComponent(shiftsParam));
-                hasShifts = true;
-            } catch(e) {
-                console.error('Vardiya parse hatası:', e);
-            }
-        }
-        
-        function isWorkingHours(currentDate) {
-            // Eski linkler için: shifts yoksa 7/24 çalış
-            if (!hasShifts) {
-                return true;
-            }
-            
-            // Yeni linkler için: vardiya kontrolü
-            const dayOfWeek = currentDate.getDay() === 0 ? 7 : currentDate.getDay();
-            const currentMinutes = currentDate.getHours() * 60 + currentDate.getMinutes();
-            
-            // Herhangi bir vardiyada mı?
-            for (const shift of shifts) {
-                if (!shift.days.includes(dayOfWeek)) continue;
-                
-                const [startHour, startMin] = shift.start.split(':').map(n => parseInt(n));
-                const [endHour, endMin] = shift.end.split(':').map(n => parseInt(n));
-                
-                const startMinutes = startHour * 60 + startMin;
-                const endMinutes = endHour * 60 + endMin;
-                
-                if (currentMinutes >= startMinutes && currentMinutes <= endMinutes) {
-                    return true;
-                }
-            }
-            
-            return false;
-        }
-
         // --- SAYAÇ MOTORU ---
         const counterEl = document.getElementById('counter');
         const elapsedEl = document.getElementById('elapsedTime');
-        let totalWorkSeconds = 0;
-        let lastUpdateTime = Date.now();
 
         function updateCounter() {
             const now = new Date();
-            const currentTime = Date.now();
             const diffSeconds = (now - startMoment) / 1000;
             
             if (diffSeconds < 0) {
@@ -233,18 +188,7 @@
                 return;
             }
 
-            // Çalışma saati kontrolü
-            const isWorking = isWorkingHours(now);
-            
-            // Çalışma saatindeyse sayacı ilerlet
-            if (isWorking) {
-                if (currentTime - lastUpdateTime >= 1000) {
-                    totalWorkSeconds += 1;
-                    lastUpdateTime = currentTime;
-                }
-            }
-
-            const currentLoss = totalWorkSeconds * burnPerSecond;
+            const currentLoss = diffSeconds * burnPerSecond;
 
             counterEl.innerText = currentLoss.toLocaleString('tr-TR', {
                 minimumFractionDigits: 4,
