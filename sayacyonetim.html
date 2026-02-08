@@ -82,63 +82,92 @@
             
             <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
                 <label class="text-[10px] font-bold text-slate-600 uppercase block mb-3">📅 Haftalık Vardiya Planı</label>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div class="grid grid-cols-1 xl:grid-cols-[1fr_auto] gap-4">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     <div class="bg-white p-2 rounded-lg border border-slate-200">
                         <label class="flex items-center gap-1 mb-1.5 cursor-pointer">
-                            <input type="checkbox" id="day1" checked class="rounded text-red-600">
+                            <input type="checkbox" id="day1" checked onchange="calculateTotalHours()" class="rounded text-red-600">
                             <span class="text-[10px] font-bold text-slate-700">Pzt</span>
                         </label>
-                        <input type="time" id="start1" value="08:00" class="w-full text-[10px] px-2 py-1 mb-1 rounded border border-slate-300">
-                        <input type="time" id="end1" value="17:00" class="w-full text-[10px] px-2 py-1 rounded border border-slate-300">
+                        <input type="time" id="start1" value="08:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 mb-1 rounded border border-slate-300">
+                        <input type="time" id="end1" value="17:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 rounded border border-slate-300">
                     </div>
                     <div class="bg-white p-2 rounded-lg border border-slate-200">
                         <label class="flex items-center gap-1 mb-1.5 cursor-pointer">
-                            <input type="checkbox" id="day2" checked class="rounded text-red-600">
+                            <input type="checkbox" id="day2" checked onchange="calculateTotalHours()" class="rounded text-red-600">
                             <span class="text-[10px] font-bold text-slate-700">Sal</span>
                         </label>
-                        <input type="time" id="start2" value="08:00" class="w-full text-[10px] px-2 py-1 mb-1 rounded border border-slate-300">
-                        <input type="time" id="end2" value="17:00" class="w-full text-[10px] px-2 py-1 rounded border border-slate-300">
+                        <input type="time" id="start2" value="08:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 mb-1 rounded border border-slate-300">
+                        <input type="time" id="end2" value="17:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 rounded border border-slate-300">
                     </div>
                     <div class="bg-white p-2 rounded-lg border border-slate-200">
                         <label class="flex items-center gap-1 mb-1.5 cursor-pointer">
-                            <input type="checkbox" id="day3" checked class="rounded text-red-600">
+                            <input type="checkbox" id="day3" checked onchange="calculateTotalHours()" class="rounded text-red-600">
                             <span class="text-[10px] font-bold text-slate-700">Çar</span>
                         </label>
-                        <input type="time" id="start3" value="08:00" class="w-full text-[10px] px-2 py-1 mb-1 rounded border border-slate-300">
-                        <input type="time" id="end3" value="17:00" class="w-full text-[10px] px-2 py-1 rounded border border-slate-300">
+                        <input type="time" id="start3" value="08:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 mb-1 rounded border border-slate-300">
+                        <input type="time" id="end3" value="17:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 rounded border border-slate-300">
                     </div>
                     <div class="bg-white p-2 rounded-lg border border-slate-200">
                         <label class="flex items-center gap-1 mb-1.5 cursor-pointer">
-                            <input type="checkbox" id="day4" checked class="rounded text-red-600">
+                            <input type="checkbox" id="day4" checked onchange="calculateTotalHours()" class="rounded text-red-600">
                             <span class="text-[10px] font-bold text-slate-700">Per</span>
                         </label>
-                        <input type="time" id="start4" value="08:00" class="w-full text-[10px] px-2 py-1 mb-1 rounded border border-slate-300">
-                        <input type="time" id="end4" value="17:00" class="w-full text-[10px] px-2 py-1 rounded border border-slate-300">
+                        <input type="time" id="start4" value="08:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 mb-1 rounded border border-slate-300">
+                        <input type="time" id="end4" value="17:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 rounded border border-slate-300">
                     </div>
                     <div class="bg-white p-2 rounded-lg border border-slate-200">
                         <label class="flex items-center gap-1 mb-1.5 cursor-pointer">
-                            <input type="checkbox" id="day5" checked class="rounded text-red-600">
+                            <input type="checkbox" id="day5" checked onchange="calculateTotalHours()" class="rounded text-red-600">
                             <span class="text-[10px] font-bold text-slate-700">Cum</span>
                         </label>
-                        <input type="time" id="start5" value="08:00" class="w-full text-[10px] px-2 py-1 mb-1 rounded border border-slate-300">
-                        <input type="time" id="end5" value="17:00" class="w-full text-[10px] px-2 py-1 rounded border border-slate-300">
+                        <input type="time" id="start5" value="08:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 mb-1 rounded border border-slate-300">
+                        <input type="time" id="end5" value="17:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 rounded border border-slate-300">
                     </div>
                     <div class="bg-white p-2 rounded-lg border border-slate-200">
                         <label class="flex items-center gap-1 mb-1.5 cursor-pointer">
-                            <input type="checkbox" id="day6" class="rounded text-red-600">
+                            <input type="checkbox" id="day6" onchange="calculateTotalHours()" class="rounded text-red-600">
                             <span class="text-[10px] font-bold text-slate-700">Cmt</span>
                         </label>
-                        <input type="time" id="start6" value="08:00" class="w-full text-[10px] px-2 py-1 mb-1 rounded border border-slate-300">
-                        <input type="time" id="end6" value="17:00" class="w-full text-[10px] px-2 py-1 rounded border border-slate-300">
+                        <input type="time" id="start6" value="08:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 mb-1 rounded border border-slate-300">
+                        <input type="time" id="end6" value="17:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 rounded border border-slate-300">
                     </div>
                     <div class="bg-white p-2 rounded-lg border border-slate-200">
                         <label class="flex items-center gap-1 mb-1.5 cursor-pointer">
-                            <input type="checkbox" id="day7" class="rounded text-red-600">
+                            <input type="checkbox" id="day7" onchange="calculateTotalHours()" class="rounded text-red-600">
                             <span class="text-[10px] font-bold text-slate-700">Paz</span>
                         </label>
-                        <input type="time" id="start7" value="08:00" class="w-full text-[10px] px-2 py-1 mb-1 rounded border border-slate-300">
-                        <input type="time" id="end7" value="17:00" class="w-full text-[10px] px-2 py-1 rounded border border-slate-300">
+                        <input type="time" id="start7" value="08:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 mb-1 rounded border border-slate-300">
+                        <input type="time" id="end7" value="17:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 rounded border border-slate-300">
                     </div>
+                </div>
+                
+                <!-- Toplam Saat Hesaplama Paneli -->
+                <div class="bg-white p-4 rounded-xl border-2 border-red-200">
+                    <div class="text-center mb-3">
+                        <p class="text-[9px] font-bold text-slate-500 uppercase mb-1">Toplam Yıllık Çalışma</p>
+                        <div class="text-3xl font-black text-red-600" id="calculatedHours">2340</div>
+                        <p class="text-[10px] font-bold text-slate-600">Saat / Yıl</p>
+                    </div>
+                    <div class="border-t border-slate-200 pt-3 space-y-2">
+                        <div class="flex justify-between text-[9px]">
+                            <span class="text-slate-500">Haftalık:</span>
+                            <span class="font-bold text-slate-700" id="weeklyHours">45</span>
+                        </div>
+                        <div class="flex justify-between text-[9px]">
+                            <span class="text-slate-500">Günlük Ort:</span>
+                            <span class="font-bold text-slate-700" id="dailyAvg">9.0</span>
+                        </div>
+                        <div class="flex justify-between text-[9px]">
+                            <span class="text-slate-500">Aktif Gün:</span>
+                            <span class="font-bold text-slate-700" id="activeDays">5</span>
+                        </div>
+                    </div>
+                    <div id="hoursDiff" class="mt-3 p-2 rounded-lg bg-yellow-50 border border-yellow-200 hidden">
+                        <p class="text-[9px] text-yellow-700 text-center font-bold"></p>
+                    </div>
+                </div>
+                
                 </div>
             </div>
 
@@ -206,6 +235,68 @@
         const hh = String(now.getHours()).padStart(2, '0');
         const mm = String(now.getMinutes()).padStart(2, '0');
         document.getElementById('installTime').value = `${hh}:${mm}`;
+
+        // Vardiya toplam saat hesaplama
+        function calculateTotalHours() {
+            let totalWeeklyHours = 0;
+            let activeDayCount = 0;
+            
+            for (let i = 1; i <= 7; i++) {
+                const checkbox = document.getElementById(`day${i}`);
+                if (!checkbox.checked) continue;
+                
+                activeDayCount++;
+                
+                const start = document.getElementById(`start${i}`).value;
+                const end = document.getElementById(`end${i}`).value;
+                
+                if (!start || !end) continue;
+                
+                const [sh, sm] = start.split(':').map(n => parseInt(n));
+                const [eh, em] = end.split(':').map(n => parseInt(n));
+                
+                const dailyHours = ((eh * 60 + em) - (sh * 60 + sm)) / 60;
+                totalWeeklyHours += dailyHours;
+            }
+            
+            const yearlyHours = Math.round(totalWeeklyHours * 52);
+            const dailyAvg = activeDayCount > 0 ? (totalWeeklyHours / activeDayCount).toFixed(1) : 0;
+            
+            // Göster
+            document.getElementById('calculatedHours').innerText = yearlyHours.toLocaleString('tr-TR');
+            document.getElementById('weeklyHours').innerText = totalWeeklyHours.toFixed(1) + ' saat';
+            document.getElementById('dailyAvg').innerText = dailyAvg + ' saat';
+            document.getElementById('activeDays').innerText = activeDayCount + ' gün';
+            
+            // Hedef ile karşılaştır
+            const targetHours = parseFloat(document.getElementById('workHours').value) || 0;
+            const diffElement = document.getElementById('hoursDiff');
+            
+            if (targetHours > 0) {
+                const diff = yearlyHours - targetHours;
+                const diffP = document.querySelector('#hoursDiff p');
+                
+                if (Math.abs(diff) < 50) {
+                    diffElement.classList.add('hidden');
+                } else {
+                    diffElement.classList.remove('hidden');
+                    diffElement.className = 'mt-3 p-2 rounded-lg';
+                    
+                    if (diff > 0) {
+                        diffElement.classList.add('bg-orange-50', 'border', 'border-orange-200');
+                        diffP.className = 'text-[9px] text-orange-700 text-center font-bold';
+                        diffP.innerText = `⚠️ Hedeften ${diff} saat fazla`;
+                    } else {
+                        diffElement.classList.add('bg-red-50', 'border', 'border-red-200');
+                        diffP.className = 'text-[9px] text-red-700 text-center font-bold';
+                        diffP.innerText = `⚠️ Hedeften ${Math.abs(diff)} saat eksik`;
+                    }
+                }
+            }
+        }
+
+        // Sayfa yüklendiğinde hesapla
+        calculateTotalHours();
 
         // Canlı Hesaplama Fonksiyonu
         function calculatePreview() {
