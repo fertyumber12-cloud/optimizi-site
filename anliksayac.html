@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Optimizi - Anlık Kayıp Sayacı</title>
+    <link rel="icon" href="favicon.png" type="image/png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script>tailwind.config = { theme: { fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] } } }</script>
+    <style>
+        body { background-color: #0f172a; color: white; overflow: hidden; }
+        .counter-shadow { text-shadow: 0 0 20px rgba(220, 38, 38, 0.6); }
+        .counter-shadow.paused { text-shadow: 0 0 20px rgba(251, 146, 60, 0.6); }
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .glass-panel-light { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        @keyframes pulse-red { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes pulse-orange { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .animate-pulse-fast { animation: pulse-red 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        .animate-pulse-paused { animation: pulse-orange 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        .status-badge { transition: all 0.3s ease; }
+        .grayscale-50 { filter: grayscale(0.5) brightness(0.7); }
+    </style>
+</head>
+<body class="h-[100dvh] flex flex-col items-center justify-between p-4 relative">
+
+    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-red-600 rounded-full blur-[120px] opacity-20"></div>
+    </div>
+
+    <div class="z-10 w-full max-w-md flex justify-between items-center opacity-80 mt-2">
+        <div>
+            <h1 class="text-xl font-black tracking-tight text-white">Optimizi<span class="text-red-500">.Anlık Kayıp</span></h1>
+            <p id="clientName" class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-0.5">Yükleniyor...</p>
+        </div>
+        <div id="statusBadge" class="bg-slate-800/50 p-2 rounded-xl border border-white/10 status-badge">
+            <div class="flex items-center gap-2">
+                <span class="relative flex h-2 w-2">
+                  <span id="statusPing" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                  <span id="statusDot" class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                </span>
+                <span id="statusText" class="text-[10px] font-bold text-red-400 uppercase">CANLI</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="z-10 w-full max-w-md flex-1 flex flex-col justify-center items-center text-center">
+        
+        <div class="mb-6 relative">
+            <div class="absolute inset-0 bg-red-500 blur-[40px] opacity-10 rounded-full"></div>
+            <i id="counterIcon" data-lucide="flame" class="w-12 h-12 text-red-500 mx-auto animate-pulse-fast relative z-10"></i>
+        </div>
+
+        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-2">TOPLAM OPERASYONEL KAYIP</p>
+        
+        <div class="relative mb-6">
+            <div class="text-5xl sm:text-6xl font-mono font-bold text-white tracking-tighter counter-shadow tabular-nums" id="counter">
+                0,0000
+            </div>
+            <div class="text-sm font-bold text-red-500 mt-1">TL</div>
+        </div>
+
+        <div class="w-full glass-panel-light rounded-2xl p-4 grid grid-cols-2 gap-3 text-left">
+            <div class="p-2">
+                <p class="text-[9px] text-slate-400 uppercase font-bold mb-1 flex items-center gap-1"><i data-lucide="trending-down" class="w-3 h-3"></i> Yıllık Toplam Kayıp</p>
+                <p id="infoTotal" class="text-xs font-bold text-white font-mono">...</p>
+            </div>
+            <div class="p-2 border-l border-white/5 pl-4">
+                <p class="text-[9px] text-slate-400 uppercase font-bold mb-1 flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> Çalışma Süresi</p>
+                <p id="infoHours" class="text-xs font-bold text-white font-mono">...</p>
+            </div>
+            <div class="p-2 border-t border-white/5 pt-3">
+                <p class="text-[9px] text-slate-400 uppercase font-bold mb-1 flex items-center gap-1"><i data-lucide="coins" class="w-3 h-3"></i> Birim Maliyet</p>
+                <p id="infoPrice" class="text-xs font-bold text-white font-mono">...</p>
+            </div>
+            <div class="p-2 border-t border-l border-white/5 pt-3 pl-4">
+                <p class="text-[9px] text-slate-400 uppercase font-bold mb-1 flex items-center gap-1"><i data-lucide="fuel" class="w-3 h-3"></i> Yakıt Tipi</p>
+                <p id="infoFuel" class="text-xs font-bold text-white font-mono">...</p>
+            </div>
+        </div>
+
+        <div class="mt-4 flex items-center gap-2 opacity-60">
+            <i data-lucide="gauge" class="w-3 h-3 text-slate-400"></i>
+            <span id="speedDisplay" class="text-[10px] font-bold text-slate-300">...</span>
+        </div>
+
+    </div>
+
+    <div class="z-10 w-full max-w-md pb-6">
+        <div class="glass-panel rounded-2xl p-3 flex items-center justify-between">
+            <div>
+                <p class="text-[9px] text-slate-400 uppercase font-bold mb-0.5">Başlangıç</p>
+                <p id="startDate" class="text-[10px] font-bold text-white">...</p>
+            </div>
+            <div class="text-right">
+                <p class="text-[9px] text-slate-400 uppercase font-bold mb-0.5">Geçen Süre</p>
+                <p id="elapsedTime" class="text-[10px] font-bold text-red-400 font-mono">00:00:00</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Yakıt Tipini İsimlendirme
+        const fuelMap = {
+            'gas': 'Doğalgaz (m³)',
+            'elec': 'Elektrik (kWh)',
+            'lng': 'LNG (kg)',
+            'fueloil': 'Fuel Oil (kg)',
+            'coal_imp': 'İthal Kömür',
+            'coal_loc': 'Yerli Kömür',
+            'manual': 'Özel / Paçal'
+        };
+
+        const params = new URLSearchParams(window.location.search);
+        
+        // Verileri Al
+        const client = params.get('c') || 'Bilinmeyen Müşteri';
+        const totalValue = parseFloat(params.get('v')) || 0; 
+        const workHours = parseFloat(params.get('wh')) || 4800; 
+        const unitPrice = parseFloat(params.get('up')) || 0;
+        const fuelCode = params.get('f') || 'gas';
+        let fuelLabel = fuelMap[fuelCode] || 'Bilinmiyor';
+        
+        // Manuel Yakıt Adı varsa onu kullan
+        if (params.get('fl')) { fuelLabel = decodeURIComponent(params.get('fl')); }
+
+        const dateStr = params.get('d'); 
+        
+        // --- HESAPLAMALAR ---
+        // Saniyelik Yanma Hızı (Burn Per Second)
+        let burnPerSecond = parseFloat(params.get('bps'));
+        if (!burnPerSecond) {
+            const secondsInYear = workHours * 3600;
+            burnPerSecond = totalValue / secondsInYear;
+        }
+
+        // Dakikalık Yanma Hızı
+        const burnPerMinute = burnPerSecond * 60;
+
+        // --- ARAYÜZÜ DOLDUR ---
+        document.getElementById('clientName').innerText = client;
+
+        // 1. Şeffaflık Tablosu Doldurma
+        document.getElementById('infoTotal').innerText = totalValue.toLocaleString('tr-TR') + ' TL';
+        document.getElementById('infoHours').innerText = workHours.toLocaleString('tr-TR') + ' Saat/Yıl';
+        document.getElementById('infoPrice').innerText = unitPrice.toLocaleString('tr-TR', {minimumFractionDigits: 2}) + ' TL';
+        document.getElementById('infoFuel').innerText = fuelLabel;
+
+        // 2. Hız Göstergesi
+        document.getElementById('speedDisplay').innerHTML = `Dakikalık Zarar: <span class="text-white">${burnPerMinute.toLocaleString('tr-TR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} TL</span>`;
+
+        // 3. Tarih
+        let startMoment = new Date();
+        if (dateStr) {
+            const parts = dateStr.split('-'); 
+            if (parts.length >= 5) {
+                // ParseInt ekleyerek sayıya çevirmeyi garanti ediyoruz
+                startMoment = new Date(
+                    parseInt(parts[0]), 
+                    parseInt(parts[1])-1, 
+                    parseInt(parts[2]), 
+                    parseInt(parts[3]), 
+                    parseInt(parts[4])
+                );
+            }
+        }
+        
+        // MANUEL FORMATLAMA (Tarayıcı bağımsız çözüm)
+        const trMonths = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+        const day = startMoment.getDate();
+        const month = trMonths[startMoment.getMonth()];
+        const year = startMoment.getFullYear();
+        const hour = String(startMoment.getHours()).padStart(2, '0');
+        const minute = String(startMoment.getMinutes()).padStart(2, '0');
+
+        document.getElementById('startDate').innerText = `${day} ${month} ${year} ${hour}:${minute}`;
+
+        // --- VARDİYA KONTROLÜ ---
+        const shiftsParam = params.get('shifts');
+        let shifts = [];
+        
+        if (shiftsParam) {
+            try {
+                shifts = JSON.parse(decodeURIComponent(shiftsParam));
+            } catch(e) {
+                console.error('Vardiya parse hatası:', e);
+            }
+        }
+        
+        function isWorkingHours(currentDate) {
+            // Vardiya yoksa 7/24 çalış (eski linkler için)
+            if (shifts.length === 0) {
+                return true;
+            }
+            
+            const dayOfWeek = currentDate.getDay() === 0 ? 7 : currentDate.getDay();
+            const currentMinutes = currentDate.getHours() * 60 + currentDate.getMinutes();
+            
+            for (const shift of shifts) {
+                if (!shift.days.includes(dayOfWeek)) continue;
+                
+                const [startHour, startMin] = shift.start.split(':').map(n => parseInt(n));
+                const [endHour, endMin] = shift.end.split(':').map(n => parseInt(n));
+                
+                const startMinutes = startHour * 60 + startMin;
+                const endMinutes = endHour * 60 + endMin;
+                
+                if (currentMinutes >= startMinutes && currentMinutes <= endMinutes) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
+        // --- SAYAÇ MOTORU ---
+        const counterEl = document.getElementById('counter');
+        const elapsedEl = document.getElementById('elapsedTime');
+        let totalWorkSeconds = 0;
+        let lastUpdateTime = Date.now();
+
+        function updateCounter() {
+            const now = new Date();
+            const currentTime = Date.now();
+            const diffSeconds = (now - startMoment) / 1000;
+            
+            if (diffSeconds < 0) {
+                counterEl.innerText = "0,0000";
+                elapsedEl.innerText = "Başlamadı";
+                requestAnimationFrame(updateCounter);
+                return;
+            }
+
+            // Sadece çalışma saatlerinde say
+            const isWorking = isWorkingHours(now);
+            
+            if (isWorking) {
+                if (currentTime - lastUpdateTime >= 1000) {
+                    totalWorkSeconds += 1;
+                    lastUpdateTime = currentTime;
+                }
+            }
+
+            // Durum göstergelerini güncelle
+            const statusBadge = document.getElementById('statusBadge');
+            const statusPing = document.getElementById('statusPing');
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            const counterIcon = document.getElementById('counterIcon');
+            const mainContainer = document.querySelector('.z-10.w-full.max-w-md.flex-1');
+            
+            if (isWorking) {
+                // ÇALIŞIYOR
+                statusBadge.className = 'bg-slate-800/50 p-2 rounded-xl border border-white/10 status-badge';
+                statusPing.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75';
+                statusDot.className = 'relative inline-flex rounded-full h-2 w-2 bg-red-500';
+                statusText.className = 'text-[10px] font-bold text-red-400 uppercase';
+                statusText.innerText = 'CANLI';
+                counterIcon.className = 'w-12 h-12 text-red-500 mx-auto animate-pulse-fast relative z-10';
+                counterEl.className = 'text-5xl sm:text-6xl font-mono font-bold text-white tracking-tighter counter-shadow tabular-nums';
+                mainContainer.classList.remove('grayscale-50');
+            } else {
+                // DURAKLADI
+                statusBadge.className = 'bg-orange-900/30 p-2 rounded-xl border border-orange-500/30 status-badge';
+                statusPing.className = 'animate-pulse-paused absolute inline-flex h-full w-full rounded-full bg-orange-500 opacity-75';
+                statusDot.className = 'relative inline-flex rounded-full h-2 w-2 bg-orange-500';
+                statusText.className = 'text-[10px] font-bold text-orange-400 uppercase';
+                statusText.innerText = 'DURAKLADI';
+                counterIcon.className = 'w-12 h-12 text-orange-500 mx-auto animate-pulse-paused relative z-10';
+                counterEl.className = 'text-5xl sm:text-6xl font-mono font-bold text-white tracking-tighter counter-shadow paused tabular-nums';
+                mainContainer.classList.add('grayscale-50');
+            }
+
+            const currentLoss = totalWorkSeconds * burnPerSecond;
+
+            counterEl.innerText = currentLoss.toLocaleString('tr-TR', {
+                minimumFractionDigits: 4,
+                maximumFractionDigits: 4
+            });
+
+            const d = Math.floor(diffSeconds / (3600*24));
+            const h = Math.floor((diffSeconds % (3600*24)) / 3600);
+            const m = Math.floor((diffSeconds % 3600) / 60);
+            const s = Math.floor(diffSeconds % 60);
+            
+            elapsedEl.innerText = `${d}g ${h}sa ${m}dk ${s}sn`;
+
+            requestAnimationFrame(updateCounter);
+        }
+
+        requestAnimationFrame(updateCounter);
+
+    </script>
+</body>
+</html>
+
