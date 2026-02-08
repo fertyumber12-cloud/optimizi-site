@@ -173,40 +173,57 @@
 
         document.getElementById('startDate').innerText = `${day} ${month} ${year} ${hour}:${minute}`;
 
-        // --- ÇALIŞMA SAATLERİ KONTROLÜ ---
-        const params = new URLSearchParams(window.location.search);
-        const workStartParam = params.get('ws') || '00:00'; // Varsayılan: 7/24
-        const workEndParam = params.get('we') || '23:59';
-        const workDaysParam = params.get('wd') || '1,2,3,4,5,6,7'; // Varsayılan: Her gün
+        // --- ÇALIŞMA SAATLERİ KONTROLÜ (GERİYE UYUMLU) ---
+        const shiftsParam = params.get('shifts');
+        let shifts = [];
+        let hasShifts = false;
         
-        const workDays = workDaysParam.split(',').map(d => parseInt(d));
+        if (shiftsParam) {
+            try {
+                shifts = JSON.parse(decodeURIComponent(shiftsParam));
+                hasShifts = true;
+            } catch(e) {
+                console.error('Vardiya parse hatası:', e);
+            }
+        }
         
         function isWorkingHours(currentDate) {
-            // Gün kontrolü (1=Pzt, 7=Paz)
-            const dayOfWeek = currentDate.getDay() === 0 ? 7 : currentDate.getDay();
-            if (!workDays.includes(dayOfWeek)) {
-                return false;
+            // Eski linkler için: shifts yoksa 7/24 çalış
+            if (!hasShifts) {
+                return true;
             }
             
-            // Saat kontrolü
-            const [startHour, startMin] = workStartParam.split(':').map(n => parseInt(n));
-            const [endHour, endMin] = workEndParam.split(':').map(n => parseInt(n));
-            
+            // Yeni linkler için: vardiya kontrolü
+            const dayOfWeek = currentDate.getDay() === 0 ? 7 : currentDate.getDay();
             const currentMinutes = currentDate.getHours() * 60 + currentDate.getMinutes();
-            const startMinutes = startHour * 60 + startMin;
-            const endMinutes = endHour * 60 + endMin;
             
-            return currentMinutes >= startMinutes && currentMinutes <= endMinutes;
+            // Herhangi bir vardiyada mı?
+            for (const shift of shifts) {
+                if (!shift.days.includes(dayOfWeek)) continue;
+                
+                const [startHour, startMin] = shift.start.split(':').map(n => parseInt(n));
+                const [endHour, endMin] = shift.end.split(':').map(n => parseInt(n));
+                
+                const startMinutes = startHour * 60 + startMin;
+                const endMinutes = endHour * 60 + endMin;
+                
+                if (currentMinutes >= startMinutes && currentMinutes <= endMinutes) {
+                    return true;
+                }
+            }
+            
+            return false;
         }
 
         // --- SAYAÇ MOTORU ---
         const counterEl = document.getElementById('counter');
         const elapsedEl = document.getElementById('elapsedTime');
-
-        let totalWorkSeconds = 0; // Toplam çalışma süresi
+        let totalWorkSeconds = 0;
+        let lastUpdateTime = Date.now();
 
         function updateCounter() {
             const now = new Date();
+            const currentTime = Date.now();
             const diffSeconds = (now - startMoment) / 1000;
             
             if (diffSeconds < 0) {
@@ -216,19 +233,17 @@
                 return;
             }
 
-            // Çalışma saatleri kontrolü
+            // Çalışma saati kontrolü
             const isWorking = isWorkingHours(now);
             
-            // CANLI göstergesini güncelle
-            const liveIndicator = document.querySelector('.bg-slate-800\\/50');
+            // Çalışma saatindeyse sayacı ilerlet
             if (isWorking) {
-                liveIndicator.classList.remove('opacity-50');
-                totalWorkSeconds += 1; // Her saniye çalışma süresine ekle
-            } else {
-                liveIndicator.classList.add('opacity-50');
+                if (currentTime - lastUpdateTime >= 1000) {
+                    totalWorkSeconds += 1;
+                    lastUpdateTime = currentTime;
+                }
             }
 
-            // Kayıp sadece çalışma saatlerinde artar
             const currentLoss = totalWorkSeconds * burnPerSecond;
 
             counterEl.innerText = currentLoss.toLocaleString('tr-TR', {
@@ -241,9 +256,7 @@
             const m = Math.floor((diffSeconds % 3600) / 60);
             const s = Math.floor(diffSeconds % 60);
             
-            // Mesai durumunu geçen süreye ekle
-            const statusText = isWorking ? ' • ÇALIŞIYOR' : ' • DURAKLADI';
-            elapsedEl.innerHTML = `${d}g ${h}sa ${m}dk ${s}sn<span class="text-${isWorking ? 'green' : 'yellow'}-400 text-[9px] ml-1">${statusText}</span>`;
+            elapsedEl.innerText = `${d}g ${h}sa ${m}dk ${s}sn`;
 
             requestAnimationFrame(updateCounter);
         }
