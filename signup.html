@@ -448,7 +448,7 @@
         <div class="mt-4 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
           <p class="text-xs text-indigo-300">
             <strong>E-posta:</strong> <a href="mailto:contact@optimizi.app" class="underline">contact@optimizi.app</a><br>
-            <strong>Adres:</strong> Optimizi Inc., [Adresiniz buraya gelecek]
+            <strong>Adres:</strong> Optimizi Inc.
           </p>
         </div>
         
@@ -461,8 +461,17 @@
     </div>
   </div>
 
-  <!-- Supabase Config -->
-  <script src="supabase-config.js"></script>
+  <!-- Supabase Config - Inline -->
+  <script>
+    // Supabase Configuration
+    const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
+    
+    // Supabase client'ı başlat
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    console.log('✅ Supabase bağlantısı kuruldu');
+  </script>
   
   <script>
     // Modal Functions
@@ -625,7 +634,7 @@
       
       try {
         // Supabase ile kayıt ol
-        const { data, error } = await window.supabaseClient.auth.signUp({
+        const { data, error } = await supabaseClient.auth.signUp({
           email: email,
           password: password,
           options: {
@@ -670,7 +679,7 @@
     document.getElementById('passwordInput').addEventListener('input', hideError);
     
     // Check if user is already logged in
-    window.supabaseClient.auth.getSession().then(({ data: { session } }) => {
+    supabaseClient.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         // Already logged in, redirect to dashboard
         window.location.href = 'dashboard.html';
