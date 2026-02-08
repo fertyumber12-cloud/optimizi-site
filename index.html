@@ -1,13 +1,11 @@
 <!doctype html>
 <html lang="tr" class="dark">
 <head>
-  <!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','GTM-KD7DLCNS');</script>
-<!-- End Google Tag Manager -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Enerji Verimliliği Hesaplamaları</title>
@@ -118,7 +116,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .bg-grid { background-size: 60px 60px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px); mask-image: radial-gradient(circle at center, black 40%, transparent 80%); }
   .text-gradient-dynamic { background: linear-gradient(to right, #818cf8, #c084fc, #fb923c, #ef4444); background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: gradientX 8s ease infinite; }
 
-  /* Sidebar Transitions */
   #sidebar { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
   .sidebar-link { position: relative; overflow: hidden; }
   .sidebar-link::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 1px; background: linear-gradient(90deg, transparent, #818cf8, transparent); transition: width 0.3s ease; }
@@ -127,11 +124,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 </head>
 <body class="antialiased selection:bg-indigo-500/30 selection:text-white" onload="initApp()">
 
-  <!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KD7DLCNS"
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KD7DLCNS"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
-
 <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
     <div class="absolute inset-0 bg-grid"></div>
     <div class="absolute top-1/2 left-1/2 z-0 opacity-20 mix-blend-screen pointer-events-none animate-wander-smooth">
@@ -159,21 +153,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <nav class="flex flex-col gap-6">
             <a href="endustriyel-enerji-kaybi-hesaplama.html" class="sidebar-link text-2xl font-bold text-slate-300 hover:text-white transition group flex items-center gap-4">
                 <span class="w-1 h-8 bg-purple-500 rounded-full scale-y-0 group-hover:scale-y-100 transition duration-300"></span>
-                <span data-i18n="nav_tools">Hesaplama Araçları</span>
+                <span>Hesaplama Araçları</span>
             </a>
 
             <a href="iletisim.html" class="sidebar-link text-2xl font-bold text-slate-300 hover:text-white transition group flex items-center gap-4">
                 <span class="w-1 h-8 bg-indigo-500 rounded-full scale-y-0 group-hover:scale-y-100 transition duration-300"></span>
-                <span data-i18n="nav_contact">İletişim</span>
+                <span>İletişim</span>
             </a>
             <a href="blog.html" onclick="toggleMenu()" class="sidebar-link text-2xl font-bold text-slate-300 hover:text-white transition group flex items-center gap-4">
                 <span class="w-1 h-8 bg-orange-500 rounded-full scale-y-0 group-hover:scale-y-100 transition duration-300"></span>
-                <span data-i18n="nav_blog">Blog</span>
+                <span>Blog</span>
             </a>
         </nav>
 
         <div class="mt-auto pt-8 border-t border-white/10">
-            <div class="text-xs text-slate-500 mb-4 uppercase tracking-wider font-bold" data-i18n="nav_social">Sosyal Medya</div>
+            <div class="text-xs text-slate-500 mb-4 uppercase tracking-wider font-bold">Sosyal Medya</div>
             <div class="flex gap-4">
                 <a href="https://www.linkedin.com/company/optimizi-app/" target="_blank" class="p-2 bg-white/5 rounded-lg hover:bg-indigo-600 hover:text-white transition text-slate-400"><i data-lucide="linkedin" class="w-5 h-5"></i></a>
                 <a href="mailto:contact@optimizi.app" class="p-2 bg-white/5 rounded-lg hover:bg-red-500 hover:text-white transition text-slate-400"><i data-lucide="mail" class="w-5 h-5"></i></a>
@@ -204,10 +198,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
         
         <div class="flex items-center gap-3">
-            <button onclick="toggleLang()" class="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800/80 hover:bg-slate-700 text-white transition border border-slate-600 shadow-lg shadow-black/20">
-            </button>
-            <a href="login.html" class="hidden sm:flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-orange-500 hover:from-indigo-500 hover:to-orange-400 text-white rounded-full font-bold transition shadow-lg shadow-indigo-500/25 active:scale-95">
-                <span data-i18n="btn_tools">Giriş Yap</span><i data-lucide="arrow-right" class="w-4 h-4"></i>
+            <a href="/login.html" class="flex items-center gap-2 px-8 py-2.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-orange-500 hover:from-indigo-500 hover:to-orange-400 text-white rounded-full font-bold transition shadow-lg shadow-indigo-500/25 active:scale-95">
+                <i data-lucide="user" class="w-4 h-4"></i>
+                <span>Giriş Yap</span>
             </a>
         </div>
     </div>
@@ -217,15 +210,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="grid lg:grid-cols-2 gap-16 items-center">
         <div class="text-center lg:text-left">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold tracking-wider uppercase mb-6">
-                <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span> <span data-i18n="hero_badge">Enerji Verimliliği Hesaplamaları</span>
+                <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span> <span>Enerji Verimliliği Hesaplamaları</span>
             </div>
             <h1 class="text-5xl lg:text-7xl font-black tracking-tight mb-8 leading-[1.1] text-white">
-                <span data-i18n="hero_t1">Endüstriyel İzolasyon ve</span> <br> <span class="text-gradient-dynamic" data-i18n="hero_t2">Enerji Verimliliği.</span>
+                <span>Endüstriyel İzolasyon ve</span> <br> <span class="text-gradient-dynamic">Enerji Verimliliği.</span>
             </h1>
-            <p class="text-lg text-slate-300 max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed" data-i18n="hero_desc">Endüstriyel tesislerdeki ısı kayıplarını, verimsiz hatları ve gereksiz maliyetleri mühendislik standartlarıyla analiz eden yeni nesil platform.</p>
+            <p class="text-lg text-slate-300 max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed">Endüstriyel tesislerdeki ısı kayıplarını, verimsiz hatları ve gereksiz maliyetleri mühendislik standartlarıyla analiz eden yeni nesil platform.</p>
             <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
                 <button onclick="openVideo()" class="w-full sm:w-auto px-8 py-4 glass-card rounded-xl font-bold text-white transition hover:bg-white/10 hover:border-orange-500/30 flex items-center justify-center gap-2 group">
-                    <i data-lucide="play-circle" class="w-5 h-5 text-orange-400 group-hover:scale-110 transition"></i><span data-i18n="btn_learn">Nasıl Çalışır?</span>
+                    <i data-lucide="play-circle" class="w-5 h-5 text-orange-400 group-hover:scale-110 transition"></i><span>Nasıl Çalışır?</span>
                 </button>
             </div>
             <div class="mt-10 flex items-center justify-center lg:justify-start gap-6 opacity-60 grayscale hover:grayscale-0 transition duration-500">
@@ -243,23 +236,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     </div>
                     <div class="space-y-4">
                         <div class="flex justify-between items-end">
-                            <div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1" data-i18n="mc_loss">Yıllık Kayıp</div><div class="text-3xl font-bold text-white">$42,500</div></div>
-                            <div class="text-right"><div class="text-xs text-indigo-200 font-bold bg-indigo-500/20 px-2 py-1 rounded animate-pulse" data-i18n="mc_status">Analiz Tamamlandı</div></div>
+                            <div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Yıllık Kayıp</div><div class="text-3xl font-bold text-white">$42,500</div></div>
+                            <div class="text-right"><div class="text-xs text-indigo-200 font-bold bg-indigo-500/20 px-2 py-1 rounded animate-pulse">Analiz Tamamlandı</div></div>
                         </div>
                         <div class="h-32 flex items-end gap-2 pt-4 border-t border-white/5">
                             <div class="w-1/5 bg-slate-700 h-[40%] rounded-t opacity-40"></div><div class="w-1/5 bg-slate-600 h-[60%] rounded-t opacity-40"></div><div class="w-1/5 bg-slate-500 h-[30%] rounded-t opacity-40"></div>
-                            <div class="w-1/5 bg-gradient-to-t from-indigo-600 via-purple-500 to-orange-500 h-[80%] rounded-t relative group shadow-[0_0_15px_rgba(249,115,22,0.4)]"><div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-white text-black text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition" data-i18n="mc_pot">Potansiyel</div></div>
+                            <div class="w-1/5 bg-gradient-to-t from-indigo-600 via-purple-500 to-orange-500 h-[80%] rounded-t relative group shadow-[0_0_15px_rgba(249,115,22,0.4)]"><div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-white text-black text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">Potansiyel</div></div>
                             <div class="w-1/5 bg-slate-600 h-[55%] rounded-t opacity-40"></div>
                         </div>
                     </div>
                 </div>
 
                 <div class="absolute -right-4 -top-24 glass-card p-4 rounded-xl animate-float-med z-10 w-40" style="animation-delay: 1s;">
-                    <div class="flex items-center gap-3"><div class="p-2 bg-green-500/20 rounded-lg text-green-400"><i data-lucide="leaf" class="w-5 h-5"></i></div><div><div class="text-[10px] text-slate-400 uppercase" data-i18n="bdg_co2">CO2 Azaltımı</div><div class="text-sm font-bold text-white">128 Ton</div></div></div>
+                    <div class="flex items-center gap-3"><div class="p-2 bg-green-500/20 rounded-lg text-green-400"><i data-lucide="leaf" class="w-5 h-5"></i></div><div><div class="text-[10px] text-slate-400 uppercase">CO2 Azaltımı</div><div class="text-sm font-bold text-white">128 Ton</div></div></div>
                 </div>
 
                 <div class="absolute -left-4 -bottom-24 glass-card p-4 rounded-xl animate-float-fast z-10 w-40" style="animation-delay: 0.5s;">
-                    <div class="flex items-center gap-3"><div class="p-2 bg-purple-500/20 rounded-lg text-purple-400"><i data-lucide="zap" class="w-5 h-5"></i></div><div><div class="text-[10px] text-slate-400 uppercase" data-i18n="bdg_eff">Verimlilik</div><div class="text-sm font-bold text-white">%18 <span class="text-green-400">▲</span></div></div></div>
+                    <div class="flex items-center gap-3"><div class="p-2 bg-purple-500/20 rounded-lg text-purple-400"><i data-lucide="zap" class="w-5 h-5"></i></div><div><div class="text-[10px] text-slate-400 uppercase">Verimlilik</div><div class="text-sm font-bold text-white">%18 <span class="text-green-400">▲</span></div></div></div>
                 </div>
             </div>
         </div>
@@ -268,12 +261,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <section id="visuals" class="py-24 relative z-10 overflow-hidden">
     <div class="container mx-auto px-6 relative">
-        <div class="text-center mb-16"><h2 class="text-3xl md:text-4xl font-black mb-4 text-white" data-i18n="sec_vis_title">Veriyi Sanata Dönüştürün</h2><p class="text-slate-300 max-w-2xl mx-auto" data-i18n="sec_vis_desc">Sadece hesaplama yapmayın. Sonuçları görselleştirin, raporlayın ve ikna edin. Karmaşık termal denklemlerin arkasındaki basit gerçeği görün.</p></div>
+        <div class="text-center mb-16"><h2 class="text-3xl md:text-4xl font-black mb-4 text-white">Veriyi Sanata Dönüştürün</h2><p class="text-slate-300 max-w-2xl mx-auto">Sadece hesaplama yapmayın. Sonuçları görselleştirin, raporlayın ve ikna edin. Karmaşık termal denklemlerin arkasındaki basit gerçeği görün.</p></div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[320px]">
             <div class="spotlight-card rounded-3xl md:col-span-2 group">
                 <div class="spotlight-border"></div><div class="absolute inset-0 bg-gradient-to-br from-slate-900/50 to-slate-950/80 z-0"></div>
                 <div class="absolute inset-0 z-10 p-10 flex flex-col justify-between w-full md:w-1/2">
-                    <div><div class="inline-flex items-center gap-2 px-2 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded text-[10px] font-bold text-indigo-400 mb-3 tracking-wider" data-i18n="lbl_auto">OTOMASYON</div><h3 class="text-3xl font-bold text-white mb-2" data-i18n="card_pdf_title">PDF Raporlama</h3><p class="text-sm text-slate-400 leading-relaxed" data-i18n="card_pdf_desc">Hesaplamalarınızı tek tıkla, görsellerle zenginleştirilmiş kurumsal raporlara dönüştürün.</p></div>
+                    <div><div class="inline-flex items-center gap-2 px-2 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded text-[10px] font-bold text-indigo-400 mb-3 tracking-wider">OTOMASYON</div><h3 class="text-3xl font-bold text-white mb-2">PDF Raporlama</h3><p class="text-sm text-slate-400 leading-relaxed">Hesaplamalarınızı tek tıkla, görsellerle zenginleştirilmiş kurumsal raporlara dönüştürün.</p></div>
                     <div class="flex items-center gap-4 mt-4"><div class="w-12 h-12 rounded-full bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition duration-300"><i data-lucide="download" class="w-5 h-5"></i></div><span class="text-xs font-mono text-indigo-400/70 group-hover:text-indigo-400 transition">export_audit_v2.pdf</span></div>
                 </div>
                 <div class="absolute right-0 top-1/2 -translate-x-1/2 w-1/2 h-full hidden md:flex items-center justify-center perspective-1000 z-20">
@@ -285,17 +278,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </div>
             <div class="spotlight-card rounded-3xl p-8 group flex flex-col justify-between relative">
                 <div class="spotlight-border"></div><svg class="absolute bottom-0 left-0 w-full h-32 opacity-20 group-hover:opacity-40 transition duration-500 z-0" viewBox="0 0 100 40" preserveAspectRatio="none"><path d="M0 40 L0 30 Q 20 35, 40 15 T 100 5 V 40 Z" fill="url(#gradRoi)" /><defs><linearGradient id="gradRoi" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#10b981" /><stop offset="100%" stop-color="transparent" /></linearGradient></defs></svg>
-                <div class="relative z-10"><div class="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/20 text-green-500 flex items-center justify-center mb-4 group-hover:scale-110 transition duration-300"><i data-lucide="trending-up" class="w-6 h-6"></i></div><h3 class="text-xl font-bold text-white mb-2" data-i18n="card_roi_title">ROI Hesaplayıcı</h3><p class="text-xs text-slate-400" data-i18n="card_roi_desc">Yatırımınızın geri dönüş süresini hesaplayın.</p></div>
-                <div class="relative z-10 text-right"><div class="text-3xl font-black text-white group-hover:text-green-400 transition font-mono"><span class="text-sm text-slate-500 font-sans font-normal align-middle mr-1">ort.</span>6.2 <span class="text-xs font-sans font-bold" data-i18n="unit_month">Ay</span></div></div>
+                <div class="relative z-10"><div class="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/20 text-green-500 flex items-center justify-center mb-4 group-hover:scale-110 transition duration-300"><i data-lucide="trending-up" class="w-6 h-6"></i></div><h3 class="text-xl font-bold text-white mb-2">ROI Hesaplayıcı</h3><p class="text-xs text-slate-400">Yatırımınızın geri dönüş süresini hesaplayın.</p></div>
+                <div class="relative z-10 text-right"><div class="text-3xl font-black text-white group-hover:text-green-400 transition font-mono"><span class="text-sm text-slate-500 font-sans font-normal align-middle mr-1">ort.</span>6.2 <span class="text-xs font-sans font-bold">Ay</span></div></div>
             </div>
             <div class="spotlight-card rounded-3xl p-8 group relative flex flex-col justify-between">
                 <div class="spotlight-border"></div><div class="absolute inset-0 bg-gradient-to-b from-transparent to-orange-900/10 z-0"></div>
-                <div class="relative z-10 flex justify-between items-start"><div><div class="flex items-center gap-2 mb-2"><i data-lucide="thermometer" class="w-5 h-5 text-orange-500 animate-pulse"></i><span class="text-[10px] font-bold text-orange-500 border border-orange-500/30 px-2 py-0.5 rounded-full bg-orange-500/10">ASTM C680</span></div><h3 class="text-xl font-bold text-white" data-i18n="card_heat_title">Isı Kaybı</h3></div></div>
-                <div class="relative z-10 mt-6"><div class="flex justify-between text-[10px] text-slate-400 mb-1 uppercase font-bold tracking-wider"><span data-i18n="lbl_uninsulated">Yalıtımsız</span><span class="text-orange-500 animate-pulse" data-i18n="lbl_critical">Kritik</span></div><div class="h-2 w-full bg-slate-700/50 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-yellow-500 via-orange-500 to-red-600 w-[85%] relative"><div class="absolute inset-0 bg-white/30 w-full animate-[shimmer_2s_infinite]"></div></div></div><div class="mt-2 text-right"><div class="text-2xl font-bold text-white font-mono">165<span class="text-orange-500">°C</span></div></div></div>
+                <div class="relative z-10 flex justify-between items-start"><div><div class="flex items-center gap-2 mb-2"><i data-lucide="thermometer" class="w-5 h-5 text-orange-500 animate-pulse"></i><span class="text-[10px] font-bold text-orange-500 border border-orange-500/30 px-2 py-0.5 rounded-full bg-orange-500/10">ASTM C680</span></div><h3 class="text-xl font-bold text-white">Isı Kaybı</h3></div></div>
+                <div class="relative z-10 mt-6"><div class="flex justify-between text-[10px] text-slate-400 mb-1 uppercase font-bold tracking-wider"><span>Yalıtımsız</span><span class="text-orange-500 animate-pulse">Kritik</span></div><div class="h-2 w-full bg-slate-700/50 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-yellow-500 via-orange-500 to-red-600 w-[85%] relative"><div class="absolute inset-0 bg-white/30 w-full animate-[shimmer_2s_infinite]"></div></div></div><div class="mt-2 text-right"><div class="text-2xl font-bold text-white font-mono">165<span class="text-orange-500">°C</span></div></div></div>
             </div>
             <div class="spotlight-card rounded-3xl md:col-span-2 p-8 group relative flex items-center justify-between overflow-hidden">
                 <div class="spotlight-border"></div><div class="absolute right-0 top-0 w-64 h-64 bg-green-500/10 rounded-full blur-3xl group-hover:bg-green-500/20 transition duration-700 z-0"></div>
-                <div class="relative z-10 max-w-md"><div class="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 flex items-center justify-center mb-4"><i data-lucide="leaf" class="w-6 h-6"></i></div><h3 class="text-2xl font-bold text-white mb-2" data-i18n="card_co2_title">Karbon Ayak İzi</h3><p class="text-sm text-slate-400" data-i18n="card_co2_desc">Enerji verimliliği projelerinizin kaç ağaca bedel olduğunu görün.</p></div>
+                <div class="relative z-10 max-w-md"><div class="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 flex items-center justify-center mb-4"><i data-lucide="leaf" class="w-6 h-6"></i></div><h3 class="text-2xl font-bold text-white mb-2">Karbon Ayak İzi</h3><p class="text-sm text-slate-400">Enerji verimliliği projelerinizin kaç ağaca bedel olduğunu görün.</p></div>
                 <div class="relative z-10 hidden md:block"><div class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-green-300 to-emerald-600 drop-shadow-lg">CO<sub class="text-3xl">2</sub></div></div>
             </div>
         </div>
@@ -305,9 +298,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <section id="standards" class="py-24 relative z-10 border-y border-white/5">
     <div class="container mx-auto px-6">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="glass-card p-10 rounded-3xl group cursor-default"><div class="w-14 h-14 rounded-2xl bg-blue-500/20 text-blue-400 flex items-center justify-center mb-6 shadow-lg shadow-blue-500/10 group-hover:scale-110 transition duration-300"><i data-lucide="shield-check" class="w-7 h-7"></i></div><h3 class="text-xl font-bold text-white mb-3" data-i18n="feat_1_t">Güvenilir Standartlar</h3><p class="text-slate-400 text-sm leading-relaxed" data-i18n="feat_1_d">Tüm hesaplamalar ISO 12241, ASTM C680 ve VDI 2055 mühendislik normlarına %100 uygun olarak simüle edilir.</p></div>
-            <div class="glass-card p-10 rounded-3xl group cursor-default"><div class="w-14 h-14 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center mb-6 shadow-lg shadow-purple-500/10 group-hover:scale-110 transition duration-300"><i data-lucide="cloud" class="w-7 h-7"></i></div><h3 class="text-xl font-bold text-white mb-3" data-i18n="feat_2_t">Bulut Tabanlı</h3><p class="text-slate-400 text-sm leading-relaxed" data-i18n="feat_2_d">Kurulum yok, güncelleme derdi yok. Bilgisayar, tablet veya telefonunuzdan anında erişin ve hesaplamaya başlayın.</p></div>
-            <div class="glass-card p-10 rounded-3xl group cursor-default"><div class="w-14 h-14 rounded-2xl bg-orange-500/20 text-orange-400 flex items-center justify-center mb-6 shadow-lg shadow-orange-500/10 group-hover:scale-110 transition duration-300"><i data-lucide="lock" class="w-7 h-7"></i></div><h3 class="text-xl font-bold text-white mb-3" data-i18n="feat_3_t">Gizlilik Odaklı</h3><p class="text-slate-400 text-sm leading-relaxed" data-i18n="feat_3_d">Verileriniz tarayıcınızda işlenir. Sunucularımıza hassas proje verileri gönderilmez, tamamen yerel çalışır.</p></div>
+            <div class="glass-card p-10 rounded-3xl group cursor-default"><div class="w-14 h-14 rounded-2xl bg-blue-500/20 text-blue-400 flex items-center justify-center mb-6 shadow-lg shadow-blue-500/10 group-hover:scale-110 transition duration-300"><i data-lucide="shield-check" class="w-7 h-7"></i></div><h3 class="text-xl font-bold text-white mb-3">Güvenilir Standartlar</h3><p class="text-slate-400 text-sm leading-relaxed">Tüm hesaplamalar ISO 12241, ASTM C680 ve VDI 2055 mühendislik normlarına %100 uygun olarak simüle edilir.</p></div>
+            <div class="glass-card p-10 rounded-3xl group cursor-default"><div class="w-14 h-14 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center mb-6 shadow-lg shadow-purple-500/10 group-hover:scale-110 transition duration-300"><i data-lucide="cloud" class="w-7 h-7"></i></div><h3 class="text-xl font-bold text-white mb-3">Bulut Tabanlı</h3><p class="text-slate-400 text-sm leading-relaxed">Kurulum yok, güncelleme derdi yok. Bilgisayar, tablet veya telefonunuzdan anında erişin ve hesaplamaya başlayın.</p></div>
+            <div class="glass-card p-10 rounded-3xl group cursor-default"><div class="w-14 h-14 rounded-2xl bg-orange-500/20 text-orange-400 flex items-center justify-center mb-6 shadow-lg shadow-orange-500/10 group-hover:scale-110 transition duration-300"><i data-lucide="lock" class="w-7 h-7"></i></div><h3 class="text-xl font-bold text-white mb-3">Gizlilik Odaklı</h3><p class="text-slate-400 text-sm leading-relaxed">Verileriniz tarayıcınızda işlenir. Sunucularımıza hassas proje verileri gönderilmez, tamamen yerel çalışır.</p></div>
         </div>
     </div>
 </section>
@@ -317,10 +310,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="glass-card max-w-4xl mx-auto rounded-3xl p-12 md:p-20 relative overflow-hidden border-white/10">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-orange-500"></div>
             <div class="relative z-10">
-                <h2 class="text-4xl md:text-5xl font-black mb-6 text-white" data-i18n="cta_title">Analize Başlamaya Hazır Mısınız?</h2>
-                <p class="text-lg text-slate-300 mb-10 max-w-xl mx-auto" data-i18n="cta_desc">Ücretsiz araçlarımızı kullanarak tesisinizdeki potansiyeli keşfedin.</p>
+                <h2 class="text-4xl md:text-5xl font-black mb-6 text-white">Analize Başlamaya Hazır Mısınız?</h2>
+                <p class="text-lg text-slate-300 mb-10 max-w-xl mx-auto">Ücretsiz araçlarımızı kullanarak tesisinizdeki potansiyeli keşfedin.</p>
                 <a href="endustriyel-enerji-kaybi-hesaplama.html" class="inline-flex items-center gap-3 px-10 py-5 bg-white text-slate-900 hover:bg-slate-200 rounded-full font-bold text-lg transition shadow-xl shadow-white/10 hover:scale-105 active:scale-95">
-                    <span data-i18n="cta_btn">Araçlara Git</span><i data-lucide="arrow-right" class="w-5 h-5 text-indigo-600"></i>
+                    <span>Araçlara Git</span><i data-lucide="arrow-right" class="w-5 h-5 text-indigo-600"></i>
                 </a>
             </div>
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-3xl pointer-events-none mix-blend-screen"></div>
@@ -332,7 +325,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="container mx-auto px-6">
         <div class="flex flex-col md:flex-row justify-between items-center gap-6">
             <div class="flex items-center gap-2"><img src="icon.jpg" class="w-8 h-8 rounded-lg shadow-sm shadow-indigo-500/20" onerror="this.style.display='none'"><span class="font-bold text-white">Optimizi.App</span></div>
-            <div class="text-sm text-slate-400" data-i18n="footer_copy">&copy; 2025 Optimizi Inc. Tüm hakları saklıdır.</div>
+            <div class="text-sm text-slate-400">&copy; 2025 Optimizi Inc. Tüm hakları saklıdır.</div>
             <div class="flex gap-4"><a href="https://www.linkedin.com/company/optimizi-app/" target="_blank" class="text-slate-400 hover:text-white transition"><i data-lucide="linkedin" class="w-5 h-5"></i></a><a href="mailto:contact@optimizi.app" class="text-slate-400 hover:text-white transition"><i data-lucide="mail" class="w-5 h-5"></i></a></div>
         </div>
     </div>
@@ -375,47 +368,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             }
         }
     });
-
-    const TRANSLATIONS = {
-        tr: {
-            // YENİ EKLENEN
-            nav_tools: "Hesaplama Araçları",
-
-            nav_contact: "İletişim", nav_blog: "Blog", nav_social: "Sosyal Medya",
-            btn_tools: "Giriş Yap", hero_badge: "Enerji Verimliliği Hesaplamaları", hero_t1: "Endüstriyel İzolasyon ve", hero_t2: "Enerji Verimliliği.", hero_desc: "Endüstriyel tesislerdeki ısı kayıplarını, verimsiz hatları ve gereksiz maliyetleri mühendislik standartlarıyla analiz eden yeni nesil platform.",
-            btn_learn: "Nasıl Çalışır?", sec_vis_title: "Veriyi Sanata Dönüştürün", sec_vis_desc: "Sadece hesaplama yapmayın. Sonuçları görselleştirin, raporlayın ve ikna edin. Karmaşık termal denklemlerin arkasındaki basit gerçeği görün.",
-            feat_1_t: "Güvenilir Standartlar", feat_1_d: "Tüm hesaplamalar ISO 12241, ASTM C680 ve VDI 2055 mühendislik normlarına %100 uygun olarak simüle edilir.",
-            feat_2_t: "Bulut Tabanlı", feat_2_d: "Kurulum yok, güncelleme derdi yok. Bilgisayar, tablet veya telefonunuzdan anında erişin ve hesaplamaya başlayın.",
-            feat_3_t: "Gizlilik Odaklı", feat_3_d: "Verileriniz tarayıcınızda işlenir. Sunucularımıza hassas proje verileri gönderilmez, tamamen yerel çalışır.",
-            cta_title: "Analize Başlamaya Hazır Mısınız?", cta_desc: "Ücretsiz araçlarımızı kullanarak tesisinizdeki potansiyeli keşfedin.", cta_btn: "Araçlara Git",
-            lbl_auto: "OTOMASYON", card_pdf_title: "PDF Raporlama", card_pdf_desc: "Hesaplamalarınızı tek tıkla, görsellerle zenginleştirilmiş kurumsal raporlara dönüştürün.",
-            card_roi_title: "ROI Hesaplayıcı", card_roi_desc: "Yatırımınızın geri dönüş süresini hesaplayın.", card_heat_title: "Isı Kaybı",
-            card_co2_title: "Karbon Ayak İzi", card_co2_desc: "Enerji verimliliği projelerinizin kaç ağaca bedel olduğunu görün.",
-            mc_loss: "Yıllık Kayıp", mc_status: "Analiz Tamamlandı", mc_pot: "Potansiyel", bdg_co2: "CO2 Azaltımı", bdg_eff: "Verimlilik",
-            footer_copy: "&copy; 2025 Optimizi Inc. Tüm hakları saklıdır.", lbl_uninsulated: "Yalıtımsız", lbl_critical: "Kritik", unit_month: "Ay"
-        },
-    };
-    
-    let currentLang = 'tr';
     
     function initApp() {
         document.documentElement.classList.add('dark');
-        const storedLang = localStorage.getItem('lang');
-        if (storedLang) { currentLang = storedLang; } else {
-            const browserLang = navigator.language || navigator.userLanguage;
-            currentLang = browserLang.startsWith('tr') ? 'tr' : 'en';
-            localStorage.setItem('lang', currentLang);
-        }
-        updateLang();
         if(typeof lucide !== 'undefined') { lucide.createIcons(); } else { setTimeout(() => { if(typeof lucide !== 'undefined') lucide.createIcons(); }, 500); }
         document.addEventListener('keydown', function(e) { if(e.key === 'Escape') { closeVideo(); } });
-    }
-
-    function toggleLang() { currentLang = currentLang === 'tr' ? 'en' : 'tr'; localStorage.setItem('lang', currentLang); updateLang(); }
-    function updateLang() {
-        const isTr = currentLang === 'tr';
-        document.getElementById('langFlag').innerText = isTr ? '🇬🇧' : '🇹🇷'; document.getElementById('langText').innerText = isTr ? 'EN' : 'TR';
-        document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if(TRANSLATIONS[currentLang][key]) { el.innerHTML = TRANSLATIONS[currentLang][key]; } });
     }
 </script>
 </body>
