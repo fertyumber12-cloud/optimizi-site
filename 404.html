@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="tr" class="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>404 - Sayfa Bulunamadı | Optimizi.App</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+        extend: {
+          colors: { slate: { 850: '#151e2e', 900: '#0f172a', 950: '#020617' } },
+          animation: {
+            'blob': 'blob 20s infinite',
+            'float': 'float 6s ease-in-out infinite',
+            'pulse-glow': 'pulseGlow 3s infinite',
+          },
+          keyframes: {
+            blob: {
+              '0%': { transform: 'translate(0px, 0px) scale(1)' },
+              '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+              '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+              '100%': { transform: 'translate(0px, 0px) scale(1)' },
+            },
+            float: { 
+              '0%, 100%': { transform: 'translateY(0)' }, 
+              '50%': { transform: 'translateY(-20px)' } 
+            },
+            pulseGlow: { 
+              '0%, 100%': { opacity: 0.6, transform: 'scale(1)' }, 
+              '50%': { opacity: 1, transform: 'scale(1.05)' } 
+            },
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body { 
+      background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%);
+      background-attachment: fixed; 
+      color: #f1f5f9; 
+      min-height: 100vh; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+    }
+    .bg-grid { 
+      background-size: 60px 60px; 
+      background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px), 
+                        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px); 
+      mask-image: radial-gradient(circle at center, black 40%, transparent 80%); 
+    }
+    .glass-card { 
+      backdrop-filter: blur(16px); 
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.5) 100%); 
+      border: 1px solid rgba(255,255,255,0.08); 
+      transition: all 0.3s ease;
+    }
+    .glass-card:hover {
+      border-color: rgba(129, 140, 248, 0.3);
+    }
+    .number-404 {
+      font-size: 12rem;
+      line-height: 1;
+      font-weight: 900;
+      background: linear-gradient(135deg, #818cf8 0%, #c084fc 25%, #fb923c 75%, #ef4444 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 80px rgba(129, 140, 248, 0.3);
+    }
+    @media (max-width: 640px) {
+      .number-404 {
+        font-size: 8rem;
+      }
+    }
+  </style>
+</head>
+<body class="antialiased">
+
+  <!-- Background -->
+  <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+      <div class="absolute inset-0 bg-grid"></div>
+      <div class="absolute top-0 -left-1/4 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[120px] animate-blob"></div>
+      <div class="absolute bottom-0 -right-1/4 w-[600px] h-[600px] bg-orange-600/10 rounded-full blur-[120px] animate-blob" style="animation-delay: 5s;"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[120px] animate-blob" style="animation-delay: 10s;"></div>
+  </div>
+
+  <!-- Content -->
+  <div class="relative z-10 w-full max-w-4xl px-6">
+    
+    <!-- Logo -->
+    <div class="text-center mb-12">
+      <a href="/" class="inline-block font-black text-3xl tracking-tighter text-white hover:opacity-80 transition">
+        Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-orange-400">.App</span>
+      </a>
+    </div>
+
+    <!-- Main Card -->
+    <div class="glass-card p-12 md:p-16 rounded-3xl shadow-2xl border border-white/10 text-center">
+      
+      <!-- 404 Number -->
+      <div class="mb-8 animate-pulse-glow">
+        <h1 class="number-404 select-none">404</h1>
+      </div>
+
+      <!-- Title -->
+      <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+        Sayfa Bulunamadı
+      </h2>
+
+      <!-- Description -->
+      <p class="text-lg text-slate-300 mb-8 max-w-xl mx-auto">
+        Aradığınız sayfa mevcut değil, taşınmış veya silinmiş olabilir. 
+        <span class="block mt-2 text-slate-400 text-base">Lütfen URL'i kontrol edin veya ana sayfaya dönün.</span>
+      </p>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+        <a href="/" 
+           class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-orange-500 hover:from-indigo-500 hover:to-orange-400 text-white rounded-xl font-bold transition shadow-lg shadow-indigo-500/25 active:scale-[0.98]">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+          </svg>
+          Ana Sayfaya Dön
+        </a>
+        
+        <a href="/dashboard" 
+           class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white rounded-xl font-bold transition active:scale-[0.98]">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+          </svg>
+          Dashboard'a Git
+        </a>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="pt-8 border-t border-white/5">
+        <p class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">Popüler Sayfalar</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          
+          <a href="/endustriyel-enerji-kaybi-hesaplama" 
+             class="flex items-center gap-3 p-4 bg-slate-800/30 hover:bg-slate-700/40 border border-white/5 hover:border-indigo-500/30 rounded-xl transition group">
+            <div class="p-2 bg-indigo-500/20 rounded-lg group-hover:bg-indigo-500/30 transition">
+              <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>
+            </div>
+            <div class="flex-1 text-left">
+              <p class="text-sm font-semibold text-white group-hover:text-indigo-400 transition">Saha Analizi</p>
+            </div>
+          </a>
+
+          <a href="/tool/roi" 
+             class="flex items-center gap-3 p-4 bg-slate-800/30 hover:bg-slate-700/40 border border-white/5 hover:border-green-500/30 rounded-xl transition group">
+            <div class="p-2 bg-green-500/20 rounded-lg group-hover:bg-green-500/30 transition">
+              <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div class="flex-1 text-left">
+              <p class="text-sm font-semibold text-white group-hover:text-green-400 transition">ROI Hesaplama</p>
+            </div>
+          </a>
+
+          <a href="/iletisim" 
+             class="flex items-center gap-3 p-4 bg-slate-800/30 hover:bg-slate-700/40 border border-white/5 hover:border-orange-500/30 rounded-xl transition group">
+            <div class="p-2 bg-orange-500/20 rounded-lg group-hover:bg-orange-500/30 transition">
+              <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path>
+              </svg>
+            </div>
+            <div class="flex-1 text-left">
+              <p class="text-sm font-semibold text-white group-hover:text-orange-400 transition">Destek</p>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="text-center mt-10">
+      <p class="text-[10px] text-slate-600 uppercase tracking-[0.2em] font-bold">&copy; 2025 Optimizi Inc • Tüm Hakları Saklıdır.</p>
+    </div>
+
+  </div>
+
+  <!-- Auto redirect hint (optional) -->
+  <script>
+    // Optional: Show helpful message in console
+    console.log('🔍 404 - Sayfa bulunamadı. Ana sayfaya yönlendirmek ister misiniz?');
+    
+    // Optional: Auto redirect after 10 seconds (uncomment if you want)
+    // setTimeout(() => {
+    //   window.location.href = '/';
+    // }, 10000);
+  </script>
+
+</body>
+</html>
