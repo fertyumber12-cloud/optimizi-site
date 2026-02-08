@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="tr" class="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard | Optimizi.App</title>
+  
+  <!-- Supabase JS Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+        extend: {
+          colors: { slate: { 850: '#151e2e', 900: '#0f172a', 950: '#020617' } },
+          animation: {
+            'blob': 'blob 20s infinite',
+            'gradient-x': 'gradientX 8s ease infinite',
+            'float-slow': 'float 8s ease-in-out infinite',
+          },
+          keyframes: {
+            blob: {
+              '0%': { transform: 'translate(0px, 0px) scale(1)' },
+              '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+              '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+              '100%': { transform: 'translate(0px, 0px) scale(1)' },
+            },
+            gradientX: { '0%, 100%': { 'background-position': '0% 50%' }, '50%': { 'background-position': '100% 50%' } },
+            float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-20px)' } },
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body { 
+      background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%);
+      background-attachment: fixed; 
+      color: #f1f5f9; 
+      min-height: 100vh;
+    }
+    .bg-grid { 
+      background-size: 60px 60px; 
+      background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px), 
+                        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px); 
+      mask-image: radial-gradient(circle at center, black 40%, transparent 80%); 
+    }
+    .glass-card { 
+      backdrop-filter: blur(16px); 
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.5) 100%); 
+      border: 1px solid rgba(255,255,255,0.08); 
+      transition: all 0.3s ease;
+    }
+    .glass-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(129, 140, 248, 0.3);
+      box-shadow: 0 20px 40px -10px rgba(129, 140, 248, 0.2);
+    }
+    .glass-nav {
+      backdrop-filter: blur(20px);
+      background: rgba(15, 23, 42, 0.8);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+  </style>
+</head>
+<body class="antialiased">
+
+  <!-- Background -->
+  <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+      <div class="absolute inset-0 bg-grid"></div>
+      <div class="absolute top-0 -left-1/4 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[120px] animate-blob"></div>
+      <div class="absolute bottom-0 -right-1/4 w-[600px] h-[600px] bg-orange-600/10 rounded-full blur-[120px] animate-blob" style="animation-delay: 5s;"></div>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="glass-nav sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <!-- Logo -->
+        <div class="flex items-center gap-3">
+          <div class="font-black text-2xl tracking-tighter text-white">
+            Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-orange-400">.App</span>
+          </div>
+        </div>
+
+        <!-- User Menu -->
+        <div class="flex items-center gap-4">
+          <div class="text-right hidden sm:block">
+            <p class="text-xs text-slate-400">Hoşgeldiniz</p>
+            <p class="text-sm font-bold text-white" id="userName">Yükleniyor...</p>
+          </div>
+          <button 
+            onclick="handleLogout()"
+            class="px-4 py-2 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 rounded-lg text-sm font-semibold transition">
+            Çıkış Yap
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="relative z-10 max-w-7xl mx-auto px-6 py-12">
+    
+    <!-- Welcome Section -->
+    <div class="mb-12">
+      <h1 class="text-4xl lg:text-5xl font-black text-white mb-4">
+        Merhaba, <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-orange-400" id="userGreeting">Yükleniyor...</span>! 👋
+      </h1>
+      <p class="text-slate-400 text-lg">Enerji verimliliği hesaplama araçlarına hoş geldiniz.</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      <!-- Card 1 -->
+      <div class="glass-card p-6 rounded-2xl">
+        <div class="flex items-center gap-4">
+          <div class="p-3 bg-indigo-500/20 rounded-xl">
+            <svg class="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <div>
+            <p class="text-3xl font-bold text-white" id="calcCount">0</p>
+            <p class="text-sm text-slate-400">Toplam Hesaplama</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="glass-card p-6 rounded-2xl">
+        <div class="flex items-center gap-4">
+          <div class="p-3 bg-orange-500/20 rounded-xl">
+            <svg class="w-8 h-8 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+          </div>
+          <div>
+            <p class="text-3xl font-bold text-white">∞</p>
+            <p class="text-sm text-slate-400">Kullanım Limiti</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="glass-card p-6 rounded-2xl">
+        <div class="flex items-center gap-4">
+          <div class="p-3 bg-green-500/20 rounded-xl">
+            <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div>
+            <p class="text-3xl font-bold text-white">Aktif</p>
+            <p class="text-sm text-slate-400">Hesap Durumu</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calculation Tools -->
+    <div class="mb-8">
+      <h2 class="text-2xl font-bold text-white mb-6">Hesaplama Araçları</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <!-- Tool 1: Ana Hesaplama -->
+        <a href="endustriyel-enerji-kaybi-hesaplama.html" class="glass-card p-6 rounded-2xl block group">
+          <div class="flex items-start gap-4">
+            <div class="p-3 bg-indigo-500/20 rounded-xl group-hover:bg-indigo-500/30 transition">
+              <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-bold text-white mb-2 group-hover:text-indigo-400 transition">Enerji Kaybı Hesaplama</h3>
+              <p class="text-sm text-slate-400">Endüstriyel tesislerdeki ısı kayıplarını hesaplayın</p>
+            </div>
+          </div>
+        </a>
+
+        <!-- Tool 2: ROI -->
+        <a href="tool/roi.html" class="glass-card p-6 rounded-2xl block group">
+          <div class="flex items-start gap-4">
+            <div class="p-3 bg-green-500/20 rounded-xl group-hover:bg-green-500/30 transition">
+              <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-bold text-white mb-2 group-hover:text-green-400 transition">ROI Hesaplama</h3>
+              <p class="text-sm text-slate-400">Yatırımınızın geri dönüş süresini hesaplayın</p>
+            </div>
+          </div>
+        </a>
+
+        <!-- Tool 3: Thickness -->
+        <a href="tool/thickness.html" class="glass-card p-6 rounded-2xl block group">
+          <div class="flex items-start gap-4">
+            <div class="p-3 bg-orange-500/20 rounded-xl group-hover:bg-orange-500/30 transition">
+              <svg class="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-bold text-white mb-2 group-hover:text-orange-400 transition">Yalıtım Kalınlığı</h3>
+              <p class="text-sm text-slate-400">Ekonomik yalıtım kalınlığını belirleyin</p>
+            </div>
+          </div>
+        </a>
+
+        <!-- Tool 4: Air Leak -->
+        <a href="tool/air.html" class="glass-card p-6 rounded-2xl block group">
+          <div class="flex items-start gap-4">
+            <div class="p-3 bg-purple-500/20 rounded-xl group-hover:bg-purple-500/30 transition">
+              <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-bold text-white mb-2 group-hover:text-purple-400 transition">Hava Kaçağı</h3>
+              <p class="text-sm text-slate-400">Basınçlı hava kaçağı maliyetlerini hesaplayın</p>
+            </div>
+          </div>
+        </a>
+
+        <!-- Tool 5: Boiler -->
+        <a href="tool/boiler.html" class="glass-card p-6 rounded-2xl block group">
+          <div class="flex items-start gap-4">
+            <div class="p-3 bg-red-500/20 rounded-xl group-hover:bg-red-500/30 transition">
+              <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"></path>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-bold text-white mb-2 group-hover:text-red-400 transition">Kazan Verimliliği</h3>
+              <p class="text-sm text-slate-400">Kazan enerji verimliliğini analiz edin</p>
+            </div>
+          </div>
+        </a>
+
+        <!-- Tool 6: Chiller ROI -->
+        <a href="tool/chiller-roi.html" class="glass-card p-6 rounded-2xl block group">
+          <div class="flex items-start gap-4">
+            <div class="p-3 bg-cyan-500/20 rounded-xl group-hover:bg-cyan-500/30 transition">
+              <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-bold text-white mb-2 group-hover:text-cyan-400 transition">Chiller ROI</h3>
+              <p class="text-sm text-slate-400">Soğutma sistemi yatırım analizini yapın</p>
+            </div>
+          </div>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="glass-card p-8 rounded-2xl">
+      <h2 class="text-2xl font-bold text-white mb-6">Hızlı İşlemler</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <a href="endustriyel-enerji-kaybi-hesaplama.html" class="flex items-center gap-3 p-4 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 rounded-xl transition group">
+          <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          <span class="text-white font-semibold group-hover:text-indigo-400 transition">Yeni Hesaplama Yap</span>
+        </a>
+        
+        <a href="iletisim.html" class="flex items-center gap-3 p-4 bg-slate-700/30 hover:bg-slate-700/50 border border-white/10 rounded-xl transition group">
+          <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path>
+          </svg>
+          <span class="text-white font-semibold group-hover:text-slate-300 transition">Destek Al</span>
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="relative z-10 text-center py-12">
+    <p class="text-[10px] text-slate-600 uppercase tracking-[0.2em] font-bold">&copy; 2025 Optimizi Inc • Tüm Hakları Saklıdır.</p>
+  </div>
+
+  <!-- Supabase Config - Inline -->
+  <script>
+    // Supabase Configuration
+    const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
+    
+    // Supabase client'ı başlat
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    console.log('✅ Supabase bağlantısı kuruldu');
+  </script>
+  
+  <script>
+    // Check authentication and load user data
+    async function checkAuth() {
+      const { data: { session }, error } = await supabaseClient.auth.getSession();
+      
+      if (!session) {
+        // Not logged in, redirect to login
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      // User is logged in, load their data
+      const user = session.user;
+      console.log('✅ Kullanıcı giriş yapmış:', user);
+      
+      // Update UI with user info
+      const fullName = user.user_metadata?.full_name || user.email.split('@')[0];
+      const firstName = fullName.split(' ')[0];
+      
+      document.getElementById('userName').textContent = fullName;
+      document.getElementById('userGreeting').textContent = firstName;
+      
+      // TODO: Fetch user's calculation count from database
+      // For now, set to 0
+      document.getElementById('calcCount').textContent = '0';
+    }
+    
+    // Logout function
+    async function handleLogout() {
+      const { error } = await supabaseClient.auth.signOut();
+      
+      if (error) {
+        console.error('Çıkış hatası:', error);
+        alert('Çıkış yapılırken bir hata oluştu.');
+      } else {
+        console.log('✅ Çıkış yapıldı');
+        window.location.href = 'login.html';
+      }
+    }
+    
+    // Run on page load
+    checkAuth();
+  </script>
+</body>
+</html>
