@@ -31,6 +31,9 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
       
       // Kullanıcı bilgilerini global olarak sakla
       window.currentUser = session.user;
+      
+      // Sayfayı görünür yap (flash problemi çözümü)
+      document.body.classList.add('auth-checked');
     }
   } catch (err) {
     console.error('Unexpected auth error:', err);
