@@ -65,6 +65,55 @@
     .error-input { border-color: #ef4444 !important; animation: shake 0.5s ease-in-out; }
     .error-input:focus { box-shadow: 0 0 15px rgba(239, 68, 68, 0.3) !important; }
     .spinner { border: 2px solid rgba(255, 255, 255, 0.3); border-top: 2px solid white; border-radius: 50%; width: 20px; height: 20px; animation: spin 0.8s linear infinite; }
+    
+    /* Modal Styles */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      animation: fadeIn 0.3s ease;
+    }
+    .modal-overlay.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px;
+      max-width: 500px;
+      width: 90%;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      animation: slideUp 0.3s ease;
+    }
+    .modal-header {
+      padding: 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-body {
+      padding: 24px;
+    }
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   </style>
 </head>
 <body class="antialiased">
@@ -177,7 +226,7 @@
                 <label class="flex items-center gap-2 cursor-pointer text-slate-400 hover:text-white transition">
                     <input type="checkbox" class="rounded border-white/10 bg-slate-800 text-indigo-600 focus:ring-indigo-500"> Beni Hatırla
                 </label>
-                <a href="#" class="text-indigo-400 hover:text-indigo-300 transition font-semibold">Şifremi Unuttum?</a>
+                <a href="#" onclick="openForgotPasswordModal(); return false;" class="text-indigo-400 hover:text-indigo-300 transition font-semibold">Şifremi Unuttum?</a>
             </div>
 
             <button 
@@ -202,6 +251,82 @@
     </div>
   </div>
 
+  <!-- ŞİFREMİ UNUTTUM MODAL -->
+  <div id="forgotPasswordModal" class="modal-overlay" onclick="closeModalOnOverlay(event, 'forgotPasswordModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="text-2xl font-bold text-white">Şifremi Unuttum</h2>
+        <button onclick="closeForgotPasswordModal()" class="text-slate-400 hover:text-white transition">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Success Message -->
+        <div id="resetSuccessMessage" class="hidden mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
+          <div class="flex items-start gap-3">
+            <div class="flex-shrink-0 mt-0.5">
+              <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h4 class="text-sm font-bold text-green-300 mb-1">Email Gönderildi! 📧</h4>
+              <p class="text-xs text-green-200/80">Şifre sıfırlama linki email adresinize gönderildi. Lütfen kontrol edin.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="resetErrorMessage" class="hidden mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+          <div class="flex items-start gap-3">
+            <div class="flex-shrink-0 mt-0.5">
+              <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <p class="text-xs text-red-200/80" id="resetErrorText">Bir hata oluştu.</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-sm text-slate-300 mb-6">
+          E-posta adresinizi girin, size şifre sıfırlama linki gönderelim.
+        </p>
+        
+        <form id="forgotPasswordForm" class="space-y-6">
+          <div>
+            <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">E-Posta Adresi</label>
+            <div class="relative group">
+              <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-indigo-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+              </svg>
+              <input 
+                type="email" 
+                id="resetEmailInput"
+                placeholder="isim@sirket.com" 
+                class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-4 pl-12 pr-4 text-white transition focus:bg-slate-900 focus:border-indigo-500/50 focus:outline-none" 
+                required>
+            </div>
+          </div>
+
+          <button 
+            type="submit" 
+            id="resetSubmitBtn"
+            class="w-full py-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-orange-500 hover:from-indigo-500 hover:to-orange-400 text-white rounded-xl font-bold transition shadow-lg shadow-indigo-500/25 active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+            <span id="resetBtnText">Sıfırlama Linki Gönder</span>
+            <svg id="resetBtnIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+            <div id="resetBtnSpinner" class="spinner hidden"></div>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- Supabase Config - Inline -->
   <script>
     // Supabase Configuration
@@ -215,6 +340,34 @@
   </script>
   
   <script>
+    // Modal Functions
+    function openForgotPasswordModal() {
+      document.getElementById('forgotPasswordModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeForgotPasswordModal() {
+      document.getElementById('forgotPasswordModal').classList.remove('active');
+      document.body.style.overflow = 'auto';
+      // Reset form
+      document.getElementById('forgotPasswordForm').reset();
+      document.getElementById('resetSuccessMessage').classList.add('hidden');
+      document.getElementById('resetErrorMessage').classList.add('hidden');
+    }
+    
+    function closeModalOnOverlay(event, modalId) {
+      if (event.target.id === modalId) {
+        closeForgotPasswordModal();
+      }
+    }
+    
+    // Close on ESC
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeForgotPasswordModal();
+      }
+    });
+    
     // Password Toggle Function
     function togglePassword() {
       const passwordInput = document.getElementById('passwordInput');
@@ -342,9 +495,73 @@
       }
     });
 
-    // Remove error styling when user starts typing
+    // Remove error when user starts typing
     document.getElementById('emailInput').addEventListener('input', hideError);
     document.getElementById('passwordInput').addEventListener('input', hideError);
+    
+    // Forgot Password Form Handler
+    document.getElementById('forgotPasswordForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById('resetEmailInput').value;
+      const submitBtn = document.getElementById('resetSubmitBtn');
+      const btnText = document.getElementById('resetBtnText');
+      const btnIcon = document.getElementById('resetBtnIcon');
+      const btnSpinner = document.getElementById('resetBtnSpinner');
+      const successMsg = document.getElementById('resetSuccessMessage');
+      const errorMsg = document.getElementById('resetErrorMessage');
+      const errorText = document.getElementById('resetErrorText');
+      
+      // Hide messages
+      successMsg.classList.add('hidden');
+      errorMsg.classList.add('hidden');
+      
+      // Loading state
+      submitBtn.disabled = true;
+      btnText.textContent = 'Gönderiliyor...';
+      btnIcon.classList.add('hidden');
+      btnSpinner.classList.remove('hidden');
+      
+      try {
+        const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + '/reset-password.html',
+        });
+        
+        if (error) {
+          // Error
+          submitBtn.disabled = false;
+          btnText.textContent = 'Sıfırlama Linki Gönder';
+          btnIcon.classList.remove('hidden');
+          btnSpinner.classList.add('hidden');
+          
+          errorText.textContent = error.message.includes('not found') 
+            ? 'Bu e-posta adresi sistemimizde kayıtlı değil.' 
+            : 'Bir hata oluştu. Lütfen tekrar deneyin.';
+          errorMsg.classList.remove('hidden');
+        } else {
+          // Success
+          submitBtn.disabled = false;
+          btnText.textContent = 'Sıfırlama Linki Gönder';
+          btnIcon.classList.remove('hidden');
+          btnSpinner.classList.add('hidden');
+          
+          successMsg.classList.remove('hidden');
+          
+          // Close modal after 3 seconds
+          setTimeout(() => {
+            closeForgotPasswordModal();
+          }, 3000);
+        }
+      } catch (err) {
+        submitBtn.disabled = false;
+        btnText.textContent = 'Sıfırlama Linki Gönder';
+        btnIcon.classList.remove('hidden');
+        btnSpinner.classList.add('hidden');
+        
+        errorText.textContent = 'Bir hata oluştu. Lütfen tekrar deneyin.';
+        errorMsg.classList.remove('hidden');
+      }
+    });
     
     // Check if user is already logged in
     supabaseClient.auth.getSession().then(({ data: { session } }) => {
