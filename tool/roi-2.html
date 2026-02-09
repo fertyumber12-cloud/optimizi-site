@@ -13,7 +13,7 @@
     
     <!-- Flash Problemi Çözümü -->
     <style>
-      body {
+      body:not(.auth-checked) {
         opacity: 0;
         visibility: hidden;
       }
@@ -23,6 +23,10 @@
         transition: opacity 0.3s ease;
       }
     </style>
+    <!-- Fallback: auth-guard yüklenemezse sayfayı yine de göster -->
+    <script>
+      setTimeout(function(){ if(document.body) document.body.classList.add('auth-checked'); }, 500);
+    </script>
 </head>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
@@ -197,6 +201,10 @@
     .audit-table th { background-color: #f8fafc !important; color: #475569 !important; font-weight: 700; text-transform: uppercase; font-size: 7px; padding: 4px; border-bottom: 2px solid #0f172a !important; }
     .audit-table td { border-bottom: 1px solid #e2e8f0 !important; padding: 4px; font-size: 8px; color: #334155 !important; vertical-align: middle; }
     .audit-table tr:nth-child(even) { background-color: #f8fafc; }
+    
+    /* QR kodun print'te görünmesini garanti et */
+    #covQrCode { mix-blend-mode: normal !important; }
+    #covQrCode[src]:not([src=""]) { opacity: 1 !important; }
   }
   #print-area { display: none; }
 </style>
@@ -237,6 +245,12 @@
                   <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400">QR Göster</span>
                   <input type="checkbox" id="toggleQrInput" checked class="w-4 h-4 accent-green-500 cursor-pointer" onchange="toggleQrVisibility()">
               </label>
+
+              <input type="file" id="qrInp" class="hidden" accept="image/*" onchange="readQr(this)">
+              <button onclick="document.getElementById('qrInp').click()" id="navQrBtn" class="flex items-center gap-2 cursor-pointer bg-slate-100 dark:bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-green-500 dark:hover:border-green-400 transition">
+                  <i data-lucide="upload" class="w-4 h-4 text-green-500"></i>
+                  <span id="navQrLabel" class="text-[10px] font-bold text-slate-500 dark:text-slate-400 hidden md:inline">QR Yükle</span>
+              </button>
 
               <button onclick="toggleDarkMode()" class="flex items-center gap-2 cursor-pointer bg-slate-100 dark:bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-indigo-500 dark:hover:border-red-500 transition">
                   <i data-lucide="sun" class="w-4 h-4 text-amber-500 dark:hidden"></i>
@@ -486,11 +500,6 @@
                         <img id="prevImg" class="hidden w-full h-24 object-cover rounded-lg mt-2 border border-slate-300 dark:border-slate-600">
                     </div>
 
-                    <div class="mt-4 relative z-10">
-                        <input type="file" id="qrInp" class="hidden" accept="image/*" onchange="readQr(this)">
-                        <div onclick="document.getElementById('qrInp').click()" class="border border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-3 text-center cursor-pointer hover:border-green-500 hover:bg-slate-100 dark:bg-slate-800 transition group"><i data-lucide="qr-code" class="w-4 h-4 text-slate-400 mx-auto group-hover:text-green-500 mb-1"></i><span class="text-[10px] text-slate-400 block">Rapor QR'ı Yükle</span></div>
-                    </div>
-
                     <div class="bg-slate-100 dark:bg-slate-800 rounded-lg p-3 mt-4 border border-slate-200 dark:border-slate-700 relative z-10">
                         <label class="text-[10px] text-green-600 font-bold uppercase mb-2 block">İzolasyon Özellikleri</label>
                         <div class="mb-2"><select id="calcStd" class="glass-input text-[10px] !py-1 !h-7 text-slate-500 dark:text-slate-400"><option value="iso">ISO 12241 (Standard)</option><option value="astm">ASTM C680 (USA)</option><option value="vdi">VDI 2055 (German)</option></select></div>
@@ -571,12 +580,12 @@
                             <th class="px-6 py-3 text-center text-red-500 dark:text-red-400">Çıplak Yüzey Sıc.<br><span class="text-[9px]">(Kayıp kWh)</span></th>
                             <th class="px-6 py-3 text-center text-orange-500 dark:text-orange-400">İzolasyonlu Yüzey Sıc.<br><span class="text-[9px]">(Kayıp kWh)</span></th>
                             <th class="px-6 py-3 text-center text-green-600 dark:text-emerald-400">Kazanç<br><span class="text-[9px]">(Fark kWh)</span></th>
-                            <th class="px-6 py-3 text-right w-32 text-slate-600 dark:text-slate-300">Yatırım</th><th class="px-6 py-3 text-right text-green-600 dark:text-emerald-400">Kazanç (Tutar)</th>
+                            <th class="px-6 py-3 text-right text-green-600 dark:text-emerald-400">Kazanç (Tutar)</th>
                             <th class="px-6 py-3 text-right text-slate-600 dark:text-slate-300">ROI</th><th class="px-6 py-3 text-right text-slate-600 dark:text-slate-300">İşlem</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200 dark:divide-slate-700" id="gridBody">
-                            <tr><td colspan="11" class="px-6 py-20 text-center text-slate-500 dark:text-slate-400"><i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-20"></i><span id="emptyMsg">Henüz hesaplama eklenmedi.</span></td></tr>
+                            <tr><td colspan="10" class="px-6 py-20 text-center text-slate-500 dark:text-slate-400"><i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-20"></i><span id="emptyMsg">Henüz hesaplama eklenmedi.</span></td></tr>
                         </tbody>
                         </table>
                     </div>
@@ -615,7 +624,7 @@
 
             <div class="relative z-10">
                 <div class="p-4 bg-white dark:bg-slate-800/50/5 rounded-xl border border-white/10 backdrop-blur-sm">
-                    <img id="covQrCode" src="" class="w-24 h-24 object-contain opacity-50 mb-2 mix-blend-screen" alt="QR">
+                    <img id="covQrCode" src="" class="w-24 h-24 object-contain opacity-50 mb-2" alt="QR">
                     <div class="text-[9px] text-slate-400 leading-tight">Mevcut ısı kayıplarının tesisinize anlık maliyetini takip etmek için kodu taratın.</div>
                 </div>
             </div>
@@ -1201,7 +1210,7 @@
                     }
                 });
                 multiplier = totalArea;
-                Name = `Yüzey (${dims.join(' + ')})`;
+                Name = `Düz Yüzey (${totalArea.toFixed(2)} m²)`;
                 unitLabel = "Set";
             }
             dPipe=1.0; D_ext=1.0; 
@@ -1408,7 +1417,7 @@
     function fillDN(id){const el=document.getElementById(id);el.innerHTML='';for(const[k,v]of Object.entries(PIPES)){let o=document.createElement('option');o.value=v;o.text=`DN ${k}`;el.add(o);}if(id==='vDN')el.value=60.3;if(id==='pDN')el.value=88.9;}
     
     function readImg(i){if(i.files&&i.files[0]){const r=new FileReader();r.onload=e=>{currImg=e.target.result;document.getElementById('prevImg').src=currImg;document.getElementById('prevImg').classList.remove('hidden');};r.readAsDataURL(i.files[0]);}}
-    function readQr(i){if(i.files&&i.files[0]){const r=new FileReader();r.onload=e=>{userQrImg=e.target.result;alert("QR Kod yüklendi! Raporun son sayfasında görünecek.");};r.readAsDataURL(i.files[0]);}}
+    function readQr(i){if(i.files&&i.files[0]){const r=new FileReader();r.onload=e=>{userQrImg=e.target.result;const btn=document.getElementById('navQrBtn');btn.classList.remove('border-slate-200','dark:border-slate-700');btn.classList.add('border-green-500','dark:border-green-500','bg-green-50','dark:bg-green-900/20');const lbl=document.getElementById('navQrLabel');if(lbl)lbl.innerText='QR Yüklendi ✓';};r.readAsDataURL(i.files[0]);}}
 
     async function getFx(){try{const r=await fetch('https://api.frankfurter.app/latest?from=USD&to=TRY');const d=await r.json();FX.USD=d.rates.TRY;const r2=await fetch('https://api.frankfurter.app/latest?from=EUR&to=TRY');const d2=await r2.json();FX.EUR=d2.rates.TRY;document.getElementById('fxVal').innerText=FX.USD.toFixed(2);}catch(e){}}
     
@@ -1494,9 +1503,42 @@
 
     function clearAll(){if(confirm('Tüm listeyi temizle?')){LIST=[];render();}}
     
+    // --- Düzgün CSV Parser (tırnak içi virgülleri doğru işler) ---
+    function parseCSVLine(line) {
+        const result = [];
+        let current = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+            if (inQuotes) {
+                if (ch === '"') {
+                    if (i + 1 < line.length && line[i + 1] === '"') { current += '"'; i++; }
+                    else { inQuotes = false; }
+                } else { current += ch; }
+            } else {
+                if (ch === '"') { inQuotes = true; }
+                else if (ch === ',') { result.push(current); current = ''; }
+                else { current += ch; }
+            }
+        }
+        result.push(current);
+        return result;
+    }
+
     function exportCSV(){
         if(LIST.length===0){alert("Liste boş!");return;}
         let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
+        // Global parametreleri meta satır olarak ekle
+        const gEff = document.getElementById('eff').value;
+        const gPrice = document.getElementById('price').value;
+        const gHours = document.getElementById('hours').value;
+        const gEnergyCurr = document.getElementById('energyCurr').value;
+        const gFuel = document.getElementById('fuel').value;
+        const gFuelLhv = document.getElementById('fuelLhv').value || '';
+        const gFuelUnit = document.getElementById('fuelUnit').value || '';
+        const gTAmb = document.getElementById('tAmb').value;
+        const gVWind = document.getElementById('vWind').value;
+        csvContent += `#META,eff=${gEff},price=${gPrice},hours=${gHours},energyCurr=${gEnergyCurr},fuel=${gFuel},fuelLhv=${gFuelLhv},fuelUnit=${gFuelUnit},tAmb=${gTAmb},vWind=${gVWind}\n`;
         csvContent += "Type,Qty,PipeLen,Temp_Proc,Temp_Amb,Material,Thickness,Invest,Standard,Valve_DN,Pipe_DN,Valve_Type,Surfaces,Invest_Curr,Energy_Curr,Location,UseL2,Mat2,Thk2,FuelType,FuelLHV,FuelUnit,PackageName,SubItemsCount,WindSpeed,SubItemsDump\n";
         
         LIST.forEach(row => {
@@ -1513,10 +1555,10 @@
             const pkgName = i.type === 'package' ? row.name.replace("📦 PAKET: ", "") : "";
             const subCount = i.type === 'package' ? i.subItems.length : 0;
             
-            const subItemsDump = i.type === 'package' ? btoa(unescape(encodeURIComponent(JSON.stringify(i.subItems)))) : "";
+            const subItemsDump = i.type === 'package' ? `"${btoa(unescape(encodeURIComponent(JSON.stringify(i.subItems))))}"` : "";
 
             const r = [
-                i.type, row.qty, i.pLen, i.tProc || 0, i.tAmb || 0, i.matKey, i.thk || 0, i.inv, i.standard || "", i.vDN || "", i.pDN || "", i.valveType || "", surfStr, i.invCurr, i.energyCurr, 
+                i.type, row.qty, i.pLen, i.tProc || 0, i.tAmb || 0, i.matKey, i.thk || 0, i.inv, i.standard || "", i.vDN || "", i.pDN || "", i.valveType || "", `"${surfStr}"`, i.invCurr, i.energyCurr, 
                 `"${row.location}"`, i.useL2, i.matKey2, i.thk2, i.fuelType, i.fuelLhv, i.fuelUnit, `"${pkgName}"`, subCount, i.vWind || 1, subItemsDump
             ];
             csvContent += r.join(",") + "\n";
@@ -1539,7 +1581,6 @@
         reader.onload = function(e){
             const text = e.target.result;
             const rows = text.split('\n');
-            rows.shift();
             
             let addedCount = 0;
 
@@ -1570,26 +1611,57 @@
 
             if(isPackageMode) togglePackageMode();
 
+            // Meta satırı ara ve global parametreleri geri yükle
+            let dataRows = [];
             rows.forEach(row => {
+                const trimmed = row.trim();
+                if(trimmed.startsWith('#META,')) {
+                    // Global parametreleri parse et
+                    const parts = trimmed.split(',');
+                    const meta = {};
+                    parts.forEach(p => {
+                        const eq = p.indexOf('=');
+                        if(eq > 0) meta[p.substring(0, eq)] = p.substring(eq + 1);
+                    });
+                    if(meta.eff) document.getElementById('eff').value = meta.eff;
+                    if(meta.price) document.getElementById('price').value = meta.price;
+                    if(meta.hours) document.getElementById('hours').value = meta.hours;
+                    if(meta.energyCurr) document.getElementById('energyCurr').value = meta.energyCurr;
+                    if(meta.tAmb) document.getElementById('tAmb').value = meta.tAmb;
+                    if(meta.vWind) document.getElementById('vWind').value = meta.vWind;
+                    if(meta.fuel) {
+                        document.getElementById('fuel').value = meta.fuel;
+                        toggleFuelMode();
+                        if(meta.fuel === 'manual') {
+                            if(meta.fuelLhv) document.getElementById('fuelLhv').value = meta.fuelLhv;
+                            if(meta.fuelUnit) document.getElementById('fuelUnit').value = meta.fuelUnit;
+                        }
+                    }
+                } else if(trimmed && !trimmed.startsWith('Type,')) {
+                    dataRows.push(trimmed);
+                }
+            });
+
+            dataRows.forEach(row => {
                 if(!row.trim()) return;
                 
-                let cols = row.split(',');
-                if(cols.length < 5) cols = row.split(';');
-
+                // Düzgün CSV parser kullan
+                let cols = parseCSVLine(row);
                 if(cols.length < 10) return;
 
                 try {
-                    const type = cols[0];
+                    const type = cols[0].trim();
 
-                    if (type === 'package' && cols[25] && cols[25].length > 5) {
+                    if (type === 'package' && cols[25] && cols[25].trim().length > 5) {
                         try {
-                            const subItemsJson = decodeURIComponent(escape(window.atob(cols[25])));
+                            const rawDump = cols[25].trim();
+                            const subItemsJson = decodeURIComponent(escape(window.atob(rawDump)));
                             const basket = JSON.parse(subItemsJson);
                             
-                            const pkgName = cols[22] ? cols[22].replace(/^"|"$/g, '') : "Paket";
+                            const pkgName = (cols[22] || "Paket").trim();
                             const pkgQty = parseFloat(cols[1]) || 1;
                             const pkgInv = parseFloat(cols[7]) || 0;
-                            const pkgInvCurr = cols[13] || "TL";
+                            const pkgInvCurr = (cols[13] || "TL").trim();
 
                             const compositeItem = buildPackageItem(basket, pkgName, pkgQty, pkgInv, pkgInvCurr);
                             LIST.push(compositeItem);
@@ -1619,27 +1691,33 @@
                         el.pDN.value = cols[10] || ""; 
                     } 
                     
-                    if(type === 'tank' && cols[12] && cols[12].length > 2) {
+                    if(type === 'tank' && cols[12] && cols[12].trim().length > 1) {
                         currentSurfaces = []; 
-                        const sList = cols[12].split('|');
+                        const surfRaw = cols[12].trim();
+                        const sList = surfRaw.split('|');
                         sList.forEach(s => {
+                            s = s.trim();
                             if(s.startsWith('C:')){
                                 const dVal = parseFloat(s.split(':')[1]);
-                                currentSurfaces.push({type: 'circle', d: dVal});
+                                if(!isNaN(dVal)) currentSurfaces.push({type: 'circle', d: dVal});
                             } else {
                                 const dims = s.split('x');
-                                if(dims.length===2) currentSurfaces.push({type: 'rect', w: parseFloat(dims[0]), h: parseFloat(dims[1])});
+                                if(dims.length===2) {
+                                    const w = parseFloat(dims[0]);
+                                    const h = parseFloat(dims[1]);
+                                    if(!isNaN(w) && !isNaN(h)) currentSurfaces.push({type: 'rect', w: w, h: h});
+                                }
                             }
                         });
                     }
 
-                    el.invCurr.value = cols[13] || "TL";
-                    el.energyCurr.value = cols[14] || "TL";
+                    el.invCurr.value = (cols[13] || "TL").trim();
+                    el.energyCurr.value = (cols[14] || "TL").trim();
                     
-                    let locRaw = cols[15] || "";
-                    el.location.value = locRaw.replace(/^"|"$/g, '');
+                    let locRaw = (cols[15] || "").trim();
+                    el.location.value = locRaw;
 
-                    const isL2 = (cols[16] === 'true');
+                    const isL2 = (cols[16] && cols[16].trim() === 'true');
                     el.useL2.checked = isL2;
                     toggleL2(); 
                     if(isL2){
@@ -1647,11 +1725,14 @@
                         el.thk2.value = cols[18];
                     }
 
-                    el.fuel.value = cols[19] || 'gas';
-                    toggleFuelMode();
-                    if(cols[19] === 'manual'){
-                        el.fuelLhv.value = cols[20];
-                        el.fuelUnit.value = cols[21];
+                    const rowFuel = (cols[19] || '').trim();
+                    if(rowFuel) {
+                        el.fuel.value = rowFuel;
+                        toggleFuelMode();
+                        if(rowFuel === 'manual'){
+                            el.fuelLhv.value = cols[20];
+                            el.fuelUnit.value = cols[21];
+                        }
                     }
 
                     if(cols[24] !== undefined) {
@@ -1702,7 +1783,6 @@
             const rowClass = i.inputs.type === 'package' ? "bg-indigo-50/50 dark:bg-red-900/10 border-l-4 border-l-indigo-500 dark:border-l-red-500" : "";
 
             const qtyInput = `<input type="number" class="grid-input font-bold text-slate-800 dark:text-slate-100" value="${i.qty}" onchange="quickUpdate(${x}, 'qty', this.value)">`;
-            const invInput = `<div class="flex items-center gap-1 justify-end text-xs"><span class="text-slate-400">${currSym}</span><input type="number" class="grid-input text-right text-slate-600 dark:text-slate-300 w-20" value="${invDisp.toFixed(2)}" onchange="quickUpdate(${x}, 'inv', this.value)"></div>`;
 
             tb.insertAdjacentHTML('beforeend',`<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition border-b border-slate-200 dark:border-slate-700 ${x===editingIndex?'bg-indigo-50 dark:bg-red-900/20':''} ${rowClass}">
             <td class="px-6 py-4">${imgTag}</td>
@@ -1712,10 +1792,9 @@
             <td class="px-6 py-4 text-center"><div class="font-bold text-slate-700 dark:text-slate-200">${i.Ts}</div><div class="text-[10px] font-bold text-red-500">${i.kwhBare} kWh</div></td>
             <td class="px-6 py-4 text-center"><div class="font-bold text-slate-700 dark:text-slate-200">${i.Tins}</div><div class="text-[10px] font-bold text-orange-500">${i.kwhIns} kWh</div></td>
             <td class="px-6 py-4 text-center"><div class="font-bold text-green-600">+${i.kwhSave} kWh</div></td>
-            <td class="px-6 py-4 text-right">${invInput}</td>
             <td class="px-6 py-4 text-right text-green-600 font-bold">${i.inputs.matKey!=='bare'?'+'+currSym+fmt(saveDisp):'-'}</td><td class="px-6 py-4 text-right font-bold text-indigo-500 dark:text-red-500">${roi}</td><td class="px-6 py-4 text-right"><button onclick="edit(${x})" class="text-indigo-500 dark:text-red-500 mr-2 hover:text-slate-900"><i data-lucide="pencil" class="w-4 h-4"></i></button><button onclick="del(${x})" class="text-red-500 hover:text-slate-900"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td></tr>`);
         });
-        if(LIST.length===0)tb.innerHTML=`<tr><td colspan="11" class="px-6 py-20 text-center text-slate-500 dark:text-slate-400"><i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-20"></i><span id="emptyMsg">Henüz hesaplama eklenmedi.</span></td></tr>`;
+        if(LIST.length===0)tb.innerHTML=`<tr><td colspan="10" class="px-6 py-20 text-center text-slate-500 dark:text-slate-400"><i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-20"></i><span id="emptyMsg">Henüz hesaplama eklenmedi.</span></td></tr>`;
         
         // Manuel yatırım bedeli girilmişse onu kullan, yoksa otomatik toplamı kullan
         const finalInv = (manualTotalInvestment !== null && manualTotalInvestment > 0) 
@@ -1998,8 +2077,8 @@
             document.getElementById('covNarrative').innerHTML = narrative;
 
             const qrImgEl = document.getElementById('covQrCode');
-            if (userQrImg) { qrImgEl.src = userQrImg; qrImgEl.classList.remove('opacity-20'); } 
-            else { qrImgEl.src = ""; qrImgEl.classList.add('opacity-50'); }
+            if (userQrImg) { qrImgEl.src = userQrImg; qrImgEl.style.opacity = '1'; qrImgEl.classList.remove('opacity-50', 'opacity-20'); } 
+            else { qrImgEl.src = ""; qrImgEl.style.opacity = '0.5'; }
 
             document.getElementById('sumLoss').innerText = currSym + fmt(gLoss);
             document.getElementById('sumFuelLost').innerText = `(${Math.round(gFuelLost).toLocaleString()} ${lastFuelUnit})`;
@@ -2029,8 +2108,5 @@
         }catch(e){ alert('Rapor oluşturulurken hata oluştu: ' + e.message); console.error(e); }
     }
 </script>
-  <script src="guard.js?v=2"></script>
 </body>
 </html>
-
-
