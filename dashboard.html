@@ -21,6 +21,12 @@
           colors: { 
             slate: { 850: '#151e2e', 900: '#0f172a', 950: '#020617' },
             primary: { 500: '#6366f1', 600: '#4f46e5' } 
+          },
+          animation: {
+            'pop-in': 'popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+          },
+          keyframes: {
+            popIn: { '0%': { transform: 'scale(0.9)', opacity: '0' }, '100%': { transform: 'scale(1)', opacity: '1' } }
           }
         }
       }
@@ -54,7 +60,7 @@
     body { 
       background: var(--bg-grad);
       background-attachment: fixed;
-      color: #0f172a; /* Light mode text default */
+      color: #0f172a;
       overflow: hidden;
       transition: color 0.3s ease, background 0.3s ease;
     }
@@ -93,6 +99,7 @@
         border-radius: 12px; 
         color: var(--sidebar-text);
         transition: all 0.2s; font-weight: 500; font-size: 0.9rem;
+        cursor: pointer;
     }
     .sidebar-link:hover, .sidebar-link.active {
         background: var(--sidebar-active-bg); 
@@ -107,6 +114,7 @@
         to { transform: translateX(0); opacity: 1; }
     }
     .modal-enter { animation: slideInRight 0.3s ease-out forwards; }
+    .animate-pop { animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
   </style>
   <script>
       // Init Theme
@@ -145,7 +153,8 @@
           <a href="#" class="sidebar-link"><i data-lucide="receipt"></i> Teklif Geçmişi</a>
 
           <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2 mt-6">Araçlar</div>
-          <a href="endustriyel-enerji-kaybi-hesaplama.html" class="sidebar-link"><i data-lucide="calculator"></i> Hesaplama Merkezi</a>
+          <button onclick="openCalcModal()" class="sidebar-link w-full text-left"><i data-lucide="calculator"></i> Hesaplama Merkezi</button>
+          
           <a href="#" class="sidebar-link"><i data-lucide="users"></i> Ekip Yönetimi <span class="ml-auto text-[10px] bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 px-1.5 py-0.5 rounded font-bold">PRO</span></a>
 
           <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2 mt-6">Ayarlar</div>
@@ -193,16 +202,9 @@
 
       <div class="flex-1 overflow-y-auto p-6 md:p-8 custom-scroll">
           
-          <div class="mb-8 flex justify-between items-end">
-              <div>
-                  <h2 class="text-3xl font-black text-slate-900 dark:text-white mb-2">Hoşgeldin, <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-cyan-500" id="headerGreeting">Kullanıcı</span> 👋</h2>
-                  <p class="text-slate-500 dark:text-slate-400">Operasyonel süreçlerini buradan yönetebilirsin.</p>
-              </div>
-              <div class="hidden sm:block">
-                  <button onclick="alert('Fiyat teklifi modülü yakında aktif olacak.')" class="bg-slate-900 dark:bg-indigo-600 hover:bg-slate-800 dark:hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-indigo-500/20 transition flex items-center gap-2">
-                      <i data-lucide="file-plus" class="w-4 h-4"></i> Fiyat Teklifi Ver
-                  </button>
-              </div>
+          <div class="mb-8">
+              <h2 class="text-3xl font-black text-slate-900 dark:text-white mb-2">Hoşgeldin, <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-cyan-500" id="headerGreeting">Kullanıcı</span> 👋</h2>
+              <p class="text-slate-500 dark:text-slate-400">Operasyonel süreçlerini buradan yönetebilirsin.</p>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -231,9 +233,9 @@
                   <div class="flex items-center justify-between h-full">
                       <div>
                           <div class="text-indigo-600 dark:text-indigo-300 text-xs font-bold uppercase tracking-wider mb-1">Yeni Hesaplama</div>
-                          <a href="endustriyel-enerji-kaybi-hesaplama.html" class="mt-2 inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-bold transition shadow-lg shadow-indigo-600/20">
+                          <button onclick="openCalcModal()" class="mt-2 inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-bold transition shadow-lg shadow-indigo-600/20">
                               <i data-lucide="plus" class="w-4 h-4"></i> Analiz Oluştur
-                          </a>
+                          </button>
                       </div>
                   </div>
               </div>
@@ -264,7 +266,7 @@
                                           <i data-lucide="inbox" class="w-6 h-6"></i>
                                       </div>
                                       <p class="text-slate-500 font-medium">Henüz kayıtlı proje yok.</p>
-                                      <a href="endustriyel-enerji-kaybi-hesaplama.html" class="text-indigo-600 dark:text-indigo-400 text-xs font-bold hover:underline mt-2 inline-block">İlk projeni oluştur →</a>
+                                      <button onclick="openCalcModal()" class="text-indigo-600 dark:text-indigo-400 text-xs font-bold hover:underline mt-2 inline-block cursor-pointer">İlk projeni oluştur →</button>
                                   </td>
                               </tr>
                           </tbody>
@@ -274,7 +276,7 @@
 
               <div class="space-y-6">
                   <div class="glass-card rounded-2xl p-6 bg-white dark:bg-transparent">
-                      <h3 class="font-bold text-slate-800 dark:text-white mb-4 text-sm uppercase tracking-wide">Hızlı Araçlar</h3>
+                      <h3 class="font-bold text-slate-800 dark:text-white mb-4 text-sm uppercase tracking-wide">Favori Araçlar</h3>
                       <div class="space-y-3">
                           <a href="tool/roi.html" class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-white/5 hover:border-indigo-500/30 transition group">
                               <div class="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center"><i data-lucide="flame" class="w-5 h-5"></i></div>
@@ -310,6 +312,83 @@
           </div>
       </div>
   </main>
+
+  <div id="calcModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="closeCalcModal()"></div>
+      <div class="relative bg-white dark:bg-slate-900 w-full max-w-4xl rounded-3xl shadow-2xl animate-pop border border-slate-200 dark:border-slate-800 flex flex-col max-h-[90vh]">
+          
+          <div class="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
+              <div class="flex items-center gap-3">
+                  <div class="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg text-indigo-600 dark:text-indigo-400"><i data-lucide="calculator" class="w-6 h-6"></i></div>
+                  <div>
+                      <h2 class="text-xl font-bold text-slate-900 dark:text-white">Hesaplama Merkezi</h2>
+                      <p class="text-xs text-slate-500">Kullanmak istediğiniz analiz aracını seçin.</p>
+                  </div>
+              </div>
+              <button onclick="closeCalcModal()" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition"><i data-lucide="x" class="w-6 h-6"></i></button>
+          </div>
+
+          <div class="p-6 overflow-y-auto">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  
+                  <a href="tool/anlik-kayip.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-red-500/50 dark:hover:border-red-500/50 group transition">
+                      <div class="flex justify-between items-start mb-4">
+                          <div class="p-3 rounded-lg bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400"><i data-lucide="scan-line" class="w-6 h-6"></i></div>
+                          <i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-red-500 transition"></i>
+                      </div>
+                      <h3 class="font-bold text-slate-800 dark:text-white mb-1">Saha Kayıp Analizi</h3>
+                      <p class="text-xs text-slate-500 dark:text-slate-400">Anlık ölçümlerle kaçak tespiti ve raporlama.</p>
+                  </a>
+
+                  <a href="tool/roi.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-orange-500/50 dark:hover:border-orange-500/50 group transition">
+                      <div class="flex justify-between items-start mb-4">
+                          <div class="p-3 rounded-lg bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400"><i data-lucide="flame" class="w-6 h-6"></i></div>
+                          <i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-orange-500 transition"></i>
+                      </div>
+                      <h3 class="font-bold text-slate-800 dark:text-white mb-1">Termal ROI</h3>
+                      <p class="text-xs text-slate-500 dark:text-slate-400">Yatırım geri dönüş ve amortisman hesabı.</p>
+                  </a>
+
+                  <a href="tool/yalitim-performans.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-purple-500/50 dark:hover:border-purple-500/50 group transition">
+                      <div class="flex justify-between items-start mb-4">
+                          <div class="p-3 rounded-lg bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400"><i data-lucide="layers" class="w-6 h-6"></i></div>
+                          <i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-purple-500 transition"></i>
+                      </div>
+                      <h3 class="font-bold text-slate-800 dark:text-white mb-1">Optimum Kalınlık</h3>
+                      <p class="text-xs text-slate-500 dark:text-slate-400">Ekonomik ve verimli yalıtım kalınlığı.</p>
+                  </a>
+
+                  <a href="tool/yogusma-hesaplama.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-blue-500/50 dark:hover:border-blue-500/50 group transition">
+                      <div class="flex justify-between items-start mb-4">
+                          <div class="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"><i data-lucide="droplets" class="w-6 h-6"></i></div>
+                          <i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-blue-500 transition"></i>
+                      </div>
+                      <h3 class="font-bold text-slate-800 dark:text-white mb-1">Yoğuşma Kontrol</h3>
+                      <p class="text-xs text-slate-500 dark:text-slate-400">Çiğ noktası ve terleme önleme analizi.</p>
+                  </a>
+
+                  <a href="tool/chiller-roi.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-cyan-500/50 dark:hover:border-cyan-500/50 group transition">
+                      <div class="flex justify-between items-start mb-4">
+                          <div class="p-3 rounded-lg bg-cyan-100 dark:bg-cyan-900/20 text-cyan-600 dark:text-cyan-400"><i data-lucide="snowflake" class="w-6 h-6"></i></div>
+                          <i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-cyan-500 transition"></i>
+                      </div>
+                      <h3 class="font-bold text-slate-800 dark:text-white mb-1">Chiller ROI</h3>
+                      <p class="text-xs text-slate-500 dark:text-slate-400">Soğutma hatları için enerji verimliliği.</p>
+                  </a>
+
+                  <a href="tool/boiler.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-amber-500/50 dark:hover:border-amber-500/50 group transition">
+                      <div class="flex justify-between items-start mb-4">
+                          <div class="p-3 rounded-lg bg-amber-100 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400"><i data-lucide="gauge" class="w-6 h-6"></i></div>
+                          <i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-amber-500 transition"></i>
+                      </div>
+                      <h3 class="font-bold text-slate-800 dark:text-white mb-1">Kazan Verimliliği</h3>
+                      <p class="text-xs text-slate-500 dark:text-slate-400">Buhar kazanı performans hesaplaması.</p>
+                  </a>
+
+              </div>
+          </div>
+      </div>
+  </div>
 
   <div id="settingsModal" class="fixed inset-0 z-50 hidden">
       <div class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" onclick="closeSettings()"></div>
@@ -381,12 +460,21 @@
         document.getElementById('themeToggle').checked = true;
     }
 
-    // --- MODAL LOGIC ---
+    // --- MODAL LOGIC (SETTINGS) ---
     function openSettings() {
         document.getElementById('settingsModal').classList.remove('hidden');
     }
     function closeSettings() {
         document.getElementById('settingsModal').classList.add('hidden');
+    }
+
+    // --- MODAL LOGIC (CALCULATOR CENTER) ---
+    function openCalcModal() {
+        document.getElementById('calcModal').classList.remove('hidden');
+        lucide.createIcons();
+    }
+    function closeCalcModal() {
+        document.getElementById('calcModal').classList.add('hidden');
     }
 
     // --- AUTH LOGIC ---
