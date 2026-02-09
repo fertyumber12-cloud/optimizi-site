@@ -183,12 +183,12 @@
   @media print {
     @page { margin: 0; size: A4; }
     
-    /* Dark mode'u print'te tamamen devre dışı bırak */
-    html.dark, html.dark *, html.dark *::before, html.dark *::after { 
-        background: white !important; 
-        color: black !important; 
-        border-color: #e5e7eb !important;
+    /* Dark mode'u print'te renkleri koruyarak temiz göster */
+    html.dark .print-page, html.dark .print-page *, html.dark .print-page *::before, html.dark .print-page *::after { 
+        /* Renkler korunsun - sadece arka plan beyaz olsun */
     }
+    
+    .print-page { background: white !important; }
     
     html, body { width: 210mm; height: 297mm; margin: 0 !important; padding: 0 !important; background: white !important; color: black !important; overflow: visible !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     #app-layer, nav, .glass-card, button, input, select { display: none !important; }
@@ -205,6 +205,9 @@
     /* QR kodun print'te görünmesini garanti et */
     #covQrCode { mix-blend-mode: normal !important; }
     #covQrCode[src]:not([src=""]) { opacity: 1 !important; }
+    
+    /* QR toggle kapalıysa raporda QR bölümünü tamamen kaldır */
+    body.hide-qr-section .qr-report-section { display: none !important; }
   }
   #print-area { display: none; }
 </style>
@@ -243,7 +246,11 @@
               <label class="flex items-center gap-2 cursor-pointer bg-slate-100 dark:bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-green-500 dark:hover:border-green-400 transition select-none">
                   <i data-lucide="qr-code" class="w-4 h-4 text-slate-500 dark:text-slate-400"></i>
                   <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400">QR Göster</span>
-                  <input type="checkbox" id="toggleQrInput" checked class="w-4 h-4 accent-green-500 cursor-pointer" onchange="toggleQrVisibility()">
+                  <div class="relative inline-block w-9 h-5 cursor-pointer" onclick="event.preventDefault(); var cb=document.getElementById('toggleQrInput'); cb.checked=!cb.checked; toggleQrVisibility();">
+                      <input type="checkbox" id="toggleQrInput" checked class="sr-only peer">
+                      <div class="w-9 h-5 bg-slate-300 peer-checked:bg-green-500 rounded-full transition-colors duration-200"></div>
+                      <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 peer-checked:translate-x-4"></div>
+                  </div>
               </label>
 
               <input type="file" id="qrInp" class="hidden" accept="image/*" onchange="readQr(this)">
@@ -258,7 +265,11 @@
                   <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 hidden md:inline">Tema</span>
               </button>
 
-              <button onclick="printRep()" class="flex items-center gap-2 bg-indigo-600 dark:bg-red-600 hover:bg-indigo-500 dark:hover:bg-red-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition shadow-lg shadow-indigo-600/20 dark:shadow-red-600/20 active:scale-95 ml-2 cursor-pointer">
+              <button onclick="saveCalculation()" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition shadow-lg shadow-emerald-600/20 active:scale-95 ml-2 cursor-pointer">
+                  <i data-lucide="save" class="w-4 h-4"></i> <span class="hidden md:inline">Kaydet</span>
+              </button>
+
+              <button onclick="showReportLangPopup()" class="flex items-center gap-2 bg-indigo-600 dark:bg-red-600 hover:bg-indigo-500 dark:hover:bg-red-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition shadow-lg shadow-indigo-600/20 dark:shadow-red-600/20 active:scale-95 ml-2 cursor-pointer">
                   <i data-lucide="printer" class="w-4 h-4"></i> Rapor Al
               </button>
           </div>
@@ -367,12 +378,12 @@
                     </div>
                 </div>
 
-                <div id="packagePanel" class="hidden glass-card p-6 rounded-2xl border-2 border-indigo-500 dark:border-red-500/50 bg-indigo-50/50">
+                <div id="packagePanel" class="hidden glass-card p-6 rounded-2xl border-2 border-indigo-500 dark:border-red-500/50 bg-indigo-50/50 dark:bg-slate-800/80">
                     <div class="flex justify-between items-start mb-4">
-                         <h3 class="text-indigo-600 dark:text-red-600 text-sm font-bold uppercase flex items-center gap-2">
+                         <h3 class="text-indigo-600 dark:text-red-400 text-sm font-bold uppercase flex items-center gap-2">
                              <i data-lucide="package" class="w-5 h-5"></i> Paket Oluşturucu
                          </h3>
-                         <div class="bg-indigo-200 text-indigo-700 text-[10px] font-bold px-2 py-1 rounded">MOD AKTİF</div>
+                         <div class="bg-indigo-200 dark:bg-red-900/50 text-indigo-700 dark:text-red-300 text-[10px] font-bold px-2 py-1 rounded">MOD AKTİF</div>
                     </div>
                     
                     <div class="space-y-3">
@@ -595,6 +606,61 @@
     </main>
 </div>
 
+<!-- RAPOR DİL SEÇİM POPUP -->
+<div id="reportLangPopup" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/50 backdrop-blur-sm" style="display:none;">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0" id="reportLangPopupInner">
+        <div class="text-center mb-6">
+            <div class="w-14 h-14 bg-indigo-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="languages" class="w-7 h-7 text-indigo-600 dark:text-red-500"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Rapor Dili Seçin</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Raporun tüm içeriği seçtiğiniz dilde oluşturulacaktır.</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <button onclick="generateReport('tr')" class="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-600 hover:border-indigo-500 dark:hover:border-red-500 hover:bg-indigo-50 dark:hover:bg-red-900/20 transition cursor-pointer group">
+                <span class="text-3xl">🇹🇷</span>
+                <span class="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-red-400">Türkçe</span>
+            </button>
+            <button onclick="generateReport('en')" class="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-600 hover:border-indigo-500 dark:hover:border-red-500 hover:bg-indigo-50 dark:hover:bg-red-900/20 transition cursor-pointer group">
+                <span class="text-3xl">🇬🇧</span>
+                <span class="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-red-400">English</span>
+            </button>
+        </div>
+        <button onclick="closeReportLangPopup()" class="w-full text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition py-2 cursor-pointer">İptal</button>
+    </div>
+</div>
+
+<!-- SİLME ONAY POPUP -->
+<div id="deleteConfirmPopup" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/50 backdrop-blur-sm" style="display:none;">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 transform transition-all" id="deleteConfirmInner">
+        <div class="text-center mb-6">
+            <div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="trash-2" class="w-7 h-7 text-red-600"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Silme Onayı</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2" id="deleteConfirmMsg">Bu kalemi silmek istediğinize emin misiniz?</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+            <button onclick="closeDeletePopup()" class="py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer">İptal</button>
+            <button onclick="confirmDelete()" class="py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-sm transition cursor-pointer shadow-lg shadow-red-600/20">Sil</button>
+        </div>
+    </div>
+</div>
+
+<!-- KAYDET POPUP -->
+<div id="savePopup" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/50 backdrop-blur-sm" style="display:none;">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all" id="savePopupInner">
+        <div class="text-center mb-6">
+            <div class="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="check-circle" class="w-7 h-7 text-emerald-600"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100" id="savePopupTitle">Hesaplama Kaydedildi</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2" id="savePopupMsg">Veriler başarıyla kaydedildi.</p>
+        </div>
+        <button onclick="closeSavePopup()" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm transition cursor-pointer shadow-lg shadow-emerald-600/20">Tamam</button>
+    </div>
+</div>
+
 <div id="print-area">
     <div id="p-cover" class="print-page cover-bg relative overflow-hidden flex">
         <div class="w-1/3 bg-slate-900 text-white p-12 flex flex-col justify-between relative overflow-hidden">
@@ -622,7 +688,7 @@
                 </div>
             </div>
 
-            <div class="relative z-10">
+            <div class="relative z-10 qr-report-section">
                 <div class="p-4 bg-white dark:bg-slate-800/50/5 rounded-xl border border-white/10 backdrop-blur-sm">
                     <img id="covQrCode" src="" class="w-24 h-24 object-contain opacity-50 mb-2" alt="QR">
                     <div class="text-[9px] text-slate-400 leading-tight">Mevcut ısı kayıplarının tesisinize anlık maliyetini takip etmek için kodu taratın.</div>
@@ -744,6 +810,106 @@
         <div class="border-t-2 border-slate-100 pt-4 mt-auto">
             <p class="text-[10px] text-slate-400 text-center font-medium leading-relaxed">Hesaplamalar ISO 12241 mühendislik standartlarına göre simüle edilmiştir. Garanti niteliği taşımaz.</p>
         </div>
+    </div>
+
+    <!-- HESAPLAMA METOTLARI VE FARKINDALIK SAYFASI -->
+    <div id="p-methodology" class="print-page p-12 flex flex-col">
+        <h2 class="text-2xl font-black text-slate-900 uppercase mb-6 border-b-2 border-slate-900 pb-4" id="methTitle">Hesaplama Metotları ve Farkındalık</h2>
+        
+        <div class="mb-6">
+            <h3 class="text-sm font-bold text-slate-700 uppercase mb-3 flex items-center gap-2">
+                <i data-lucide="calculator" class="w-4 h-4 text-indigo-600"></i> <span class="meth-calc-title">Hesaplama Temelleri</span>
+            </h3>
+            <p class="text-xs text-slate-600 leading-relaxed mb-3" id="methCalcP1">
+                Bu raporda sunulan tüm ısı kaybı hesaplamaları, uluslararası kabul görmüş <strong>ISO 12241 – Termal Yalıtım Hesaplama Standartları</strong> temelinde gerçekleştirilmiştir. ISO 12241, silindirik (boru) ve düz yüzeylerden meydana gelen ısı transferini; iletim (kondüksiyon), taşınım (konveksiyon) ve ışınım (radyasyon) mekanizmalarını dikkate alarak modellemektedir.
+            </p>
+            <p class="text-xs text-slate-600 leading-relaxed mb-3" id="methCalcP2">
+                Hesaplamalar iteratif bir yöntemle yürütülür: izolasyon malzemesinin termal iletkenlik katsayısı (λ), ortalama sıcaklığa bağlı olarak dinamik biçimde hesaplanır. Dış yüzey ısı transfer katsayısı (h<sub>s</sub>), doğal ve zorlanmış konveksiyon ile radyasyon bileşenlerinin toplamı olarak bulunur. Sistem, yüzey sıcaklığı yakınsayana dek çözümlenerek nihai ısı kaybı değerleri elde edilir.
+            </p>
+            <div class="bg-slate-50 rounded-lg p-4 border border-slate-200 mb-4">
+                <div class="text-[10px] font-bold text-slate-500 uppercase mb-2" id="methFormulaTitle">Temel Formül (Silindirik Yüzey)</div>
+                <div class="text-center text-sm font-mono text-slate-700 leading-relaxed">
+                    Q = 2π × L × (T<sub>proc</sub> − T<sub>s</sub>) / ln(D<sub>out</sub>/D<sub>in</sub>) × (1/λ)
+                </div>
+                <div class="text-[9px] text-slate-400 mt-2 text-center" id="methFormulaDesc">Burada Q = ısı kaybı (W), T<sub>proc</sub> = proses sıcaklığı, T<sub>s</sub> = yüzey sıcaklığı, D = çaplar, λ = iletkenlik katsayısı</div>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <h3 class="text-sm font-bold text-slate-700 uppercase mb-3 flex items-center gap-2">
+                <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i> <span class="meth-tesla-title">Enerji Farkındalığı – Tesla Örneği</span>
+            </h3>
+            <div class="bg-gradient-to-r from-slate-900 to-slate-800 rounded-xl p-5 text-white mb-3 relative overflow-hidden">
+                <div class="absolute right-4 top-4 opacity-10"><i data-lucide="car" class="w-24 h-24"></i></div>
+                <div class="relative z-10">
+                    <div class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider mb-2" id="methTeslaSubtitle">En Yüksek Kayıplı Kaleminiz</div>
+                    <div class="text-lg font-bold mb-1" id="methTeslaItem">-</div>
+                    <div class="grid grid-cols-3 gap-4 mt-3">
+                        <div>
+                            <div class="text-[10px] text-slate-400" id="methTeslaKwhLabel">Yıllık Enerji Kaybı</div>
+                            <div class="text-xl font-black text-red-400" id="methTeslaKwh">0 kWh</div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] text-slate-400" id="methTeslaChargeLabel">Tesla Şarj Sayısı</div>
+                            <div class="text-xl font-black text-amber-400" id="methTeslaCharges">0</div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] text-slate-400" id="methTeslaKmLabel">Toplam Mesafe</div>
+                            <div class="text-xl font-black text-emerald-400" id="methTeslaKm">0 km</div>
+                        </div>
+                    </div>
+                    <div class="text-[9px] text-slate-400 mt-3 leading-relaxed" id="methTeslaNote">
+                        * Tesla Model 3 batarya kapasitesi ≈ 60 kWh, ortalama menzil ≈ 490 km baz alınmıştır. Termal enerji %40 termodinamik verimle elektrik enerjisine dönüştürülmüştür. (Kaynak: EiiF – TIPCHECK Programı)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <h3 class="text-sm font-bold text-slate-700 uppercase mb-3 flex items-center gap-2">
+                <i data-lucide="info" class="w-4 h-4 text-blue-500"></i> <span class="meth-awareness-title">İzolasyonun Önemi</span>
+            </h3>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-red-50 rounded-lg p-3 border border-red-100">
+                    <div class="text-xs font-bold text-red-700 mb-1" id="methAware1Title">🔥 Enerji İsrafı</div>
+                    <p class="text-[10px] text-red-600 leading-relaxed" id="methAware1Desc">Endüstriyel tesislerde yalıtımsız ekipmanlar, toplam enerji tüketiminin %5-10'una varan kayıplara neden olabilir. Bu kayıplar doğrudan işletme maliyetlerini artırır.</p>
+                </div>
+                <div class="bg-emerald-50 rounded-lg p-3 border border-emerald-100">
+                    <div class="text-xs font-bold text-emerald-700 mb-1" id="methAware2Title">🌿 Çevresel Etki</div>
+                    <p class="text-[10px] text-emerald-600 leading-relaxed" id="methAware2Desc">Her 1.000 kWh ısı enerjisi tasarrufu, yaklaşık 200-250 kg CO₂ emisyon azaltımına eşdeğerdir. İzolasyon yatırımları, karbon ayak izini azaltmanın en maliyet etkin yollarından biridir.</p>
+                </div>
+                <div class="bg-blue-50 rounded-lg p-3 border border-blue-100">
+                    <div class="text-xs font-bold text-blue-700 mb-1" id="methAware3Title">👷 İSG ve Güvenlik</div>
+                    <p class="text-[10px] text-blue-600 leading-relaxed" id="methAware3Desc">60°C üzerindeki yüzeyler ciddi yanık riski taşır. Uygun izolasyon, yüzey sıcaklıklarını güvenli seviyelere düşürerek iş güvenliği standartlarına uyumu sağlar.</p>
+                </div>
+                <div class="bg-amber-50 rounded-lg p-3 border border-amber-100">
+                    <div class="text-xs font-bold text-amber-700 mb-1" id="methAware4Title">💰 Hızlı Geri Dönüş</div>
+                    <p class="text-[10px] text-amber-600 leading-relaxed" id="methAware4Desc">Endüstriyel izolasyon yatırımlarının geri dönüş süresi tipik olarak 6-18 ay arasındadır. Bu, sanayideki en kısa amortisman süresine sahip enerji verimliliği önlemlerinden biridir.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="border-t-2 border-slate-100 pt-3 mt-auto">
+            <p class="text-[10px] text-slate-400 text-center font-medium leading-relaxed" id="methFooter">Bu sayfa şeffaflık ve profesyonellik ilkesi gereği hesaplama metodolojisi hakkında bilgi vermek amacıyla hazırlanmıştır.</p>
+        </div>
+        <div class="page-num mt-2 text-center text-[10px] text-slate-400" id="methPageNum">Sayfa X / Y</div>
+    </div>
+
+    <!-- OPTİMİZİ.APP LOGO SAYFASI -->
+    <div id="p-logo" class="print-page flex flex-col items-center justify-center relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-slate-50 to-slate-100"></div>
+        <div class="absolute top-20 left-20 w-96 h-96 bg-indigo-100 rounded-full blur-3xl opacity-50"></div>
+        <div class="absolute bottom-20 right-20 w-80 h-80 bg-emerald-100 rounded-full blur-3xl opacity-50"></div>
+        
+        <div class="relative z-10 text-center">
+            <div class="text-7xl font-black text-slate-900 tracking-tighter mb-3">
+                Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-orange-500">.App</span>
+            </div>
+            <div class="text-lg font-bold text-slate-400 uppercase tracking-[8px] mb-8" id="logoSubtitle">Enerji Verimliliği Hesaplama Araçları</div>
+            <div class="w-24 h-0.5 bg-gradient-to-r from-indigo-500 to-orange-500 mx-auto mb-8 rounded-full"></div>
+            <div class="text-sm text-slate-400 font-medium" id="logoTagline">Engineering Solutions</div>
+        </div>
+        <div class="page-num absolute bottom-8 text-center text-[10px] text-slate-400 w-full" id="logoPageNum">Sayfa X / Y</div>
     </div>
 </div>
 
@@ -915,11 +1081,15 @@
         const invBox = document.getElementById('singleInvBox');
         const invInput = document.getElementById('inv');
         const invCurr = document.getElementById('invCurr');
+        const locationInput = document.getElementById('location');
+        const imgUploadArea = document.getElementById('imgInp').parentElement;
 
         if(isPackageMode){
             panel.classList.remove('hidden');
             btnToggle.classList.replace('bg-slate-200', 'bg-indigo-600');
+            btnToggle.classList.replace('dark:bg-slate-700', 'dark:bg-red-600');
             btnToggle.classList.replace('text-slate-600', 'text-white');
+            btnToggle.classList.replace('dark:text-slate-300', 'dark:text-white');
             btnToggle.innerHTML = `<i data-lucide="box" class="w-3 h-3"></i> Paket Modunu Kapat`;
             btnAdd.innerText = "Sepete Ekle";
             
@@ -927,10 +1097,18 @@
             invInput.disabled = true;
             invCurr.disabled = true;
             invBox.classList.add('opacity-30');
+            
+            // Mahal ve termal görüntü alanlarını devre dışı bırak
+            locationInput.disabled = true;
+            locationInput.classList.add('opacity-30', 'cursor-not-allowed');
+            const thermalArea = document.querySelector('[onclick="document.getElementById(\'imgInp\').click()"]');
+            if(thermalArea) { thermalArea.classList.add('opacity-30', 'pointer-events-none'); }
         } else {
             panel.classList.add('hidden');
             btnToggle.classList.replace('bg-indigo-600', 'bg-slate-200');
+            btnToggle.classList.replace('dark:bg-red-600', 'dark:bg-slate-700');
             btnToggle.classList.replace('text-white', 'text-slate-600');
+            btnToggle.classList.replace('dark:text-white', 'dark:text-slate-300');
             btnToggle.innerHTML = `<i data-lucide="box" class="w-3 h-3"></i> Paket Modunu Aç`;
             btnAdd.innerText = "Hesapla & Ekle";
             
@@ -938,6 +1116,12 @@
             invInput.disabled = false;
             invCurr.disabled = false;
             invBox.classList.remove('opacity-30');
+            
+            // Mahal ve termal görüntü alanlarını tekrar aktif et
+            locationInput.disabled = false;
+            locationInput.classList.remove('opacity-30', 'cursor-not-allowed');
+            const thermalArea = document.querySelector('[onclick="document.getElementById(\'imgInp\').click()"]');
+            if(thermalArea) { thermalArea.classList.remove('opacity-30', 'pointer-events-none'); }
         }
         lucide.createIcons();
     }
@@ -1100,7 +1284,7 @@
         
         renderPackageBasket();
         render(); 
-        alert("Paket başarıyla oluşturuldu ve listeye eklendi!");
+        showSavePopup("Paket Oluşturuldu", `<strong>"${pkgName}"</strong> paketi başarıyla oluşturuldu ve listeye eklendi!`);
     }
 
 
@@ -1438,8 +1622,19 @@
         const d=LIST[i].inputs;
 
         if(d.type === 'package') {
-            alert("Paketler şu an düzenlenemez, silip tekrar oluşturunuz.");
+            // Paket düzenleme: Paketi sepete geri yükle
+            if(!isPackageMode) togglePackageMode();
+            PACKAGE_BASKET = d.subItems ? JSON.parse(JSON.stringify(d.subItems)) : [];
+            document.getElementById('pkgName').value = LIST[i].name.replace("📦 PAKET: ", "");
+            document.getElementById('pkgQty').value = LIST[i].qty || 1;
+            document.getElementById('pkgInv').value = d.inv || 0;
+            document.getElementById('pkgInvCurr').value = d.invCurr || "TL";
+            if(LIST[i].img) { currPkgImg = LIST[i].img; document.getElementById('pkgPrevImg').src = currPkgImg; document.getElementById('pkgPrevImg').classList.remove('hidden'); }
+            renderPackageBasket();
+            // Eski paketi sil
+            LIST.splice(i, 1);
             editingIndex = null;
+            render();
             return;
         }
 
@@ -1488,7 +1683,7 @@
         document.getElementById('btnUpdate').classList.remove('hidden');
     }
 
-    function del(i){if(confirm('Silmek istediğine emin misin?')){LIST.splice(i,1);render();}}
+    // del() is now defined in the modal script section below
     
     function resetForm(){
         currImg=null;
@@ -1501,7 +1696,7 @@
         renderSurfaces();
     } 
 
-    function clearAll(){if(confirm('Tüm listeyi temizle?')){LIST=[];render();}}
+    // clearAll() is now defined in the modal script section below
     
     // --- Düzgün CSV Parser (tırnak içi virgülleri doğru işler) ---
     function parseCSVLine(line) {
@@ -1854,258 +2049,433 @@
         render();
     }
 
+    // ===== I18N STRINGS =====
+    const I18N = {
+        tr: {
+            detailedAnalysis: "Detaylı Analiz Dökümü",
+            executiveSummary: "Yönetici Özeti",
+            currentAnnualLoss: "Mevcut Yıllık Kayıp",
+            totalInvestment: "Toplam Yatırım Bedeli",
+            materialAndLabor: "Malzeme ve İşçilik Dahil",
+            annualNetGain: "Yıllık Net Kazanç",
+            afterEnergySaving: "Enerji Tasarrufu Sonrası",
+            roiPeriod: "Geri Dönüş Süresi (ROI)",
+            depreciation: "Amortisman",
+            financialProjection: "Finansal Projeksiyon (5 Yıl)",
+            scenario: "Senaryo", year: "Yıl", total: "TOPLAM",
+            currentStatus: "Mevcut Durum (Kümülatif Kayıp)",
+            afterInvestment: "Yatırım Sonrası (Kümülatif Kazanç)",
+            carbonFootprint: "KARBON AYAK İZİ AZALTIMI",
+            treeEquivalent: "Ağaç Eşdeğeri",
+            isoDisclaimer: "Hesaplamalar ISO 12241 mühendislik standartlarına göre simüle edilmiştir. Garanti niteliği taşımaz.",
+            page: "Sayfa", month: "AY",
+            daily: "GÜNLÜK", weekly: "HAFTALIK", monthly: "AYLIK", yearly: "YILLIK",
+            company: "Firma / Müşteri", supplier: "Tedarikçi / Hazırlayan",
+            reportDate: "Rapor Tarihi", authPerson: "Yetkili Kişi",
+            isoLabel: "ISO 12241 Temelli Isı Kaybı Kaynaklı Kayıp Simülasyonu",
+            industrialTitle: "ENDÜSTRİYEL", insulationTitle: "YALITIM", analysisTitle: "ANALİZİ",
+            coverIntro: "tarihinde tesisinizde gerçekleştirilen termal denetimler sonucunda; yalıtımsız ekipmanlardan kaynaklanan ısı kayıpları, finansal maliyetler ve karbon ayak izi hesaplanmıştır. Aşağıdaki veriler mevcut durumun özetidir.",
+            roi: "Amortisman (ROI)",
+            narrative: (tAmb, windBit, eff, hours, price, curr) => `Simülasyonlar; <strong>${tAmb}°C</strong> ortam sıcaklığı, ${windBit}, <strong>%${eff}</strong> sistem verimi ve yıllık <strong>${hours} saat</strong> çalışma süresi baz alınarak hesaplanmıştır. Enerji birim maliyeti <strong>${price} ${curr}</strong> olarak kabul edilmiştir.`,
+            qrText: "Mevcut ısı kayıplarının tesisinize anlık maliyetini takip etmek için kodu taratın.",
+            thBare: "Çıplak", thBareKwh: "(Kayıp kWh)", thInsulated: "İzolasyon", thInsKwh: "(Kayıp kWh)",
+            thGain: "Kazanç", thGainKwh: "(Fark kWh)", thQty: "Adet", thInvestment: "Yatırım",
+            thNetGain: "Net Kazanç", thRoi: "ROI", thEquipment: "Ekipman", thVisual: "Görsel",
+            windNarMulti: "tesis içi farklı lokasyonların rüzgar şartlarına uygun olarak",
+            windNarSingle: (v) => `<strong>${v} m/s</strong> rüzgar hızı koşullarında`,
+            methTitle: "Hesaplama Metotları ve Farkındalık",
+            methCalcTitle: "Hesaplama Temelleri",
+            methCalcP1: 'Bu raporda sunulan tüm ısı kaybı hesaplamaları, uluslararası kabul görmüş <strong>ISO 12241 – Termal Yalıtım Hesaplama Standartları</strong> temelinde gerçekleştirilmiştir.',
+            methCalcP2: 'Hesaplamalar iteratif bir yöntemle yürütülür: izolasyon malzemesinin termal iletkenlik katsayısı (λ), ortalama sıcaklığa bağlı olarak dinamik biçimde hesaplanır.',
+            methFormulaTitle: "Temel Formül (Silindirik Yüzey)",
+            methFormulaDesc: "Q = ısı kaybı (W), T<sub>proc</sub> = proses sıcaklığı, T<sub>s</sub> = yüzey sıcaklığı",
+            methTeslaTitle: "Enerji Farkındalığı – Tesla Örneği",
+            methTeslaSubtitle: "En Yüksek Kayıplı Kaleminiz",
+            methTeslaKwhLabel: "Yıllık Enerji Kaybı", methTeslaChargeLabel: "Tesla Şarj Sayısı", methTeslaKmLabel: "Toplam Mesafe",
+            methTeslaNote: "* Tesla Model 3 batarya kapasitesi ≈ 60 kWh, ortalama menzil ≈ 490 km. Termal enerji %40 termodinamik verimle elektrik enerjisine dönüştürülmüştür. (Kaynak: EiiF – TIPCHECK)",
+            methAwarenessTitle: "İzolasyonun Önemi",
+            methAware1Title: "🔥 Enerji İsrafı", methAware1Desc: "Endüstriyel tesislerde yalıtımsız ekipmanlar, toplam enerji tüketiminin %5-10'una varan kayıplara neden olabilir.",
+            methAware2Title: "🌿 Çevresel Etki", methAware2Desc: "Her 1.000 kWh tasarruf, yaklaşık 200-250 kg CO₂ azaltımına eşdeğerdir.",
+            methAware3Title: "👷 İSG ve Güvenlik", methAware3Desc: "60°C üzerindeki yüzeyler ciddi yanık riski taşır. Uygun izolasyon güvenliği sağlar.",
+            methAware4Title: "💰 Hızlı Geri Dönüş", methAware4Desc: "İzolasyon yatırımlarının geri dönüş süresi tipik olarak 6-18 aydır.",
+            methFooter: "Bu sayfa şeffaflık ve profesyonellik ilkesi gereği hesaplama metodolojisi hakkında bilgi vermek amacıyla hazırlanmıştır.",
+            logoSubtitle: "Enerji Verimliliği Hesaplama Araçları",
+        },
+        en: {
+            detailedAnalysis: "Detailed Analysis Report",
+            executiveSummary: "Executive Summary",
+            currentAnnualLoss: "Current Annual Loss",
+            totalInvestment: "Total Investment Cost",
+            materialAndLabor: "Including Material and Labor",
+            annualNetGain: "Annual Net Savings",
+            afterEnergySaving: "After Energy Savings",
+            roiPeriod: "Payback Period (ROI)",
+            depreciation: "Return on Investment",
+            financialProjection: "Financial Projection (5 Years)",
+            scenario: "Scenario", year: "Year", total: "TOTAL",
+            currentStatus: "Current State (Cumulative Loss)",
+            afterInvestment: "After Investment (Cumulative Gain)",
+            carbonFootprint: "CARBON FOOTPRINT REDUCTION",
+            treeEquivalent: "Tree Equivalent",
+            isoDisclaimer: "Calculations are simulated according to ISO 12241 engineering standards. Not a guarantee.",
+            page: "Page", month: "MONTHS",
+            daily: "DAILY", weekly: "WEEKLY", monthly: "MONTHLY", yearly: "ANNUAL",
+            company: "Client / Company", supplier: "Supplier / Prepared By",
+            reportDate: "Report Date", authPerson: "Contact Person",
+            isoLabel: "ISO 12241 Based Heat Loss Simulation",
+            industrialTitle: "INDUSTRIAL", insulationTitle: "INSULATION", analysisTitle: "ANALYSIS",
+            coverIntro: "following the thermal audits conducted at your facility; heat losses from uninsulated equipment, financial costs and carbon footprint have been calculated. The data below is a summary of the current situation.",
+            roi: "Return on Investment (ROI)",
+            narrative: (tAmb, windBit, eff, hours, price, curr) => `Simulations based on <strong>${tAmb}°C</strong> ambient temperature, ${windBit}, <strong>${eff}%</strong> system efficiency and <strong>${hours} hours</strong> annual operation. Unit energy cost: <strong>${price} ${curr}</strong>.`,
+            qrText: "Scan the code to track the real-time cost of current heat losses at your facility.",
+            thBare: "Bare", thBareKwh: "(Loss kWh)", thInsulated: "Insulated", thInsKwh: "(Loss kWh)",
+            thGain: "Savings", thGainKwh: "(Diff kWh)", thQty: "Qty", thInvestment: "Investment",
+            thNetGain: "Net Savings", thRoi: "ROI", thEquipment: "Equipment", thVisual: "Image",
+            windNarMulti: "adjusted for different wind conditions at various facility locations",
+            windNarSingle: (v) => `under <strong>${v} m/s</strong> wind speed conditions`,
+            methTitle: "Calculation Methods and Awareness",
+            methCalcTitle: "Calculation Fundamentals",
+            methCalcP1: 'All heat loss calculations are based on internationally recognized <strong>ISO 12241 – Thermal Insulation Calculation Standards</strong>.',
+            methCalcP2: 'Calculations use an iterative method: thermal conductivity (λ) is dynamically calculated based on average temperature.',
+            methFormulaTitle: "Basic Formula (Cylindrical Surface)",
+            methFormulaDesc: "Q = heat loss (W), T<sub>proc</sub> = process temperature, T<sub>s</sub> = surface temperature",
+            methTeslaTitle: "Energy Awareness – Tesla Example",
+            methTeslaSubtitle: "Your Highest Loss Item",
+            methTeslaKwhLabel: "Annual Energy Loss", methTeslaChargeLabel: "Tesla Charges", methTeslaKmLabel: "Total Distance",
+            methTeslaNote: "* Tesla Model 3 battery ≈ 60 kWh, range ≈ 490 km. Thermal energy converted at 40% thermodynamic efficiency. (Source: EiiF – TIPCHECK)",
+            methAwarenessTitle: "The Importance of Insulation",
+            methAware1Title: "🔥 Energy Waste", methAware1Desc: "Uninsulated equipment can cause losses of up to 5-10% of total energy consumption.",
+            methAware2Title: "🌿 Environmental Impact", methAware2Desc: "Every 1,000 kWh savings equals approximately 200-250 kg CO₂ reduction.",
+            methAware3Title: "👷 OHS and Safety", methAware3Desc: "Surfaces above 60°C pose serious burn risks. Proper insulation ensures safety compliance.",
+            methAware4Title: "💰 Quick Payback", methAware4Desc: "Industrial insulation payback periods are typically 6-18 months.",
+            methFooter: "This page provides information about the calculation methodology for transparency and professionalism.",
+            logoSubtitle: "Energy Efficiency Calculation Tools",
+        }
+    };
+
+    let reportLang = 'tr';
+    let pendingDeleteIndex = null;
     let printTemplateCache = null;
 
+    // ===== POPUP FUNCTIONS =====
+    function showReportLangPopup() {
+        if(LIST.length === 0) { alert("Liste boş!"); return; }
+        const popup = document.getElementById('reportLangPopup');
+        popup.style.display = 'flex';
+        popup.classList.remove('hidden');
+        setTimeout(() => {
+            const inner = document.getElementById('reportLangPopupInner');
+            inner.classList.remove('scale-95','opacity-0');
+            inner.classList.add('scale-100','opacity-100');
+        }, 10);
+        lucide.createIcons();
+    }
+    function closeReportLangPopup() {
+        const inner = document.getElementById('reportLangPopupInner');
+        inner.classList.add('scale-95','opacity-0');
+        inner.classList.remove('scale-100','opacity-100');
+        setTimeout(() => { document.getElementById('reportLangPopup').style.display='none'; }, 200);
+    }
+    function generateReport(lang) {
+        reportLang = lang;
+        closeReportLangPopup();
+        setTimeout(() => printRep(), 300);
+    }
+
+    // Delete popup
+    let _clearAllMode = false;
+    function showDeletePopup(idx) {
+        pendingDeleteIndex = idx;
+        _clearAllMode = false;
+        const item = LIST[idx];
+        document.getElementById('deleteConfirmMsg').innerHTML = `<strong>"${item.name}"</strong> kalemini silmek istediğinize emin misiniz?`;
+        document.getElementById('deleteConfirmPopup').style.display = 'flex';
+        document.getElementById('deleteConfirmPopup').classList.remove('hidden');
+        lucide.createIcons();
+    }
+    function closeDeletePopup() {
+        pendingDeleteIndex = null;
+        _clearAllMode = false;
+        document.getElementById('deleteConfirmPopup').style.display = 'none';
+    }
+    function confirmDelete() {
+        if(_clearAllMode) { LIST = []; render(); }
+        else if(pendingDeleteIndex !== null) { LIST.splice(pendingDeleteIndex, 1); render(); }
+        closeDeletePopup();
+    }
+    function del(i) { showDeletePopup(i); }
+    function clearAll() {
+        if(LIST.length === 0) return;
+        _clearAllMode = true;
+        document.getElementById('deleteConfirmMsg').innerHTML = `Tüm listeyi (<strong>${LIST.length} kalem</strong>) temizlemek istediğinize emin misiniz?`;
+        document.getElementById('deleteConfirmPopup').style.display = 'flex';
+        document.getElementById('deleteConfirmPopup').classList.remove('hidden');
+        lucide.createIcons();
+    }
+
+    // Save calculation
+    function saveCalculation() {
+        if(LIST.length === 0) { showSavePopup("Uyarı", "Kaydedilecek hesaplama bulunamadı."); return; }
+        const projectData = {
+            projectName: document.getElementById('pName').value || "",
+            projectEngineer: document.getElementById('pEng').value || "",
+            clientName: document.getElementById('cName').value || "",
+            clientContact: document.getElementById('cEng').value || "",
+            auditDate: document.getElementById('auditDate').value || "",
+            tAmb: document.getElementById('tAmb').value,
+            vWind: document.getElementById('vWind').value,
+            fuel: document.getElementById('fuel').value,
+            eff: document.getElementById('eff').value,
+            price: document.getElementById('price').value,
+            energyCurr: document.getElementById('energyCurr').value,
+            hours: document.getElementById('hours').value,
+            currency: document.getElementById('curr').value,
+            manualTotalInvestment: manualTotalInvestment,
+            items: LIST,
+            savedAt: new Date().toISOString(),
+            version: "2.0"
+        };
+        try {
+            const saveKey = `optimizi_calc_${Date.now()}`;
+            const saveName = projectData.clientName || projectData.projectName || "İsimsiz Proje";
+            localStorage.setItem(saveKey, JSON.stringify(projectData));
+            let savedList = JSON.parse(localStorage.getItem('optimizi_saved_list') || '[]');
+            savedList.push({ key: saveKey, name: saveName, date: projectData.savedAt, itemCount: LIST.length });
+            localStorage.setItem('optimizi_saved_list', JSON.stringify(savedList));
+            showSavePopup("Hesaplama Kaydedildi", `<strong>"${saveName}"</strong> projesi ${LIST.length} kalem ile kaydedildi.<br><span class="text-[10px] text-slate-400 mt-2 block">Veritabanı entegrasyonu aktif olduğunda veriler otomatik senkronize edilecektir.</span>`);
+        } catch(e) { showSavePopup("Hata", "Kaydetme hatası: " + e.message); }
+    }
+    function showSavePopup(title, msg) {
+        document.getElementById('savePopupTitle').innerText = title;
+        document.getElementById('savePopupMsg').innerHTML = msg;
+        document.getElementById('savePopup').style.display = 'flex';
+        document.getElementById('savePopup').classList.remove('hidden');
+        lucide.createIcons();
+    }
+    function closeSavePopup() { document.getElementById('savePopup').style.display = 'none'; }
+
+    // Tesla equivalent calculation
+    function calculateTeslaEquivalent() {
+        let maxKwh = 0, maxItem = null;
+        LIST.forEach(item => {
+            const kwh = parseFloat(item.kwhBare.replace(/\./g,'').replace(',','.')) || 0;
+            if(kwh > maxKwh) { maxKwh = kwh; maxItem = item; }
+        });
+        if(!maxItem) return { itemName: '-', kwh: 0, charges: 0, km: 0 };
+        const electricKwh = maxKwh * 0.40;
+        const teslaCharges = Math.floor(electricKwh / 60);
+        const teslaKm = Math.round(teslaCharges * 490);
+        return { itemName: maxItem.name, kwh: Math.round(maxKwh), charges: teslaCharges, km: teslaKm };
+    }
+
+    // ===== PRINT REPORT =====
     function printRep(){
         try{
+            const L = I18N[reportLang] || I18N.tr;
             const printArea = document.getElementById('print-area');
-            if(!printTemplateCache){
-                printTemplateCache = printArea.innerHTML;
-            }
+            if(!printTemplateCache) printTemplateCache = printArea.innerHTML;
             printArea.innerHTML = printTemplateCache;
             
-            const today = new Date().toLocaleDateString('tr-TR');
+            const today = new Date().toLocaleDateString(reportLang==='en'?'en-GB':'tr-TR');
             const auditInput = document.getElementById('auditDate').value;
             let auditDateStr = today; 
-            if(auditInput){
-                const parts = auditInput.split('-'); 
-                auditDateStr = `${parts[2]}.${parts[1]}.${parts[0]}`;
-            }
+            if(auditInput){ const parts=auditInput.split('-'); auditDateStr=`${parts[2]}.${parts[1]}.${parts[0]}`; }
             
-            const currSymVal = document.getElementById('curr').value;
-            const reportRate = FX[currSymVal] || 1;
-            const currSymMap = {'USD':'$','EUR':'€','TL':'₺'};
-            const currSym = currSymMap[currSymVal]||'';
-
-            let gInv=0, gSave=0, gCo2=0, gLoss=0, gFuelLost=0;
-            let gTotalKwh = 0; 
-            let lastFuelUnit = "";
-            let maxTempDetected = 0; 
-
-            let allWinds = [];
+            const currSymVal=document.getElementById('curr').value;
+            const reportRate=FX[currSymVal]||1;
+            const currSymMap={'USD':'$','EUR':'€','TL':'₺'};
+            const currSym=currSymMap[currSymVal]||'';
+            let gInv=0,gSave=0,gCo2=0,gLoss=0,gFuelLost=0,gTotalKwh=0;
+            let lastFuelUnit="",maxTempDetected=0,allWinds=[];
 
             LIST.forEach(i => {
-                const invDisp = i.invTL / reportRate;
-                const saveDisp = i.saveTL / reportRate;
-                const lossDisp = i.lossTL / reportRate;
-                const lossBareDisp = i.lossBareTL / reportRate;
-                
-                const itemTs = parseFloat(i.Ts) || 0;
-                if(itemTs > maxTempDetected) maxTempDetected = itemTs;
-
-                if(i.inputs.type !== 'package') {
-                    allWinds.push(i.inputs.vWind || 1);
-                }
-
-                const rawKwh = parseFloat(i.kwhBare.replace(/\./g,'').replace(',','.'));
-                gTotalKwh += rawKwh;
-
-                if(i.inputs.matKey!=='bare'){
-                    gInv += invDisp;
-                    gSave += saveDisp;
-                    gCo2 += i.co2;
-                    gLoss += lossBareDisp; 
-                    gFuelLost += i.fuelLost;
-                } else {
-                    gLoss += lossDisp;
-                    gFuelLost += i.fuelLost;
-                }
-                lastFuelUnit = i.inputs.fuelUnit || "";
+                const invDisp=i.invTL/reportRate, saveDisp=i.saveTL/reportRate, lossDisp=i.lossTL/reportRate, lossBareDisp=i.lossBareTL/reportRate;
+                const itemTs=parseFloat(i.Ts)||0;
+                if(itemTs>maxTempDetected) maxTempDetected=itemTs;
+                if(i.inputs.type!=='package') allWinds.push(i.inputs.vWind||1);
+                const rawKwh=parseFloat(i.kwhBare.replace(/\./g,'').replace(',','.'));
+                gTotalKwh+=rawKwh;
+                if(i.inputs.matKey!=='bare'){ gInv+=invDisp; gSave+=saveDisp; gCo2+=i.co2; gLoss+=lossBareDisp; gFuelLost+=i.fuelLost; }
+                else { gLoss+=lossDisp; gFuelLost+=i.fuelLost; }
+                lastFuelUnit=i.inputs.fuelUnit||"";
             });
 
-            let uniqueWinds = new Set(allWinds);
-            let windNarrativeBit = "";
+            let uniqueWinds=new Set(allWinds);
+            let windNarrativeBit = (uniqueWinds.size>1||LIST.some(x=>x.inputs.type==='package')) ? L.windNarMulti : L.windNarSingle(allWinds.length>0?allWinds[0]:document.getElementById('vWind').value);
 
-            if(uniqueWinds.size > 1 || LIST.some(x=>x.inputs.type==='package')) {
-                windNarrativeBit = "tesis içi farklı lokasyonların rüzgar şartlarına uygun olarak";
-            } else {
-                let val = allWinds.length > 0 ? allWinds[0] : document.getElementById('vWind').value;
-                windNarrativeBit = `<strong>${val} m/s</strong> rüzgar hızı koşullarında`;
-            }
-
-            const ghostContainer = document.createElement('div');
-            ghostContainer.style.width = '210mm'; 
-            ghostContainer.style.padding = '40px'; 
-            ghostContainer.style.position = 'absolute';
-            ghostContainer.style.top = '-9999px';
-            ghostContainer.style.left = '-9999px';
-            ghostContainer.style.visibility = 'hidden';
+            // Ghost container for measuring
+            const ghostContainer=document.createElement('div');
+            ghostContainer.style.cssText='width:210mm;padding:40px;position:absolute;top:-9999px;left:-9999px;visibility:hidden;';
             document.body.appendChild(ghostContainer);
 
-            const tableHeaderHTML = `
-                <th class="w-6">#</th>
-                <th class="w-20 text-center">Görsel</th>
-                <th class="text-left w-48">Ekipman</th>
-                <th class="text-center w-20 text-xs text-red-500">Çıplak<br><span class="text-[8px] font-normal">(Kayıp kWh)</span></th>
-                <th class="text-center w-20 text-xs text-blue-500">İzolasyon<br><span class="text-[8px] font-normal">(Kayıp kWh)</span></th>
-                <th class="text-center w-20 text-xs text-green-500">Kazanç<br><span class="text-[8px] font-normal">(Fark kWh)</span></th>
-                <th class="text-center w-8">Adet</th>
-                <th class="text-right text-slate-700 dark:text-slate-200">Yatırım</th>
-                <th class="text-right text-green-600 font-black">Net Kazanç</th>
-                <th class="text-right w-10">ROI</th>`;
+            const tableHeaderHTML = `<th class="w-6">#</th><th class="w-20 text-center">${L.thVisual}</th><th class="text-left w-48">${L.thEquipment}</th><th class="text-center w-20 text-xs text-red-500">${L.thBare}<br><span class="text-[8px] font-normal">${L.thBareKwh}</span></th><th class="text-center w-20 text-xs text-blue-500">${L.thInsulated}<br><span class="text-[8px] font-normal">${L.thInsKwh}</span></th><th class="text-center w-20 text-xs text-green-500">${L.thGain}<br><span class="text-[8px] font-normal">${L.thGainKwh}</span></th><th class="text-center w-8">${L.thQty}</th><th class="text-right text-slate-700">${L.thInvestment}</th><th class="text-right text-green-600 font-black">${L.thNetGain}</th><th class="text-right w-10">${L.thRoi}</th>`;
 
-            const PAGE_SAFE_HEIGHT = 880; 
-
-            const pages = [];
-            let currentPage = [];
-            let currentHeight = 0;
-
-            let tempTable = document.createElement('table');
-            tempTable.className = 'w-full text-sm'; 
+            const PAGE_SAFE_HEIGHT=880;
+            const pages=[]; let currentPage=[],currentHeight=0;
+            let tempTable=document.createElement('table');
+            tempTable.className='w-full text-sm';
             ghostContainer.appendChild(tempTable);
-            let tempTbody = document.createElement('tbody');
+            let tempTbody=document.createElement('tbody');
             tempTable.appendChild(tempTbody);
 
-            LIST.forEach((i, idx) => {
-                const globalIndex = idx + 1;
-                const iInv = i.invTL / reportRate;
-                const iSave = i.saveTL / reportRate;
-                const roi = i.roi > 0 ? i.roi.toFixed(1) : "-";
-                const imgTag = i.img ? `<img src="${i.img}" class="w-16 h-16 object-cover rounded mx-auto border border-slate-200 dark:border-slate-700">` : `<div class="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded mx-auto flex items-center justify-center text-[8px]">${i.inputs.type==='package'?'PKG':'-'}</div>`;
-                const locText = i.location ? `<div class="text-[8px] uppercase text-slate-400 mt-1 font-bold">📍 ${i.location}</div>` : '';
-
-                const trHTML = `
-                    <td class="text-center font-bold text-slate-400 border-b border-slate-100">${globalIndex}</td>
-                    <td class="text-center border-b border-slate-100 p-1">${imgTag}</td>
-                    <td class="font-bold text-slate-800 dark:text-slate-100 border-b border-slate-100 text-[10px]">${i.name} ${locText}<div class="text-[8px] text-slate-500 dark:text-slate-400 font-normal mt-0.5">${i.desc}</div></td>
-                    <td class="text-center border-b border-slate-100"><div class="font-bold text-slate-700 dark:text-slate-200">${i.Ts}</div><div class="text-[9px] font-bold text-red-500">${i.kwhBare} kWh</div></td>
-                    <td class="text-center border-b border-slate-100"><div class="font-bold text-slate-700 dark:text-slate-200">${i.Tins}</div><div class="text-[9px] font-bold text-orange-500">${i.kwhIns} kWh</div></td>
-                    <td class="text-center border-b border-slate-100"><div class="font-bold text-green-600">+${i.kwhSave} kWh</div></td>
-                    <td class="text-center border-b border-slate-100 text-[10px]">${i.qty} ${i.unit}</td>
-                    <td class="text-right font-mono text-[10px] text-slate-700 dark:text-slate-200 border-b border-slate-100">${currSym}${fmt(iInv)}</td>
-                    <td class="text-right font-mono text-[10px] text-green-600 font-bold border-b border-slate-100">${i.inputs.matKey!=='bare'?'+'+currSym+fmt(iSave):'-'}</td>
-                    <td class="text-right font-bold text-blue-600 text-[10px] border-b border-slate-100">${roi}</td>
-                `;
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = trHTML;
-                tempTbody.appendChild(tr);
-                
-                const rowHeight = tr.offsetHeight;
-
-                if (currentHeight + rowHeight > PAGE_SAFE_HEIGHT) {
-                    pages.push(currentPage); 
-                    currentPage = []; 
-                    currentHeight = 0;
-                    tempTbody.innerHTML = ''; 
-                    
-                    tempTbody.appendChild(tr); 
-                }
-
-                currentPage.push({ html: trHTML });
-                currentHeight += rowHeight;
+            LIST.forEach((i,idx)=>{
+                const globalIndex=idx+1, iInv=i.invTL/reportRate, iSave=i.saveTL/reportRate;
+                const roi=i.roi>0?i.roi.toFixed(1):"-";
+                const imgTag=i.img?`<img src="${i.img}" class="w-16 h-16 object-cover rounded mx-auto border border-slate-200">`:`<div class="w-8 h-8 bg-slate-100 rounded mx-auto flex items-center justify-center text-[8px]">${i.inputs.type==='package'?'PKG':'-'}</div>`;
+                const locText=i.location?`<div class="text-[8px] uppercase text-slate-400 mt-1 font-bold">📍 ${i.location}</div>`:'';
+                const trHTML=`<td class="text-center font-bold text-slate-400 border-b border-slate-100">${globalIndex}</td><td class="text-center border-b border-slate-100 p-1">${imgTag}</td><td class="font-bold text-slate-800 border-b border-slate-100 text-[10px]">${i.name} ${locText}<div class="text-[8px] text-slate-500 font-normal mt-0.5">${i.desc}</div></td><td class="text-center border-b border-slate-100"><div class="font-bold text-slate-700">${i.Ts}</div><div class="text-[9px] font-bold text-red-500">${i.kwhBare} kWh</div></td><td class="text-center border-b border-slate-100"><div class="font-bold text-slate-700">${i.Tins}</div><div class="text-[9px] font-bold text-orange-500">${i.kwhIns} kWh</div></td><td class="text-center border-b border-slate-100"><div class="font-bold text-green-600">+${i.kwhSave} kWh</div></td><td class="text-center border-b border-slate-100 text-[10px]">${i.qty} ${i.unit}</td><td class="text-right font-mono text-[10px] text-slate-700 border-b border-slate-100">${currSym}${fmt(iInv)}</td><td class="text-right font-mono text-[10px] text-green-600 font-bold border-b border-slate-100">${i.inputs.matKey!=='bare'?'+'+currSym+fmt(iSave):'-'}</td><td class="text-right font-bold text-blue-600 text-[10px] border-b border-slate-100">${roi}</td>`;
+                const tr=document.createElement('tr'); tr.innerHTML=trHTML; tempTbody.appendChild(tr);
+                const rowHeight=tr.offsetHeight;
+                if(currentHeight+rowHeight>PAGE_SAFE_HEIGHT){pages.push(currentPage);currentPage=[];currentHeight=0;tempTbody.innerHTML='';tempTbody.appendChild(tr);}
+                currentPage.push({html:trHTML}); currentHeight+=rowHeight;
             });
-
-            if (currentPage.length > 0) pages.push(currentPage);
-
+            if(currentPage.length>0) pages.push(currentPage);
             document.body.removeChild(ghostContainer);
 
-            const tablePageTemplate = document.getElementById('p-table');
-            const summaryPage = document.getElementById('p-summary');
-            tablePageTemplate.remove(); 
-            
-            const totalPages = 1 + pages.length + 1; 
+            const tablePageTemplate=document.getElementById('p-table');
+            const summaryPage=document.getElementById('p-summary');
+            tablePageTemplate.remove();
+            const totalPages=1+pages.length+1+1+1; // cover+tables+summary+methodology+logo
 
-            pages.forEach((pageRows, index) => {
-                const newPage = tablePageTemplate.cloneNode(true);
-                newPage.id = '';
-                const titleEl = newPage.querySelector('h2');
-                titleEl.innerText = "Detaylı Analiz Dökümü";
-                if(index > 0) { titleEl.innerHTML += ` <span class="text-sm text-slate-400 font-normal">(${index+1})</span>`; }
-                newPage.querySelector('#rDate').innerText = today; 
-                newPage.querySelector('thead tr').innerHTML = tableHeaderHTML;
-                const pageNum = index + 2; 
-                newPage.querySelector('.page-num').innerText = `Sayfa ${pageNum} / ${totalPages}`;
-                const tbody = newPage.querySelector('tbody');
-                tbody.innerHTML = ''; 
-                
-                pageRows.forEach(row => {
-                    tbody.innerHTML += `<tr>${row.html}</tr>`;
-                });
-
-                document.getElementById('print-area').insertBefore(newPage, summaryPage);
+            pages.forEach((pageRows,index)=>{
+                const newPage=tablePageTemplate.cloneNode(true); newPage.id='';
+                const titleEl=newPage.querySelector('h2');
+                titleEl.innerText=L.detailedAnalysis;
+                if(index>0) titleEl.innerHTML+=` <span class="text-sm text-slate-400 font-normal">(${index+1})</span>`;
+                newPage.querySelector('#rDate').innerText=today;
+                newPage.querySelector('thead tr').innerHTML=tableHeaderHTML;
+                newPage.querySelector('.page-num').innerText=`${L.page} ${index+2} / ${totalPages}`;
+                const tbody=newPage.querySelector('tbody'); tbody.innerHTML='';
+                pageRows.forEach(row=>{ tbody.innerHTML+=`<tr>${row.html}</tr>`; });
+                document.getElementById('print-area').insertBefore(newPage,summaryPage);
             });
 
-            // KAPAK VERİLERİ (GÜNCEL)
-            // Manuel yatırım bedeli varsa onu kullan
-            const finalInvForReport = (manualTotalInvestment !== null && manualTotalInvestment > 0) 
-                ? (manualTotalInvestment / reportRate) 
-                : gInv;
-            const totalRoi = gSave>0 ? (finalInvForReport/gSave*12) : 0;
+            // COVER DATA
+            const finalInvForReport=(manualTotalInvestment!==null&&manualTotalInvestment>0)?(manualTotalInvestment/reportRate):gInv;
+            const totalRoi=gSave>0?(finalInvForReport/gSave*12):0;
             
-            document.getElementById('covClient').innerText = document.getElementById('cName').value || "FİRMA ADI";
-            document.getElementById('covContact').innerText = document.getElementById('cEng').value || "";
-            document.getElementById('covProv').innerText = document.getElementById('pName').value || "TEDARİKÇİ";
-            document.getElementById('covDate').innerText = today; 
-            document.getElementById('covIntroDate').innerText = auditDateStr; 
+            document.getElementById('covClient').innerText=document.getElementById('cName').value||(reportLang==='en'?"COMPANY NAME":"FİRMA ADI");
+            document.getElementById('covContact').innerText=document.getElementById('cEng').value||"";
+            document.getElementById('covProv').innerText=document.getElementById('pName').value||(reportLang==='en'?"SUPPLIER":"TEDARİKÇİ");
+            document.getElementById('covDate').innerText=today;
+            document.getElementById('covIntroDate').innerText=auditDateStr;
+            document.getElementById('covRoiBig').innerText=totalRoi>0?totalRoi.toFixed(1):"---";
+
+            // Cover intro text
+            const coverIntroP=document.querySelector('#p-cover p.text-sm.text-slate-500');
+            if(coverIntroP) coverIntroP.innerHTML=`<span class="font-bold text-slate-900">${auditDateStr}</span> ${L.coverIntro}`;
+
+            // Time labels
+            const timeLabels=document.querySelectorAll('#p-cover .text-xs.font-bold.uppercase.tracking-wide');
+            [L.daily,L.weekly,L.monthly,L.yearly].forEach((t,i)=>{ if(timeLabels[i]) timeLabels[i].innerText=t; });
+
+            // ISO label
+            const isoLabelEl=document.querySelector('#p-cover .bg-green-100');
+            if(isoLabelEl) isoLabelEl.innerText=L.isoLabel;
+
+            // Main title
+            const mainTitleH1=document.querySelector('#p-cover h1');
+            if(mainTitleH1) mainTitleH1.innerHTML=`${L.industrialTitle} <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-800">${L.insulationTitle}</span> ${L.analysisTitle}`;
+
+            // QR text
+            const qrTextEl=document.querySelector('.qr-report-section .text-\\[9px\\]');
+            if(qrTextEl) qrTextEl.innerText=L.qrText;
+
+            // Fuel data
+            document.getElementById('covFuelYear').innerText=Math.round(gFuelLost).toLocaleString();
+            document.getElementById('covFuelMonth').innerText=Math.round(gFuelLost/12).toLocaleString();
+            document.getElementById('covFuelWeek').innerText=Math.round(gFuelLost/52).toLocaleString();
+            document.getElementById('covFuelDay').innerText=Math.round(gFuelLost/365).toLocaleString();
+            document.getElementById('covKwhYear').innerText=Math.round(gTotalKwh).toLocaleString();
+            document.getElementById('covKwhMonth').innerText=Math.round(gTotalKwh/12).toLocaleString();
+            document.getElementById('covKwhWeek').innerText=Math.round(gTotalKwh/52).toLocaleString();
+            document.getElementById('covKwhDay').innerText=Math.round(gTotalKwh/365).toLocaleString();
+            document.querySelectorAll('.fuel-unit-label').forEach(el=>el.innerText=lastFuelUnit);
             
-            // ROI YENİ YERİNDE
-            document.getElementById('covRoiBig').innerText = totalRoi>0 ? totalRoi.toFixed(1) : "---";
-            
-            // --- YENİ EKLENEN DAILY/WEEKLY/MONTHLY HESAPLAMALAR ---
-            const fuelYearly = gFuelLost;
-            const fuelMonthly = gFuelLost / 12;
-            const fuelWeekly = gFuelLost / 52;
-            const fuelDaily = gFuelLost / 365;
+            const tAmb=document.getElementById('tAmb').value, eff=document.getElementById('eff').value;
+            const price=document.getElementById('price').value, hours=document.getElementById('hours').value;
+            const energyCurr=document.getElementById('energyCurr').value;
+            document.getElementById('covNarrative').innerHTML=L.narrative(tAmb,windNarrativeBit,eff,hours,price,energyCurr);
 
-            document.getElementById('covFuelYear').innerText = Math.round(fuelYearly).toLocaleString();
-            document.getElementById('covFuelMonth').innerText = Math.round(fuelMonthly).toLocaleString();
-            document.getElementById('covFuelWeek').innerText = Math.round(fuelWeekly).toLocaleString();
-            document.getElementById('covFuelDay').innerText = Math.round(fuelDaily).toLocaleString();
-            
-            const kwhYearly = gTotalKwh;
-            const kwhMonthly = gTotalKwh / 12;
-            const kwhWeekly = gTotalKwh / 52;
-            const kwhDaily = gTotalKwh / 365;
+            const qrImgEl=document.getElementById('covQrCode');
+            if(userQrImg){qrImgEl.src=userQrImg;qrImgEl.style.opacity='1';} else {qrImgEl.src="";qrImgEl.style.opacity='0.5';}
 
-            document.getElementById('covKwhYear').innerText = Math.round(kwhYearly).toLocaleString();
-            document.getElementById('covKwhMonth').innerText = Math.round(kwhMonthly).toLocaleString();
-            document.getElementById('covKwhWeek').innerText = Math.round(kwhWeekly).toLocaleString();
-            document.getElementById('covKwhDay').innerText = Math.round(kwhDaily).toLocaleString();
-            // --------------------------------------------------------
+            // SUMMARY PAGE
+            const sumPage=document.getElementById('p-summary');
+            sumPage.querySelector('h2').innerText=L.executiveSummary;
+            document.getElementById('sumLoss').innerText=currSym+fmt(gLoss);
+            document.getElementById('sumFuelLost').innerText=`(${Math.round(gFuelLost).toLocaleString()} ${lastFuelUnit})`;
+            document.getElementById('sumCo2').innerText=gCo2.toFixed(1);
+            document.getElementById('sumTrees').innerText=Math.round(gCo2*40).toLocaleString();
+            document.getElementById('sumInvSummary').innerText=currSym+fmt(finalInvForReport);
+            document.getElementById('sumNetSaveSummary').innerText=currSym+fmt(gSave);
+            document.getElementById('sumRoiSummary').innerText=totalRoi>0?totalRoi.toFixed(1)+` ${L.month}`:"---";
 
-            const fuelLabels = document.querySelectorAll('.fuel-unit-label');
-            fuelLabels.forEach(el => el.innerText = lastFuelUnit);
-            
-            const tAmb = document.getElementById('tAmb').value;
-            const eff = document.getElementById('eff').value;
-            const price = document.getElementById('price').value;
-            const hours = document.getElementById('hours').value;
-            const energyCurr = document.getElementById('energyCurr').value;
-            
-            const narrative = `Simülasyonlar; <strong>${tAmb}°C</strong> ortam sıcaklığı, ${windNarrativeBit}, <strong>%${eff}</strong> sistem verimi ve yıllık <strong>${hours} saat</strong> çalışma süresi baz alınarak hesaplanmıştır. Enerji birim maliyeti <strong>${price} ${energyCurr}</strong> olarak kabul edilmiştir.`;
-            document.getElementById('covNarrative').innerHTML = narrative;
+            // Carbon section
+            const carbonTitle=sumPage.querySelector('.text-emerald-300');
+            if(carbonTitle) carbonTitle.innerText=L.carbonFootprint;
+            const treeLabel=sumPage.querySelector('.text-emerald-400.mt-1');
+            if(treeLabel) treeLabel.innerText=L.treeEquivalent;
 
-            const qrImgEl = document.getElementById('covQrCode');
-            if (userQrImg) { qrImgEl.src = userQrImg; qrImgEl.style.opacity = '1'; qrImgEl.classList.remove('opacity-50', 'opacity-20'); } 
-            else { qrImgEl.src = ""; qrImgEl.style.opacity = '0.5'; }
+            // Disclaimer
+            const disclaimer=sumPage.querySelector('.border-t-2.border-slate-100 p');
+            if(disclaimer) disclaimer.innerText=L.isoDisclaimer;
 
-            document.getElementById('sumLoss').innerText = currSym + fmt(gLoss);
-            document.getElementById('sumFuelLost').innerText = `(${Math.round(gFuelLost).toLocaleString()} ${lastFuelUnit})`;
-            
-            document.getElementById('sumCo2').innerText = gCo2.toFixed(1);
-            document.getElementById('sumTrees').innerText = Math.round(gCo2*40).toLocaleString();
-
-            // YÖNETİCİ ÖZETİ SAYFASINDAKİ YENİ ALANLARI DOLDUR
-            document.getElementById('sumInvSummary').innerText = currSym + fmt(finalInvForReport);
-            document.getElementById('sumNetSaveSummary').innerText = currSym + fmt(gSave);
-            document.getElementById('sumRoiSummary').innerText = totalRoi>0 ? totalRoi.toFixed(1) + " AY" : "---";
-
-            const pt = document.getElementById('projTable');
-            pt.innerHTML = '';
-            let rowL = `<tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2 text-left font-bold text-red-600">Mevcut Durum (Kümülatif Kayıp)</td>`;
+            // Projection table
+            const pt=document.getElementById('projTable'); pt.innerHTML='';
+            let rowL=`<tr class="border-b border-slate-200"><td class="p-2 text-left font-bold text-red-600">${L.currentStatus}</td>`;
             let tL=0;
-            for(let y=1; y<=5; y++){ tL += gLoss; rowL += `<td class="p-2 text-red-500">-${currSym}${fmt(tL)}</td>`; }
-            rowL += `<td class="p-2 font-black text-red-700">-${currSym}${fmt(tL)}</td></tr>`;
-            let rowG = `<tr><td class="p-2 text-left font-bold text-green-600">Yatırım Sonrası (Kümülatif Kazanç)</td>`;
-            let tG = -finalInvForReport;
-            for(let y=1; y<=5; y++){ tG += gSave; rowG += `<td class="p-2 ${tG>=0?'text-green-600':'text-red-400'}">${currSym}${fmt(tG)}</td>`; }
-            rowG += `<td class="p-2 font-black ${tG>=0?'text-green-700':'text-red-700'}">${tG>0?'+':''}${currSym}${fmt(tG)}</td></tr>`;
-            pt.innerHTML = rowL + rowG;
+            for(let y=1;y<=5;y++){tL+=gLoss;rowL+=`<td class="p-2 text-red-500">-${currSym}${fmt(tL)}</td>`;}
+            rowL+=`<td class="p-2 font-black text-red-700">-${currSym}${fmt(tL)}</td></tr>`;
+            let rowG=`<tr><td class="p-2 text-left font-bold text-green-600">${L.afterInvestment}</td>`;
+            let tG=-finalInvForReport;
+            for(let y=1;y<=5;y++){tG+=gSave;rowG+=`<td class="p-2 ${tG>=0?'text-green-600':'text-red-400'}">${currSym}${fmt(tG)}</td>`;}
+            rowG+=`<td class="p-2 font-black ${tG>=0?'text-green-700':'text-red-700'}">${tG>0?'+':''}${currSym}${fmt(tG)}</td></tr>`;
+            pt.innerHTML=rowL+rowG;
+
+            // METHODOLOGY PAGE
+            const methPage=document.getElementById('p-methodology');
+            if(methPage){
+                methPage.querySelector('#methTitle').innerText=L.methTitle;
+                methPage.querySelector('.meth-calc-title').innerText=L.methCalcTitle;
+                methPage.querySelector('#methCalcP1').innerHTML=L.methCalcP1;
+                methPage.querySelector('#methCalcP2').innerHTML=L.methCalcP2;
+                methPage.querySelector('#methFormulaTitle').innerText=L.methFormulaTitle;
+                methPage.querySelector('#methFormulaDesc').innerHTML=L.methFormulaDesc;
+                methPage.querySelector('.meth-tesla-title').innerText=L.methTeslaTitle;
+                methPage.querySelector('#methTeslaSubtitle').innerText=L.methTeslaSubtitle;
+                methPage.querySelector('#methTeslaKwhLabel').innerText=L.methTeslaKwhLabel;
+                methPage.querySelector('#methTeslaChargeLabel').innerText=L.methTeslaChargeLabel;
+                methPage.querySelector('#methTeslaKmLabel').innerText=L.methTeslaKmLabel;
+                methPage.querySelector('#methTeslaNote').innerText=L.methTeslaNote;
+                methPage.querySelector('.meth-awareness-title').innerText=L.methAwarenessTitle;
+                methPage.querySelector('#methAware1Title').innerText=L.methAware1Title;
+                methPage.querySelector('#methAware1Desc').innerText=L.methAware1Desc;
+                methPage.querySelector('#methAware2Title').innerText=L.methAware2Title;
+                methPage.querySelector('#methAware2Desc').innerText=L.methAware2Desc;
+                methPage.querySelector('#methAware3Title').innerText=L.methAware3Title;
+                methPage.querySelector('#methAware3Desc').innerText=L.methAware3Desc;
+                methPage.querySelector('#methAware4Title').innerText=L.methAware4Title;
+                methPage.querySelector('#methAware4Desc').innerText=L.methAware4Desc;
+                methPage.querySelector('#methFooter').innerText=L.methFooter;
+                // Tesla
+                const tesla=calculateTeslaEquivalent();
+                methPage.querySelector('#methTeslaItem').innerText=tesla.itemName;
+                methPage.querySelector('#methTeslaKwh').innerText=tesla.kwh.toLocaleString()+" kWh";
+                methPage.querySelector('#methTeslaCharges').innerText=tesla.charges.toLocaleString();
+                methPage.querySelector('#methTeslaKm').innerText=tesla.km.toLocaleString()+" km";
+                methPage.querySelector('#methPageNum').innerText=`${L.page} ${1+pages.length+1+1} / ${totalPages}`;
+            }
+
+            // LOGO PAGE
+            const logoPage=document.getElementById('p-logo');
+            if(logoPage){
+                logoPage.querySelector('#logoSubtitle').innerText=L.logoSubtitle;
+                logoPage.querySelector('#logoPageNum').innerText=`${L.page} ${totalPages} / ${totalPages}`;
+            }
 
             setTimeout(()=>{ lucide.createIcons(); window.print(); }, 100);
-
-        }catch(e){ alert('Rapor oluşturulurken hata oluştu: ' + e.message); console.error(e); }
+        }catch(e){ alert('Rapor oluşturulurken hata oluştu: '+e.message); console.error(e); }
     }
 </script>
 </body>
