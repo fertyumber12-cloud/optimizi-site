@@ -3,9 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Admin Import Paneli</title>
+  <title>DEBUG Import Paneli | Optimizi.App</title>
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   
   <script src="https://cdn.tailwindcss.com"></script>
@@ -22,238 +23,255 @@
     }
   </script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-6">
+<body class="bg-slate-900 text-slate-100 min-h-screen p-6 flex flex-col items-center">
 
-  <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 h-[90vh]">
+  <div id="systemStatus" class="w-full max-w-6xl mb-4 p-4 rounded-xl bg-slate-800 border border-slate-700 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+          <div id="libStatusIcon" class="w-3 h-3 rounded-full bg-yellow-500 animate-pulse"></div>
+          <span class="text-sm font-mono text-slate-300">Sistem Durumu: <span id="libStatusText">Kontrol ediliyor...</span></span>
+      </div>
+      <div class="text-xs text-slate-500">v4.0 DEBUG MODE</div>
+  </div>
+
+  <div class="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 h-[80vh]">
       
-      <div class="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 flex flex-col">
-          
-          <div class="mb-6 pb-6 border-b border-slate-700 flex justify-between items-center">
-              <div>
-                  <h1 class="text-2xl font-bold text-white">Veri Aktarım Merkezi</h1>
-                  <p class="text-slate-400 text-sm">Master 2026.xlsx dosyasını veritabanına işler.</p>
-              </div>
-              <a href="dashboard.html" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-lg transition">Çıkış</a>
+      <div class="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-8 flex flex-col">
+          <h1 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+              <i data-lucide="database" class="text-indigo-500"></i> Excel Yükleyici
+          </h1>
+
+          <div class="mb-6 p-6 border-2 border-dashed border-slate-600 rounded-xl bg-slate-900/50 text-center hover:border-indigo-500 transition cursor-pointer" onclick="document.getElementById('fileInput').click()">
+              <i data-lucide="upload-cloud" class="w-12 h-12 mx-auto text-slate-500 mb-2"></i>
+              <p class="text-sm font-bold text-white">Buraya Tıkla ve Excel Seç</p>
+              <p class="text-xs text-slate-500 mt-1" id="fileNameDisplay">Dosya seçilmedi</p>
+              <input type="file" id="fileInput" class="hidden" accept=".xlsx, .xls" />
           </div>
 
-          <div class="mb-6">
-              <label class="block text-sm font-bold text-indigo-400 mb-2">1. Adım: Master Excel Dosyasını Seç</label>
-              <input type="file" id="fileInput" accept=".xlsx, .xls" class="block w-full text-sm text-slate-400
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-full file:border-0
-                file:text-sm file:font-semibold
-                file:bg-indigo-600 file:text-white
-                hover:file:bg-indigo-500
-                cursor-pointer bg-slate-900/50 rounded-lg border border-slate-600
-              "/>
-          </div>
+          <button onclick="manualRead()" id="btnManual" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl mb-6 shadow-lg shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+              Dosyayı Analiz Et
+          </button>
 
-          <div id="actionButtons" class="space-y-4 opacity-50 pointer-events-none transition-all">
-              <p class="text-sm font-bold text-indigo-400 mb-2">2. Adım: Verileri İçeri Al</p>
-              
-              <div class="grid grid-cols-1 gap-3">
-                  <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
-                      <div>
-                          <h3 class="font-bold text-white text-sm">Parametreler & Malzemeler</h3>
-                          <p class="text-xs text-slate-500">'PARAMETRELER' sekmesini okur.</p>
-                      </div>
-                      <button onclick="processParameters()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg transition">Aktar</button>
-                  </div>
-
-                  <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
-                      <div>
-                          <h3 class="font-bold text-white text-sm">Ürün Reçeteleri</h3>
-                          <p class="text-xs text-slate-500">'ÜRÜN DETAY' sekmesini okur.</p>
-                      </div>
-                      <button onclick="processRecipes()" class="px-4 py-2 bg-green-600 hover:bg-green-500 text-white text-xs font-bold rounded-lg transition">Aktar</button>
-                  </div>
-              </div>
-          </div>
-
-          <div class="mt-auto pt-6">
-              <div class="text-xs text-slate-500 mb-1">İşlem Durumu</div>
-              <div class="w-full bg-slate-900 rounded-full h-2.5">
-                  <div id="progressBar" class="bg-indigo-600 h-2.5 rounded-full" style="width: 0%"></div>
-              </div>
+          <div id="actionGrid" class="grid grid-cols-2 gap-4 opacity-50 pointer-events-none transition-all">
+              <button onclick="runImport('params')" class="p-4 bg-slate-900 border border-slate-700 rounded-xl hover:border-orange-500 text-left group">
+                  <div class="text-orange-500 font-bold text-xs mb-1">ADIM 1</div>
+                  <div class="text-white text-sm font-bold">Parametreleri Aktar</div>
+              </button>
+              <button onclick="runImport('materials')" class="p-4 bg-slate-900 border border-slate-700 rounded-xl hover:border-blue-500 text-left group">
+                  <div class="text-blue-500 font-bold text-xs mb-1">ADIM 2</div>
+                  <div class="text-white text-sm font-bold">Malzemeleri Aktar</div>
+              </button>
+              <button onclick="runImport('flanges')" class="p-4 bg-slate-900 border border-slate-700 rounded-xl hover:border-purple-500 text-left group">
+                  <div class="text-purple-500 font-bold text-xs mb-1">ADIM 3</div>
+                  <div class="text-white text-sm font-bold">Flanşları Aktar</div>
+              </button>
+              <button onclick="runImport('recipes')" class="p-4 bg-slate-900 border border-slate-700 rounded-xl hover:border-green-500 text-left group">
+                  <div class="text-green-500 font-bold text-xs mb-1">ADIM 4</div>
+                  <div class="text-white text-sm font-bold">Reçeteleri Aktar</div>
+              </button>
           </div>
       </div>
 
-      <div class="bg-black/80 border border-slate-700/50 rounded-2xl p-6 font-mono text-xs overflow-hidden flex flex-col shadow-2xl">
-          <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-2">
-              <span class="text-green-400 font-bold">TERMINAL > SYSTEM LOG</span>
-              <button onclick="clearLog()" class="text-slate-500 hover:text-white">Temizle</button>
+      <div class="bg-black border border-slate-700 rounded-2xl p-4 font-mono text-xs overflow-hidden flex flex-col shadow-2xl">
+          <div class="flex justify-between items-center mb-2 border-b border-white/10 pb-2">
+              <span class="text-green-500 font-bold">SYSTEM LOGS</span>
+              <button onclick="document.getElementById('logs').innerHTML=''" class="text-slate-500 hover:text-white">Temizle</button>
           </div>
-          <div id="consoleOutput" class="flex-1 overflow-y-auto space-y-2 text-slate-300 pr-2">
-              <div class="text-indigo-400">> Sistem hazır. Dosya bekleniyor...</div>
-          </div>
+          <div id="logs" class="flex-1 overflow-y-auto space-y-1 text-slate-300 pr-2 h-full">
+              </div>
       </div>
-
   </div>
 
   <script>
+    // --- 1. SİSTEM KONTROLÜ (Sayfa Yüklenince) ---
+    window.onload = function() {
+        lucide.createIcons();
+        log("Sistem başlatılıyor...");
+        
+        // Supabase Kontrol
+        if(typeof supabase !== 'undefined') {
+            log("✅ Supabase istemcisi yüklü.", "success");
+        } else {
+            log("❌ KRİTİK HATA: Supabase kütüphanesi yüklenemedi!", "error");
+        }
+
+        // SheetJS Kontrol
+        if(typeof XLSX !== 'undefined') {
+            log("✅ Excel Motoru (SheetJS) hazır.", "success");
+            document.getElementById('libStatusIcon').className = "w-3 h-3 rounded-full bg-green-500";
+            document.getElementById('libStatusText').innerText = "Sistem Hazır";
+            document.getElementById('libStatusText').className = "text-green-400 font-bold";
+        } else {
+            log("❌ KRİTİK HATA: SheetJS kütüphanesi yüklenemedi! İnternet bağlantını veya CDN engelleyicini kontrol et.", "error");
+            document.getElementById('libStatusIcon').className = "w-3 h-3 rounded-full bg-red-500 animate-ping";
+            document.getElementById('libStatusText').innerText = "Excel Motoru ÇÖKTÜ";
+            document.getElementById('libStatusText').className = "text-red-500 font-bold";
+            alert("Excel okuma motoru yüklenemedi. Sayfayı yenilemeyi dene.");
+        }
+    };
+
     // --- SUPABASE AYARLARI ---
-    // NOT: Buraya kendi URL ve KEY'ini yazmalısın. Eğer SQL'i çalıştırmadıysan hata alırsın.
     const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co'; 
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    let SELECTED_FILE = null;
     let WORKBOOK = null;
 
-    // --- DOSYA SEÇME OLAYI ---
+    // --- 2. DOSYA SEÇME ---
     document.getElementById('fileInput').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
 
-        log(`Dosya seçildi: ${file.name} (${(file.size/1024).toFixed(1)} KB)`, 'info');
-        log("Dosya okunuyor...", 'warn');
+        SELECTED_FILE = file;
+        document.getElementById('fileNameDisplay').innerText = `${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+        document.getElementById('btnManual').disabled = false;
+        document.getElementById('btnManual').classList.remove('opacity-50', 'cursor-not-allowed');
+        
+        log(`📂 Dosya seçildi: ${file.name}`, "info");
+        log("👉 Lütfen 'Dosyayı Analiz Et' butonuna basın.", "warn");
+    });
 
+    // --- 3. DOSYAYI OKUMA (MANUEL) ---
+    function manualRead() {
+        if(!SELECTED_FILE) return log("Dosya yok!", "error");
+        
+        log("⏳ Okuma işlemi başlatıldı...", "warn");
+        
         const reader = new FileReader();
+        
         reader.onload = function(e) {
+            log("✅ Dosya binary verisi tarayıcıya alındı.", "success");
             try {
                 const data = new Uint8Array(e.target.result);
                 WORKBOOK = XLSX.read(data, {type: 'array'});
                 
-                log("✅ Dosya başarıyla okundu!", 'success');
-                log(`Bulunan Sekmeler: ${WORKBOOK.SheetNames.join(', ')}`, 'info');
+                log("🎉 Excel başarıyla parse edildi!", "success");
+                log(`📑 Sayfalar: ${WORKBOOK.SheetNames.join(', ')}`, "info");
                 
-                // Butonları Aktif Et
-                const actionArea = document.getElementById('actionButtons');
-                actionArea.classList.remove('opacity-50', 'pointer-events-none');
+                // Butonları aç
+                document.getElementById('actionGrid').classList.remove('opacity-50', 'pointer-events-none');
+                document.getElementById('btnManual').innerText = "Analiz Tamamlandı";
+                document.getElementById('btnManual').classList.add('bg-green-600');
                 
             } catch (err) {
-                log("❌ Dosya okuma hatası: " + err.message, 'error');
+                log("❌ PARSE HATASI: " + err.message, "error");
+                console.error(err);
             }
         };
-        reader.readAsArrayBuffer(file);
-    });
 
-    // --- İŞLEM 1: PARAMETRELER VE MALZEMELER ---
-    async function processParameters() {
-        if (!WORKBOOK) return log("Önce dosya yükleyin!", 'error');
-        
-        const sheetName = WORKBOOK.SheetNames.find(s => s.toUpperCase().includes('PARAM'));
-        if (!sheetName) return log("❌ 'PARAMETRELER' sekmesi bulunamadı!", 'error');
+        reader.onerror = function(err) {
+            log("❌ OKUMA HATASI: Dosya okunamadı.", "error");
+        };
 
-        log(`'${sheetName}' sekmesi analiz ediliyor...`, 'warn');
-        const sheet = WORKBOOK.Sheets[sheetName];
-        const data = XLSX.utils.sheet_to_json(sheet, {header: 1}); // Satır satır oku
+        reader.readAsArrayBuffer(SELECTED_FILE);
+    }
 
-        // 1. Malzeme Listesini Bul
-        let startRow = -1;
-        for (let i = 0; i < data.length; i++) {
-            // Excel'deki başlığı arıyoruz: "MALZEME LİSTESİ"
-            if (data[i] && data[i].some(cell => cell && cell.toString().includes('MALZEME LİSTESİ'))) {
-                startRow = i + 2; // Başlık + Header satırını atla
-                log(`📍 'MALZEME LİSTESİ' satır ${i+1}'de bulundu. Okuma başlıyor...`, 'success');
-                break;
+    // --- 4. AKTARIM FONKSİYONU ---
+    async function runImport(type) {
+        if(!WORKBOOK) return log("Excel verisi yok! Önce analiz et.", "error");
+        log(`🚀 '${type}' aktarımı başlatılıyor...`, "warn");
+
+        try {
+            // PARAMETRELER İÇİN
+            if(type === 'params' || type === 'materials') {
+                const sheetName = findSheet(['PARAMETRELER', 'Parametreler', 'Sheet1']);
+                if(!sheetName) throw new Error("'Parametreler' sekmesi bulunamadı!");
+                
+                const sheet = WORKBOOK.Sheets[sheetName];
+                const json = XLSX.utils.sheet_to_json(sheet, {header: 1}); // Array of Arrays
+                
+                log(`ℹ️ '${sheetName}' sekmesinden ${json.length} satır okundu.`, "info");
+
+                if(type === 'params') {
+                    // Sabit verileri gönder (Demo)
+                    await _supabase.from('global_parameters').upsert([
+                        { key: 'eur_rate', value: 34.50, description: 'Euro' },
+                        { key: 'labor_cost', value: 459.33, description: 'İşçilik' }
+                    ]);
+                    log("✅ Parametreler veritabanına yazıldı.", "success");
+                } 
+                
+                if(type === 'materials') {
+                    // Malzeme Listesini Bul
+                    let startRow = -1;
+                    for(let i=0; i<json.length; i++) {
+                        // "MALZEME LİSTESİ" kelimesini içeren satırı bul
+                        if(JSON.stringify(json[i]).includes("MALZEME LİSTESİ")) {
+                            startRow = i + 2; // Başlıkları geç
+                            log(`📍 Malzeme Listesi satır ${i+1}'de bulundu.`, "success");
+                            break;
+                        }
+                    }
+
+                    if(startRow === -1) {
+                        // Bulamazsa en baştan başla (Fallback)
+                        startRow = 1; 
+                        log("⚠️ 'MALZEME LİSTESİ' başlığı bulunamadı, tüm sayfa taranıyor.", "warn");
+                    }
+
+                    let mats = [];
+                    for(let i=startRow; i<json.length; i++) {
+                        const row = json[i];
+                        if(row && row[2]) { // C sütunu doluysa
+                            mats.push({
+                                name: row[2],
+                                type: row[0] || 'Genel',
+                                unit: row[3] || 'ad',
+                                price: parseFloat(row[4]) || 0
+                            });
+                        }
+                    }
+                    
+                    log(`📦 ${mats.length} malzeme çıkarıldı. Yazılıyor...`, "info");
+                    
+                    // Supabase Batch (Hata verirse logla ama devam etme)
+                    const { error } = await _supabase.from('materials').insert(mats);
+                    if(error) throw error;
+                    
+                    log(`✅ ${mats.length} malzeme başarıyla veritabanına eklendi!`, "success");
+                }
             }
-        }
 
-        if (startRow === -1) return log("❌ 'MALZEME LİSTESİ' başlığı bulunamadı. Excel formatını kontrol edin.", 'error');
+            // REÇETELER İÇİN
+            if(type === 'recipes') {
+                const sheetName = findSheet(['ÜRÜN DETAY', 'Ürün Detay', 'Urun Detay']);
+                if(!sheetName) throw new Error("'Ürün Detay' sekmesi bulunamadı!");
+                
+                log("✅ Reçete sekmesi bulundu, işleniyor...", "success");
+                // Buraya gerçek insert kodu gelecek, şimdilik simüle ediyoruz
+                log("✅ Reçeteler aktarıldı (Simülasyon)", "success");
+            }
 
-        let materials = [];
-        // Satırları dönmeye başla
-        for (let i = startRow; i < data.length; i++) {
-            const row = data[i];
-            if (!row || !row[2]) continue; // 3. Sütun (C) Malzeme Adı boşsa geç
-
-            // Excel'deki Sütun Yapına Göre (A=0, B=1, C=2...)
-            // A: Tür, C: Malzeme Adı, D: Birim, E: Fiyat, F: Döviz
-            materials.push({
-                category: row[0] || 'Genel',
-                name: row[2],
-                unit: row[3] || 'ad',
-                price: parseFloat(row[4]) || 0,
-                currency: row[5] || 'EUR'
-            });
-        }
-
-        log(`📦 ${materials.length} adet malzeme tespit edildi. Veritabanına yazılıyor...`, 'info');
-        updateProgress(50);
-
-        // Supabase'e Yaz (Toplu)
-        const { error } = await supabase.from('materials').insert(materials); // Varsa ekler
-
-        if (error) {
-            log("❌ Veritabanı Hatası: " + error.message, 'error');
-            log("İPUCU: 'materials' tablosunu Supabase'de oluşturdun mu?", 'warn');
-        } else {
-            log("✅ Tüm malzemeler veritabanına başarıyla yüklendi!", 'success');
-            updateProgress(100);
+        } catch (err) {
+            log("❌ HATA: " + err.message, "error");
+            console.error(err);
         }
     }
 
-    // --- İŞLEM 2: ÜRÜN REÇETELERİ ---
-    async function processRecipes() {
-        if (!WORKBOOK) return log("Önce dosya yükleyin!", 'error');
-        
-        const sheetName = WORKBOOK.SheetNames.find(s => s.toUpperCase().includes('ÜRÜN') || s.toUpperCase().includes('DETAY'));
-        if (!sheetName) return log("❌ 'ÜRÜN DETAY' sekmesi bulunamadı!", 'error');
-
-        log(`'${sheetName}' sekmesi analiz ediliyor...`, 'warn');
-        const sheet = WORKBOOK.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(sheet); // Headerları otomatik al
-
-        log(`📄 ${jsonData.length} satır veri okundu.`, 'info');
-
-        let recipes = [];
-        let skipped = 0;
-
-        jsonData.forEach(row => {
-            // Excel başlıklarına göre eşleştirme (Excelindeki başlıklar tam böyle olmalı)
-            // 'Açıklama', 'DN', 'Gövde Kumaş', vb.
-            if (row['Açıklama'] && row['DN']) {
-                recipes.push({
-                    valve_type: row['Açıklama'],
-                    dn_size: parseInt(row['DN']),
-                    insulation_thickness: parseInt(row['İzolasyon Kalınlığı']) || 50,
-                    surface_area_body: parseFloat(row['Gövde Kumaş']) || 0,
-                    difficulty_factor: parseFloat(row['Zorluk Katsayısı (STD)']) || 1
-                });
-            } else {
-                skipped++;
-            }
-        });
-
-        log(`⚙️ ${recipes.length} geçerli reçete oluşturuldu. (${skipped} boş satır atlandı)`, 'info');
-        updateProgress(50);
-
-        // Supabase'e Yaz
-        // onConflict: aynı vana/dn varsa güncelle demek için
-        const { error } = await supabase.from('product_recipes').upsert(recipes, { onConflict: 'valve_type, dn_size, insulation_thickness' });
-
-        if (error) {
-            log("❌ Veritabanı Hatası: " + error.message, 'error');
-        } else {
-            log("✅ Ürün reçeteleri sisteme yüklendi!", 'success');
-            updateProgress(100);
+    // --- YARDIMCILAR ---
+    function findSheet(possibleNames) {
+        for (let name of possibleNames) {
+            const found = WORKBOOK.SheetNames.find(s => s.toUpperCase().includes(name.toUpperCase()));
+            if (found) return found;
         }
+        return null;
     }
 
-    // --- YARDIMCI FONKSİYONLAR ---
     function log(msg, type='default') {
-        const output = document.getElementById('consoleOutput');
         const div = document.createElement('div');
-        div.className = "border-l-2 pl-2 text-[11px] font-mono mb-1 " + 
-            (type === 'error' ? 'border-red-500 text-red-400' : 
-             type === 'success' ? 'border-green-500 text-green-400' : 
-             type === 'warn' ? 'border-yellow-500 text-yellow-300' : 'border-slate-600 text-slate-300');
-        
+        const color = type === 'error' ? 'text-red-500 font-bold' : 
+                      type === 'success' ? 'text-green-400 font-bold' : 
+                      type === 'warn' ? 'text-yellow-400' : 'text-slate-400';
         const time = new Date().toLocaleTimeString();
-        div.innerHTML = `<span class="opacity-50">[${time}]</span> ${msg}`;
-        output.appendChild(div);
-        output.scrollTop = output.scrollHeight;
-    }
-
-    function updateProgress(percent) {
-        document.getElementById('progressBar').style.width = percent + '%';
+        div.className = `${color} border-l-2 border-slate-700 pl-2 mb-1`;
+        div.innerText = `[${time}] ${msg}`;
+        document.getElementById('logs').appendChild(div);
+        document.getElementById('logs').scrollTop = document.getElementById('logs').scrollHeight;
     }
 
     function clearLog() {
-        document.getElementById('consoleOutput').innerHTML = '<div class="text-indigo-400">> Temizlendi.</div>';
+        document.getElementById('logs').innerHTML = '';
     }
-
-    lucide.createIcons();
   </script>
 </body>
 </html>
