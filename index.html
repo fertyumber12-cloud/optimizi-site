@@ -55,6 +55,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             'scan': 'scan 3s cubic-bezier(0.4, 0, 0.2, 1) infinite',
             'spin-slow': 'spin 30s linear infinite', 
             'wander-smooth': 'wanderSmooth 25s ease-in-out infinite',
+            'pop-in': 'popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         },
         keyframes: {
             float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-20px)' } },
@@ -74,7 +75,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 '50%': { transform: 'translate(-50%, -50%) translate(10vw, 15vh)' },
                 '75%': { transform: 'translate(-50%, -50%) translate(15vw, -15vh)' },
                 '100%': { transform: 'translate(-50%, -50%) translate(0px, 0px)' } 
-            }
+            },
+            popIn: { '0%': { transform: 'scale(0.9)', opacity: '0' }, '100%': { transform: 'scale(1)', opacity: '1' } }
         }
       }
     }
@@ -176,6 +178,50 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 </aside>
   
+<div id="infoModal" class="fixed inset-0 z-[110] hidden">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity" onclick="closeInfoModal()"></div>
+    <div class="relative z-20 flex items-center justify-center min-h-screen p-4">
+        <div class="glass-card w-full max-w-2xl rounded-3xl p-8 md:p-10 animate-pop-in relative overflow-hidden border border-white/10">
+            <div class="absolute -top-24 -right-24 w-64 h-64 bg-indigo-600/30 rounded-full blur-[80px] pointer-events-none"></div>
+            
+            <button onclick="closeInfoModal()" class="absolute top-4 right-4 p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition"><i data-lucide="x" class="w-6 h-6"></i></button>
+            
+            <div class="relative z-10">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-indigo-400 text-xs font-bold uppercase tracking-wider mb-6">
+                    <i data-lucide="zap" class="w-4 h-4"></i> Optimizi.App Nedir?
+                </div>
+                
+                <h2 class="text-3xl font-black text-white mb-6">Mühendislik Hassasiyetinde <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Dijital Dönüşüm.</span></h2>
+                
+                <p class="text-slate-300 leading-relaxed mb-8">
+                    Optimizi, endüstriyel tesisler için geliştirilmiş yeni nesil bir enerji verimliliği hesaplama platformudur. Karmaşık termodinamik denklemleri saniyeler içinde çözer ve sonuçları görselleştirir.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div class="bg-white/5 p-4 rounded-xl border border-white/5">
+                        <div class="w-10 h-10 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center mb-3"><i data-lucide="file-input" class="w-5 h-5"></i></div>
+                        <h3 class="font-bold text-white text-sm mb-1">1. Veri Gir</h3>
+                        <p class="text-xs text-slate-400">Saha ölçümlerinizi sisteme girin.</p>
+                    </div>
+                    <div class="bg-white/5 p-4 rounded-xl border border-white/5">
+                        <div class="w-10 h-10 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center mb-3"><i data-lucide="cpu" class="w-5 h-5"></i></div>
+                        <h3 class="font-bold text-white text-sm mb-1">2. Analiz Et</h3>
+                        <p class="text-xs text-slate-400">ISO standartlarında anlık hesaplama.</p>
+                    </div>
+                    <div class="bg-white/5 p-4 rounded-xl border border-white/5">
+                        <div class="w-10 h-10 rounded-lg bg-green-500/20 text-green-400 flex items-center justify-center mb-3"><i data-lucide="file-check-2" class="w-5 h-5"></i></div>
+                        <h3 class="font-bold text-white text-sm mb-1">3. Raporla</h3>
+                        <p class="text-xs text-slate-400">Profesyonel PDF raporları oluşturun.</p>
+                    </div>
+                </div>
+
+                <a href="endustriyel-enerji-kaybi-hesaplama.html" class="w-full py-4 bg-white text-slate-900 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-200 transition shadow-lg shadow-white/5">
+                    Hemen Hesaplamaya Başla <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 
 <nav class="fixed w-full z-50 glass-nav transition-all duration-300">
     <div class="container h-20 flex items-center justify-between">
@@ -217,7 +263,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </h1>
             <p class="text-lg text-slate-300 max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed">Endüstriyel tesislerdeki ısı kayıplarını, verimsiz hatları ve gereksiz maliyetleri mühendislik standartlarıyla analiz eden yeni nesil platform.</p>
             <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                <button onclick="openVideo()" class="w-full sm:w-auto px-8 py-4 glass-card rounded-xl font-bold text-white transition hover:bg-white/10 hover:border-orange-500/30 flex items-center justify-center gap-2 group">
+                <button onclick="openInfoModal()" class="w-full sm:w-auto px-8 py-4 glass-card rounded-xl font-bold text-white transition hover:bg-white/10 hover:border-orange-500/30 flex items-center justify-center gap-2 group">
                     <i data-lucide="play-circle" class="w-5 h-5 text-orange-400 group-hover:scale-110 transition"></i><span>Nasıl Çalışır?</span>
                 </button>
             </div>
@@ -300,7 +346,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div class="glass-card p-10 rounded-3xl group cursor-default"><div class="w-14 h-14 rounded-2xl bg-blue-500/20 text-blue-400 flex items-center justify-center mb-6 shadow-lg shadow-blue-500/10 group-hover:scale-110 transition duration-300"><i data-lucide="shield-check" class="w-7 h-7"></i></div><h3 class="text-xl font-bold text-white mb-3">Güvenilir Standartlar</h3><p class="text-slate-400 text-sm leading-relaxed">Tüm hesaplamalar ISO 12241, ASTM C680 ve VDI 2055 mühendislik normlarına %100 uygun olarak simüle edilir.</p></div>
             <div class="glass-card p-10 rounded-3xl group cursor-default"><div class="w-14 h-14 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center mb-6 shadow-lg shadow-purple-500/10 group-hover:scale-110 transition duration-300"><i data-lucide="cloud" class="w-7 h-7"></i></div><h3 class="text-xl font-bold text-white mb-3">Bulut Tabanlı</h3><p class="text-slate-400 text-sm leading-relaxed">Kurulum yok, güncelleme derdi yok. Bilgisayar, tablet veya telefonunuzdan anında erişin ve hesaplamaya başlayın.</p></div>
-            <div class="glass-card p-10 rounded-3xl group cursor-default"><div class="w-14 h-14 rounded-2xl bg-orange-500/20 text-orange-400 flex items-center justify-center mb-6 shadow-lg shadow-orange-500/10 group-hover:scale-110 transition duration-300"><i data-lucide="lock" class="w-7 h-7"></i></div><h3 class="text-xl font-bold text-white mb-3">Gizlilik Odaklı</h3><p class="text-slate-400 text-sm leading-relaxed">Verileriniz tarayıcınızda işlenir. Sunucularımıza hassas proje verileri gönderilmez, tamamen yerel çalışır.</p></div>
+            
+            <div class="glass-card p-10 rounded-3xl group cursor-default">
+                <div class="w-14 h-14 rounded-2xl bg-orange-500/20 text-orange-400 flex items-center justify-center mb-6 shadow-lg shadow-orange-500/10 group-hover:scale-110 transition duration-300">
+                    <i data-lucide="lock" class="w-7 h-7"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-3">Veri Güvenliği & Bulut</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">Projeleriniz ve hassas verileriniz, endüstriyel standartlarda şifrelenerek güvenli bulut sunucularımızda saklanır. Dilediğiniz zaman, dilediğiniz yerden erişin.</p>
+            </div>
         </div>
     </div>
 </section>
@@ -332,13 +385,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </footer>
 
 <script>
-    function openVideo() {
-        const modal = document.getElementById('videoModal');
+    function openInfoModal() {
+        const modal = document.getElementById('infoModal');
         if(modal) { modal.classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
     }
-    function closeVideo() {
-        const modal = document.getElementById('videoModal');
-        if(modal) { modal.classList.add('hidden'); document.body.style.overflow = 'auto'; const iframe = modal.querySelector('iframe'); if(iframe) iframe.src = iframe.src; }
+    
+    function closeInfoModal() {
+        const modal = document.getElementById('infoModal');
+        if(modal) { modal.classList.add('hidden'); document.body.style.overflow = 'auto'; }
     }
 
     function toggleMenu() {
@@ -372,7 +426,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function initApp() {
         document.documentElement.classList.add('dark');
         if(typeof lucide !== 'undefined') { lucide.createIcons(); } else { setTimeout(() => { if(typeof lucide !== 'undefined') lucide.createIcons(); }, 500); }
-        document.addEventListener('keydown', function(e) { if(e.key === 'Escape') { closeVideo(); } });
+        document.addEventListener('keydown', function(e) { if(e.key === 'Escape') { closeInfoModal(); } });
     }
 </script>
 </body>
