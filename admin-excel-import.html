@@ -17,372 +17,242 @@
       darkMode: 'class',
       theme: {
         fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
-        extend: {
-            colors: { slate: { 850: '#151e2e', 900: '#0f172a' } },
-            animation: { 'spin-slow': 'spin 3s linear infinite' }
-        }
+        extend: { colors: { slate: { 850: '#151e2e', 900: '#0f172a' } } }
       }
     }
   </script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex items-center justify-center p-6">
+<body class="bg-slate-900 text-slate-100 min-h-screen p-6">
 
-  <div class="w-full max-w-4xl bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+  <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 h-[90vh]">
       
-      <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -z-10"></div>
-
-      <div class="flex items-center justify-between mb-8 pb-6 border-b border-slate-700">
-          <div class="flex items-center gap-4">
-              <div class="p-3 bg-indigo-500/20 text-indigo-400 rounded-xl"><i data-lucide="database" class="w-8 h-8"></i></div>
+      <div class="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 flex flex-col">
+          
+          <div class="mb-6 pb-6 border-b border-slate-700 flex justify-between items-center">
               <div>
-                  <h1 class="text-2xl font-bold text-white">Master Veri Aktarım</h1>
-                  <p class="text-slate-400 text-sm">Excel veritabanı güncelleme sihirbazı.</p>
+                  <h1 class="text-2xl font-bold text-white">Veri Aktarım Merkezi</h1>
+                  <p class="text-slate-400 text-sm">Master 2026.xlsx dosyasını veritabanına işler.</p>
+              </div>
+              <a href="dashboard.html" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-lg transition">Çıkış</a>
+          </div>
+
+          <div class="mb-6">
+              <label class="block text-sm font-bold text-indigo-400 mb-2">1. Adım: Master Excel Dosyasını Seç</label>
+              <input type="file" id="fileInput" accept=".xlsx, .xls" class="block w-full text-sm text-slate-400
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-full file:border-0
+                file:text-sm file:font-semibold
+                file:bg-indigo-600 file:text-white
+                hover:file:bg-indigo-500
+                cursor-pointer bg-slate-900/50 rounded-lg border border-slate-600
+              "/>
+          </div>
+
+          <div id="actionButtons" class="space-y-4 opacity-50 pointer-events-none transition-all">
+              <p class="text-sm font-bold text-indigo-400 mb-2">2. Adım: Verileri İçeri Al</p>
+              
+              <div class="grid grid-cols-1 gap-3">
+                  <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
+                      <div>
+                          <h3 class="font-bold text-white text-sm">Parametreler & Malzemeler</h3>
+                          <p class="text-xs text-slate-500">'PARAMETRELER' sekmesini okur.</p>
+                      </div>
+                      <button onclick="processParameters()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg transition">Aktar</button>
+                  </div>
+
+                  <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
+                      <div>
+                          <h3 class="font-bold text-white text-sm">Ürün Reçeteleri</h3>
+                          <p class="text-xs text-slate-500">'ÜRÜN DETAY' sekmesini okur.</p>
+                      </div>
+                      <button onclick="processRecipes()" class="px-4 py-2 bg-green-600 hover:bg-green-500 text-white text-xs font-bold rounded-lg transition">Aktar</button>
+                  </div>
               </div>
           </div>
-          <a href="dashboard.html" class="text-sm text-slate-400 hover:text-white transition flex items-center gap-2"><i data-lucide="arrow-left" class="w-4 h-4"></i> Panele Dön</a>
+
+          <div class="mt-auto pt-6">
+              <div class="text-xs text-slate-500 mb-1">İşlem Durumu</div>
+              <div class="w-full bg-slate-900 rounded-full h-2.5">
+                  <div id="progressBar" class="bg-indigo-600 h-2.5 rounded-full" style="width: 0%"></div>
+              </div>
+          </div>
       </div>
 
-      <div id="step-upload" class="mb-8 transition-all duration-500">
-          <input id="fileInput" type="file" class="hidden" accept=".xlsx" onchange="fileSelected(event)" />
-          
-          <label for="fileInput" class="flex flex-col items-center justify-center w-full h-40 border-2 border-slate-600 border-dashed rounded-2xl cursor-pointer bg-slate-800/30 hover:bg-slate-800/50 hover:border-indigo-500 transition group relative overflow-hidden">
-              <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                  <i data-lucide="upload-cloud" class="w-10 h-10 mb-3 text-slate-500 group-hover:text-indigo-400 transition"></i>
-                  <p class="mb-1 text-sm text-slate-400"><span class="font-bold text-white">Master Excel</span> dosyasını seçin</p>
-                  <p class="text-xs text-slate-500">.xlsx formatı desteklenir</p>
-              </div>
-          </label>
-      </div>
-
-      <div id="step-confirm" class="hidden mb-8 bg-slate-900/50 border border-indigo-500/30 rounded-xl p-6 text-center">
-          <div class="flex items-center justify-center gap-3 mb-4">
-              <i data-lucide="file-spreadsheet" class="w-8 h-8 text-green-400"></i>
-              <div class="text-left">
-                  <div class="text-sm font-bold text-white" id="displayFileName">dosya.xlsx</div>
-                  <div class="text-xs text-slate-400" id="displayFileSize">0 KB</div>
-              </div>
+      <div class="bg-black/80 border border-slate-700/50 rounded-2xl p-6 font-mono text-xs overflow-hidden flex flex-col shadow-2xl">
+          <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-2">
+              <span class="text-green-400 font-bold">TERMINAL > SYSTEM LOG</span>
+              <button onclick="clearLog()" class="text-slate-500 hover:text-white">Temizle</button>
           </div>
-          
-          <button onclick="startAnalysis()" id="btnAnalyze" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold shadow-lg shadow-indigo-600/20 transition flex items-center gap-2 mx-auto">
-              <i data-lucide="cpu" class="w-5 h-5"></i> Analizi Başlat
-          </button>
-
-          <div id="loadingSpinner" class="hidden mt-4">
-              <div class="flex items-center justify-center gap-2 text-indigo-400">
-                  <i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i>
-                  <span class="text-sm font-medium">Excel okunuyor, sekmeler ayrıştırılıyor...</span>
-              </div>
+          <div id="consoleOutput" class="flex-1 overflow-y-auto space-y-2 text-slate-300 pr-2">
+              <div class="text-indigo-400">> Sistem hazır. Dosya bekleniyor...</div>
           </div>
-      </div>
-
-      <div id="actionArea" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6 opacity-0 transition-opacity duration-700">
-          
-          <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 relative overflow-hidden group hover:border-orange-500/50 transition">
-              <div class="flex justify-between items-center mb-4">
-                  <h3 class="font-bold text-white flex items-center gap-2"><i data-lucide="settings" class="w-4 h-4 text-orange-400"></i> Parametreler</h3>
-                  <span id="status-params" class="text-[10px] bg-slate-800 text-slate-400 px-2 py-1 rounded">BEKLİYOR</span>
-              </div>
-              <p class="text-xs text-slate-400 mb-4">Döviz, İşçilik, Genel Giderler</p>
-              <button onclick="importParams()" class="w-full py-2 bg-slate-800 hover:bg-orange-600 hover:text-white text-slate-300 text-xs font-bold rounded-lg border border-slate-600 transition">Veritabanına Aktar</button>
-              <div class="h-1 w-full bg-slate-800 mt-4 rounded-full overflow-hidden"><div id="prog-params" class="h-full bg-orange-500 w-0 transition-all duration-500"></div></div>
-          </div>
-
-          <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 relative overflow-hidden group hover:border-blue-500/50 transition">
-              <div class="flex justify-between items-center mb-4">
-                  <h3 class="font-bold text-white flex items-center gap-2"><i data-lucide="package" class="w-4 h-4 text-blue-400"></i> Malzemeler</h3>
-                  <span id="status-materials" class="text-[10px] bg-slate-800 text-slate-400 px-2 py-1 rounded">BEKLİYOR</span>
-              </div>
-              <p class="text-xs text-slate-400 mb-4">Kumaş, Dolgu ve Sarf Malzemeleri</p>
-              <button onclick="importMaterials()" class="w-full py-2 bg-slate-800 hover:bg-blue-600 hover:text-white text-slate-300 text-xs font-bold rounded-lg border border-slate-600 transition">Veritabanına Aktar</button>
-              <div class="h-1 w-full bg-slate-800 mt-4 rounded-full overflow-hidden"><div id="prog-materials" class="h-full bg-blue-500 w-0 transition-all duration-500"></div></div>
-          </div>
-
-          <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 relative overflow-hidden group hover:border-purple-500/50 transition">
-              <div class="flex justify-between items-center mb-4">
-                  <h3 class="font-bold text-white flex items-center gap-2"><i data-lucide="circle-dot" class="w-4 h-4 text-purple-400"></i> Flanş Çapları</h3>
-                  <span id="status-flanges" class="text-[10px] bg-slate-800 text-slate-400 px-2 py-1 rounded">BEKLİYOR</span>
-              </div>
-              <p class="text-xs text-slate-400 mb-4">Pipedata Plus standart verileri</p>
-              <button onclick="importFlanges()" class="w-full py-2 bg-slate-800 hover:bg-purple-600 hover:text-white text-slate-300 text-xs font-bold rounded-lg border border-slate-600 transition">Veritabanına Aktar</button>
-              <div class="h-1 w-full bg-slate-800 mt-4 rounded-full overflow-hidden"><div id="prog-flanges" class="h-full bg-purple-500 w-0 transition-all duration-500"></div></div>
-          </div>
-
-          <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 relative overflow-hidden group hover:border-green-500/50 transition">
-              <div class="flex justify-between items-center mb-4">
-                  <h3 class="font-bold text-white flex items-center gap-2"><i data-lucide="file-spreadsheet" class="w-4 h-4 text-green-400"></i> Ürün Reçeteleri</h3>
-                  <span id="status-recipes" class="text-[10px] bg-slate-800 text-slate-400 px-2 py-1 rounded">BEKLİYOR</span>
-              </div>
-              <p class="text-xs text-slate-400 mb-4">Ürün Detay sekmesindeki formüller</p>
-              <button onclick="importRecipes()" class="w-full py-2 bg-slate-800 hover:bg-green-600 hover:text-white text-slate-300 text-xs font-bold rounded-lg border border-slate-600 transition">Veritabanına Aktar</button>
-              <div class="h-1 w-full bg-slate-800 mt-4 rounded-full overflow-hidden"><div id="prog-recipes" class="h-full bg-green-500 w-0 transition-all duration-500"></div></div>
-          </div>
-
-      </div>
-
-      <div class="mt-8 bg-black/40 rounded-xl p-4 font-mono text-[10px] text-slate-400 h-32 overflow-y-auto border border-white/5" id="consoleLog">
-          <div class="text-indigo-400">> Sistem Hazır. Bekleniyor...</div>
       </div>
 
   </div>
 
   <script>
-    // --- KONFİGÜRASYON ---
-    const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
+    // --- SUPABASE AYARLARI ---
+    // NOT: Buraya kendi URL ve KEY'ini yazmalısın. Eğer SQL'i çalıştırmadıysan hata alırsın.
+    const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co'; 
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    let SELECTED_FILE = null;
     let WORKBOOK = null;
 
-    // --- 1. DOSYA SEÇİLDİĞİNDE ---
-    function fileSelected(evt) {
-        const file = evt.target.files[0];
-        if(!file) return;
+    // --- DOSYA SEÇME OLAYI ---
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
 
-        SELECTED_FILE = file;
-        
-        // UI Güncelle
-        document.getElementById('step-upload').classList.add('hidden');
-        document.getElementById('step-confirm').classList.remove('hidden');
-        
-        document.getElementById('displayFileName').innerText = file.name;
-        document.getElementById('displayFileSize').innerText = (file.size / 1024).toFixed(2) + " KB";
-        
-        log(`Dosya seçildi: ${file.name}`);
-    }
-
-    // --- 2. ANALİZİ BAŞLAT ---
-    function startAnalysis() {
-        if(!SELECTED_FILE) return;
-
-        const btn = document.getElementById('btnAnalyze');
-        const spinner = document.getElementById('loadingSpinner');
-        
-        btn.classList.add('hidden'); // Butonu gizle
-        spinner.classList.remove('hidden'); // Spinner'ı göster
-        log("Dosya okunuyor, lütfen bekleyin...");
+        log(`Dosya seçildi: ${file.name} (${(file.size/1024).toFixed(1)} KB)`, 'info');
+        log("Dosya okunuyor...", 'warn');
 
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
-                const data = e.target.result;
-                WORKBOOK = XLSX.read(data, {type: 'binary'});
+                const data = new Uint8Array(e.target.result);
+                WORKBOOK = XLSX.read(data, {type: 'array'});
                 
-                // Başarılı okuma sonrası
-                setTimeout(() => {
-                    spinner.classList.add('hidden');
-                    document.getElementById('step-confirm').innerHTML = `
-                        <div class="text-green-400 font-bold flex flex-col items-center gap-2">
-                            <i data-lucide="check-circle" class="w-10 h-10"></i>
-                            Dosya Analizi Tamamlandı
-                        </div>
-                        <div class="text-slate-500 text-xs mt-2">Bulunan Sekmeler: ${WORKBOOK.SheetNames.length} adet</div>
-                    `;
-                    
-                    // Aksiyon kartlarını göster
-                    const actionArea = document.getElementById('actionArea');
-                    actionArea.classList.remove('hidden');
-                    // Fade-in efekti için küçük gecikme
-                    setTimeout(() => actionArea.classList.remove('opacity-0'), 100);
-                    
-                    log(`✅ Analiz tamamlandı. Sayfalar: ${WORKBOOK.SheetNames.join(', ')}`, 'success');
-                    lucide.createIcons();
-
-                }, 1000); // Kullanıcı görsün diye yapay gecikme
-
+                log("✅ Dosya başarıyla okundu!", 'success');
+                log(`Bulunan Sekmeler: ${WORKBOOK.SheetNames.join(', ')}`, 'info');
+                
+                // Butonları Aktif Et
+                const actionArea = document.getElementById('actionButtons');
+                actionArea.classList.remove('opacity-50', 'pointer-events-none');
+                
             } catch (err) {
-                log("Hata: Dosya okunamadı. " + err.message, "error");
-                spinner.classList.add('hidden');
-                btn.classList.remove('hidden');
-                btn.innerText = "Tekrar Dene";
+                log("❌ Dosya okuma hatası: " + err.message, 'error');
             }
         };
-        reader.readAsBinaryString(SELECTED_FILE);
-    }
+        reader.readAsArrayBuffer(file);
+    });
 
-    // --- LOG YAZDIRMA ---
-    function log(msg, type='info') {
-        const consoleEl = document.getElementById('consoleLog');
-        const color = type === 'error' ? 'text-red-400' : (type === 'success' ? 'text-green-400' : 'text-slate-400');
-        const time = new Date().toLocaleTimeString('tr-TR');
-        consoleEl.innerHTML += `<div class="${color} mb-1"><span class="opacity-50">[${time}]</span> ${msg}</div>`;
-        consoleEl.scrollTop = consoleEl.scrollHeight;
-    }
-
-    // --- PROGRESS HELPER ---
-    function updateStatus(id, state, percent) {
-        const statusEl = document.getElementById(`status-${id}`);
-        const barEl = document.getElementById(`prog-${id}`);
+    // --- İŞLEM 1: PARAMETRELER VE MALZEMELER ---
+    async function processParameters() {
+        if (!WORKBOOK) return log("Önce dosya yükleyin!", 'error');
         
-        barEl.style.width = `${percent}%`;
-        
-        if(state === 'working') {
-            statusEl.innerText = `%${percent}`;
-            statusEl.className = "text-[10px] bg-blue-500/20 text-blue-400 px-2 py-1 rounded animate-pulse";
-            barEl.className = "h-full bg-blue-500 transition-all duration-300";
-        } else if(state === 'done') {
-            statusEl.innerText = "TAMAMLANDI";
-            statusEl.className = "text-[10px] bg-green-500/20 text-green-400 px-2 py-1 rounded font-bold";
-            barEl.className = "h-full bg-green-500 transition-all duration-300";
-        } else {
-            statusEl.innerText = "HATA";
-            statusEl.className = "text-[10px] bg-red-500/20 text-red-400 px-2 py-1 rounded font-bold";
-            barEl.className = "h-full bg-red-500 transition-all duration-300";
-        }
-    }
+        const sheetName = WORKBOOK.SheetNames.find(s => s.toUpperCase().includes('PARAM'));
+        if (!sheetName) return log("❌ 'PARAMETRELER' sekmesi bulunamadı!", 'error');
 
-    // ==========================================
-    // 1. PARAMETRELER AKTARIMI
-    // ==========================================
-    async function importParams() {
-        if(!WORKBOOK) return;
-        updateStatus('params', 'working', 10);
-        log("Parametreler sekmesi taranıyor...");
-        
-        try {
-            const sheet = WORKBOOK.Sheets['PARAMETRELER']; 
-            if(!sheet) throw new Error("'PARAMETRELER' sekmesi bulunamadı!");
+        log(`'${sheetName}' sekmesi analiz ediliyor...`, 'warn');
+        const sheet = WORKBOOK.Sheets[sheetName];
+        const data = XLSX.utils.sheet_to_json(sheet, {header: 1}); // Satır satır oku
 
-            // Bu kısım Excel yapına göre özelleştirilecek.
-            // Örnek: Keyfi veri basıyorum şimdilik
-            const paramsToInsert = [
-                { key: 'eur_rate', value: 34.50, description: 'Euro Kuru' },
-                { key: 'labor_cost', value: 459.33, description: 'Saatlik İşçilik' },
-                { key: 'overhead', value: 0.33, description: 'Genel Gider' },
-                { key: 'profit_margin', value: 2.5, description: 'Kar Marjı' }
-            ];
-
-            const { error } = await supabase.from('global_parameters').upsert(paramsToInsert);
-            if(error) throw error;
-
-            updateStatus('params', 'done', 100);
-            log("✅ Parametreler veritabanına işlendi.", "success");
-
-        } catch (e) {
-            log("Parametre Hatası: " + e.message, "error");
-            updateStatus('params', 'error', 0);
-        }
-    }
-
-    // ==========================================
-    // 2. MALZEMELER AKTARIMI
-    // ==========================================
-    async function importMaterials() {
-        if(!WORKBOOK) return;
-        updateStatus('materials', 'working', 5);
-        log("Malzeme listesi ayıklanıyor...");
-
-        try {
-            const sheet = WORKBOOK.Sheets['PARAMETRELER'];
-            if(!sheet) throw new Error("Sekme bulunamadı");
-
-            const rawData = XLSX.utils.sheet_to_json(sheet, {header: 1});
-            
-            // "MALZEME LİSTESİ" başlığını bul
-            let startRow = -1;
-            for(let i=0; i<rawData.length; i++) {
-                if(rawData[i][0] && rawData[i][0].toString().includes("MALZEME LİSTESİ")) {
-                    startRow = i + 2;
-                    break;
-                }
+        // 1. Malzeme Listesini Bul
+        let startRow = -1;
+        for (let i = 0; i < data.length; i++) {
+            // Excel'deki başlığı arıyoruz: "MALZEME LİSTESİ"
+            if (data[i] && data[i].some(cell => cell && cell.toString().includes('MALZEME LİSTESİ'))) {
+                startRow = i + 2; // Başlık + Header satırını atla
+                log(`📍 'MALZEME LİSTESİ' satır ${i+1}'de bulundu. Okuma başlıyor...`, 'success');
+                break;
             }
-
-            if(startRow === -1) throw new Error("'MALZEME LİSTESİ' başlığı bulunamadı");
-
-            let materials = [];
-            for(let i=startRow; i<rawData.length; i++) {
-                const row = rawData[i];
-                if(!row || !row[2]) continue; 
-
-                materials.push({
-                    category: row[0] || 'Genel',
-                    name: row[2],
-                    unit: row[3] || 'ad',
-                    price: parseFloat(row[4]) || 0,
-                    currency: row[5] || 'EUR'
-                });
-            }
-
-            log(`${materials.length} malzeme bulundu. Paketler halinde yükleniyor...`);
-
-            // Batch Insert
-            const batchSize = 100;
-            for (let i = 0; i < materials.length; i += batchSize) {
-                const batch = materials.slice(i, i + batchSize);
-                const { error } = await supabase.from('materials').insert(batch);
-                
-                const progress = Math.round(((i + batchSize) / materials.length) * 100);
-                updateStatus('materials', 'working', Math.min(progress, 99));
-                
-                if (error) console.error(error);
-                await new Promise(r => setTimeout(r, 50)); // UI donmasın diye nefes al
-            }
-
-            updateStatus('materials', 'done', 100);
-            log(`✅ ${materials.length} malzeme başarıyla aktarıldı.`, "success");
-
-        } catch (e) {
-            log("Malzeme Hatası: " + e.message, "error");
-            updateStatus('materials', 'error', 0);
         }
-    }
 
-    // ==========================================
-    // 3. FLANŞLAR AKTARIMI (Placeholder)
-    // ==========================================
-    async function importFlanges() {
-        updateStatus('flanges', 'working', 50);
-        log("Flanş tablosu simüle ediliyor...");
-        setTimeout(() => {
-            updateStatus('flanges', 'done', 100);
-            log("✅ Flanş verileri güncellendi (Simülasyon)", "success");
-        }, 1000);
-    }
+        if (startRow === -1) return log("❌ 'MALZEME LİSTESİ' başlığı bulunamadı. Excel formatını kontrol edin.", 'error');
 
-    // ==========================================
-    // 4. REÇETELER AKTARIMI (ÜRÜN DETAY)
-    // ==========================================
-    async function importRecipes() {
-        if(!WORKBOOK) return;
-        updateStatus('recipes', 'working', 10);
-        log("Ürün reçeteleri okunuyor...");
+        let materials = [];
+        // Satırları dönmeye başla
+        for (let i = startRow; i < data.length; i++) {
+            const row = data[i];
+            if (!row || !row[2]) continue; // 3. Sütun (C) Malzeme Adı boşsa geç
 
-        try {
-            const sheet = WORKBOOK.Sheets['ÜRÜN DETAY'];
-            if(!sheet) throw new Error("'ÜRÜN DETAY' sekmesi bulunamadı!");
-
-            const jsonData = XLSX.utils.sheet_to_json(sheet);
-            
-            let recipes = [];
-            jsonData.forEach(row => {
-                if(row['DN'] && row['Açıklama']) {
-                    recipes.push({
-                        valve_type: row['Açıklama'],
-                        dn_size: parseInt(row['DN']),
-                        insulation_thickness: parseInt(row['İzolasyon Kalınlığı']) || 50,
-                        surface_area_body: parseFloat(row['Gövde Kumaş']) || 0,
-                    });
-                }
+            // Excel'deki Sütun Yapına Göre (A=0, B=1, C=2...)
+            // A: Tür, C: Malzeme Adı, D: Birim, E: Fiyat, F: Döviz
+            materials.push({
+                category: row[0] || 'Genel',
+                name: row[2],
+                unit: row[3] || 'ad',
+                price: parseFloat(row[4]) || 0,
+                currency: row[5] || 'EUR'
             });
+        }
 
-            log(`${recipes.length} reçete bulundu. Yazılıyor...`);
-            
-            // Gerçekte burada Supabase insert yapılır
-            // const { error } = await supabase.from('product_recipes').upsert(recipes...);
-            
-            // Simülasyon
-            await new Promise(r => setTimeout(r, 1500));
+        log(`📦 ${materials.length} adet malzeme tespit edildi. Veritabanına yazılıyor...`, 'info');
+        updateProgress(50);
 
-            updateStatus('recipes', 'done', 100);
-            log("✅ Ürün reçeteleri başarıyla aktarıldı.", "success");
+        // Supabase'e Yaz (Toplu)
+        const { error } = await supabase.from('materials').insert(materials); // Varsa ekler
 
-        } catch (e) {
-            log("Reçete Hatası: " + e.message, "error");
-            updateStatus('recipes', 'error', 0);
+        if (error) {
+            log("❌ Veritabanı Hatası: " + error.message, 'error');
+            log("İPUCU: 'materials' tablosunu Supabase'de oluşturdun mu?", 'warn');
+        } else {
+            log("✅ Tüm malzemeler veritabanına başarıyla yüklendi!", 'success');
+            updateProgress(100);
         }
     }
 
-    // Başlat
+    // --- İŞLEM 2: ÜRÜN REÇETELERİ ---
+    async function processRecipes() {
+        if (!WORKBOOK) return log("Önce dosya yükleyin!", 'error');
+        
+        const sheetName = WORKBOOK.SheetNames.find(s => s.toUpperCase().includes('ÜRÜN') || s.toUpperCase().includes('DETAY'));
+        if (!sheetName) return log("❌ 'ÜRÜN DETAY' sekmesi bulunamadı!", 'error');
+
+        log(`'${sheetName}' sekmesi analiz ediliyor...`, 'warn');
+        const sheet = WORKBOOK.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(sheet); // Headerları otomatik al
+
+        log(`📄 ${jsonData.length} satır veri okundu.`, 'info');
+
+        let recipes = [];
+        let skipped = 0;
+
+        jsonData.forEach(row => {
+            // Excel başlıklarına göre eşleştirme (Excelindeki başlıklar tam böyle olmalı)
+            // 'Açıklama', 'DN', 'Gövde Kumaş', vb.
+            if (row['Açıklama'] && row['DN']) {
+                recipes.push({
+                    valve_type: row['Açıklama'],
+                    dn_size: parseInt(row['DN']),
+                    insulation_thickness: parseInt(row['İzolasyon Kalınlığı']) || 50,
+                    surface_area_body: parseFloat(row['Gövde Kumaş']) || 0,
+                    difficulty_factor: parseFloat(row['Zorluk Katsayısı (STD)']) || 1
+                });
+            } else {
+                skipped++;
+            }
+        });
+
+        log(`⚙️ ${recipes.length} geçerli reçete oluşturuldu. (${skipped} boş satır atlandı)`, 'info');
+        updateProgress(50);
+
+        // Supabase'e Yaz
+        // onConflict: aynı vana/dn varsa güncelle demek için
+        const { error } = await supabase.from('product_recipes').upsert(recipes, { onConflict: 'valve_type, dn_size, insulation_thickness' });
+
+        if (error) {
+            log("❌ Veritabanı Hatası: " + error.message, 'error');
+        } else {
+            log("✅ Ürün reçeteleri sisteme yüklendi!", 'success');
+            updateProgress(100);
+        }
+    }
+
+    // --- YARDIMCI FONKSİYONLAR ---
+    function log(msg, type='default') {
+        const output = document.getElementById('consoleOutput');
+        const div = document.createElement('div');
+        div.className = "border-l-2 pl-2 text-[11px] font-mono mb-1 " + 
+            (type === 'error' ? 'border-red-500 text-red-400' : 
+             type === 'success' ? 'border-green-500 text-green-400' : 
+             type === 'warn' ? 'border-yellow-500 text-yellow-300' : 'border-slate-600 text-slate-300');
+        
+        const time = new Date().toLocaleTimeString();
+        div.innerHTML = `<span class="opacity-50">[${time}]</span> ${msg}`;
+        output.appendChild(div);
+        output.scrollTop = output.scrollHeight;
+    }
+
+    function updateProgress(percent) {
+        document.getElementById('progressBar').style.width = percent + '%';
+    }
+
+    function clearLog() {
+        document.getElementById('consoleOutput').innerHTML = '<div class="text-indigo-400">> Temizlendi.</div>';
+    }
+
     lucide.createIcons();
   </script>
 </body>
