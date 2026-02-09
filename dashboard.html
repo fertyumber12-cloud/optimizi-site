@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Yönetim Paneli</title>
+  <title>Yönetim Paneli | Optimizi.App</title>
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
@@ -28,147 +28,211 @@
   </script>
 
   <style>
-    body { 
-      background-color: #0f172a;
-      color: #f1f5f9; 
-      overflow: hidden; /* Scroll inside containers */
+    /* DYNAMIC THEME VARIABLES */
+    :root {
+        --bg-grad: radial-gradient(ellipse at top, #f8fafc 0%, #e2e8f0 40%, #cbd5e1 100%);
+        --glass-panel: rgba(255, 255, 255, 0.8);
+        --glass-border: rgba(0, 0, 0, 0.05);
+        --glass-card-bg: linear-gradient(145deg, rgba(255, 255, 255, 0.9) 0%, rgba(241, 245, 249, 0.95) 100%);
+        --scroll-thumb: #cbd5e1;
+        --sidebar-active-bg: rgba(99, 102, 241, 0.1);
+        --sidebar-text: #64748b;
+        --sidebar-text-hover: #0f172a;
     }
+
+    .dark {
+        --bg-grad: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%);
+        --glass-panel: rgba(30, 41, 59, 0.4);
+        --glass-border: rgba(255, 255, 255, 0.05);
+        --glass-card-bg: linear-gradient(145deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%);
+        --scroll-thumb: #334155;
+        --sidebar-active-bg: rgba(99, 102, 241, 0.2);
+        --sidebar-text: #94a3b8;
+        --sidebar-text-hover: #ffffff;
+    }
+
+    body { 
+      background: var(--bg-grad);
+      background-attachment: fixed;
+      color: #0f172a; /* Light mode text default */
+      overflow: hidden;
+      transition: color 0.3s ease, background 0.3s ease;
+    }
+    .dark body { color: #f1f5f9; }
     
-    /* Glassmorphism Utilities */
+    /* Glass Utilities */
     .glass-panel {
-      background: rgba(30, 41, 59, 0.4);
+      background: var(--glass-panel);
       backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      transition: background 0.3s ease, border-color 0.3s ease;
     }
     
     .glass-card {
-      background: linear-gradient(145deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: var(--glass-card-bg);
+      border: 1px solid var(--glass-border);
       transition: all 0.3s ease;
     }
     
     .glass-card:hover {
       border-color: rgba(99, 102, 241, 0.3);
       transform: translateY(-2px);
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.15);
     }
 
-    /* Custom Scrollbar */
+    /* Scrollbar */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    ::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
 
+    /* Sidebar Links */
     .sidebar-link {
         display: flex; align-items: center; gap: 12px;
         padding: 12px 16px; margin-bottom: 4px;
-        border-radius: 12px; color: #94a3b8;
+        border-radius: 12px; 
+        color: var(--sidebar-text);
         transition: all 0.2s; font-weight: 500; font-size: 0.9rem;
     }
     .sidebar-link:hover, .sidebar-link.active {
-        background: rgba(99, 102, 241, 0.1); color: #fff;
+        background: var(--sidebar-active-bg); 
+        color: var(--sidebar-text-hover);
     }
     .sidebar-link.active { border-left: 3px solid #6366f1; }
     .sidebar-link i { width: 20px; height: 20px; }
-  </style>
-</head>
-<body class="flex h-screen w-full">
 
-  <div class="fixed inset-0 z-0 pointer-events-none">
-      <div class="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[100px]"></div>
-      <div class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[100px]"></div>
+    /* Settings Modal Animation */
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    .modal-enter { animation: slideInRight 0.3s ease-out forwards; }
+  </style>
+  <script>
+      // Init Theme
+      (function() {
+          const savedTheme = localStorage.getItem('theme');
+          if (savedTheme === 'light') {
+              document.documentElement.classList.remove('dark');
+          } else {
+              document.documentElement.classList.add('dark');
+          }
+      })();
+  </script>
+</head>
+<body class="flex h-screen w-full text-slate-800 dark:text-slate-100 transition-colors duration-300">
+
+  <div class="fixed inset-0 z-0 pointer-events-none opacity-50 dark:opacity-100 transition-opacity duration-500">
+      <div class="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-500/20 dark:bg-indigo-600/10 rounded-full blur-[100px]"></div>
+      <div class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-500/20 dark:bg-blue-600/10 rounded-full blur-[100px]"></div>
   </div>
 
-  <aside class="w-64 h-full glass-panel flex flex-col z-20 hidden md:flex border-r border-slate-700/50">
-      <div class="h-20 flex items-center px-6 border-b border-white/5">
+  <aside class="w-64 h-full glass-panel flex flex-col z-20 hidden md:flex border-r border-slate-200 dark:border-slate-700/50 bg-white/50 dark:bg-slate-900/50">
+      <div class="h-20 flex items-center px-6 border-b border-slate-200 dark:border-white/5">
           <div class="flex items-center gap-2">
               <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold">O</div>
-              <span class="text-lg font-bold text-white tracking-tight">Optimizi<span class="text-indigo-400">.App</span></span>
+              <span class="text-lg font-bold text-slate-800 dark:text-white tracking-tight">Optimizi<span class="text-indigo-500 dark:text-indigo-400">.App</span></span>
           </div>
       </div>
 
       <div class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
-          <div class="text-xs font-bold text-slate-500 uppercase tracking-wider px-4 mb-2">Genel</div>
+          <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2">Genel</div>
           <a href="#" class="sidebar-link active"><i data-lucide="layout-dashboard"></i> Panel</a>
           <a href="#" class="sidebar-link"><i data-lucide="folder-open"></i> Projelerim</a>
-          <a href="#" class="sidebar-link"><i data-lucide="file-text"></i> Raporlar</a>
           
-          <div class="text-xs font-bold text-slate-500 uppercase tracking-wider px-4 mb-2 mt-6">Araçlar</div>
-          <a href="endustriyel-enerji-kaybi-hesaplama.html" class="sidebar-link"><i data-lucide="calculator"></i> Hesaplama Merkezi</a>
-          <a href="#" class="sidebar-link"><i data-lucide="users"></i> Ekip Yönetimi <span class="ml-auto text-[10px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">PRO</span></a>
+          <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2 mt-6">Ticari İşlemler</div>
+          <a href="#" onclick="alert('Fiyat teklifi modülü yakında aktif olacak.')" class="sidebar-link text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"><i data-lucide="file-plus"></i> Fiyat Teklifi Ver</a>
+          <a href="#" class="sidebar-link"><i data-lucide="receipt"></i> Teklif Geçmişi</a>
 
-          <div class="text-xs font-bold text-slate-500 uppercase tracking-wider px-4 mb-2 mt-6">Ayarlar</div>
-          <a href="#" class="sidebar-link"><i data-lucide="settings"></i> Hesabım</a>
-          <a href="#" class="sidebar-link"><i data-lucide="life-buoy"></i> Destek</a>
+          <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2 mt-6">Araçlar</div>
+          <a href="endustriyel-enerji-kaybi-hesaplama.html" class="sidebar-link"><i data-lucide="calculator"></i> Hesaplama Merkezi</a>
+          <a href="#" class="sidebar-link"><i data-lucide="users"></i> Ekip Yönetimi <span class="ml-auto text-[10px] bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 px-1.5 py-0.5 rounded font-bold">PRO</span></a>
+
+          <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2 mt-6">Ayarlar</div>
+          <button onclick="openSettings()" class="sidebar-link w-full text-left"><i data-lucide="settings"></i> Ayarlar</button>
+          <a href="iletisim.html" class="sidebar-link"><i data-lucide="life-buoy"></i> Destek</a>
       </div>
 
-      <div class="p-4 border-t border-white/5">
-          <div class="flex items-center gap-3 p-2 rounded-xl bg-white/5 hover:bg-white/10 transition cursor-pointer">
-              <div class="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold text-sm shadow-lg" id="avatarInitial">U</div>
+      <div class="p-4 border-t border-slate-200 dark:border-white/5">
+          <div onclick="openSettings()" class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-200/50 dark:hover:bg-white/10 transition cursor-pointer group">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:scale-105 transition" id="avatarInitial">U</div>
               <div class="flex-1 min-w-0">
-                  <p class="text-sm font-bold text-white truncate" id="sidebarUserName">Yükleniyor...</p>
-                  <p class="text-xs text-slate-400 truncate">Pro Plan</p>
+                  <p class="text-sm font-bold text-slate-800 dark:text-white truncate" id="sidebarUserName">Yükleniyor...</p>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 truncate">Hesap Ayarları</p>
               </div>
-              <button onclick="handleLogout()" class="text-slate-400 hover:text-red-400 transition" title="Çıkış Yap"><i data-lucide="log-out" class="w-4 h-4"></i></button>
+              <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
           </div>
       </div>
   </aside>
 
-  <main class="flex-1 flex flex-col h-full relative z-10 overflow-hidden">
+  <main class="flex-1 flex flex-col h-full relative z-10 overflow-hidden bg-slate-50/50 dark:bg-transparent">
       
-      <header class="h-20 flex items-center justify-between px-6 md:px-8 border-b border-white/5 glass-panel md:bg-transparent md:backdrop-filter-none md:border-none">
+      <header class="h-20 flex items-center justify-between px-6 md:px-8 border-b border-slate-200 dark:border-white/5 glass-panel md:bg-transparent md:backdrop-filter-none md:border-none">
           <div class="flex items-center gap-4">
-              <button class="md:hidden p-2 text-slate-400 hover:text-white"><i data-lucide="menu"></i></button>
-              <h1 class="text-xl font-bold text-white hidden md:block">Genel Bakış</h1>
+              <button class="md:hidden p-2 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-white"><i data-lucide="menu"></i></button>
+              <h1 class="text-xl font-bold text-slate-800 dark:text-white hidden md:block">Genel Bakış</h1>
           </div>
           
           <div class="flex items-center gap-4">
+              <button onclick="toggleTheme()" class="p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition" title="Temayı Değiştir">
+                  <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                  <i data-lucide="moon" class="w-5 h-5 dark:hidden"></i>
+              </button>
+
               <div class="relative hidden md:block">
-                  <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-slate-500"></i>
-                  <input type="text" placeholder="Proje ara..." class="bg-slate-800/50 border border-slate-700 rounded-full pl-10 pr-4 py-2 text-sm text-slate-300 focus:outline-none focus:border-indigo-500 w-64 transition">
+                  <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-slate-400"></i>
+                  <input type="text" placeholder="Proje ara..." class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-full pl-10 pr-4 py-2 text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 w-64 transition shadow-sm">
               </div>
-              <button class="p-2 relative text-slate-400 hover:text-white transition">
+              
+              <button class="p-2 relative text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-white transition">
                   <i data-lucide="bell"></i>
-                  <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-slate-900"></span>
+                  <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-slate-900"></span>
               </button>
           </div>
       </header>
 
       <div class="flex-1 overflow-y-auto p-6 md:p-8 custom-scroll">
           
-          <div class="mb-8">
-              <h2 class="text-3xl font-black text-white mb-2">Hoşgeldin, <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400" id="headerGreeting">Kullanıcı</span> 👋</h2>
-              <p class="text-slate-400">Enerji verimliliği projelerindeki son durumun burada.</p>
+          <div class="mb-8 flex justify-between items-end">
+              <div>
+                  <h2 class="text-3xl font-black text-slate-900 dark:text-white mb-2">Hoşgeldin, <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-cyan-500" id="headerGreeting">Kullanıcı</span> 👋</h2>
+                  <p class="text-slate-500 dark:text-slate-400">Operasyonel süreçlerini buradan yönetebilirsin.</p>
+              </div>
+              <div class="hidden sm:block">
+                  <button onclick="alert('Fiyat teklifi modülü yakında aktif olacak.')" class="bg-slate-900 dark:bg-indigo-600 hover:bg-slate-800 dark:hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-indigo-500/20 transition flex items-center gap-2">
+                      <i data-lucide="file-plus" class="w-4 h-4"></i> Fiyat Teklifi Ver
+                  </button>
+              </div>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <div class="glass-card p-5 rounded-2xl relative overflow-hidden group">
                   <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:scale-110 transition"><i data-lucide="folder" class="w-16 h-16 text-indigo-500"></i></div>
-                  <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Toplam Proje</div>
-                  <div class="text-3xl font-black text-white" id="statTotalProjects">0</div>
-                  <div class="mt-2 text-xs text-green-400 flex items-center gap-1"><i data-lucide="trending-up" class="w-3 h-3"></i> <span>Bu ay %12 artış</span></div>
+                  <div class="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Toplam Proje</div>
+                  <div class="text-3xl font-black text-slate-800 dark:text-white" id="statTotalProjects">0</div>
+                  <div class="mt-2 text-xs text-green-600 dark:text-green-400 flex items-center gap-1"><i data-lucide="trending-up" class="w-3 h-3"></i> <span>Bu ay %12 artış</span></div>
               </div>
               
               <div class="glass-card p-5 rounded-2xl relative overflow-hidden group">
                   <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:scale-110 transition"><i data-lucide="zap" class="w-16 h-16 text-yellow-500"></i></div>
-                  <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Hesaplanan Kayıp</div>
-                  <div class="text-3xl font-black text-white" id="statTotalLoss">0 ₺</div>
-                  <div class="mt-2 text-xs text-slate-500">Bekleyen optimizasyon</div>
+                  <div class="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Analiz Edilen Kayıp</div>
+                  <div class="text-3xl font-black text-slate-800 dark:text-white" id="statTotalLoss">0 ₺</div>
+                  <div class="mt-2 text-xs text-slate-500">Potansiyel tasarruf</div>
               </div>
 
               <div class="glass-card p-5 rounded-2xl relative overflow-hidden group">
                   <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:scale-110 transition"><i data-lucide="leaf" class="w-16 h-16 text-green-500"></i></div>
-                  <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">CO2 Tasarrufu</div>
-                  <div class="text-3xl font-black text-white">0 <span class="text-sm font-normal text-slate-500">Ton</span></div>
-                  <div class="mt-2 text-xs text-green-400">Hedefin %40'ı</div>
+                  <div class="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">CO2 Tasarrufu</div>
+                  <div class="text-3xl font-black text-slate-800 dark:text-white">0 <span class="text-sm font-normal text-slate-500">Ton</span></div>
+                  <div class="mt-2 text-xs text-green-600 dark:text-green-400">Sürdürülebilirlik</div>
               </div>
 
-              <div class="glass-card p-5 rounded-2xl relative overflow-hidden group bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border-indigo-500/30">
+              <div class="glass-card p-5 rounded-2xl relative overflow-hidden group bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-600/20 dark:to-purple-600/10 border-indigo-200 dark:border-indigo-500/30">
                   <div class="flex items-center justify-between h-full">
                       <div>
-                          <div class="text-indigo-300 text-xs font-bold uppercase tracking-wider mb-1">Yeni Hesaplama</div>
+                          <div class="text-indigo-600 dark:text-indigo-300 text-xs font-bold uppercase tracking-wider mb-1">Yeni Hesaplama</div>
                           <a href="endustriyel-enerji-kaybi-hesaplama.html" class="mt-2 inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-bold transition shadow-lg shadow-indigo-600/20">
-                              <i data-lucide="plus" class="w-4 h-4"></i> Oluştur
+                              <i data-lucide="plus" class="w-4 h-4"></i> Analiz Oluştur
                           </a>
                       </div>
                   </div>
@@ -177,30 +241,30 @@
 
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
               
-              <div class="lg:col-span-2 glass-card rounded-2xl overflow-hidden flex flex-col">
-                  <div class="p-6 border-b border-white/5 flex justify-between items-center">
-                      <h3 class="font-bold text-white flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4 text-indigo-400"></i> Son Projeler</h3>
-                      <button class="text-xs text-slate-400 hover:text-white transition">Tümünü Gör</button>
+              <div class="lg:col-span-2 glass-card rounded-2xl overflow-hidden flex flex-col bg-white dark:bg-transparent">
+                  <div class="p-6 border-b border-slate-200 dark:border-white/5 flex justify-between items-center">
+                      <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4 text-indigo-500"></i> Son Projeler</h3>
+                      <button class="text-xs text-slate-500 hover:text-indigo-600 dark:hover:text-white transition">Tümünü Gör</button>
                   </div>
                   
                   <div class="overflow-x-auto">
-                      <table class="w-full text-left text-sm text-slate-400">
-                          <thead class="bg-slate-800/50 text-xs uppercase text-slate-500">
+                      <table class="w-full text-left text-sm text-slate-600 dark:text-slate-400">
+                          <thead class="bg-slate-50 dark:bg-slate-800/50 text-xs uppercase text-slate-500 font-bold">
                               <tr>
-                                  <th class="px-6 py-4 font-bold">Proje Adı</th>
-                                  <th class="px-6 py-4 font-bold">Tür</th>
-                                  <th class="px-6 py-4 font-bold">Durum</th>
-                                  <th class="px-6 py-4 font-bold text-right">İşlem</th>
+                                  <th class="px-6 py-4">Proje Adı</th>
+                                  <th class="px-6 py-4">Tür</th>
+                                  <th class="px-6 py-4">Durum</th>
+                                  <th class="px-6 py-4 text-right">İşlem</th>
                               </tr>
                           </thead>
-                          <tbody class="divide-y divide-white/5" id="projectsTableBody">
+                          <tbody class="divide-y divide-slate-100 dark:divide-white/5" id="projectsTableBody">
                               <tr>
                                   <td colspan="4" class="px-6 py-12 text-center">
-                                      <div class="inline-flex items-center justify-center w-12 h-12 bg-slate-800 rounded-full mb-3 text-slate-600">
+                                      <div class="inline-flex items-center justify-center w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full mb-3 text-slate-400">
                                           <i data-lucide="inbox" class="w-6 h-6"></i>
                                       </div>
-                                      <p class="text-slate-500">Henüz kayıtlı proje yok.</p>
-                                      <a href="endustriyel-enerji-kaybi-hesaplama.html" class="text-indigo-400 text-xs font-bold hover:underline mt-2 inline-block">İlk projeni oluştur →</a>
+                                      <p class="text-slate-500 font-medium">Henüz kayıtlı proje yok.</p>
+                                      <a href="endustriyel-enerji-kaybi-hesaplama.html" class="text-indigo-600 dark:text-indigo-400 text-xs font-bold hover:underline mt-2 inline-block">İlk projeni oluştur →</a>
                                   </td>
                               </tr>
                           </tbody>
@@ -209,45 +273,36 @@
               </div>
 
               <div class="space-y-6">
-                  <div class="glass-card rounded-2xl p-6">
-                      <h3 class="font-bold text-white mb-4 text-sm uppercase tracking-wide text-slate-400">Hızlı Araçlar</h3>
+                  <div class="glass-card rounded-2xl p-6 bg-white dark:bg-transparent">
+                      <h3 class="font-bold text-slate-800 dark:text-white mb-4 text-sm uppercase tracking-wide">Hızlı Araçlar</h3>
                       <div class="space-y-3">
-                          <a href="tool/roi.html" class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 border border-white/5 hover:border-indigo-500/30 transition group">
-                              <div class="w-10 h-10 rounded-lg bg-orange-500/10 text-orange-400 flex items-center justify-center"><i data-lucide="flame" class="w-5 h-5"></i></div>
+                          <a href="tool/roi.html" class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-white/5 hover:border-indigo-500/30 transition group">
+                              <div class="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center"><i data-lucide="flame" class="w-5 h-5"></i></div>
                               <div class="flex-1">
-                                  <h4 class="text-sm font-bold text-slate-200 group-hover:text-white">Termal ROI</h4>
-                                  <p class="text-xs text-slate-500">Geri dönüş süresi hesabı</p>
+                                  <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-white">Termal ROI</h4>
+                                  <p class="text-xs text-slate-500">Amortisman hesabı</p>
                               </div>
-                              <i data-lucide="chevron-right" class="w-4 h-4 text-slate-600 group-hover:text-indigo-400"></i>
+                              <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:text-indigo-500"></i>
                           </a>
                           
-                          <a href="tool/yogusma-hesaplama.html" class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 border border-white/5 hover:border-indigo-500/30 transition group">
-                              <div class="w-10 h-10 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center"><i data-lucide="droplets" class="w-5 h-5"></i></div>
+                          <a href="tool/yogusma-hesaplama.html" class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-white/5 hover:border-indigo-500/30 transition group">
+                              <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center"><i data-lucide="droplets" class="w-5 h-5"></i></div>
                               <div class="flex-1">
-                                  <h4 class="text-sm font-bold text-slate-200 group-hover:text-white">Yoğuşma Hesabı</h4>
-                                  <p class="text-xs text-slate-500">Kritik yalıtım kalınlığı</p>
+                                  <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-white">Yoğuşma Hesabı</h4>
+                                  <p class="text-xs text-slate-500">Kritik kalınlık analizi</p>
                               </div>
-                              <i data-lucide="chevron-right" class="w-4 h-4 text-slate-600 group-hover:text-indigo-400"></i>
-                          </a>
-
-                          <a href="tool/yalitim-performans.html" class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 border border-white/5 hover:border-indigo-500/30 transition group">
-                              <div class="w-10 h-10 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center"><i data-lucide="layers" class="w-5 h-5"></i></div>
-                              <div class="flex-1">
-                                  <h4 class="text-sm font-bold text-slate-200 group-hover:text-white">Optimum Kalınlık</h4>
-                                  <p class="text-xs text-slate-500">Verimlilik analizi</p>
-                              </div>
-                              <i data-lucide="chevron-right" class="w-4 h-4 text-slate-600 group-hover:text-indigo-400"></i>
+                              <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:text-indigo-500"></i>
                           </a>
                       </div>
                   </div>
 
-                  <div class="glass-card rounded-2xl p-6 bg-gradient-to-br from-indigo-900/50 to-slate-900 border-indigo-500/30 relative overflow-hidden">
-                      <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="crown" class="w-24 h-24 text-white"></i></div>
+                  <div class="glass-card rounded-2xl p-6 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/50 dark:to-slate-900 border border-indigo-100 dark:border-indigo-500/30 relative overflow-hidden">
+                      <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="crown" class="w-24 h-24 text-indigo-900 dark:text-white"></i></div>
                       <div class="relative z-10">
-                          <span class="inline-block px-2 py-1 rounded bg-indigo-500 text-white text-[10px] font-bold mb-2">PRO</span>
-                          <h3 class="text-lg font-bold text-white mb-2">Raporlarını Özelleştir</h3>
-                          <p class="text-xs text-slate-300 mb-4 leading-relaxed">Kendi şirket logonu ve şablonunu ekleyerek müşterilerine özel raporlar oluştur.</p>
-                          <button class="text-xs font-bold text-white bg-white/10 hover:bg-white/20 border border-white/20 px-4 py-2 rounded-lg transition">Planı Yükselt</button>
+                          <span class="inline-block px-2 py-1 rounded bg-indigo-600 text-white text-[10px] font-bold mb-2">PRO</span>
+                          <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Raporlarını Özelleştir</h3>
+                          <p class="text-xs text-slate-600 dark:text-slate-300 mb-4 leading-relaxed">Kendi şirket logonu ve şablonunu ekleyerek müşterilerine özel raporlar oluştur.</p>
+                          <button class="text-xs font-bold text-indigo-700 dark:text-white bg-white/50 dark:bg-white/10 hover:bg-white dark:hover:bg-white/20 border border-indigo-200 dark:border-white/20 px-4 py-2 rounded-lg transition">Planı Yükselt</button>
                       </div>
                   </div>
               </div>
@@ -256,13 +311,85 @@
       </div>
   </main>
 
+  <div id="settingsModal" class="fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" onclick="closeSettings()"></div>
+      <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl modal-enter flex flex-col">
+          
+          <div class="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
+              <h2 class="text-xl font-bold text-slate-900 dark:text-white">Kullanıcı Ayarları</h2>
+              <button onclick="closeSettings()" class="text-slate-500 hover:text-red-500 transition"><i data-lucide="x" class="w-6 h-6"></i></button>
+          </div>
+
+          <div class="flex-1 overflow-y-auto p-6 space-y-8">
+              <section>
+                  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Profil Bilgileri</h3>
+                  <div class="flex items-center gap-4 mb-4">
+                      <div class="w-16 h-16 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-2xl font-bold text-indigo-600 dark:text-indigo-400" id="modalAvatar">U</div>
+                      <div>
+                          <p class="font-bold text-slate-900 dark:text-white text-lg" id="modalName">Yükleniyor...</p>
+                          <p class="text-sm text-slate-500" id="modalEmail">...</p>
+                      </div>
+                  </div>
+              </section>
+
+              <section>
+                  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Görünüm</h3>
+                  <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                      <div class="flex items-center gap-3">
+                          <div class="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400"><i data-lucide="moon" class="w-5 h-5"></i></div>
+                          <div>
+                              <p class="text-sm font-bold text-slate-800 dark:text-white">Karanlık Mod</p>
+                              <p class="text-xs text-slate-500">Göz yormayan koyu tema</p>
+                          </div>
+                      </div>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" id="themeToggle" class="sr-only peer" onchange="toggleTheme()">
+                          <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                      </label>
+                  </div>
+              </section>
+
+              <section>
+                  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Hesap</h3>
+                  <button onclick="handleLogout()" class="w-full py-3 rounded-xl border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 font-bold transition flex items-center justify-center gap-2">
+                      <i data-lucide="log-out" class="w-4 h-4"></i> Çıkış Yap
+                  </button>
+              </section>
+          </div>
+          
+          <div class="p-4 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-400">
+              Optimizi v2.1 • Build 2026
+          </div>
+      </div>
+  </div>
+
   <script>
-    // Supabase Configuration (AYNEN KORUNDU)
+    // Supabase Configuration
     const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
-    // Check authentication and load user data
+    // --- THEME LOGIC ---
+    function toggleTheme() {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        document.getElementById('themeToggle').checked = isDark;
+    }
+
+    // Set initial toggle state
+    if (document.documentElement.classList.contains('dark')) {
+        document.getElementById('themeToggle').checked = true;
+    }
+
+    // --- MODAL LOGIC ---
+    function openSettings() {
+        document.getElementById('settingsModal').classList.remove('hidden');
+    }
+    function closeSettings() {
+        document.getElementById('settingsModal').classList.add('hidden');
+    }
+
+    // --- AUTH LOGIC ---
     async function checkAuth() {
       const { data: { session }, error } = await supabaseClient.auth.getSession();
       
@@ -272,27 +399,26 @@
       }
       
       const user = session.user;
-      console.log('✅ Kullanıcı giriş yapmış:', user);
       
       // Update UI with user info
       const fullName = user.user_metadata?.full_name || user.email.split('@')[0];
       const firstName = fullName.split(' ')[0];
       const initial = firstName.charAt(0).toUpperCase();
       
-      // Sidebar Update
       document.getElementById('sidebarUserName').textContent = fullName;
       document.getElementById('avatarInitial').textContent = initial;
-      
-      // Header Greeting
       document.getElementById('headerGreeting').textContent = firstName;
       
-      // TODO: Fetch real data from DB later. For now, we simulate empty state or fetch local storage mock
+      // Modal Info
+      document.getElementById('modalName').textContent = fullName;
+      document.getElementById('modalEmail').textContent = user.email;
+      document.getElementById('modalAvatar').textContent = initial;
+      
       loadRecentProjects();
     }
     
     function loadRecentProjects() {
-        // Bu fonksiyon ileride Supabase'den veri çekecek.
-        // Şimdilik LocalStorage'daki "optimizi_saved_list" e bakabiliriz (eski kodlarda vardı)
+        // LocalStorage'dan örnek veri çekme
         const savedData = JSON.parse(localStorage.getItem('optimizi_saved_list') || '[]');
         const tableBody = document.getElementById('projectsTableBody');
         const countEl = document.getElementById('statTotalProjects');
@@ -305,17 +431,17 @@
             savedData.slice().reverse().slice(0, 5).forEach(proj => {
                 const date = new Date(proj.date).toLocaleDateString('tr-TR');
                 const row = `
-                <tr class="hover:bg-white/5 transition group">
-                    <td class="px-6 py-4 font-medium text-white flex items-center gap-3">
-                        <div class="w-8 h-8 rounded bg-slate-700 flex items-center justify-center text-slate-400 group-hover:text-white group-hover:bg-indigo-600 transition">
+                <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition group border-b border-slate-100 dark:border-white/5 last:border-0">
+                    <td class="px-6 py-4 font-bold text-slate-700 dark:text-white flex items-center gap-3">
+                        <div class="w-8 h-8 rounded bg-indigo-100 dark:bg-slate-700 flex items-center justify-center text-indigo-600 dark:text-slate-400 group-hover:text-white group-hover:bg-indigo-600 transition">
                             <i data-lucide="file-text" class="w-4 h-4"></i>
                         </div>
                         ${proj.name}
                     </td>
                     <td class="px-6 py-4">Genel Hesaplama</td>
-                    <td class="px-6 py-4"><span class="px-2 py-1 rounded bg-green-500/10 text-green-400 text-xs font-bold border border-green-500/20">Tamamlandı</span></td>
+                    <td class="px-6 py-4"><span class="px-2 py-1 rounded bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-400 text-xs font-bold border border-green-200 dark:border-green-500/20">Tamamlandı</span></td>
                     <td class="px-6 py-4 text-right">
-                        <button class="text-slate-400 hover:text-white p-1"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
+                        <button class="text-slate-400 hover:text-indigo-600 dark:hover:text-white p-1 transition"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
                     </td>
                 </tr>
                 `;
@@ -325,18 +451,11 @@
         }
     }
 
-    // Logout function
     async function handleLogout() {
       const { error } = await supabaseClient.auth.signOut();
-      if (error) {
-        console.error('Çıkış hatası:', error);
-        alert('Çıkış yapılırken bir hata oluştu.');
-      } else {
-        window.location.href = 'login.html';
-      }
+      if (!error) window.location.href = 'login.html';
     }
     
-    // Init
     checkAuth();
     lucide.createIcons();
   </script>
