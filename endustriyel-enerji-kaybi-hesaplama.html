@@ -10,16 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="icon" href="favicon.png" type="image/png">
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/auth-guard.js"></script>
-    <style>
-      body:not(.auth-checked) { opacity: 0; visibility: hidden; }
-      body.auth-checked { opacity: 1; visibility: visible; transition: opacity 0.3s ease; }
-    </style>
-    <script>
-      setTimeout(function(){ if(document.body) document.body.classList.add('auth-checked'); }, 500);
-    </script>
-
     <style>
         body { 
             background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%);
