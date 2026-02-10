@@ -2335,37 +2335,105 @@
     }
 
     // Save calculation
-    function saveCalculation() {
-        if(LIST.length === 0) { showSavePopup("Uyarı", "Kaydedilecek hesaplama bulunamadı."); return; }
+async function saveCalculation() {
+    if(LIST.length === 0) { 
+        showSavePopup("Uyarı", "Kaydedilecek hesaplama bulunamadı."); 
+        return; 
+    }
+    
+    // Kullanıcı kontrolü
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if(!session) {
+        showSavePopup("Hata", "Lütfen önce giriş yapın.");
+        window.location.href = '/login';
+        return;
+    }
+    
+    // Özet verileri hesapla
+    const currVal = document.getElementById('curr').value;
+    const reportRate = FX[currVal] || 1;
+    
+    let gInv = 0, gSave = 0, gCo2 = 0, gLoss = 0;
+    LIST.forEach(i => {
+        const invDisp = i.invTL / reportRate;
+        const saveDisp = i.saveTL / reportRate;
+        const lossDisp = i.lossTL / reportRate;
+        
+        if(i.inputs.matKey !== 'bare') {
+            gInv += invDisp;
+            gSave += saveDisp;
+            gCo2 += i.co2;
+        }
+        gLoss += lossDisp;
+    });
+    
+    const finalInv = (manualTotalInvestment !== null && manualTotalInvestment > 0) 
+        ? (manualTotalInvestment / reportRate) 
+        : gInv;
+    
+    const totalRoi = gSave > 0 ? (finalInv / gSave * 12) : 0;
+    
+    // Veritabanına kaydet
+    const { data, error } = await supabaseClient
+        .from('calculations')
+        .insert({
+            user_id: session.user.id,
+            
+            // Proje bilgileri
+            project_name: document.getElementById('pName').value || "İsimsiz Proje",
+            client_name: document.getElementById('cName').value || "",
+            client_contact: document.getElementById('cEng').value || "",
+            provider_name: document.getElementById('pName').value || "",
+            provider_engineer: document.getElementById('pEng').value || "",
+            audit_date: document.getElementById('auditDate').value || null,
+            
+            // Hesaplama verileri
+            calculation_type: 'roi',
+            items: LIST,
+            
+            // Finansal özet
+            total_investment: finalInv,
+            total_savings: gSave,
+            total_loss: gLoss,
+            total_co2: gCo2,
+            roi_months: totalRoi,
+            currency: currVal,
+            
+            // Parametreler
+            ambient_temp: parseFloat(document.getElementById('tAmb').value),
+            wind_speed: parseFloat(document.getElementById('vWind').value),
+            fuel_type: document.getElementById('fuel').value,
+            boiler_efficiency: parseFloat(document.getElementById('eff').value),
+            energy_price: parseFloat(document.getElementById('price').value),
+            annual_hours: parseInt(document.getElementById('hours').value)
+        })
+        .select();
+    
+    if(error) {
+        console.error('Kayıt hatası:', error);
+        showSavePopup("Hata", "Kaydetme sırasında hata oluştu: " + error.message);
+    } else {
+        const saveName = document.getElementById('cName').value || document.getElementById('pName').value || 'Proje';
+        showSavePopup("Başarılı! 🎉", `<strong>"${saveName}"</strong> başarıyla veritabanına kaydedildi!<br><br><span class="text-xs text-slate-500">Dashboard'dan görüntüleyebilirsiniz.</span>`);
+        
+        // LocalStorage'a da yedek kaydet
+        const saveKey = `optimizi_calc_${Date.now()}`;
         const projectData = {
             projectName: document.getElementById('pName').value || "",
             projectEngineer: document.getElementById('pEng').value || "",
             clientName: document.getElementById('cName').value || "",
             clientContact: document.getElementById('cEng').value || "",
             auditDate: document.getElementById('auditDate').value || "",
-            tAmb: document.getElementById('tAmb').value,
-            vWind: document.getElementById('vWind').value,
-            fuel: document.getElementById('fuel').value,
-            eff: document.getElementById('eff').value,
-            price: document.getElementById('price').value,
-            energyCurr: document.getElementById('energyCurr').value,
-            hours: document.getElementById('hours').value,
-            currency: document.getElementById('curr').value,
-            manualTotalInvestment: manualTotalInvestment,
             items: LIST,
             savedAt: new Date().toISOString(),
-            version: "2.0"
+            supabaseId: data[0].id
         };
-        try {
-            const saveKey = `optimizi_calc_${Date.now()}`;
-            const saveName = projectData.clientName || projectData.projectName || "İsimsiz Proje";
-            localStorage.setItem(saveKey, JSON.stringify(projectData));
-            let savedList = JSON.parse(localStorage.getItem('optimizi_saved_list') || '[]');
-            savedList.push({ key: saveKey, name: saveName, date: projectData.savedAt, itemCount: LIST.length });
-            localStorage.setItem('optimizi_saved_list', JSON.stringify(savedList));
-            showSavePopup("Hesaplama Kaydedildi", `<strong>"${saveName}"</strong> projesi ${LIST.length} kalem ile kaydedildi.<br><span class="text-[10px] text-slate-400 mt-2 block">Veritabanı entegrasyonu aktif olduğunda veriler otomatik senkronize edilecektir.</span>`);
-        } catch(e) { showSavePopup("Hata", "Kaydetme hatası: " + e.message); }
+        localStorage.setItem(saveKey, JSON.stringify(projectData));
+        let savedList = JSON.parse(localStorage.getItem('optimizi_saved_list') || '[]');
+        savedList.push({ key: saveKey, name: saveName, date: projectData.savedAt, itemCount: LIST.length, dbId: data[0].id });
+        localStorage.setItem('optimizi_saved_list', JSON.stringify(savedList));
     }
+}
     function showSavePopup(title, msg) {
         document.getElementById('savePopupTitle').innerText = title;
         document.getElementById('savePopupMsg').innerHTML = msg;
@@ -2656,3 +2724,4 @@
 </script>
 </body>
 </html>
+
