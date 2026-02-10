@@ -2729,70 +2729,62 @@ async function saveCalculation() {
         }catch(e){ alert('Rapor oluşturulurken hata oluştu: '+e.message); console.error(e); }
     }
 </script>
-  // --- VERİ GERİ YÜKLEME SİSTEMİ (Senin SQL Tablona Göre Güncellendi) ---
-// Bu kodu tool/roi.html sayfasının en altındaki <script> içine ekle.
-
-window.addEventListener('DOMContentLoaded', async () => {
-    // 1. URL'den proje ID'sini yakala
-    const urlParams = new URLSearchParams(window.location.search);
-    const loadId = urlParams.get('load_id');
-
-    if (loadId) {
-        console.log('Proje yükleniyor ID:', loadId);
-
-        // Kullanıcıya bilgi ver (Opsiyonel)
-        // if(typeof showNotification === 'function') showNotification('Bilgi', 'Veriler yükleniyor...', 'info');
-
-        // 2. Supabase'den veriyi çek
-        const { data, error } = await supabaseClient
-            .from('calculations')
-            .select('*')
-            .eq('id', loadId)
-            .single();
-
-        if (error) {
-            console.error('Veri çekme hatası:', error);
-            return;
-        }
-
-        if (data && data.items) {
-            
-            // Supabase JSONB sütununu bazen string, bazen obje olarak döndürebilir.
-            const inputs = typeof data.items === 'string' ? JSON.parse(data.items) : data.items;
-
-            // 3. Verileri kutucuklara doldur
-            Object.keys(inputs).forEach(key => {
-                const element = document.getElementById(key);
-                if (element) {
-                    if (element.type === 'checkbox') {
-                        element.checked = inputs[key];
-                    } else {
-                        element.value = inputs[key];
+ <script>
+    window.addEventListener('DOMContentLoaded', async () => {
+        // 1. URL'den proje ID'sini yakala
+        const urlParams = new URLSearchParams(window.location.search);
+        const loadId = urlParams.get('load_id');
+    
+        if (loadId) {
+            console.log('Proje yükleniyor ID:', loadId);
+    
+            // 2. Supabase'den veriyi çek
+            const { data, error } = await supabaseClient
+                .from('calculations')
+                .select('*')
+                .eq('id', loadId)
+                .single();
+    
+            if (error) {
+                console.error('Veri çekme hatası:', error);
+                return;
+            }
+    
+            // 3. Verileri kutucuklara doldur (SQL tablondaki 'items' sütunu)
+            if (data && data.items) {
+                const inputs = typeof data.items === 'string' ? JSON.parse(data.items) : data.items;
+    
+                Object.keys(inputs).forEach(key => {
+                    const element = document.getElementById(key);
+                    if (element) {
+                        if (element.type === 'checkbox') {
+                            element.checked = inputs[key];
+                        } else {
+                            element.value = inputs[key];
+                        }
+                        // Hesaplama fonksiyonlarını tetikle
+                        element.dispatchEvent(new Event('change')); 
+                        element.dispatchEvent(new Event('input')); 
                     }
-                    // Hesaplama fonksiyonlarını tetikle
-                    element.dispatchEvent(new Event('change')); 
-                    element.dispatchEvent(new Event('input')); 
+                });
+    
+                // 4. Proje Adını Başlığa Ekle
+                const titleEl = document.getElementById('pageTitle') || document.querySelector('h1');
+                if(titleEl && data.project_name) {
+                    if(!titleEl.innerText.includes(data.project_name)) {
+                       titleEl.innerText += ` - ${data.project_name}`;
+                    }
                 }
-            });
-
-            // 4. Proje Adını Başlığa Ekle
-            // Eğer sayfanda id="pageTitle" olan bir başlık varsa oraya yazar
-            const titleEl = document.getElementById('pageTitle') || document.querySelector('h1');
-            if(titleEl && data.project_name) {
-                // Sadece bir kere eklemesi için kontrol
-                if(!titleEl.innerText.includes(data.project_name)) {
-                   titleEl.innerText += ` - ${data.project_name}`;
+    
+                // 5. Hesaplamayı Otomatik Çalıştır
+                const calcBtn = document.getElementById('calculateBtn'); 
+                if (calcBtn) {
+                    calcBtn.click();
                 }
-            }
-
-            // 5. Hesaplamayı Otomatik Çalıştır (Buton ID'nize göre)
-            const calcBtn = document.getElementById('calculateBtn'); 
-            if (calcBtn) {
-                calcBtn.click();
-                console.log('Hesaplama güncellendi.');
             }
         }
-    }
-});
+    });
+</script>
 </body>
 </html>
+
