@@ -2345,7 +2345,9 @@ async function saveCalculation() {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if(!session) {
         showSavePopup("Hata", "Lütfen önce giriş yapın.");
-        window.location.href = '/login';
+        setTimeout(() => {
+            window.location.href = '/login';
+        }, 2000);
         return;
     }
     
@@ -2374,64 +2376,69 @@ async function saveCalculation() {
     const totalRoi = gSave > 0 ? (finalInv / gSave * 12) : 0;
     
     // Veritabanına kaydet
-    const { data, error } = await supabaseClient
-        .from('calculations')
-        .insert({
-            user_id: session.user.id,
-            
-            // Proje bilgileri
-            project_name: document.getElementById('pName').value || "İsimsiz Proje",
-            client_name: document.getElementById('cName').value || "",
-            client_contact: document.getElementById('cEng').value || "",
-            provider_name: document.getElementById('pName').value || "",
-            provider_engineer: document.getElementById('pEng').value || "",
-            audit_date: document.getElementById('auditDate').value || null,
-            
-            // Hesaplama verileri
-            calculation_type: 'roi',
-            items: LIST,
-            
-            // Finansal özet
-            total_investment: finalInv,
-            total_savings: gSave,
-            total_loss: gLoss,
-            total_co2: gCo2,
-            roi_months: totalRoi,
-            currency: currVal,
-            
-            // Parametreler
-            ambient_temp: parseFloat(document.getElementById('tAmb').value),
-            wind_speed: parseFloat(document.getElementById('vWind').value),
-            fuel_type: document.getElementById('fuel').value,
-            boiler_efficiency: parseFloat(document.getElementById('eff').value),
-            energy_price: parseFloat(document.getElementById('price').value),
-            annual_hours: parseInt(document.getElementById('hours').value)
-        })
-        .select();
-    
-    if(error) {
-        console.error('Kayıt hatası:', error);
-        showSavePopup("Hata", "Kaydetme sırasında hata oluştu: " + error.message);
-    } else {
-        const saveName = document.getElementById('cName').value || document.getElementById('pName').value || 'Proje';
-        showSavePopup("Başarılı! 🎉", `<strong>"${saveName}"</strong> başarıyla veritabanına kaydedildi!<br><br><span class="text-xs text-slate-500">Dashboard'dan görüntüleyebilirsiniz.</span>`);
+    try {
+        const { data, error } = await supabaseClient
+            .from('calculations')
+            .insert({
+                user_id: session.user.id,
+                
+                // Proje bilgileri
+                project_name: document.getElementById('pName').value || "İsimsiz Proje",
+                client_name: document.getElementById('cName').value || "",
+                client_contact: document.getElementById('cEng').value || "",
+                provider_name: document.getElementById('pName').value || "",
+                provider_engineer: document.getElementById('pEng').value || "",
+                audit_date: document.getElementById('auditDate').value || null,
+                
+                // Hesaplama verileri
+                calculation_type: 'roi',
+                items: LIST,
+                
+                // Finansal özet
+                total_investment: finalInv,
+                total_savings: gSave,
+                total_loss: gLoss,
+                total_co2: gCo2,
+                roi_months: totalRoi,
+                currency: currVal,
+                
+                // Parametreler
+                ambient_temp: parseFloat(document.getElementById('tAmb').value),
+                wind_speed: parseFloat(document.getElementById('vWind').value),
+                fuel_type: document.getElementById('fuel').value,
+                boiler_efficiency: parseFloat(document.getElementById('eff').value),
+                energy_price: parseFloat(document.getElementById('price').value),
+                annual_hours: parseInt(document.getElementById('hours').value)
+            })
+            .select();
         
-        // LocalStorage'a da yedek kaydet
-        const saveKey = `optimizi_calc_${Date.now()}`;
-        const projectData = {
-            projectName: document.getElementById('pName').value || "",
-            projectEngineer: document.getElementById('pEng').value || "",
-            clientName: document.getElementById('cName').value || "",
-            clientContact: document.getElementById('cEng').value || "",
-            auditDate: document.getElementById('auditDate').value || "",
-            items: LIST,
-            savedAt: new Date().toISOString(),
-            supabaseId: data[0].id
-        };
-        localStorage.setItem(saveKey, JSON.stringify(projectData));
-        let savedList = JSON.parse(localStorage.getItem('optimizi_saved_list') || '[]');
-        savedList.push({ key: saveKey, name: saveName, date: projectData.savedAt, itemCount: LIST.length, dbId: data[0].id });
-        localStorage.setItem('optimizi_saved_list', JSON.stringify(savedList));
+        if(error) {
+            console.error('Kayıt hatası:', error);
+            showSavePopup("Hata", "Kaydetme sırasında hata oluştu: " + error.message);
+        } else {
+            const saveName = document.getElementById('cName').value || document.getElementById('pName').value || 'Proje';
+            showSavePopup("Başarılı! 🎉", `<strong>"${saveName}"</strong> başarıyla veritabanına kaydedildi!<br><br><span class="text-xs text-slate-500">Dashboard'dan görüntüleyebilirsiniz.</span>`);
+            
+            // LocalStorage'a da yedek kaydet
+            const saveKey = `optimizi_calc_${Date.now()}`;
+            const projectData = {
+                projectName: document.getElementById('pName').value || "",
+                projectEngineer: document.getElementById('pEng').value || "",
+                clientName: document.getElementById('cName').value || "",
+                clientContact: document.getElementById('cEng').value || "",
+                auditDate: document.getElementById('auditDate').value || "",
+                items: LIST,
+                savedAt: new Date().toISOString(),
+                supabaseId: data[0].id
+            };
+            localStorage.setItem(saveKey, JSON.stringify(projectData));
+            let savedList = JSON.parse(localStorage.getItem('optimizi_saved_list') || '[]');
+            savedList.push({ key: saveKey, name: saveName, date: projectData.savedAt, itemCount: LIST.length, dbId: data[0].id });
+            localStorage.setItem('optimizi_saved_list', JSON.stringify(savedList));
+        }
+    } catch(err) {
+        console.error('Beklenmeyen hata:', err);
+        showSavePopup("Hata", "Bir hata oluştu: " + err.message);
     }
 }
     function showSavePopup(title, msg) {
@@ -2724,4 +2731,5 @@ async function saveCalculation() {
 </script>
 </body>
 </html>
+
 
