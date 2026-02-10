@@ -94,6 +94,8 @@
         color: var(--sidebar-text);
         transition: all 0.2s; font-weight: 500; font-size: 0.9rem;
         cursor: pointer;
+        width: 100%;
+        text-align: left;
     }
     .sidebar-link:hover, .sidebar-link.active {
         background: var(--sidebar-active-bg); 
@@ -102,6 +104,37 @@
     .sidebar-link.active { border-left: 3px solid #6366f1; }
     .sidebar-link i { width: 20px; height: 20px; }
     
+    /* Submenu Styles */
+    .submenu {
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+        max-height: 0;
+    }
+    .submenu.open {
+        max-height: 500px; /* Yeterince büyük bir değer */
+    }
+    .submenu-link {
+        display: flex; align-items: center; gap: 10px;
+        padding: 8px 16px 8px 48px; /* Soldan girinti */
+        color: var(--sidebar-text);
+        font-size: 0.85rem;
+        transition: color 0.2s;
+        text-decoration: none;
+        position: relative;
+    }
+    .submenu-link:before {
+        content: '';
+        position: absolute; left: 30px; top: 50%;
+        width: 4px; height: 4px; border-radius: 50%;
+        background: var(--sidebar-text);
+        transform: translateY(-50%);
+        opacity: 0.5;
+    }
+    .submenu-link:hover { color: #6366f1; }
+    .submenu-link:hover:before { background: #6366f1; opacity: 1; }
+    
+    .rotate-chevron { transform: rotate(180deg); }
+
     /* Animation Utilities */
     @keyframes slideInRight {
         from { transform: translateX(100%); opacity: 0; }
@@ -137,22 +170,40 @@
           </div>
       </div>
 
-      <div class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+      <div class="flex-1 overflow-y-auto py-6 px-4 custom-scroll">
+          
           <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2">Genel</div>
           <a href="dashboard.html" class="sidebar-link"><i data-lucide="layout-dashboard"></i> Panel</a>
           <a href="#" class="sidebar-link active"><i data-lucide="folder-open"></i> Projelerim</a>
           
-          <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2 mt-6">Ticari İşlemler</div>
-          <a href="#" onclick="showNotification('Bilgi', 'Fiyat teklifi modülü yakında aktif olacak.', 'info')" class="sidebar-link text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"><i data-lucide="file-plus"></i> Fiyat Teklifi Ver</a>
-          <a href="#" class="sidebar-link"><i data-lucide="receipt"></i> Teklif Geçmişi</a>
+          <div class="mt-6">
+              <button onclick="toggleSubmenu('offerMenu', this)" class="sidebar-link justify-between group">
+                  <div class="flex items-center gap-3"><i data-lucide="file-text"></i> Teklif Yönetimi</div>
+                  <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300 text-slate-400"></i>
+              </button>
+              <div id="offerMenu" class="submenu">
+                  <a href="#" onclick="showNotification('Bilgi', 'Müşteri modülü yakında.', 'info')" class="submenu-link">Müşteri Listesi</a>
+                  <a href="#" onclick="showNotification('Bilgi', 'Teklif modülü yakında.', 'info')" class="submenu-link">Teklif Ver</a>
+                  <a href="#" class="submenu-link">Teklif Geçmişi</a>
+              </div>
+          </div>
+
+          <div class="mt-1">
+              <button onclick="toggleSubmenu('salesMenu', this)" class="sidebar-link justify-between group">
+                  <div class="flex items-center gap-3"><i data-lucide="shopping-bag"></i> Satış Yönetimi</div>
+                  <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300 text-slate-400"></i>
+              </button>
+              <div id="salesMenu" class="submenu">
+                  <a href="#" onclick="showNotification('Bilgi', 'Satış listesi yakında.', 'info')" class="submenu-link">Satış Listesi</a>
+                  <a href="#" onclick="showNotification('Bilgi', 'Üretim modülü yakında.', 'info')" class="submenu-link">Üretim Listesi</a>
+              </div>
+          </div>
 
           <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2 mt-6">Araçlar</div>
-          <button onclick="openCalcModal()" class="sidebar-link w-full text-left"><i data-lucide="calculator"></i> Hesaplama Merkezi</button>
+          <button onclick="openCalcModal()" class="sidebar-link"><i data-lucide="calculator"></i> Hesaplama Merkezi</button>
           
-          <a href="#" class="sidebar-link"><i data-lucide="users"></i> Ekip Yönetimi <span class="ml-auto text-[10px] bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 px-1.5 py-0.5 rounded font-bold">PRO</span></a>
-
           <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2 mt-6">Ayarlar</div>
-          <button onclick="openSettings()" class="sidebar-link w-full text-left"><i data-lucide="settings"></i> Ayarlar</button>
+          <button onclick="openSettings()" class="sidebar-link"><i data-lucide="settings"></i> Ayarlar</button>
           <a href="iletisim.html" class="sidebar-link"><i data-lucide="life-buoy"></i> Destek</a>
       </div>
 
@@ -273,7 +324,7 @@
 
   <div id="calcModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="closeCalcModal()"></div>
-      <div class="relative bg-white dark:bg-slate-900 w-full max-w-4xl rounded-3xl shadow-2xl animate-pop border border-slate-200 dark:border-slate-800 flex flex-col max-h-[90vh]">
+      <div class="relative bg-white dark:bg-slate-900 w-full max-w-5xl rounded-3xl shadow-2xl animate-pop border border-slate-200 dark:border-slate-800 flex flex-col max-h-[90vh]">
           <div class="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
               <div class="flex items-center gap-3">
                   <div class="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg text-indigo-600 dark:text-indigo-400"><i data-lucide="calculator" class="w-6 h-6"></i></div>
@@ -281,11 +332,63 @@
               </div>
               <button onclick="closeCalcModal()" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition"><i data-lucide="x" class="w-6 h-6"></i></button>
           </div>
-          <div class="p-6 overflow-y-auto">
+          <div class="p-6 overflow-y-auto custom-scroll">
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <a href="tool/roi.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-orange-500/50 group transition"><div class="flex justify-between items-start mb-4"><div class="p-3 rounded-lg bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400"><i data-lucide="flame" class="w-6 h-6"></i></div><i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-orange-500 transition"></i></div><h3 class="font-bold text-slate-800 dark:text-white mb-1">Termal ROI</h3><p class="text-xs text-slate-500">Yatırım geri dönüş hesabı.</p></a>
-                  <a href="tool/yogusma-hesaplama.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-blue-500/50 group transition"><div class="flex justify-between items-start mb-4"><div class="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"><i data-lucide="droplets" class="w-6 h-6"></i></div><i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-blue-500 transition"></i></div><h3 class="font-bold text-slate-800 dark:text-white mb-1">Yoğuşma Kontrol</h3><p class="text-xs text-slate-500">Terleme önleme analizi.</p></a>
-                  <a href="tool/yalitim-performans.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-purple-500/50 group transition"><div class="flex justify-between items-start mb-4"><div class="p-3 rounded-lg bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400"><i data-lucide="layers" class="w-6 h-6"></i></div><i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-purple-500 transition"></i></div><h3 class="font-bold text-slate-800 dark:text-white mb-1">Optimum Kalınlık</h3><p class="text-xs text-slate-500">Ekonomik kalınlık.</p></a>
+                  
+                  <a href="tool/anlik-kayip.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-red-500/50 dark:hover:border-red-500/50 group transition">
+                      <div class="flex justify-between items-start mb-4">
+                          <div class="p-3 rounded-lg bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400"><i data-lucide="scan-line" class="w-6 h-6"></i></div>
+                          <i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-red-500 transition"></i>
+                      </div>
+                      <h3 class="font-bold text-slate-800 dark:text-white mb-1">Saha Kayıp Analizi</h3>
+                      <p class="text-xs text-slate-500 dark:text-slate-400">Anlık ölçümlerle kaçak tespiti ve raporlama.</p>
+                  </a>
+
+                  <a href="tool/roi.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-orange-500/50 group transition">
+                      <div class="flex justify-between items-start mb-4">
+                          <div class="p-3 rounded-lg bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400"><i data-lucide="flame" class="w-6 h-6"></i></div>
+                          <i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-orange-500 transition"></i>
+                      </div>
+                      <h3 class="font-bold text-slate-800 dark:text-white mb-1">Termal ROI</h3>
+                      <p class="text-xs text-slate-500">Yatırım geri dönüş hesabı.</p>
+                  </a>
+                  
+                  <a href="tool/yalitim-performans.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-purple-500/50 group transition">
+                      <div class="flex justify-between items-start mb-4">
+                          <div class="p-3 rounded-lg bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400"><i data-lucide="layers" class="w-6 h-6"></i></div>
+                          <i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-purple-500 transition"></i>
+                      </div>
+                      <h3 class="font-bold text-slate-800 dark:text-white mb-1">Optimum Kalınlık</h3>
+                      <p class="text-xs text-slate-500">Ekonomik kalınlık.</p>
+                  </a>
+                  
+                  <a href="tool/yogusma-hesaplama.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-blue-500/50 group transition">
+                      <div class="flex justify-between items-start mb-4">
+                          <div class="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"><i data-lucide="droplets" class="w-6 h-6"></i></div>
+                          <i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-blue-500 transition"></i>
+                      </div>
+                      <h3 class="font-bold text-slate-800 dark:text-white mb-1">Yoğuşma Kontrol</h3>
+                      <p class="text-xs text-slate-500">Terleme önleme analizi.</p>
+                  </a>
+
+                  <a href="tool/chiller-roi.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-cyan-500/50 dark:hover:border-cyan-500/50 group transition">
+                      <div class="flex justify-between items-start mb-4">
+                          <div class="p-3 rounded-lg bg-cyan-100 dark:bg-cyan-900/20 text-cyan-600 dark:text-cyan-400"><i data-lucide="snowflake" class="w-6 h-6"></i></div>
+                          <i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-cyan-500 transition"></i>
+                      </div>
+                      <h3 class="font-bold text-slate-800 dark:text-white mb-1">Chiller ROI</h3>
+                      <p class="text-xs text-slate-500 dark:text-slate-400">Soğutma hatları için enerji verimliliği.</p>
+                  </a>
+
+                  <a href="tool/boiler.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-amber-500/50 dark:hover:border-amber-500/50 group transition">
+                      <div class="flex justify-between items-start mb-4">
+                          <div class="p-3 rounded-lg bg-amber-100 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400"><i data-lucide="gauge" class="w-6 h-6"></i></div>
+                          <i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-amber-500 transition"></i>
+                      </div>
+                      <h3 class="font-bold text-slate-800 dark:text-white mb-1">Kazan Verimliliği</h3>
+                      <p class="text-xs text-slate-500 dark:text-slate-400">Buhar kazanı performans hesaplaması.</p>
+                  </a>
+
               </div>
           </div>
       </div>
@@ -309,8 +412,12 @@
               <section>
                   <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Görünüm</h3>
                   <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                      <div class="flex items-center gap-3"><div class="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400"><i data-lucide="moon" class="w-5 h-5"></i></div><div><p class="text-sm font-bold text-slate-800 dark:text-white">Karanlık Mod</p></div></div>
-                      <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="themeToggle" class="sr-only peer" onchange="toggleTheme()"><div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:bg-indigo-600"></div></label>
+                      <div class="flex items-center gap-3"><div class="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400"><i data-lucide="moon" class="w-5 h-5"></i></div><div><p class="text-sm font-bold text-slate-800 dark:text-white">Karanlık Mod</p><p class="text-xs text-slate-500">Göz yormayan koyu tema</p></div></div>
+                      
+                      <label class="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" id="themeToggle" class="sr-only peer" onchange="toggleTheme()">
+                          <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                      </label>
                   </div>
               </section>
               <section>
@@ -338,6 +445,24 @@
     }
     if (document.documentElement.classList.contains('dark')) {
         if(document.getElementById('themeToggle')) document.getElementById('themeToggle').checked = true;
+    }
+
+    // --- SIDEBAR DROPDOWN LOGIC ---
+    function toggleSubmenu(menuId, btn) {
+        const menu = document.getElementById(menuId);
+        const icon = btn.querySelector('.text-slate-400'); // Chevron icon
+        
+        if (menu.classList.contains('open')) {
+            menu.classList.remove('open');
+            icon.style.transform = 'rotate(0deg)';
+        } else {
+            // Diğer açık menüleri kapatmak istersen burayı açabilirsin
+            // document.querySelectorAll('.submenu.open').forEach(el => el.classList.remove('open'));
+            // document.querySelectorAll('.rotate-chevron').forEach(el => el.style.transform = 'rotate(0deg)');
+            
+            menu.classList.add('open');
+            icon.style.transform = 'rotate(180deg)';
+        }
     }
 
     // --- MODAL FUNCTIONS ---
