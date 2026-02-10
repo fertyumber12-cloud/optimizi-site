@@ -2729,62 +2729,76 @@ async function saveCalculation() {
         }catch(e){ alert('Rapor oluşturulurken hata oluştu: '+e.message); console.error(e); }
     }
 </script>
- <script>
+<script>
     window.addEventListener('DOMContentLoaded', async () => {
-        // 1. URL'den proje ID'sini yakala
+        // 1. URL'den ID al
         const urlParams = new URLSearchParams(window.location.search);
         const loadId = urlParams.get('load_id');
-    
-        if (loadId) {
-            console.log('Proje yükleniyor ID:', loadId);
-    
-            // 2. Supabase'den veriyi çek
-            const { data, error } = await supabaseClient
-                .from('calculations')
-                .select('*')
-                .eq('id', loadId)
-                .single();
-    
-            if (error) {
-                console.error('Veri çekme hatası:', error);
-                return;
+
+        if (!loadId) return;
+
+        console.log('Proje yükleniyor ID:', loadId);
+
+        // 2. Auth-guard veya global supabase istemcisini bul
+        const activeSupabase = window.supabaseClient || window.supabase;
+
+        if (!activeSupabase) {
+            console.error('HATA: Supabase bağlantısı bulunamadı!');
+            return;
+        }
+
+        // 3. Veriyi çek
+        const { data, error } = await activeSupabase
+            .from('calculations')
+            .select('*')
+            .eq('id', loadId)
+            .single();
+
+        if (error) {
+            console.error('Veri çekme hatası:', error);
+            // alert('Proje yüklenemedi.'); // İstersen açabilirsin
+            return;
+        }
+
+        if (data) {
+            // --- A. GENEL BİLGİLERİ DOLDUR ---
+            // Proje ve Firma Bilgileri
+            if(data.project_name) document.getElementById('pName').value = data.project_name;
+            if(data.client_name) document.getElementById('cName').value = data.client_name;
+            if(data.client_contact) document.getElementById('cEng').value = data.client_contact;
+            if(data.provider_engineer) document.getElementById('pEng').value = data.provider_engineer;
+            if(data.audit_date) document.getElementById('auditDate').value = data.audit_date;
+
+            // Ortam ve Enerji Parametreleri (Veritabanı sütun adlarına göre)
+            if(data.ambient_temp) document.getElementById('tAmb').value = data.ambient_temp;
+            if(data.wind_speed !== null) document.getElementById('vWind').value = data.wind_speed;
+            if(data.boiler_efficiency) document.getElementById('eff').value = data.boiler_efficiency;
+            if(data.energy_price) document.getElementById('price').value = data.energy_price;
+            if(data.annual_hours) document.getElementById('hours').value = data.annual_hours;
+            if(data.currency) document.getElementById('curr').value = data.currency;
+
+            // Yakıt Tipi
+            if(data.fuel_type) {
+                document.getElementById('fuel').value = data.fuel_type;
+                // Eğer fonksiyon tanımlıysa tetikle
+                if(typeof toggleFuelMode === 'function') toggleFuelMode(); 
             }
-    
-            // 3. Verileri kutucuklara doldur (SQL tablondaki 'items' sütunu)
-            if (data && data.items) {
-                const inputs = typeof data.items === 'string' ? JSON.parse(data.items) : data.items;
-    
-                Object.keys(inputs).forEach(key => {
-                    const element = document.getElementById(key);
-                    if (element) {
-                        if (element.type === 'checkbox') {
-                            element.checked = inputs[key];
-                        } else {
-                            element.value = inputs[key];
-                        }
-                        // Hesaplama fonksiyonlarını tetikle
-                        element.dispatchEvent(new Event('change')); 
-                        element.dispatchEvent(new Event('input')); 
-                    }
-                });
-    
-                // 4. Proje Adını Başlığa Ekle
-                const titleEl = document.getElementById('pageTitle') || document.querySelector('h1');
-                if(titleEl && data.project_name) {
-                    if(!titleEl.innerText.includes(data.project_name)) {
-                       titleEl.innerText += ` - ${data.project_name}`;
-                    }
-                }
-    
-                // 5. Hesaplamayı Otomatik Çalıştır
-                const calcBtn = document.getElementById('calculateBtn'); 
-                if (calcBtn) {
-                    calcBtn.click();
-                }
+
+            // --- B. HESAPLAMA LİSTESİNİ GERİ YÜKLE ---
+            // data.items veritabanındaki JSON sütunudur
+            if (data.items && Array.isArray(data.items)) {
+                // Listeyi global LIST değişkenine ata
+                LIST = data.items;
+                
+                // Tabloyu yeniden çiz (roi.html içindeki ana fonksiyon)
+                if(typeof render === 'function') render();
+                
+                console.log("Proje başarıyla yüklendi:", data.project_name);
             }
         }
     });
 </script>
 </body>
 </html>
+
 
