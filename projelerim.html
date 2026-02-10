@@ -3,14 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Projelerim</title>
+  <title>Projelerim | Optimizi</title>
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
-  
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -341,7 +340,7 @@
         if(document.getElementById('themeToggle')) document.getElementById('themeToggle').checked = true;
     }
 
-    // --- MODAL FUNCTIONS (Sidebar ve Sayfa için) ---
+    // --- MODAL FUNCTIONS ---
     function openSettings() { document.getElementById('settingsModal').classList.remove('hidden'); }
     function closeSettings() { document.getElementById('settingsModal').classList.add('hidden'); }
     function openCalcModal() { document.getElementById('calcModal').classList.remove('hidden'); lucide.createIcons(); }
@@ -368,6 +367,17 @@
         }
         modal.classList.remove('hidden');
         lucide.createIcons();
+    }
+
+    // --- SECURITY UTILS (XSS Protection) ---
+    function escapeHtml(text) {
+        if (!text) return text;
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
 
     // --- AUTH & DATA INIT ---
@@ -426,7 +436,10 @@
         projects.forEach(proj => {
             const date = new Date(proj.created_at).toLocaleDateString('tr-TR');
             
-            // Calculation Type Logic
+            // XSS KORUMASI UYGULANDI
+            const safeProjectName = escapeHtml(proj.project_name || 'İsimsiz Proje');
+            const safeClientName = escapeHtml(proj.client_name || 'Müşteri belirtilmemiş');
+            
             let typeLabel = 'Diğer';
             let typeIcon = 'file';
             let toolUrl = '#';
@@ -456,8 +469,8 @@
             const row = `
                 <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition group border-b border-slate-100 dark:border-white/5 last:border-0">
                     <td class="px-6 py-4">
-                        <div class="font-bold text-slate-700 dark:text-white text-base mb-0.5">${proj.project_name || 'İsimsiz Proje'}</div>
-                        <div class="text-xs text-slate-500">${proj.client_name || 'Müşteri belirtilmemiş'}</div>
+                        <div class="font-bold text-slate-700 dark:text-white text-base mb-0.5">${safeProjectName}</div>
+                        <div class="text-xs text-slate-500">${safeClientName}</div>
                     </td>
                     <td class="px-6 py-4">
                         <div class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-bold ${colorClass}">
