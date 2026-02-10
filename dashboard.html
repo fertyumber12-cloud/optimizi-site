@@ -557,41 +557,91 @@
       document.getElementById('modalEmail').textContent = user.email;
       document.getElementById('modalAvatar').textContent = initial;
       
-      loadRecentProjects();
+      // VERİTABANI VERİLERİNİ YÜKLE
+      loadDashboardData();
     }
     
-    function loadRecentProjects() {
-        // LocalStorage'dan örnek veri çekme
-        const savedData = JSON.parse(localStorage.getItem('optimizi_saved_list') || '[]');
-        const tableBody = document.getElementById('projectsTableBody');
-        const countEl = document.getElementById('statTotalProjects');
-
-        if(savedData.length > 0) {
-            tableBody.innerHTML = ''; // Clear empty state
-            countEl.innerText = savedData.length;
-            
-            // Show last 5
-            savedData.slice().reverse().slice(0, 5).forEach(proj => {
-                const date = new Date(proj.date).toLocaleDateString('tr-TR');
-                const row = `
-                <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition group border-b border-slate-100 dark:border-white/5 last:border-0">
-                    <td class="px-6 py-4 font-bold text-slate-700 dark:text-white flex items-center gap-3">
-                        <div class="w-8 h-8 rounded bg-indigo-100 dark:bg-slate-700 flex items-center justify-center text-indigo-600 dark:text-slate-400 group-hover:text-white group-hover:bg-indigo-600 transition">
-                            <i data-lucide="file-text" class="w-4 h-4"></i>
-                        </div>
-                        ${proj.name}
-                    </td>
-                    <td class="px-6 py-4">Genel Hesaplama</td>
-                    <td class="px-6 py-4"><span class="px-2 py-1 rounded bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-400 text-xs font-bold border border-green-200 dark:border-green-500/20">Tamamlandı</span></td>
-                    <td class="px-6 py-4 text-right">
-                        <button class="text-slate-400 hover:text-indigo-600 dark:hover:text-white p-1 transition"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
-                    </td>
-                </tr>
-                `;
-                tableBody.insertAdjacentHTML('beforeend', row);
-            });
-            lucide.createIcons();
+    async function loadDashboardData() {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if(!session) return;
+        
+        // Tüm hesaplamaları çek
+        const { data: calculations, error } = await supabaseClient
+            .from('calculations')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .order('created_at', { ascending: false });
+        
+        if(error) {
+            console.error('Veri çekme hatası:', error);
+            return;
         }
+        
+        // İstatistikleri hesapla
+        const totalProjects = calculations.length;
+        const totalSavings = calculations.reduce((sum, c) => sum + parseFloat(c.total_savings || 0), 0);
+        const totalCo2 = calculations.reduce((sum, c) => sum + parseFloat(c.total_co2 || 0), 0);
+        
+        // UI'ı güncelle - Toplam Proje
+        document.getElementById('statTotalProjects').innerText = totalProjects;
+        
+        // UI'ı güncelle - Analiz Edilen Kayıp (Tasarruf)
+        document.getElementById('statTotalLoss').innerText = totalSavings.toLocaleString('tr-TR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' ₺';
+        
+        // UI'ı güncelle - CO2 Tasarrufu
+        const co2Elements = document.querySelectorAll('.text-3xl.font-black');
+        co2Elements.forEach(el => {
+            if(el.innerHTML.includes('Ton')) {
+                el.innerHTML = totalCo2.toFixed(1) + ' <span class="text-sm font-normal text-slate-500">Ton</span>';
+            }
+        });
+        
+        // Son projeleri tabloya ekle
+        const tableBody = document.getElementById('projectsTableBody');
+        
+        if(calculations.length === 0) {
+            // Boş durum mesajı (zaten HTML'de var)
+            return;
+        }
+        
+        tableBody.innerHTML = ''; // Boş mesajı temizle
+        
+        calculations.slice(0, 5).forEach(proj => {
+            const date = new Date(proj.created_at).toLocaleDateString('tr-TR');
+            const typeLabel = proj.calculation_type === 'roi' ? 'Termal ROI' : 'Genel Hesaplama';
+            const typeIcon = proj.calculation_type === 'roi' ? 'flame' : 'calculator';
+            
+            const row = `
+            <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition group border-b border-slate-100 dark:border-white/5 last:border-0">
+                <td class="px-6 py-4 font-bold text-slate-700 dark:text-white flex items-center gap-3">
+                    <div class="w-8 h-8 rounded bg-indigo-100 dark:bg-slate-700 flex items-center justify-center text-indigo-600 dark:text-slate-400 group-hover:text-white group-hover:bg-indigo-600 transition">
+                        <i data-lucide="${typeIcon}" class="w-4 h-4"></i>
+                    </div>
+                    ${proj.client_name || proj.project_name || 'İsimsiz Proje'}
+                </td>
+                <td class="px-6 py-4">${typeLabel}</td>
+                <td class="px-6 py-4">
+                    <span class="px-2 py-1 rounded bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-400 text-xs font-bold border border-green-200 dark:border-green-500/20">
+                        Tamamlandı
+                    </span>
+                </td>
+                <td class="px-6 py-4 text-right">
+                    <button onclick="viewProject('${proj.id}')" class="text-indigo-600 hover:text-indigo-500 p-1 transition" title="Görüntüle">
+                        <i data-lucide="eye" class="w-4 h-4"></i>
+                    </button>
+                </td>
+            </tr>
+            `;
+            tableBody.insertAdjacentHTML('beforeend', row);
+        });
+        
+        lucide.createIcons();
+    }
+    
+    // Proje görüntüleme (gelecekte detay sayfası)
+    function viewProject(projectId) {
+        showNotification('Bilgi', 'Proje detay sayfası yakında aktif olacak.', 'info');
+        console.log('Proje ID:', projectId);
     }
 
     async function handleLogout() {
