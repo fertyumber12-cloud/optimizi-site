@@ -718,6 +718,49 @@ async function saveProjectToDB() {
         lucide.createIcons(); renderEnergyClass(Qu,dn,tP,tA,isF);
     }
     function renderEnergyClass(q,d,p,a,f){ const c=document.getElementById('eiifChart'); c.innerHTML=''; if(f){c.innerHTML=`<div class="text-center text-xs text-slate-400 py-4 border border-dashed border-slate-200 rounded-lg">Düz yüzey: Sınıflandırma Yok</div>`;return;} const l=getEiifLimits(d,p,a); const cls=['A','B','C','D','E','F','G']; let mc='G'; if(q<=l.F)mc='F';if(q<=l.E)mc='E';if(q<=l.D)mc='D';if(q<=l.C)mc='C';if(q<=l.B)mc='B';if(q<=l.A)mc='A'; cls.forEach(k=>{const ia=(k===mc);c.innerHTML+=`<div class="eiif-row ${ia?'active':''}"><div class="eiif-label">${k}</div><div class="eiif-bar-container"><div class="eiif-bar w-${k.toLowerCase()}">${ia?'<span class="ml-auto mr-2 bg-white text-slate-900 px-1.5 py-0.5 rounded text-[9px] shadow font-bold">SİZİN</span>':''}</div></div><div class="eiif-val">&lt; ${Math.round(l[k]||(l.G*1.5))}</div></div>`;}); }
+
+// --- KAYITLI PROJEYİ GERİ YÜKLEME ---
+window.addEventListener('DOMContentLoaded', async () => {
+    // URL'de "load_id" var mı diye bakıyoruz
+    const urlParams = new URLSearchParams(window.location.search);
+    const loadId = urlParams.get('load_id');
+
+    if (loadId) {
+        console.log("Proje yükleniyor, ID:", loadId);
+        
+        // Veritabanından çek
+        const { data, error } = await supabaseClient
+            .from('calculations')
+            .select('*')
+            .eq('id', loadId)
+            .single();
+
+        if (error) {
+            console.error('Yükleme hatası:', error);
+            return;
+        }
+
+        // 1. Form alanlarını geri doldur
+        if(data.project_name) document.getElementById('inp-company').value = data.project_name;
+        if(data.client_contact) document.getElementById('inp-rep').value = data.client_contact;
+        if(data.provider_name) document.getElementById('inp-provider').value = data.provider_name;
+
+        // 2. Listeyi geri yükle
+        if (data.items && Array.isArray(data.items)) {
+            reportQueue = data.items;
+            
+            // Buton üzerindeki sayıları güncelle
+            const topBtn = document.getElementById('topReportBtn');
+            const addBtn = document.getElementById('btnAdd');
+            
+            if(topBtn) topBtn.innerHTML = `<i data-lucide="printer" class="w-3 h-3"></i> Rapor Al (${reportQueue.length})`;
+            
+            // Kullanıcıya haber ver
+            showNotification("Yüklendi", `<strong>${data.project_name}</strong> verileri başarıyla yüklendi.`, "success");
+        }
+    }
+});
+
 </script>
 </body>
 </html>
