@@ -10,6 +10,14 @@
 <link rel="icon" href="../favicon.png" type="image/png">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth-guard.js"></script>
+<style>
+  body:not(.auth-checked) { opacity: 0; visibility: hidden; }
+  body.auth-checked { opacity: 1; visibility: visible; transition: opacity 0.3s ease; }
+</style>
+<script>
+  setTimeout(function(){ if(document.body) document.body.classList.add('auth-checked'); }, 500);
+</script>
 
 <script>
   tailwind.config = {
@@ -45,14 +53,6 @@
       background-size: 24px 24px;
       color: var(--text-main); 
       overflow-x: hidden; 
-      opacity: 0; 
-      visibility: hidden;
-      transition: opacity 0.5s ease;
-  }
-  
-  body.loaded {
-      opacity: 1;
-      visibility: visible;
   }
 
   .glass-card { 
@@ -101,7 +101,7 @@
   }
 </style>
 </head>
-<body class="antialiased selection:bg-indigo-500/30 selection:text-indigo-700">
+<body class="antialiased selection:bg-indigo-500/30 selection:text-indigo-700" onload="initApp()">
 
 <div id="langModal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8 border border-slate-100 relative transform transition-all animate-pop">
@@ -209,7 +209,7 @@
 <div class="relative z-10 flex flex-col min-h-screen main-interface">
     <nav class="sticky top-0 z-50 glass-card !bg-white/95 !border-x-0 !border-t-0 !rounded-none border-b border-slate-200 backdrop-blur-xl">
       <div class="container mx-auto px-6 h-16 flex items-center justify-between max-w-[1400px]">
-          <a href="../dashboard.html" class="flex items-center gap-3 group">
+          <a href="../index.html" class="flex items-center gap-3 group">
               <div><h1 class="text-lg font-bold text-slate-800 tracking-wide">Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600">.Yalıtım Performansı</span></h1></div>
           </a>
           <div class="flex items-center gap-3">
@@ -343,7 +343,6 @@
                             <div class="col-span-2">
                                 <select id="mat1" class="glass-input text-xs" onchange="calc()">
                                     <option value="rockwool" selected>Taş Yünü (Sanayi)</option>
-                                    <option value="glasswool">Camyünü (İzocam Sanayi)</option>
                                     <option value="needlemat">İğnelenmiş Cam Elyaf (650°C)</option>
                                     <option value="ceramic">Seramik Yünü (1260°C)</option>
                                     <option value="aerogel">Aerogel (Pyrogel XT)</option>
@@ -369,7 +368,6 @@
                              <div class="grid grid-cols-3 gap-3">
                                 <div class="col-span-2">
                                     <select id="mat2" class="glass-input text-xs" onchange="calc()">
-                                        <option value="glasswool">Camyünü (İzocam Sanayi)</option>
                                         <option value="rubber">Elastomerik Kauçuk</option>
                                         <option value="aerogel">Aerogel (Pyrogel XT)</option>
                                         <option value="needlemat">İğnelenmiş Cam Elyaf</option>
@@ -466,170 +464,167 @@
 </div>
 
 <script>
-    // --- GÜVENLİK VE AYARLAR ---
     let reportQueue = [];
-    const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
-    
-    // Supabase'i Güvenli Başlat
-    let supabaseClient = null;
-    try {
-        if(window.supabase) {
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // --- NOTIFICATION SYSTEM (INTERNAL POPUPS) ---
+    function showNotification(title, message, type = 'success') {
+        const modal = document.getElementById('sysNotificationModal');
+        const iconCont = document.getElementById('notifIconContainer');
+        const titleEl = document.getElementById('notifTitle');
+        const msgEl = document.getElementById('notifMsg');
+        const btn = document.getElementById('notifBtn');
+
+        titleEl.innerText = title;
+        msgEl.innerHTML = message;
+
+        // Reset Styles
+        iconCont.className = 'w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 animate-success';
+        btn.className = 'w-full font-bold py-3 rounded-xl transition shadow-lg cursor-pointer text-white';
+
+        if(type === 'success') {
+            iconCont.classList.add('bg-green-100');
+            iconCont.innerHTML = '<i data-lucide="check" class="w-10 h-10 text-green-600"></i>';
+            btn.classList.add('bg-slate-900', 'hover:bg-slate-800');
         } else {
-            console.error("Supabase yüklenemedi. İnternet bağlantınızı kontrol edin.");
+            iconCont.classList.add('bg-red-100');
+            iconCont.innerHTML = '<i data-lucide="alert-circle" class="w-10 h-10 text-red-600"></i>';
+            btn.classList.add('bg-red-600', 'hover:bg-red-500');
         }
-    } catch(e) {
-        console.error("Supabase hatası:", e);
+
+        modal.classList.remove('hidden');
+        lucide.createIcons();
     }
 
-    // AUTH KONTROLÜ (INLINE) - Dosya yolu hatasını önler
-    async function checkAuthStatus() {
-        if(!supabaseClient) return;
-        
-        try {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                // Giriş yapılmamışsa login.html'e yönlendir
-                window.location.href = '../login.html'; 
-            } else {
-                // Giriş yapılmışsa sayfayı görünür yap
-                document.body.classList.add('loaded');
-            }
-        } catch (error) {
-            console.error("Auth kontrol hatası:", error);
-            // Hata olsa bile sayfayı göster (offline test için)
-            document.body.classList.add('loaded');
-        }
+    function toggleNotification(show) {
+        const m = document.getElementById('sysNotificationModal');
+        if(show) m.classList.remove('hidden'); else m.classList.add('hidden');
     }
 
-    // --- UYGULAMA MANTIĞI ---
-    const PIPES={15:21.3,20:26.7,25:33.4,32:42.2,40:48.3,50:60.3,65:73.0,80:88.9,100:114.3,125:141.3,150:168.3,200:219.1,250:273.0,300:323.9,350:355.6,400:406.4,500:508.0};
-    
-    [cite_start]// MALZEME KÜTÜPHANESİ (CAMYÜNÜ EKLENDİ) [cite: 1]
-    // İzocam verilerine göre camyünü için sıcaklığa bağlı iletkenlik katsayısı:
-    // k = 0.031 + 0.00012T + 3.3e-7*T^2
-    const MATS={
-        rockwool:{a:0.035,b:0.00017,c:0, limit:650},
-        glasswool:{a:0.031,b:0.00012,c:3.3e-7, limit:550, name:"Camyünü (İzocam Sanayi)"},
-        needlemat:{a:0.033,b:0.00015,c:0, limit:650, name:"İğnelenmiş Cam Elyaf"},
-        ceramic:{a:0.025,b:0.00012,c:1.2e-7, limit:1200},
-        aerogel:{a:0.019,b:0.00004,c:5e-8, limit:650},
-        rubber:{a:0.034,b:0.000075,c:0, limit:105},
-        pu:{a:0.024,b:0.000075,c:0, limit:100}
-    };
-
-    const VALVE_FACTORS={gate:1.2,globe:1.4,butterfly:0.6,ball:1.0,strainer:1.5,check:0.9};
-
-    // BAŞLATMA FONKSİYONU
-    function initApp() {
-        console.log("Uygulama başlatılıyor...");
-        fillDN('dn'); 
-        setType('pipe'); 
-        
-        // Lucide ikonlarını yükle (Hata korumalı)
-        if(window.lucide) {
-            lucide.createIcons();
-        }
-        
-        calc(); 
-        toggleProjectInfo();
-        
-        // Kimlik doğrulama kontrolü
-        checkAuthStatus();
+    // --- COLLAPSIBLE PROJECT INFO ---
+    function toggleProjectInfo() {
+        const content = document.getElementById('projectInfoContent');
+        const icon = document.getElementById('projInfoIcon');
+        if (content.classList.contains('collapsed')) { content.classList.remove('collapsed'); icon.classList.remove('collapsed'); } 
+        else { content.classList.add('collapsed'); icon.classList.add('collapsed'); }
     }
 
-    // --- DB KAYIT İŞLEMİ ---
     async function saveProjectToDB() {
-        if (!supabaseClient) {
-            showNotification('Sistem Hatası', 'Veritabanı bağlantısı yok.', 'error');
-            return;
-        }
-
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        
-        if (!session) {
-            showNotification('Hata', 'Lütfen önce giriş yapın.', 'error');
-            return;
-        }
-
-        const compName = document.getElementById('inp-company').value || 'İsimsiz Firma';
-        const repName = document.getElementById('inp-rep').value || 'İsimsiz Proje';
-        
         const payload = {
-            user_id: session.user.id,
-            client_name: compName,
-            project_name: repName,
-            calculation_type: 'isolation',
-            input_data: {
-                provider: document.getElementById('inp-provider').value,
-                report_items: reportQueue
-            },
-            result_data: {
-                total_items: reportQueue.length
-            }
+            company: document.getElementById('inp-company').value,
+            representative: document.getElementById('inp-rep').value,
+            provider: document.getElementById('inp-provider').value,
+            items: reportQueue,
+            created_at: new Date().toISOString()
         };
+        console.log("Payload ready for localhost:", payload);
+        showNotification("Başarıyla Kaydedildi", `Proje verileri sisteme aktarıldı.<br><span class="text-xs text-slate-400 font-mono bg-slate-50 px-2 py-1 rounded mt-2 inline-block">Localhost: Sync Pending...</span>`, 'success');
+    }
 
-        const { error } = await supabaseClient.from('calculations').insert([payload]);
+    // --- REPORT LOGIC ---
+    function addToQueue() {
+        const data = captureCurrentState();
+        reportQueue.push(data);
+        const btn = document.getElementById('btnAdd');
+        const oldContent = btn.innerHTML;
+        btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> EKLENDİ (${reportQueue.length})`;
+        btn.classList.replace('bg-slate-900', 'bg-green-600');
+        setTimeout(() => { btn.innerHTML = oldContent; btn.classList.replace('bg-green-600', 'bg-slate-900'); lucide.createIcons(); }, 1200);
+        
+        const topBtn = document.getElementById('topReportBtn');
+        topBtn.innerHTML = `<i data-lucide="printer" class="w-3 h-3"></i> Rapor Al (${reportQueue.length})`;
+        lucide.createIcons();
+    }
 
-        if (error) {
-            console.error('Kayıt hatası:', error);
-            showNotification('Hata', 'Kayıt başarısız: ' + error.message, 'error');
-        } else {
-            showNotification("Başarılı", `<b>${compName}</b> projesi panele kaydedildi.`, 'success');
+    function handleReportClick() {
+        if(reportQueue.length === 0) { addToQueue(); }
+        toggleLangModal(true);
+    }
+
+    function toggleLangModal(show) {
+        const m = document.getElementById('langModal');
+        if(show) m.classList.remove('hidden'); else m.classList.add('hidden');
+    }
+
+    // --- SAFE PRINT FUNCTION (ERROR PROOF) ---
+    function confirmPrint(lang) {
+        try {
+            toggleLangModal(false);
+            
+            // Safe Element Setter Helper
+            const safeSet = (id, val) => {
+                const el = document.getElementById(id);
+                if(el) el.innerText = val;
+            };
+
+            const comp = document.getElementById('inp-company').value || (lang==='en'?"Company Name":"Firma Belirtilmedi");
+            const rep = document.getElementById('inp-rep').value || (lang==='en'?"Representative":"Yetkili Belirtilmedi");
+            const provider = document.getElementById('inp-provider').value || "Optimizi Engineering";
+            const dateStr = new Date().toLocaleDateString(lang==='en'?'en-GB':'tr-TR');
+            
+            // Set Cover Data Safely
+            safeSet('cover-project', comp);
+            safeSet('cover-rep', rep);
+            safeSet('cover-provider', provider);
+            safeSet('cover-date', dateStr);
+            
+            renderPrintTable();
+            
+            setTimeout(() => {
+                lucide.createIcons();
+                window.print();
+            }, 500);
+
+        } catch (e) {
+            console.error(e);
+            showNotification("Rapor Hatası", "Rapor oluşturulurken bir sorun oluştu: " + e.message, "error");
         }
     }
 
-    // --- YARDIMCI FONKSİYONLAR ---
-    function setStd(val){ document.getElementById('calcStd').value = val; document.querySelectorAll('.std-btn').forEach(b=>b.classList.remove('active')); document.getElementById('std-'+val).classList.add('active'); const n={iso:'TS EN ISO 12241',astm:'ASTM C680',vdi:'VDI 2055'}; document.getElementById('stdBadge').innerText=n[val]; calc(); }
-    
-    function fillDN(id){ 
-        const el=document.getElementById(id); 
-        if(!el) return;
-        el.innerHTML=''; 
-        for(const[k,v]of Object.entries(PIPES)){
-            let o=document.createElement('option'); o.value=k; o.text=`DN ${k} (${v}mm)`; el.add(o);
-        } 
-        el.value='100'; 
+    function renderPrintTable() {
+        const container = document.getElementById('print-rows');
+        if(!container) return; // Safety check
+        
+        container.innerHTML = '';
+        reportQueue.forEach((item) => {
+            const html = `
+            <div class="flex items-center gap-4 p-4 border border-slate-200 rounded-xl page-break-item bg-white shadow-sm">
+                <div class="w-4/12 border-r border-slate-100 pr-4 flex flex-col justify-center">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-12 h-12 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-500 shrink-0"><i data-lucide="${item.typeIcon}" class="w-6 h-6"></i></div>
+                        <div>
+                            <div class="font-bold text-slate-800 text-sm uppercase leading-tight">${item.sysType}</div>
+                            <div class="text-[10px] text-slate-400 mt-1 font-medium">${item.tAmb}°C Ortam • ${item.vWind} m/s Rüzgar</div>
+                        </div>
+                    </div>
+                    <div class="inline-block self-start bg-slate-800 text-white text-[10px] font-bold px-3 py-1 rounded-full">${item.quantity}</div>
+                </div>
+                <div class="w-5/12 flex flex-col justify-center px-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="bg-indigo-50 text-indigo-700 px-2 py-1 rounded text-[10px] font-bold border border-indigo-100">${item.matName}</span>
+                        <span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-[10px] font-bold border border-slate-200">Toplam: ${item.thkTotal}mm</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-red-600 font-bold text-sm min-w-[40px] text-right">${item.tProc}°C</span>
+                        <div class="flex-1 h-3 rounded-full relative overflow-hidden bg-slate-100 border border-slate-200">
+                             <div class="absolute top-0 left-0 h-full w-full" style="background: linear-gradient(90deg, #ef4444 0%, #a855f7 50%, #4f46e5 100%); opacity: 0.9;"></div>
+                        </div>
+                        <span class="text-indigo-700 font-bold text-sm min-w-[40px]">${item.Ts}°C</span>
+                    </div>
+                </div>
+                <div class="w-3/12 border-l border-slate-100 pl-4 text-right">
+                    <div class="flex items-center justify-end gap-2 mb-1">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase">Enerji Sınıfı</span>
+                        <div class="w-6 h-6 flex items-center justify-center rounded text-xs font-bold text-white shadow-sm" style="background-color: var(--c-${item.eClass})">${item.eClass}</div>
+                    </div>
+                    <div class="text-2xl font-black text-slate-800 tracking-tight">${item.qUnit}</div>
+                    <div class="text-[9px] text-slate-400 font-bold">Isı Kaybı (W/m)</div>
+                </div>
+            </div>`;
+            container.innerHTML += html;
+        });
+        lucide.createIcons();
     }
 
-    function setType(t){ document.getElementById('type').value=t; document.querySelectorAll('[id^="btn-"]').forEach(b=>b.className="flex-1 py-2 text-[10px] font-bold rounded-lg transition-all text-slate-500 hover:text-slate-800 bg-white shadow-sm"); document.getElementById('btn-'+t).className="flex-1 py-2 text-[10px] font-bold rounded-lg transition-all text-white bg-indigo-600 shadow-md"; document.getElementById('box-valve').classList.add('hidden'); document.getElementById('row-dn').classList.remove('hidden'); document.getElementById('row-dims').classList.add('hidden'); const lbl=document.getElementById('lblQty'); if(t==='flat'){document.getElementById('row-dn').classList.add('hidden');document.getElementById('row-dims').classList.remove('hidden');}else if(t==='valve'){document.getElementById('box-valve').classList.remove('hidden');lbl.innerText="Adet";}else if(t==='flange'){lbl.innerText="Adet";}else{lbl.innerText="Metraj (m)";} calc(); }
-    function toggleFlatShape(){ const s=document.querySelector('input[name="flatShape"]:checked').value; if(s==='rect'){document.getElementById('box-rect').classList.remove('hidden');document.getElementById('box-circle').classList.add('hidden');}else{document.getElementById('box-rect').classList.add('hidden');document.getElementById('box-circle').classList.remove('hidden');} calc(); }
-    function toggleL2(){ const c=document.getElementById('useL2').checked; if(c){document.getElementById('layer2Box').classList.remove('hidden');document.getElementById('rowInter').classList.remove('hidden');}else{document.getElementById('layer2Box').classList.add('hidden');document.getElementById('rowInter').classList.add('hidden');} calc(); }
-    function getK(m,T){ return MATS[m].a+(MATS[m].b*T)+(MATS[m].c*T*T); }
-    function getH(v,Ts,Ta,D,F){ const std=document.getElementById('calcStd').value; const dT=Math.abs(Ts-Ta); let hr=0.8*5.67e-8*(Math.pow(Ts+273.15,4)-Math.pow(Ta+273.15,4))/(dT||1); if(dT<0.1)hr=5; let hc=0; if(std==='astm'){if(v<0.1)hc=F?1.95*Math.pow(dT,0.25):1.32*Math.pow(dT/D,0.25);else hc=10*Math.pow(v,0.6)/Math.pow(D,0.4);}else if(std==='vdi'){if(v<0.1)hc=3.5+0.05*dT;else hc=3.9*Math.pow(v,0.7)/Math.pow(D,0.3);}else{if(v<0.1)hc=F?2.2*Math.pow(dT,0.25):1.4*Math.pow(dT/D,0.25);else hc=4+4*v;} if(hc<1)hc=1; return (hr+hc)||10; }
-    function getEiifLimits(d,p,a){ const dT=Math.abs(p-a); const dn=parseFloat(d); const b=(0.25*dn+10)*(dT/50); return {A:b*0.5,B:b*0.7,C:b*1.0,D:b*1.3,E:b*1.8,F:b*2.5,G:b*3.5}; }
-    
-    function calc(){ 
-        const type=document.getElementById('type').value; const tP=parseFloat(document.getElementById('tProc').value)||0; const tA=parseFloat(document.getElementById('tAmb').value)||25; const vW=parseFloat(document.getElementById('vWind').value)||0; const qty=parseFloat(document.getElementById('qty').value)||1;
-        let dn=100,dP=0.114,isF=(type==='flat'),mul=1;
-        if(!isF){ dn=document.getElementById('dn').value; dP=PIPES[dn]/1000; if(type==='pipe')mul=qty; else if(type==='valve')mul=(dP*6*(VALVE_FACTORS[document.getElementById('valveType').value]||1.5))*qty; else if(type==='flange')mul=(dP*2.5)*qty; }
-        else{ const s=document.querySelector('input[name="flatShape"]:checked').value; if(s==='rect')mul=(parseFloat(document.getElementById('dimW').value)/100)*(parseFloat(document.getElementById('dimH').value)/100); else mul=Math.PI*Math.pow((parseFloat(document.getElementById('dimD').value)/100)/2,2); dP=1.0; }
-        const m1=document.getElementById('mat1').value; const th1=parseFloat(document.getElementById('thk1').value)/1000; const uL2=document.getElementById('useL2').checked; const m2=document.getElementById('mat2').value; const th2=parseFloat(document.getElementById('thk2').value)/1000;
-        let minTs=tA,maxTs=tP,Ts=(minTs+maxTs)/2,Ti=0,Qu=0;
-        for(let i=0;i<50;i++){
-            const Tm1=(tP+(uL2?(tP+Ts)/2:Ts))/2; const k1=getK(m1,Tm1); let R1=isF?th1/k1:Math.log((dP+2*th1)/dP)/(2*Math.PI*k1); let R2=0;
-            if(uL2){const Tm2=((tP+Ts)/2+Ts)/2; const k2=getK(m2,Tm2); R2=isF?th2/k2:Math.log((dP+2*th1+2*th2)/(dP+2*th1))/(2*Math.PI*k2);}
-            const Ri=R1+R2; const Qc=(tP-Ts)/Ri; const Ds=isF?1.0:(dP+2*(th1+th2)); const h=getH(vW,Ts,tA,Ds,isF); const Qcv=h*(isF?1.0:Math.PI*Ds)*(Ts-tA);
-            if(Qc>Qcv)minTs=Ts;else maxTs=Ts; Ts=(minTs+maxTs)/2; if(i===49){Qu=Qcv;if(uL2)Ti=tP-(Qc*R1);}
-        }
-        const Qt=Qu*mul; let al=[]; if(MATS[m1].limit&&tP>MATS[m1].limit)al.push("1. Katman limiti aşıldı!"); if(uL2&&MATS[m2].limit&&Ti>MATS[m2].limit)al.push("2. Katman limiti aşıldı!");
-        const ab=document.getElementById('alertBox'); if(al.length>0){ab.classList.remove('hidden');document.getElementById('alertMsg').innerHTML=al.join("<br>");}else{ab.classList.add('hidden');}
-        document.getElementById('resTs').innerText=Ts.toFixed(1); document.getElementById('resQTotal').innerText=Math.round(Qt).toLocaleString(); document.getElementById('resQUnitVal').innerText=Qu.toFixed(1); document.getElementById('resQUnitLabel').innerText=isF?"W/m²":"W/m"; document.getElementById('resArea').innerText=(isF?mul:(mul*Math.PI*(dP+2*(th1+th2)))).toFixed(2)+" m²";
-        if(uL2){document.getElementById('resTInter').innerText=Ti.toFixed(1)+" °C";document.getElementById('rowInter').classList.remove('hidden');}else{document.getElementById('rowInter').classList.add('hidden');}
-        const bd=document.getElementById('badgeContainer'); if(Ts>55)bd.innerHTML=`<span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-red-100 text-red-700 border border-red-200 shadow-sm"><i data-lucide="flame" class="w-3 h-3 mr-1"></i> YANIK RİSKİ</span>`;else bd.innerHTML=`<span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-green-100 text-green-700 border border-green-200 shadow-sm"><i data-lucide="shield-check" class="w-3 h-3 mr-1"></i> GÜVENLİ</span>`;
-        if(window.lucide) lucide.createIcons(); 
-        renderEnergyClass(Qu,dn,tP,tA,isF);
-    }
-
-    function renderEnergyClass(q,d,p,a,f){ const c=document.getElementById('eiifChart'); c.innerHTML=''; if(f){c.innerHTML=`<div class="text-center text-xs text-slate-400 py-4 border border-dashed border-slate-200 rounded-lg">Düz yüzey: Sınıflandırma Yok</div>`;return;} const l=getEiifLimits(d,p,a); const cls=['A','B','C','D','E','F','G']; let mc='G'; if(q<=l.F)mc='F';if(q<=l.E)mc='E';if(q<=l.D)mc='D';if(q<=l.C)mc='C';if(q<=l.B)mc='B';if(q<=l.A)mc='A'; cls.forEach(k=>{const ia=(k===mc);c.innerHTML+=`<div class="eiif-row ${ia?'active':''}"><div class="eiif-label">${k}</div><div class="eiif-bar-container"><div class="eiif-bar w-${k.toLowerCase()}">${ia?'<span class="ml-auto mr-2 bg-white text-slate-900 px-1.5 py-0.5 rounded text-[9px] shadow font-bold">SİZİN</span>':''}</div></div><div class="eiif-val">&lt; ${Math.round(l[k]||(l.G*1.5))}</div></div>`;}); }
-
-    // NOTIFICATION & UI HELPERS
-    function showNotification(title, message, type = 'success') { const m=document.getElementById('sysNotificationModal'); document.getElementById('notifTitle').innerText=title; document.getElementById('notifMsg').innerHTML=message; m.classList.remove('hidden'); }
-    function toggleNotification(show) { const m=document.getElementById('sysNotificationModal'); if(show) m.classList.remove('hidden'); else m.classList.add('hidden'); }
-    function toggleProjectInfo() { const c=document.getElementById('projectInfoContent'); if(c.classList.contains('collapsed')) c.classList.remove('collapsed'); else c.classList.add('collapsed'); }
-    function toggleLangModal(show) { const m = document.getElementById('langModal'); if(show) m.classList.remove('hidden'); else m.classList.add('hidden'); }
-    
     function captureCurrentState() {
         const type = document.getElementById('type').value;
         const mat1 = document.getElementById('mat1');
@@ -649,30 +644,40 @@
         else if(type === 'flat') { icon = 'square'; qtyDisplay = document.getElementById('resArea').innerText; const shape = document.querySelector('input[name="flatShape"]:checked').value; sysLabel = shape === 'rect' ? 'Düz Yüzey (Dikdörtgen)' : 'Düz Yüzey (Daire/Tank)'; }
         return { sysType: sysLabel, typeIcon: icon, quantity: qtyDisplay, tProc: document.getElementById('tProc').value, tAmb: document.getElementById('tAmb').value, vWind: document.getElementById('vWind').value, matName: matText, thkTotal: thkText, Ts: document.getElementById('resTs').innerText, qUnit: document.getElementById('resQUnitVal').innerText, eClass: eClass };
     }
-
-    function addToQueue() {
-        const data = captureCurrentState();
-        reportQueue.push(data);
-        const btn = document.getElementById('btnAdd');
-        const oldContent = btn.innerHTML;
-        btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> EKLENDİ (${reportQueue.length})`;
-        btn.classList.replace('bg-slate-900', 'bg-green-600');
-        setTimeout(() => { btn.innerHTML = oldContent; btn.classList.replace('bg-green-600', 'bg-slate-900'); if(window.lucide) lucide.createIcons(); }, 1200);
-        document.getElementById('topReportBtn').innerHTML = `<i data-lucide="printer" class="w-3 h-3"></i> Rapor Al (${reportQueue.length})`;
-        if(window.lucide) lucide.createIcons();
-    }
-
-    function handleReportClick() { if(reportQueue.length === 0) addToQueue(); toggleLangModal(true); }
-    function confirmPrint(lang) { toggleLangModal(false); renderPrintTable(); setTimeout(() => { window.print(); }, 500); }
-    function renderPrintTable() { /* Print Logic Here (Simplified for brevity) */ }
-
-    // SAYFA YÜKLENDİĞİNDE BAŞLAT (GARANTİ YÖNTEM)
-    document.addEventListener('DOMContentLoaded', initApp);
     
-    // Fallback: Eğer DOMContentLoaded kaçırıldıysa hemen çalıştır
-    if (document.readyState === "complete" || document.readyState === "interactive") {
-        setTimeout(initApp, 1);
+    const PIPES={15:21.3,20:26.7,25:33.4,32:42.2,40:48.3,50:60.3,65:73.0,80:88.9,100:114.3,125:141.3,150:168.3,200:219.1,250:273.0,300:323.9,350:355.6,400:406.4,500:508.0};
+    const MATS={rockwool:{a:0.035,b:0.00017,c:0, limit:650},needlemat:{a:0.033,b:0.00015,c:0, limit:650, name:"İğnelenmiş Cam Elyaf"},ceramic:{a:0.025,b:0.00012,c:1.2e-7, limit:1200},aerogel:{a:0.019,b:0.00004,c:5e-8, limit:650},rubber:{a:0.034,b:0.000075,c:0, limit:105},pu:{a:0.024,b:0.000075,c:0, limit:100}};
+    const VALVE_FACTORS={gate:1.2,globe:1.4,butterfly:0.6,ball:1.0,strainer:1.5,check:0.9};
+    function initApp(){ fillDN('dn'); setType('pipe'); lucide.createIcons(); calc(); toggleProjectInfo(); }
+    function setStd(val){ document.getElementById('calcStd').value = val; document.querySelectorAll('.std-btn').forEach(b=>b.classList.remove('active')); document.getElementById('std-'+val).classList.add('active'); const n={iso:'TS EN ISO 12241',astm:'ASTM C680',vdi:'VDI 2055'}; document.getElementById('stdBadge').innerText=n[val]; calc(); }
+    function fillDN(id){ const el=document.getElementById(id); el.innerHTML=''; for(const[k,v]of Object.entries(PIPES)){let o=document.createElement('option'); o.value=k; o.text=`DN ${k} (${v}mm)`; el.add(o);} el.value='100'; }
+    function setType(t){ document.getElementById('type').value=t; document.querySelectorAll('[id^="btn-"]').forEach(b=>b.className="flex-1 py-2 text-[10px] font-bold rounded-lg transition-all text-slate-500 hover:text-slate-800 bg-white shadow-sm"); document.getElementById('btn-'+t).className="flex-1 py-2 text-[10px] font-bold rounded-lg transition-all text-white bg-indigo-600 shadow-md"; document.getElementById('box-valve').classList.add('hidden'); document.getElementById('row-dn').classList.remove('hidden'); document.getElementById('row-dims').classList.add('hidden'); const lbl=document.getElementById('lblQty'); if(t==='flat'){document.getElementById('row-dn').classList.add('hidden');document.getElementById('row-dims').classList.remove('hidden');}else if(t==='valve'){document.getElementById('box-valve').classList.remove('hidden');lbl.innerText="Adet";}else if(t==='flange'){lbl.innerText="Adet";}else{lbl.innerText="Metraj (m)";} calc(); }
+    function toggleFlatShape(){ const s=document.querySelector('input[name="flatShape"]:checked').value; if(s==='rect'){document.getElementById('box-rect').classList.remove('hidden');document.getElementById('box-circle').classList.add('hidden');}else{document.getElementById('box-rect').classList.add('hidden');document.getElementById('box-circle').classList.remove('hidden');} calc(); }
+    function toggleL2(){ const c=document.getElementById('useL2').checked; if(c){document.getElementById('layer2Box').classList.remove('hidden');document.getElementById('rowInter').classList.remove('hidden');}else{document.getElementById('layer2Box').classList.add('hidden');document.getElementById('rowInter').classList.add('hidden');} calc(); }
+    function getK(m,T){ return MATS[m].a+(MATS[m].b*T)+(MATS[m].c*T*T); }
+    function getH(v,Ts,Ta,D,F){ const std=document.getElementById('calcStd').value; const dT=Math.abs(Ts-Ta); let hr=0.8*5.67e-8*(Math.pow(Ts+273.15,4)-Math.pow(Ta+273.15,4))/(dT||1); if(dT<0.1)hr=5; let hc=0; if(std==='astm'){if(v<0.1)hc=F?1.95*Math.pow(dT,0.25):1.32*Math.pow(dT/D,0.25);else hc=10*Math.pow(v,0.6)/Math.pow(D,0.4);}else if(std==='vdi'){if(v<0.1)hc=3.5+0.05*dT;else hc=3.9*Math.pow(v,0.7)/Math.pow(D,0.3);}else{if(v<0.1)hc=F?2.2*Math.pow(dT,0.25):1.4*Math.pow(dT/D,0.25);else hc=4+4*v;} if(hc<1)hc=1; return (hr+hc)||10; }
+    function getEiifLimits(d,p,a){ const dT=Math.abs(p-a); const dn=parseFloat(d); const b=(0.25*dn+10)*(dT/50); return {A:b*0.5,B:b*0.7,C:b*1.0,D:b*1.3,E:b*1.8,F:b*2.5,G:b*3.5}; }
+    function calc(){ 
+        const type=document.getElementById('type').value; const tP=parseFloat(document.getElementById('tProc').value)||0; const tA=parseFloat(document.getElementById('tAmb').value)||25; const vW=parseFloat(document.getElementById('vWind').value)||0; const qty=parseFloat(document.getElementById('qty').value)||1;
+        let dn=100,dP=0.114,isF=(type==='flat'),mul=1;
+        if(!isF){ dn=document.getElementById('dn').value; dP=PIPES[dn]/1000; if(type==='pipe')mul=qty; else if(type==='valve')mul=(dP*6*(VALVE_FACTORS[document.getElementById('valveType').value]||1.5))*qty; else if(type==='flange')mul=(dP*2.5)*qty; }
+        else{ const s=document.querySelector('input[name="flatShape"]:checked').value; if(s==='rect')mul=(parseFloat(document.getElementById('dimW').value)/100)*(parseFloat(document.getElementById('dimH').value)/100); else mul=Math.PI*Math.pow((parseFloat(document.getElementById('dimD').value)/100)/2,2); dP=1.0; }
+        const m1=document.getElementById('mat1').value; const th1=parseFloat(document.getElementById('thk1').value)/1000; const uL2=document.getElementById('useL2').checked; const m2=document.getElementById('mat2').value; const th2=parseFloat(document.getElementById('thk2').value)/1000;
+        let minTs=tA,maxTs=tP,Ts=(minTs+maxTs)/2,Ti=0,Qu=0;
+        for(let i=0;i<50;i++){
+            const Tm1=(tP+(uL2?(tP+Ts)/2:Ts))/2; const k1=getK(m1,Tm1); let R1=isF?th1/k1:Math.log((dP+2*th1)/dP)/(2*Math.PI*k1); let R2=0;
+            if(uL2){const Tm2=((tP+Ts)/2+Ts)/2; const k2=getK(m2,Tm2); R2=isF?th2/k2:Math.log((dP+2*th1+2*th2)/(dP+2*th1))/(2*Math.PI*k2);}
+            const Ri=R1+R2; const Qc=(tP-Ts)/Ri; const Ds=isF?1.0:(dP+2*(th1+th2)); const h=getH(vW,Ts,tA,Ds,isF); const Qcv=h*(isF?1.0:Math.PI*Ds)*(Ts-tA);
+            if(Qc>Qcv)minTs=Ts;else maxTs=Ts; Ts=(minTs+maxTs)/2; if(i===49){Qu=Qcv;if(uL2)Ti=tP-(Qc*R1);}
+        }
+        const Qt=Qu*mul; let al=[]; if(MATS[m1].limit&&tP>MATS[m1].limit)al.push("1. Katman limiti aşıldı!"); if(uL2&&MATS[m2].limit&&Ti>MATS[m2].limit)al.push("2. Katman limiti aşıldı!");
+        const ab=document.getElementById('alertBox'); if(al.length>0){ab.classList.remove('hidden');document.getElementById('alertMsg').innerHTML=al.join("<br>");}else{ab.classList.add('hidden');}
+        document.getElementById('resTs').innerText=Ts.toFixed(1); document.getElementById('resQTotal').innerText=Math.round(Qt).toLocaleString(); document.getElementById('resQUnitVal').innerText=Qu.toFixed(1); document.getElementById('resQUnitLabel').innerText=isF?"W/m²":"W/m"; document.getElementById('resArea').innerText=(isF?mul:(mul*Math.PI*(dP+2*(th1+th2)))).toFixed(2)+" m²";
+        if(uL2){document.getElementById('resTInter').innerText=Ti.toFixed(1)+" °C";document.getElementById('rowInter').classList.remove('hidden');}else{document.getElementById('rowInter').classList.add('hidden');}
+        const bd=document.getElementById('badgeContainer'); if(Ts>55)bd.innerHTML=`<span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-red-100 text-red-700 border border-red-200 shadow-sm"><i data-lucide="flame" class="w-3 h-3 mr-1"></i> YANIK RİSKİ</span>`;else bd.innerHTML=`<span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-green-100 text-green-700 border border-green-200 shadow-sm"><i data-lucide="shield-check" class="w-3 h-3 mr-1"></i> GÜVENLİ</span>`;
+        lucide.createIcons(); renderEnergyClass(Qu,dn,tP,tA,isF);
     }
+    function renderEnergyClass(q,d,p,a,f){ const c=document.getElementById('eiifChart'); c.innerHTML=''; if(f){c.innerHTML=`<div class="text-center text-xs text-slate-400 py-4 border border-dashed border-slate-200 rounded-lg">Düz yüzey: Sınıflandırma Yok</div>`;return;} const l=getEiifLimits(d,p,a); const cls=['A','B','C','D','E','F','G']; let mc='G'; if(q<=l.F)mc='F';if(q<=l.E)mc='E';if(q<=l.D)mc='D';if(q<=l.C)mc='C';if(q<=l.B)mc='B';if(q<=l.A)mc='A'; cls.forEach(k=>{const ia=(k===mc);c.innerHTML+=`<div class="eiif-row ${ia?'active':''}"><div class="eiif-label">${k}</div><div class="eiif-bar-container"><div class="eiif-bar w-${k.toLowerCase()}">${ia?'<span class="ml-auto mr-2 bg-white text-slate-900 px-1.5 py-0.5 rounded text-[9px] shadow font-bold">SİZİN</span>':''}</div></div><div class="eiif-val">&lt; ${Math.round(l[k]||(l.G*1.5))}</div></div>`;}); }
 </script>
 </body>
 </html>
