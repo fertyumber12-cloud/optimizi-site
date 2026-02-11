@@ -2,364 +2,258 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Canlı Kayıp Analizi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Anlık Enerji Kaybınız</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
             theme: {
-                fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], mono: ['"Roboto Mono"', 'monospace'] },
+                fontFamily: { sans: ['"Inter"', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] },
                 extend: {
-                    colors: { danger: { 400: '#f87171', 500: '#ef4444', 600: '#dc2626', 900: '#7f1d1d' } },
-                    animation: { 'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite' }
+                    colors: { 
+                        slate: { 850: '#1e293b', 900: '#0f172a' },
+                        danger: { 500: '#ef4444', 900: '#7f1d1d' }
+                    },
+                    animation: { 'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite' }
                 }
             }
         }
     </script>
     <style>
-        /* Modern Mobil Resetleri */
-        body { background-color: #020617; color: white; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #0f172a; color: white; -webkit-tap-highlight-color: transparent; }
         
-        /* Cam Efektleri (Glassmorphism) */
-        .glass-panel { 
-            background: rgba(30, 41, 59, 0.4); 
-            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        /* Cam Efekti */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
         }
+
+        /* Sayaç Parlaması */
+        .counter-glow { text-shadow: 0 0 40px rgba(239, 68, 68, 0.4); }
         
-        /* Sayaç Efektleri */
-        .counter-glow { text-shadow: 0 0 30px rgba(239, 68, 68, 0.4); }
-        .counter-paused { text-shadow: none; opacity: 0.6; filter: grayscale(1); }
-        
-        /* Arka Plan Hareketli Gradient */
+        /* Arka Plan Işığı */
         .ambient-light {
-            position: absolute; width: 600px; height: 600px;
-            background: radial-gradient(circle, rgba(220,38,38,0.15) 0%, rgba(0,0,0,0) 70%);
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            animation: breathe 6s ease-in-out infinite; z-index: 0; pointer-events: none;
+            position: absolute; width: 100%; height: 100%; top: 0; left: 0;
+            background: radial-gradient(circle at 50% 30%, rgba(239,68,68,0.15), transparent 70%);
+            pointer-events: none; z-index: 0;
         }
-        @keyframes breathe { 0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } }
-        
-        /* Yükleme Ekranı */
-        #loader { transition: opacity 0.5s ease; }
     </style>
 </head>
 <body class="h-[100dvh] flex flex-col relative overflow-hidden">
 
-    <div class="ambient-light" id="bgLight"></div>
+    <div class="ambient-light animate-pulse-slow"></div>
 
-    <div class="z-20 pt-6 pb-2 px-6 flex justify-between items-center bg-gradient-to-b from-[#020617] to-transparent">
+    <div class="z-10 px-6 pt-8 pb-4 flex justify-between items-start">
         <div>
-            <h1 class="text-xl font-black tracking-tight flex items-center gap-1">
-                <i data-lucide="zap" class="w-5 h-5 text-danger-500 fill-danger-500"></i> Optimizi
+            <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                <i data-lucide="zap" class="w-5 h-5 text-red-500 fill-red-500"></i> Optimizi
             </h1>
+            <p id="clientName" class="text-xs text-slate-400 font-medium mt-1">Yükleniyor...</p>
         </div>
-        <div id="statusBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/50 backdrop-blur-md transition-all duration-500">
+        
+        <div id="statusBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 backdrop-blur-md">
             <span class="relative flex h-2 w-2">
-              <span id="statusPing" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-400 opacity-75"></span>
-              <span id="statusDot" class="relative inline-flex rounded-full h-2 w-2 bg-slate-500"></span>
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
             </span>
-            <span id="statusText" class="text-[10px] font-bold tracking-wider text-slate-400">BAĞLANIYOR</span>
+            <span class="text-[10px] font-bold tracking-wider text-slate-300">CANLI AKIŞ</span>
         </div>
     </div>
 
-    <div class="flex-1 z-10 flex flex-col items-center justify-center text-center px-4">
+    <div class="z-10 flex-1 flex flex-col items-center justify-center text-center px-4 -mt-10">
         
-        <div class="mb-2 opacity-0 animate-[fadeIn_1s_ease-out_0.5s_forwards]">
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">OPERASYONEL KAYIP</p>
+        <div class="mb-4">
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">TOPLAM OPERASYONEL KAYIP</p>
         </div>
 
-        <div class="relative mb-8">
-            <div id="counter" class="text-[13vw] leading-none font-mono font-bold text-white tracking-tighter tabular-nums counter-glow transition-all duration-300">
+        <div class="relative">
+            <div id="counter" class="text-[14vw] leading-none font-mono font-bold text-white tracking-tight tabular-nums counter-glow transition-all">
                 0.0000
             </div>
-            <div class="absolute -right-4 top-0 translate-x-full pt-2">
-                <span class="text-lg font-bold text-danger-500">TL</span>
-            </div>
+            <div class="absolute -right-6 top-0 text-xl font-bold text-red-500 translate-x-full">TL</div>
         </div>
 
-        <div class="space-y-1 mb-8 opacity-0 animate-[fadeIn_1s_ease-out_1s_forwards]">
-            <h2 id="clientName" class="text-lg font-bold text-white">...</h2>
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-white/5 border border-white/5">
-                <i data-lucide="gauge" class="w-3 h-3 text-slate-400"></i>
-                <span class="text-xs text-slate-300"><span id="speedDisplay" class="font-bold text-white">0.00</span> TL / Dakika Kayıp</span>
+        <div class="mt-8 inline-flex items-center gap-3 px-4 py-2 rounded-xl bg-white/5 border border-white/5 backdrop-blur-sm">
+            <div class="p-1.5 bg-red-500/10 rounded-lg">
+                <i data-lucide="gauge" class="w-4 h-4 text-red-500"></i>
+            </div>
+            <div class="text-left">
+                <p class="text-[10px] text-slate-400 uppercase font-bold">Anlık Kayıp Hızı</p>
+                <p class="text-sm font-bold text-white"><span id="perMinuteDisplay">...</span> TL / Dakika</p>
             </div>
         </div>
 
     </div>
 
-    <div class="z-20 p-4 pb-8 bg-gradient-to-t from-[#020617] via-[#020617] to-transparent">
-        <div class="glass-panel rounded-2xl p-4 grid grid-cols-2 gap-4">
-            
-            <div class="space-y-1">
-                <p class="text-[9px] text-slate-500 uppercase font-bold flex items-center gap-1.5">
-                    <i data-lucide="calendar-clock" class="w-3 h-3"></i> Başlangıç
-                </p>
-                <p id="startDate" class="text-xs font-bold text-slate-200">...</p>
-            </div>
-
-            <div class="space-y-1 text-right">
-                <p class="text-[9px] text-slate-500 uppercase font-bold flex items-center justify-end gap-1.5">
-                    <i data-lucide="hourglass" class="w-3 h-3"></i> Geçen İş Süresi
-                </p>
-                <p id="elapsedTime" class="text-xs font-mono font-bold text-danger-400">Hesaplanıyor...</p>
-            </div>
-
-            <div class="col-span-2 h-px bg-white/5 my-1"></div>
-
-            <div class="grid grid-cols-3 gap-2 col-span-2">
-                <div class="text-center p-2 rounded-lg bg-white/5">
-                    <p class="text-[9px] text-slate-500 uppercase font-bold">Yıllık Kayıp</p>
-                    <p id="infoTotal" class="text-[11px] font-bold text-white mt-0.5">...</p>
-                </div>
-                <div class="text-center p-2 rounded-lg bg-white/5">
-                    <p class="text-[9px] text-slate-500 uppercase font-bold">Çalışma Saati</p>
-                    <p id="infoHours" class="text-[11px] font-bold text-white mt-0.5">...</p>
-                </div>
-                <div class="text-center p-2 rounded-lg bg-white/5">
-                    <p class="text-[9px] text-slate-500 uppercase font-bold">Yakıt</p>
-                    <p id="infoFuel" class="text-[11px] font-bold text-white mt-0.5">...</p>
-                </div>
-            </div>
-        </div>
+    <div class="z-10 p-4 pb-8">
         
-        <div class="mt-4 text-center opacity-30">
-            <p class="text-[9px] font-medium text-slate-500">Powered by Optimizi Simulation Engine v2.0</p>
+        <div class="glass-card rounded-2xl p-5 mb-4">
+            <div class="grid grid-cols-2 gap-y-4 gap-x-8">
+                
+                <div>
+                    <p class="text-[9px] text-slate-500 uppercase font-bold mb-1 flex items-center gap-1.5">
+                        <i data-lucide="fuel" class="w-3 h-3"></i> Yakıt Tipi
+                    </p>
+                    <p id="fuelDisplay" class="text-xs font-bold text-slate-200">...</p>
+                </div>
+
+                <div class="text-right">
+                    <p class="text-[9px] text-slate-500 uppercase font-bold mb-1 flex items-center justify-end gap-1.5">
+                        <i data-lucide="calendar-clock" class="w-3 h-3"></i> Yıllık Çalışma
+                    </p>
+                    <p id="hoursDisplay" class="text-xs font-bold text-slate-200">...</p>
+                </div>
+
+                <div class="col-span-2 h-px bg-white/5"></div>
+
+                <div class="col-span-2">
+                    <div class="flex items-start gap-2 text-[10px] text-slate-400 leading-relaxed bg-slate-900/50 p-3 rounded-lg border border-white/5">
+                        <i data-lucide="info" class="w-3 h-3 text-blue-400 mt-0.5 flex-shrink-0"></i>
+                        <span>
+                            <strong class="text-slate-300">Sistem Bilgisi:</strong> 
+                            Bu sayaç, tesisinizin 7/24 çalışma düzenine göre kurgulanmıştır. 
+                            Toplam yıllık çalışma saati (<span id="limitHour" class="text-white">...</span>) 
+                            tamamlandığında sayaç otomatik olarak duracaktır.
+                        </span>
+                    </div>
+                </div>
+
+            </div>
         </div>
+
+        <div class="px-2">
+            <div class="flex justify-between text-[9px] text-slate-500 font-bold mb-1">
+                <span>YILLIK KOTA DOLULUĞU</span>
+                <span id="progressText">0%</span>
+            </div>
+            <div class="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                <div id="progressBar" class="h-full bg-red-600 rounded-full w-0 transition-all duration-1000"></div>
+            </div>
+        </div>
+
     </div>
 
-    <div id="loader" class="fixed inset-0 z-50 bg-[#020617] flex items-center justify-center">
-        <div class="flex flex-col items-center gap-4">
-            <div class="w-12 h-12 border-4 border-danger-500/30 border-t-danger-500 rounded-full animate-spin"></div>
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Veriler Yükleniyor</p>
-        </div>
+    <div id="loader" class="fixed inset-0 z-50 bg-[#0f172a] flex items-center justify-center transition-opacity duration-500">
+        <div class="w-10 h-10 border-4 border-red-500/20 border-t-red-500 rounded-full animate-spin"></div>
     </div>
 
     <script>
         lucide.createIcons();
 
-        // --- SUPABASE AYARLARI ---
+        // SUPABASE BAĞLANTISI
         const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // --- DEĞİŞKENLER ---
-        let simulationData = null;
+        // Değişkenler
         let burnPerSecond = 0;
-        let cumulativeWorkSeconds = 0; // DB'den gelen + şu anki
-        let lastTickTime = Date.now();
-        let isSimRunning = false;
+        let totalLimitSeconds = 0;
+        let startTimestamp = 0;
+        let isCompleted = false;
 
-        // --- BAŞLATMA ---
         async function init() {
             const params = new URLSearchParams(window.location.search);
             const id = params.get('id');
 
-            if (!id) { alert("Geçersiz Simülasyon ID'si"); return; }
+            if (!id) return showError();
 
-            // Veriyi Çek
-            const { data, error } = await supabase
-                .from('simulations')
-                .select('*')
-                .eq('id', id)
-                .single();
+            // Verileri Çek
+            const { data, error } = await supabase.from('simulations').select('*').eq('id', id).single();
+            if (error || !data) return showError();
 
-            if (error || !data) {
-                document.getElementById('loader').innerHTML = '<p class="text-red-500">Veri Bulunamadı</p>';
-                return;
-            }
-
-            simulationData = data;
+            // Arayüzü Doldur
             setupUI(data);
+
+            // Hesaplama Parametreleri
+            const annualHours = data.work_hours;
+            const totalAnnualLoss = data.total_annual_loss;
             
-            // Kritik: Geçmiş Çalışma Süresini Hesapla
-            cumulativeWorkSeconds = calculatePastWorkSeconds(data);
+            // 1. Toplam Çalışma Saniyesi (Kota)
+            totalLimitSeconds = annualHours * 3600;
             
+            // 2. Saniyelik Kayıp Hızı
+            burnPerSecond = totalAnnualLoss / totalLimitSeconds;
+
+            // 3. Başlangıç Zamanı
+            startTimestamp = new Date(data.start_date).getTime();
+
             // Yükleme ekranını kaldır
             document.getElementById('loader').style.opacity = '0';
             setTimeout(() => document.getElementById('loader').remove(), 500);
 
-            // Döngüyü Başlat
-            requestAnimationFrame(loop);
-        }
-
-        // --- GEÇMİŞ ZAMAN HESAPLAYICI ---
-        // Başlangıç tarihinden ŞİMDİYE kadar kaç saniye mesai yapıldı?
-        function calculatePastWorkSeconds(data) {
-            const start = new Date(data.start_date);
-            const now = new Date();
-            const shifts = data.shift_config; // [{dayIndex: 1, start: "08:00", end: "18:00"}, ...]
-
-            if (now < start) return 0;
-
-            // Basitleştirilmiş Hesaplama (Tam doğruluk için backend gerekir ama JS ile yaklaşacağız)
-            // Bu fonksiyon milisaniye bazında döngü kuramaz, çok yorar.
-            // Yaklaşık değer için: Gün gün iterasyon yapıyoruz.
-            
-            let totalSeconds = 0;
-            let currentCursor = new Date(start);
-
-            // Günleri tek tek gez (Performans için max 365 gün sınırı koyulabilir)
-            while (currentCursor < now) {
-                // Bugün vardiya var mı?
-                const dayIndex = currentCursor.getDay() === 0 ? 7 : currentCursor.getDay(); // 1-7
-                const shift = shifts.find(s => s.dayIndex === dayIndex);
-
-                if (shift) {
-                    // Vardiya saatlerini bugüne uyarla
-                    const [sH, sM] = shift.start.split(':').map(Number);
-                    const [eH, eM] = shift.end.split(':').map(Number);
-                    
-                    const shiftStart = new Date(currentCursor);
-                    shiftStart.setHours(sH, sM, 0, 0);
-                    
-                    const shiftEnd = new Date(currentCursor);
-                    shiftEnd.setHours(eH, eM, 0, 0);
-
-                    // Başlangıç günündeysek
-                    if (currentCursor.toDateString() === start.toDateString()) {
-                         if (start > shiftEnd) { /* Vardiya bitmiş, sayma */ }
-                         else if (start > shiftStart) { shiftStart.setTime(start.getTime()); }
-                    }
-
-                    // Bitiş (bugün) günündeysek
-                    if (currentCursor.toDateString() === now.toDateString()) {
-                        if (now < shiftStart) { /* Vardiya başlamadı */ }
-                        else if (now < shiftEnd) { shiftEnd.setTime(now.getTime()); }
-                    }
-
-                    // Eğer geçerli bir aralık varsa topla
-                    if (shiftStart < shiftEnd) {
-                        // O günün sınırları içinde kalmalı
-                        // (Bu algoritma basit tutuldu, gece yarısını geçen vardiyalarda revize gerekir)
-                        const diff = (shiftEnd - shiftStart) / 1000;
-                        totalSeconds += diff > 0 ? diff : 0;
-                    }
-                }
-                
-                // Bir sonraki güne geç
-                currentCursor.setDate(currentCursor.getDate() + 1);
-                currentCursor.setHours(0,0,0,0);
-            }
-
-            return totalSeconds;
+            // Sayacı Başlat
+            requestAnimationFrame(updateCounter);
         }
 
         function setupUI(data) {
-            // Statik Bilgiler
             document.getElementById('clientName').innerText = data.client_name;
-            document.getElementById('infoTotal').innerText = formatCurrency(data.total_annual_loss);
-            document.getElementById('infoHours').innerText = data.work_hours + ' Saat';
             
-            const fuelMap = { 'gas': 'Doğalgaz', 'elec': 'Elektrik', 'lng': 'LNG', 'manual': 'Özel' };
-            document.getElementById('infoFuel').innerText = fuelMap[data.fuel_type] || data.fuel_type;
-
-            // Tarih Formatı
-            const d = new Date(data.start_date);
-            document.getElementById('startDate').innerText = d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
-
-            // Hız Hesabı
-            const secondsInWorkYear = data.work_hours * 3600;
-            burnPerSecond = data.total_annual_loss / secondsInWorkYear;
+            const fuelMap = { 'gas': 'Doğalgaz', 'elec': 'Elektrik', 'lng': 'LNG', 'manual': 'Özel', 'fueloil': 'Fuel Oil', 'coal_imp': 'İthal Kömür', 'coal_loc': 'Yerli Kömür' };
+            document.getElementById('fuelDisplay').innerText = fuelMap[data.fuel_type] || 'Bilinmiyor';
             
-            document.getElementById('speedDisplay').innerText = (burnPerSecond * 60).toFixed(2);
+            document.getElementById('hoursDisplay').innerText = data.work_hours.toLocaleString('tr-TR') + ' Saat';
+            document.getElementById('limitHour').innerText = data.work_hours + ' saat';
+
+            // Dakikalık Kayıp Hesabı (Sadece gösterge için)
+            const minLoss = (data.total_annual_loss / (data.work_hours * 60));
+            document.getElementById('perMinuteDisplay').innerText = minLoss.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
-        // --- ANA DÖNGÜ ---
-        function loop() {
-            const now = new Date();
-            const currentTime = Date.now();
-            
-            // Şu an mesai saati mi?
-            const isWorking = checkIsWorkingNow(now, simulationData.shift_config);
+        function updateCounter() {
+            const now = Date.now();
+            let elapsedSeconds = (now - startTimestamp) / 1000;
 
-            if (isWorking) {
-                // Son tick'ten bu yana geçen süreyi ekle (Smooth animation için)
-                const delta = (currentTime - lastTickTime) / 1000;
-                cumulativeWorkSeconds += delta;
-                updateStatus(true);
-            } else {
-                updateStatus(false);
+            // Kota Kontrolü (Limitsiz akmasın, yıllık saate gelince dursun)
+            if (elapsedSeconds >= totalLimitSeconds) {
+                elapsedSeconds = totalLimitSeconds;
+                isCompleted = true;
+                showCompletedState();
             }
 
-            lastTickTime = currentTime;
+            // Negatif kontrolü (Gelecek tarihli ise 0 göster)
+            if (elapsedSeconds < 0) elapsedSeconds = 0;
 
-            // Ekrana Yaz
-            const totalLoss = cumulativeWorkSeconds * burnPerSecond;
-            document.getElementById('counter').innerText = totalLoss.toLocaleString('tr-TR', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
-            
-            // Süreyi Yaz
-            const h = Math.floor(cumulativeWorkSeconds / 3600);
-            const m = Math.floor((cumulativeWorkSeconds % 3600) / 60);
-            const s = Math.floor(cumulativeWorkSeconds % 60);
-            document.getElementById('elapsedTime').innerText = `${h}sa ${m}dk ${s}sn`;
+            // Değeri Hesapla
+            const currentLoss = elapsedSeconds * burnPerSecond;
 
-            requestAnimationFrame(loop);
+            // Ekrana Bas
+            document.getElementById('counter').innerText = currentLoss.toLocaleString('tr-TR', {
+                minimumFractionDigits: 4,
+                maximumFractionDigits: 4
+            });
+
+            // Progress Bar Güncelle
+            const percent = Math.min((elapsedSeconds / totalLimitSeconds) * 100, 100);
+            document.getElementById('progressBar').style.width = percent + '%';
+            document.getElementById('progressText').innerText = percent.toFixed(1) + '%';
+
+            if (!isCompleted) {
+                requestAnimationFrame(updateCounter);
+            }
         }
 
-        function checkIsWorkingNow(date, shifts) {
-            const dayIndex = date.getDay() === 0 ? 7 : date.getDay();
-            const shift = shifts.find(s => s.dayIndex === dayIndex);
-            
-            if (!shift) return false;
-
-            const [sH, sM] = shift.start.split(':').map(Number);
-            const [eH, eM] = shift.end.split(':').map(Number);
-            
-            const nowMin = date.getHours() * 60 + date.getMinutes();
-            const startMin = sH * 60 + sM;
-            const endMin = eH * 60 + eM;
-
-            return nowMin >= startMin && nowMin < endMin;
-        }
-
-        function updateStatus(active) {
+        function showCompletedState() {
             const badge = document.getElementById('statusBadge');
-            const ping = document.getElementById('statusPing');
-            const dot = document.getElementById('statusDot');
-            const text = document.getElementById('statusText');
-            const counter = document.getElementById('counter');
-            const bgLight = document.getElementById('bgLight');
-
-            if (active) {
-                if(isSimRunning) return; // Zaten aktifse tekrar yapma
-                isSimRunning = true;
-                
-                badge.className = "flex items-center gap-2 px-3 py-1.5 rounded-full bg-danger-900/30 border border-danger-500/30 backdrop-blur-md transition-all duration-500";
-                ping.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-danger-500 opacity-75";
-                dot.className = "relative inline-flex rounded-full h-2 w-2 bg-danger-500";
-                text.className = "text-[10px] font-bold tracking-wider text-danger-400";
-                text.innerText = "CANLI KAYIP";
-                counter.className = "text-[13vw] leading-none font-mono font-bold text-white tracking-tighter tabular-nums counter-glow transition-all duration-300";
-                bgLight.style.opacity = "1";
-            } else {
-                if(!isSimRunning) return;
-                isSimRunning = false;
-
-                badge.className = "flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/50 border border-slate-700/30 backdrop-blur-md transition-all duration-500";
-                ping.className = "hidden";
-                dot.className = "relative inline-flex rounded-full h-2 w-2 bg-orange-500";
-                text.className = "text-[10px] font-bold tracking-wider text-slate-400";
-                text.innerText = "MESAİ DIŞI - DURDU";
-                counter.className = "text-[13vw] leading-none font-mono font-bold text-white tracking-tighter tabular-nums counter-paused transition-all duration-300";
-                bgLight.style.opacity = "0.2";
-            }
+            badge.className = "flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-700 border border-slate-600";
+            badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-gray-400"></span><span class="text-[10px] font-bold text-gray-300">TAMAMLANDI</span>';
+            
+            document.getElementById('counter').classList.remove('counter-glow');
+            document.getElementById('counter').classList.add('text-slate-400');
         }
 
-        function formatCurrency(val) {
-            return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TL', maximumFractionDigits: 0 }).format(val);
+        function showError() {
+            document.body.innerHTML = '<div class="flex h-screen items-center justify-center text-white">Veri bulunamadı.</div>';
         }
 
-        // Başlat
         init();
-
     </script>
 </body>
 </html>
