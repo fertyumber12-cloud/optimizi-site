@@ -343,6 +343,7 @@
                             <div class="col-span-2">
                                 <select id="mat1" class="glass-input text-xs" onchange="calc()">
                                     <option value="rockwool" selected>Taş Yünü (Sanayi)</option>
+                                    <option value="camyunu">Cam Yünü (İzocam)</option>
                                     <option value="needlemat">İğnelenmiş Cam Elyaf (650°C)</option>
                                     <option value="ceramic">Seramik Yünü (1260°C)</option>
                                     <option value="aerogel">Aerogel (Pyrogel XT)</option>
@@ -369,6 +370,7 @@
                                 <div class="col-span-2">
                                     <select id="mat2" class="glass-input text-xs" onchange="calc()">
                                         <option value="rubber">Elastomerik Kauçuk</option>
+                                        <option value="camyunu">Cam Yünü</option>
                                         <option value="aerogel">Aerogel (Pyrogel XT)</option>
                                         <option value="needlemat">İğnelenmiş Cam Elyaf</option>
                                         <option value="rockwool">Taş Yünü</option>
@@ -646,7 +648,7 @@
     }
     
     const PIPES={15:21.3,20:26.7,25:33.4,32:42.2,40:48.3,50:60.3,65:73.0,80:88.9,100:114.3,125:141.3,150:168.3,200:219.1,250:273.0,300:323.9,350:355.6,400:406.4,500:508.0};
-    const MATS={rockwool:{a:0.035,b:0.00017,c:0, limit:650},needlemat:{a:0.033,b:0.00015,c:0, limit:650, name:"İğnelenmiş Cam Elyaf"},ceramic:{a:0.025,b:0.00012,c:1.2e-7, limit:1200},aerogel:{a:0.019,b:0.00004,c:5e-8, limit:650},rubber:{a:0.034,b:0.000075,c:0, limit:105},pu:{a:0.024,b:0.000075,c:0, limit:100}};
+    const MATS={rockwool:{a:0.035,b:0.00017,c:0, limit:650}, camyunu:{a:0.035,b:0.00018,c:0, limit:250, name:"Cam Yünü"}, needlemat:{a:0.033,b:0.00015,c:0, limit:650, name:"İğnelenmiş Cam Elyaf"},ceramic:{a:0.025,b:0.00012,c:1.2e-7, limit:1200},aerogel:{a:0.019,b:0.00004,c:5e-8, limit:650},rubber:{a:0.034,b:0.000075,c:0, limit:105},pu:{a:0.024,b:0.000075,c:0, limit:100}};
     const VALVE_FACTORS={gate:1.2,globe:1.4,butterfly:0.6,ball:1.0,strainer:1.5,check:0.9};
     function initApp(){ fillDN('dn'); setType('pipe'); lucide.createIcons(); calc(); toggleProjectInfo(); }
     function setStd(val){ document.getElementById('calcStd').value = val; document.querySelectorAll('.std-btn').forEach(b=>b.classList.remove('active')); document.getElementById('std-'+val).classList.add('active'); const n={iso:'TS EN ISO 12241',astm:'ASTM C680',vdi:'VDI 2055'}; document.getElementById('stdBadge').innerText=n[val]; calc(); }
