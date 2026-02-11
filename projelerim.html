@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Projelerim</title>
+  <title>Projelerim | Optimizi</title>
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -147,11 +147,7 @@
   </style>
   
   <script>
-      (function() {
-          const savedTheme = localStorage.getItem('theme');
-          if (savedTheme === 'light') { document.documentElement.classList.remove('dark'); } 
-          else { document.documentElement.classList.add('dark'); }
-      })();
+      // Tema kontrolü artık JS içinde loadUserProfile ile yapılacak
   </script>
 </head>
 <body class="flex h-screen w-full text-slate-800 dark:text-slate-100 transition-colors duration-300">
@@ -478,6 +474,7 @@
     let projectToDeleteId = null;
     let reminderProjectId = null;
     let isSidebarCollapsed = false;
+    let currentUser = null; // KULLANICI DEĞİŞKENİ EKLENDİ
 
     // --- SIDEBAR & MENU LOGIC ---
     function toggleSidebar() {
@@ -496,13 +493,58 @@
         }
     });
 
-    function toggleTheme() {
-        const isDark = document.documentElement.classList.toggle('dark');
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        if(document.getElementById('themeToggle')) document.getElementById('themeToggle').checked = isDark;
+    // --- THEME & PROFILE LOGIC (GÜNCELLENDİ) ---
+    async function loadUserProfile() {
+        if (!currentUser) return;
+
+        // Profili çek
+        let { data, error } = await supabaseClient
+            .from('profiles')
+            .select('*')
+            .eq('id', currentUser.id)
+            .single();
+
+        // Eğer profil yoksa (yeni/eski kullanıcı), yeni oluştur (Otomatik)
+        if (error && error.code === 'PGRST116') {
+            const { data: newData } = await supabaseClient
+                .from('profiles')
+                .insert([{ 
+                    id: currentUser.id, 
+                    theme: 'light', 
+                    favorite_tools: ['roi', 'cond'],
+                    full_name: currentUser.user_metadata?.full_name || 'Kullanıcı'
+                }])
+                .select()
+                .single();
+            if (newData) data = newData;
+        }
+
+        if (data) {
+            // Temayı Uygula
+            if (data.theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                document.getElementById('themeToggle').checked = true;
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.getElementById('themeToggle').checked = false;
+                localStorage.setItem('theme', 'light');
+            }
+        }
     }
-    if (document.documentElement.classList.contains('dark')) {
-        if(document.getElementById('themeToggle')) document.getElementById('themeToggle').checked = true;
+
+    async function toggleTheme() {
+        const isDark = document.getElementById('themeToggle').checked;
+        const newTheme = isDark ? 'dark' : 'light';
+        
+        // UI Güncelle
+        if (isDark) document.documentElement.classList.add('dark');
+        else document.documentElement.classList.remove('dark');
+        
+        // DB Güncelle
+        if (currentUser) {
+            await supabaseClient.from('profiles').update({ theme: newTheme }).eq('id', currentUser.id);
+        }
     }
 
     function toggleSubmenu(menuId, btn) {
@@ -551,13 +593,11 @@
         const descEl = document.getElementById('reminderModalDesc');
         const deleteSec = document.getElementById('reminderDeleteSection');
         
-        // Eğer zaten hatırlatma varsa düzenleme modu aç
         if (project && project.reminder_date) {
             titleEl.innerText = "Hatırlatmayı Düzenle";
             descEl.innerText = "Mevcut hatırlatmayı değiştirebilir veya silebilirsiniz.";
             deleteSec.classList.remove('hidden');
             
-            // Tarih ve Saati Ayır
             const dt = new Date(project.reminder_date);
             const yyyy = dt.getFullYear();
             const mm = String(dt.getMonth() + 1).padStart(2, '0');
@@ -568,7 +608,6 @@
             document.getElementById('dateInput').value = `${yyyy}-${mm}-${dd}`;
             document.getElementById('timeInput').value = `${hh}:${min}`;
         } else {
-            // Yoksa yeni kurma modu
             titleEl.innerText = "Hatırlatma Kur";
             descEl.innerText = "Bildirim almak istediğiniz zamanı seçin.";
             deleteSec.classList.add('hidden');
@@ -603,7 +642,6 @@
             showNotification('Hata', 'İşlem başarısız.', 'error');
         } else {
             showNotification('Başarılı', 'Hatırlatma ayarlandı.', 'success');
-            // Listeyi yerel olarak güncelle
             const p = allProjects.find(x => x.id === reminderProjectId);
             if(p) p.reminder_date = fullDate;
             renderProjects(allProjects);
@@ -651,6 +689,7 @@
         }
     }
     
+    // --- BİLDİRİM KONTROL (Sadece Tarihi Gelenler) ---
     function checkReminders(forceOpen = false) {
         const now = new Date(); 
         const activeReminders = allProjects.filter(p => {
@@ -666,14 +705,6 @@
         if(activeReminders.length > 0) {
             dot.classList.remove('hidden');
             list.innerHTML = '';
-            
-            // Eğer bildirim varsa ve kapalıysa OTOMATİK AÇ (Sadece ilk yüklemede veya forceOpen true ise)
-            // Sürekli açılıp kapanmasın diye basit bir kontrol:
-            // if (forceOpen || !dropdown.classList.contains('user-closed')) { 
-            //    dropdown.classList.remove('hidden'); 
-            // } 
-            // Not: Kullanıcı deneyimi için şimdilik sadece manuel açılıyor veya refresh sonrası.
-            // Ama istenirse buradaki yorumu kaldırabilirsin.
             
             activeReminders.forEach(p => {
                 const dateObj = new Date(p.reminder_date);
@@ -709,15 +740,16 @@
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) { window.location.href = 'login.html'; return; }
 
-        const user = session.user;
-        const fullName = user.user_metadata?.full_name || user.email.split('@')[0];
+        currentUser = session.user; // KULLANICIYI KAYDET
+        const fullName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
         document.getElementById('sidebarUserName').textContent = fullName;
         document.getElementById('avatarInitial').textContent = fullName.charAt(0).toUpperCase();
         document.getElementById('modalName').textContent = fullName;
-        document.getElementById('modalEmail').textContent = user.email;
+        document.getElementById('modalEmail').textContent = currentUser.email;
         document.getElementById('modalAvatar').textContent = fullName.charAt(0).toUpperCase();
 
-        fetchProjects(user.id);
+        await loadUserProfile(); // TEMA AYARINI ÇEK
+        fetchProjects(currentUser.id);
     }
 
     async function fetchProjects(userId) {
@@ -761,7 +793,7 @@
             else if (proj.calculation_type === 'condensation') { typeLabel = 'Yoğuşma'; typeIcon = 'droplets'; toolUrl = 'tool/yogusma-hesaplama.html'; colorClass = 'text-blue-600 bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400'; }
             else if (proj.calculation_type === 'anlik-kayip') { typeLabel = 'Saha Kayıp'; typeIcon = 'scan-line'; toolUrl = 'tool/anlik-kayip.html'; colorClass = 'text-red-600 bg-red-100 dark:bg-red-900/20 dark:text-red-400'; }
 
-            // ZİL RENK MANTIĞI (DÜZELTİLDİ)
+            // ZİL RENK MANTIĞI
             let reminderIconClass = "text-slate-300 hover:text-slate-500 bg-slate-50 dark:bg-slate-800"; // Varsayılan (Gri/Boş)
             const now = new Date();
             
@@ -770,7 +802,7 @@
                 if (rDate <= now) {
                     reminderIconClass = "text-red-600 bg-red-50 dark:bg-red-900/30 animate-pulse"; // Vakti Gelmiş
                 } else {
-                    reminderIconClass = "text-green-600 bg-green-50 dark:bg-green-900/30"; // Kurulu (Gelecekte)
+                    reminderIconClass = "text-green-600 bg-green-50 dark:bg-green-900/30"; // Gelecekte
                 }
             }
 
