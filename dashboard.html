@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Genel Bakış</title>
+  <title>Yönetim Paneli</title>
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -23,11 +23,11 @@
           },
           animation: {
             'pop-in': 'popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-            'success-bounce': 'successBounce 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+            'fade-in': 'fadeIn 0.5s ease-out',
           },
           keyframes: {
-            popIn: { '0%': { transform: 'scale(0.9)', opacity: '0' }, '100%': { transform: 'scale(1)', opacity: '1' } },
-            successBounce: { '0%': { transform: 'scale(0.8)', opacity: '0' }, '50%': { transform: 'scale(1.1)' }, '100%': { transform: 'scale(1)', opacity: '1' } }
+            popIn: { '0%': { transform: 'scale(0.95)', opacity: '0' }, '100%': { transform: 'scale(1)', opacity: '1' } },
+            fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
           }
         }
       }
@@ -35,7 +35,7 @@
   </script>
 
   <style>
-    /* PROJELERİM.HTML İLE AYNI TASARIM DİLİ */
+    /* PROJELERİM.HTML İLE BİREBİR AYNI STİLLER */
     :root {
         --bg-grad: radial-gradient(ellipse at top, #f8fafc 0%, #e2e8f0 40%, #cbd5e1 100%);
         --glass-panel: rgba(255, 255, 255, 0.8);
@@ -67,57 +67,42 @@
     }
     .dark body { color: #f1f5f9; }
     
-    .glass-panel {
-      background: var(--glass-panel);
-      backdrop-filter: blur(12px);
-      border: 1px solid var(--glass-border);
-      transition: background 0.3s ease, border-color 0.3s ease, width 0.3s ease;
-    }
-    
-    .glass-card {
+    .glass-panel, .glass-card {
       background: var(--glass-card-bg);
+      backdrop-filter: blur(12px);
       border: 1px solid var(--glass-border);
       transition: all 0.3s ease;
     }
 
     /* Scrollbar */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
 
-    /* Sidebar Styles */
+    /* Sidebar Link Styles */
     .sidebar-link {
         display: flex; align-items: center; gap: 12px;
-        padding: 12px 16px; margin-bottom: 4px;
+        padding: 10px 16px; margin-bottom: 4px;
         border-radius: 12px; 
         color: var(--sidebar-text);
         transition: all 0.2s; font-weight: 500; font-size: 0.9rem;
-        cursor: pointer;
-        width: 100%; text-align: left;
-        white-space: nowrap; overflow: hidden;
+        cursor: pointer; width: 100%; text-align: left;
     }
     .sidebar-link:hover, .sidebar-link.active {
         background: var(--sidebar-active-bg); 
         color: var(--sidebar-text-hover);
     }
     .sidebar-link.active { border-left: 3px solid #6366f1; }
-    .sidebar-link i { width: 20px; height: 20px; min-width: 20px; }
     
     /* Submenu */
     .submenu { overflow: hidden; transition: max-height 0.3s ease-out; max-height: 0; }
-    .submenu.open { max-height: 800px; } 
-    
-    .submenu-item {
-        display: flex; align-items: center; justify-content: space-between;
-        padding-right: 12px; margin-bottom: 2px; border-radius: 8px; transition: background 0.2s;
-    }
-    .submenu-item:hover { background: rgba(0,0,0,0.03); }
-    .dark .submenu-item:hover { background: rgba(255,255,255,0.03); }
-
+    .submenu.open { max-height: 500px; }
     .submenu-link {
-        flex: 1; display: flex; align-items: center; gap: 10px; padding: 8px 0 8px 48px;
-        color: var(--sidebar-text); font-size: 0.85rem; transition: color 0.2s; text-decoration: none; position: relative; white-space: nowrap;
+        display: flex; align-items: center; gap: 10px;
+        padding: 8px 0 8px 48px;
+        color: var(--sidebar-text); font-size: 0.85rem;
+        transition: color 0.2s; text-decoration: none; position: relative;
     }
     .submenu-link:before {
         content: ''; position: absolute; left: 30px; top: 50%;
@@ -126,36 +111,44 @@
     .submenu-link:hover { color: #6366f1; }
     .submenu-link:hover:before { background: #6366f1; opacity: 1; }
 
-    .quick-action-btn {
-        opacity: 0; transform: translateX(-5px); transition: all 0.2s;
-        padding: 4px; border-radius: 6px; color: var(--sidebar-text);
+    /* Mode Switcher Styles */
+    .mode-switch {
+        background: rgba(0,0,0,0.05);
+        border-radius: 99px;
+        padding: 4px;
+        display: flex;
+        position: relative;
     }
-    .submenu-item:hover .quick-action-btn { opacity: 1; transform: translateX(0); }
-    .quick-action-btn:hover { background: #6366f1; color: white; box-shadow: 0 2px 5px rgba(99, 102, 241, 0.3); }
+    .dark .mode-switch { background: rgba(255,255,255,0.1); }
     
-    /* Collapsed Sidebar Styles */
-    aside.collapsed { width: 80px; }
-    aside.collapsed .sidebar-link { justify-content: center; padding: 12px; }
-    aside.collapsed .sidebar-link span, 
-    aside.collapsed .sidebar-link i.chevron, 
-    aside.collapsed .submenu,
-    aside.collapsed .logo-text,
-    aside.collapsed .sidebar-title,
-    aside.collapsed .user-info { display: none !important; }
-    aside.collapsed .sidebar-link { border-left: none; }
-    aside.collapsed .sidebar-link.active { background: var(--sidebar-active-bg); color: #6366f1; }
+    .mode-btn {
+        padding: 6px 16px;
+        border-radius: 99px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--sidebar-text);
+        z-index: 2;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    .mode-btn.active { color: white; }
+    
+    .mode-bg {
+        position: absolute;
+        top: 4px; left: 4px; bottom: 4px;
+        width: calc(50% - 4px);
+        border-radius: 99px;
+        transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+        z-index: 1;
+    }
+    /* Satış Modu Rengi */
+    .bg-sales { background: #6366f1; } 
+    /* Proje Modu Rengi */
+    .bg-project { background: #10b981; }
 
-    /* Custom Dashboard Styles */
-    .stat-card-value { font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: -0.05em; }
-    .apexcharts-tooltip { background: #1e293b !important; border-color: #334155 !important; color: #fff; }
-    .apexcharts-tooltip-title { background: #0f172a !important; border-bottom: 1px solid #334155 !important; }
-
-    .modal-enter { animation: slideInRight 0.3s ease-out forwards; }
-    @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-    .animate-bounce-in { animation: successBounce 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-    @keyframes successBounce { 0% { transform: scale(0.8); opacity: 0; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
-    .animate-pop { animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-    @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    /* Compact Chart & Card */
+    .compact-card { padding: 16px; }
+    .stat-val { font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: -0.5px; }
   </style>
   
   <script>
@@ -169,91 +162,59 @@
 <body class="flex h-screen w-full text-slate-800 dark:text-slate-100 transition-colors duration-300">
 
   <div class="fixed inset-0 z-0 pointer-events-none opacity-50 dark:opacity-100 transition-opacity duration-500">
-      <div class="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-500/20 dark:bg-indigo-600/10 rounded-full blur-[100px]"></div>
-      <div class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-500/20 dark:bg-blue-600/10 rounded-full blur-[100px]"></div>
+      <div id="bgOrb1" class="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-500/20 dark:bg-indigo-600/10 rounded-full blur-[100px] transition-colors duration-700"></div>
+      <div id="bgOrb2" class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-500/20 dark:bg-blue-600/10 rounded-full blur-[100px] transition-colors duration-700"></div>
   </div>
 
   <aside id="mainSidebar" class="w-64 h-full glass-panel flex flex-col z-20 hidden md:flex border-r border-slate-200 dark:border-slate-700/50 bg-white/50 dark:bg-slate-900/50 transition-all duration-300">
-      <div class="h-20 flex items-center justify-between px-6 border-b border-slate-200 dark:border-white/5">
-          <div class="flex items-center gap-2 overflow-hidden logo-text">
+      <div class="h-20 flex items-center px-6 border-b border-slate-200 dark:border-white/5">
+          <div class="flex items-center gap-2">
               <span class="text-lg font-bold text-slate-800 dark:text-white tracking-tight">Optimizi<span class="text-indigo-500 dark:text-indigo-400">.App</span></span>
           </div>
-          <button onclick="toggleSidebar()" class="text-slate-400 hover:text-indigo-600 transition"><i data-lucide="panel-left" class="w-5 h-5"></i></button>
       </div>
 
       <div class="flex-1 overflow-y-auto py-6 px-4 custom-scroll">
-          
-          <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2 sidebar-title">Genel</div>
-          <a href="#" class="sidebar-link active"><i data-lucide="layout-dashboard"></i> <span>Anasayfa</span></a>
-          <a href="projelerim.html" class="sidebar-link"><i data-lucide="folder-open"></i> <span>Projelerim</span></a>
+          <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2">Genel</div>
+          <a href="#" class="sidebar-link active"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> <span>Anasayfa</span></a>
+          <a href="projelerim.html" class="sidebar-link"><i data-lucide="folder-open" class="w-5 h-5"></i> <span>Projelerim</span></a>
           
           <div class="mt-6">
               <button onclick="toggleSubmenu('offerMenu', this)" class="sidebar-link justify-between group">
-                  <div class="flex items-center gap-3"><i data-lucide="file-text"></i> <span>Teklif Yönetimi</span></div>
-                  <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300 text-slate-400 chevron"></i>
+                  <div class="flex items-center gap-3"><i data-lucide="file-text" class="w-5 h-5"></i> <span>Teklif Yönetimi</span></div>
+                  <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300 text-slate-400"></i>
               </button>
               <div id="offerMenu" class="submenu">
-                  <div class="submenu-item group/item"><a href="#" onclick="showNotification('Bilgi', 'Müşteri listesi yakında.', 'info')" class="submenu-link">Müşteri Listesi</a><button onclick="quickAction('client')" class="quick-action-btn" title="Yeni Müşteri Ekle"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button></div>
-                  <div class="submenu-item group/item"><a href="#" class="submenu-link">Teklif Geçmişi</a><button onclick="quickAction('proposal')" class="quick-action-btn" title="Hızlı Teklif Oluştur"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button></div>
-                  <div class="submenu-item group/item"><a href="#" onclick="showNotification('Bilgi', 'Hızlı Teklif Ver modülü yakında.', 'info')" class="submenu-link">Hızlı Teklif Ver</a></div>
+                  <a href="#" class="submenu-link">Müşteri Listesi</a>
+                  <a href="#" class="submenu-link">Teklif Geçmişi</a>
+                  <a href="#" class="submenu-link">Hızlı Teklif Ver</a>
               </div>
           </div>
 
           <div class="mt-1">
               <button onclick="toggleSubmenu('salesMenu', this)" class="sidebar-link justify-between group">
-                  <div class="flex items-center gap-3"><i data-lucide="shopping-bag"></i> <span>Satış Yönetimi</span></div>
-                  <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300 text-slate-400 chevron"></i>
+                  <div class="flex items-center gap-3"><i data-lucide="shopping-bag" class="w-5 h-5"></i> <span>Satış Yönetimi</span></div>
+                  <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300 text-slate-400"></i>
               </button>
               <div id="salesMenu" class="submenu">
-                  <div class="submenu-item group/item"><a href="#" onclick="showNotification('Bilgi', 'Satış listesi yakında.', 'info')" class="submenu-link">Satış Listesi</a><button onclick="quickAction('sale')" class="quick-action-btn" title="Yeni Satış Gir"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button></div>
+                  <a href="#" class="submenu-link">Satış Listesi</a>
               </div>
           </div>
 
-          <div class="mt-1">
-              <button onclick="toggleSubmenu('prodMenu', this)" class="sidebar-link justify-between group">
-                  <div class="flex items-center gap-3"><i data-lucide="factory"></i> <span>Üretim Yönetimi</span></div>
-                  <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300 text-slate-400 chevron"></i>
-              </button>
-              <div id="prodMenu" class="submenu">
-                  <div class="submenu-item group/item"><a href="#" onclick="showNotification('Bilgi', 'Üretim Takibi yakında.', 'info')" class="submenu-link">Üretim Takibi</a></div>
-                  <div class="submenu-item group/item"><a href="#" onclick="toggleSubmenu('stockSubMenu', this.parentElement); return false;" class="submenu-link justify-between">Stok Durumu <i data-lucide="chevron-down" class="w-3 h-3 opacity-50"></i></a></div>
-                  <div id="stockSubMenu" class="submenu pl-2 border-l border-slate-200 dark:border-slate-700 ml-4">
-                      <div class="submenu-item group/item"><a href="#" onclick="quickAction('stockIn')" class="submenu-link text-[11px]">- Hammadde Girdisi</a></div>
-                      <div class="submenu-item group/item"><a href="#" onclick="quickAction('stockOut')" class="submenu-link text-[11px]">- Hammadde Çıktısı</a></div>
-                  </div>
-              </div>
-          </div>
+          <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2 mt-6">Analiz Araçları</div>
+          <div id="favToolsSidebar"></div> <button onclick="openFavModal()" class="sidebar-link text-xs"><i data-lucide="edit-3" class="w-4 h-4"></i> Düzenle</button>
 
-          <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2 mt-6 sidebar-title">Analiz Araçları</div>
-          <div id="favToolsSidebar">
-              </div>
-          <button onclick="openFavModal()" class="sidebar-link text-xs"><i data-lucide="edit-3" class="w-3 h-3"></i> <span class="sidebar-text">Düzenle</span></button>
-
-          <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2 mt-6 sidebar-title">Yönetim</div>
-          <div class="mt-1">
-              <button onclick="toggleSubmenu('adminMenu', this)" class="sidebar-link justify-between group">
-                  <div class="flex items-center gap-3"><i data-lucide="building-2"></i> <span>Şirket Yönetimi</span></div>
-                  <i data-lucide="lock" class="w-3 h-3 text-slate-400 chevron"></i>
-              </button>
-              <div id="adminMenu" class="submenu">
-                  <div class="submenu-item"><a href="#" onclick="checkAdminAccess()" class="submenu-link">Şirket Raporları</a></div>
-                  <div class="submenu-item"><a href="#" onclick="checkAdminAccess()" class="submenu-link">Personel Yönetimi</a></div>
-              </div>
-          </div>
-          
-          <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2 mt-6 sidebar-title">Sistem</div>
-          <button onclick="openSettings()" class="sidebar-link"><i data-lucide="settings"></i> <span>Ayarlar</span></button>
-          <a href="iletisim.html" class="sidebar-link"><i data-lucide="life-buoy"></i> <span>Destek</span></a>
+          <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2 mt-6">Sistem</div>
+          <button onclick="openSettings()" class="sidebar-link"><i data-lucide="settings" class="w-5 h-5"></i> <span>Ayarlar</span></button>
       </div>
 
       <div class="p-4 border-t border-slate-200 dark:border-white/5">
           <div onclick="openSettings()" class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-200/50 dark:hover:bg-white/10 transition cursor-pointer group">
-              <div class="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:scale-105 transition shrink-0" id="avatarInitial">U</div>
-              <div class="flex-1 min-w-0 user-info">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:scale-105 transition" id="avatarInitial">U</div>
+              <div class="flex-1 min-w-0">
                   <p class="text-sm font-bold text-slate-800 dark:text-white truncate" id="sidebarUserName">Yükleniyor...</p>
                   <p class="text-xs text-slate-500 dark:text-slate-400 truncate">Hesap Ayarları</p>
               </div>
-              <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 chevron"></i>
+              <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
           </div>
       </div>
   </aside>
@@ -262,33 +223,26 @@
       
       <header class="h-20 flex items-center justify-between px-6 md:px-8 border-b border-slate-200 dark:border-white/5 glass-panel md:bg-transparent md:backdrop-filter-none md:border-none">
           <div class="flex items-center gap-4">
-              <button class="md:hidden p-2 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-white"><i data-lucide="menu"></i></button>
-              <h1 class="text-xl font-bold text-slate-800 dark:text-white hidden md:block">Genel Bakış</h1>
+              <button class="md:hidden p-2 text-slate-500 dark:text-slate-400 hover:text-indigo-600"><i data-lucide="menu"></i></button>
+              <h1 class="text-xl font-bold text-slate-800 dark:text-white hidden md:block" id="pageTitle">Genel Bakış</h1>
           </div>
           
-          <div class="flex items-center gap-4">
-              <div class="hidden md:flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-1 mr-2">
-                  <button id="btnNoKDV" onclick="setKDV(false)" class="px-3 py-1.5 text-xs font-bold rounded-md bg-white dark:bg-slate-600 shadow text-slate-800 dark:text-white transition">KDV Hariç</button>
-                  <button id="btnWithKDV" onclick="setKDV(true)" class="px-3 py-1.5 text-xs font-bold rounded-md text-slate-500 hover:text-slate-800 dark:hover:text-white transition">KDV Dahil</button>
+          <div class="flex items-center gap-6">
+              
+              <div class="mode-switch">
+                  <div id="modeBg" class="mode-bg bg-sales"></div>
+                  <button onclick="setDashboardMode('sales')" class="mode-btn active" id="btnSales">Satış & Teklif</button>
+                  <button onclick="setDashboardMode('project')" class="mode-btn" id="btnProject">Proje & Rapor</button>
               </div>
 
-              <button onclick="toggleTheme()" class="p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition" title="Temayı Değiştir">
-                  <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
-                  <i data-lucide="moon" class="w-5 h-5 dark:hidden"></i>
-              </button>
-              
               <div class="relative group">
                   <button id="bellBtn" onclick="toggleNotifDropdown()" class="p-2 relative text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-white transition">
                       <i data-lucide="bell"></i>
                       <span id="notifDot" class="hidden absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-900 animate-pulse"></span>
                   </button>
                   <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden transform origin-top-right transition-all">
-                      <div class="p-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 font-bold text-xs uppercase text-slate-500 dark:text-slate-400 flex justify-between">
-                          <span>Hatırlatmalar</span>
-                          <span class="text-[10px] font-normal cursor-pointer hover:text-indigo-600" onclick="checkReminders(true)">Yenile</span>
-                      </div>
-                      <div id="notifList" class="max-h-64 overflow-y-auto">
-                          </div>
+                      <div class="p-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 font-bold text-xs uppercase text-slate-500 dark:text-slate-400">Hatırlatmalar</div>
+                      <div id="notifList" class="max-h-64 overflow-y-auto p-2"></div>
                   </div>
               </div>
           </div>
@@ -298,54 +252,52 @@
           
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               
-              <div class="glass-card p-5 rounded-xl border-l-4 border-indigo-500 relative overflow-hidden group">
+              <div class="glass-card compact-card rounded-xl border-l-4 transition-all duration-500" id="card1">
                   <div class="flex justify-between items-start">
                       <div>
-                          <p class="text-xs font-bold text-slate-400 uppercase mb-1">Toplam Teklif</p>
-                          <h3 class="text-2xl font-black text-slate-800 dark:text-white" id="totalProposalVal">0 ₺</h3>
-                          <p class="text-xs text-slate-500 mt-1"><span id="totalProposalCount">0</span> adet teklif verildi</p>
+                          <p class="text-[10px] font-bold text-slate-400 uppercase mb-1" id="label1">...</p>
+                          <h3 class="text-2xl font-black text-slate-800 dark:text-white stat-val" id="val1">0</h3>
                       </div>
-                      <div class="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg text-indigo-600 dark:text-indigo-400"><i data-lucide="file-text" class="w-5 h-5"></i></div>
+                      <div class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800" id="icon1"><i data-lucide="activity" class="w-5 h-5"></i></div>
                   </div>
               </div>
 
-              <div class="glass-card p-5 rounded-xl border-l-4 border-emerald-500 relative overflow-hidden group">
+              <div class="glass-card compact-card rounded-xl border-l-4 transition-all duration-500" id="card2">
                   <div class="flex justify-between items-start">
                       <div>
-                          <p class="text-xs font-bold text-slate-400 uppercase mb-1">Gerçekleşen Satış</p>
-                          <h3 class="text-2xl font-black text-slate-800 dark:text-white" id="totalSalesVal">0 ₺</h3>
-                          <p class="text-xs text-slate-500 mt-1"><span id="totalSalesCount">0</span> adet satış onaylandı</p>
+                          <p class="text-[10px] font-bold text-slate-400 uppercase mb-1" id="label2">...</p>
+                          <h3 class="text-2xl font-black text-slate-800 dark:text-white stat-val" id="val2">0</h3>
                       </div>
-                      <div class="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg text-emerald-600 dark:text-emerald-400"><i data-lucide="check-circle" class="w-5 h-5"></i></div>
+                      <div class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800" id="icon2"><i data-lucide="activity" class="w-5 h-5"></i></div>
                   </div>
               </div>
 
-              <div class="glass-card p-5 rounded-xl border-l-4 border-orange-500 relative overflow-hidden group">
+              <div class="glass-card compact-card rounded-xl border-l-4 transition-all duration-500" id="card3">
                   <div class="flex justify-between items-start">
-                      <div class="flex-1">
-                          <p class="text-xs font-bold text-slate-400 uppercase mb-1">Analiz Verileri</p>
-                          <div class="space-y-1">
-                              <div class="flex justify-between w-full gap-4 text-xs"><span class="text-slate-500">Isı Kaybı:</span> <strong class="text-slate-800 dark:text-white" id="totalLoss">0 kWh</strong></div>
-                              <div class="flex justify-between w-full gap-4 text-xs"><span class="text-slate-500">CO2 Tasarruf:</span> <strong class="text-green-600" id="totalCO2">0 Ton</strong></div>
-                          </div>
+                      <div>
+                          <p class="text-[10px] font-bold text-slate-400 uppercase mb-1" id="label3">...</p>
+                          <h3 class="text-2xl font-black text-slate-800 dark:text-white stat-val" id="val3">0</h3>
                       </div>
-                      <div class="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-orange-600 dark:text-orange-400 ml-2"><i data-lucide="activity" class="w-5 h-5"></i></div>
+                      <div class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800" id="icon3"><i data-lucide="activity" class="w-5 h-5"></i></div>
                   </div>
               </div>
 
-              <div class="glass-card p-5 rounded-xl flex flex-col justify-center">
-                  <div class="flex items-center justify-between mb-3">
-                      <span class="text-xs font-bold text-slate-400 uppercase">Canlı Kur</span>
-                      <span class="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded font-bold animate-pulse">CANLI</span>
+              <div class="glass-card compact-card rounded-xl flex flex-col justify-center">
+                  <div class="flex items-center justify-between mb-2">
+                      <span class="text-[10px] font-bold text-slate-400 uppercase">Döviz Kuru</span>
+                      <select onchange="fetchCurrency()" id="currencyMode" class="text-[10px] bg-slate-100 dark:bg-slate-800 border-none rounded px-2 py-0.5 font-bold outline-none cursor-pointer hover:text-indigo-500 transition">
+                          <option value="buy">Alış</option>
+                          <option value="sell">Satış</option>
+                      </select>
                   </div>
                   <div class="grid grid-cols-2 gap-2 text-sm">
                       <div class="flex justify-between items-center p-1.5 bg-slate-50 dark:bg-slate-800 rounded">
-                          <span class="font-bold text-slate-600 dark:text-slate-300">USD</span>
-                          <span class="font-mono font-bold text-slate-900 dark:text-white" id="rateUSD">...</span>
+                          <span class="font-bold text-slate-500 text-xs">USD</span>
+                          <span class="font-mono font-bold text-slate-800 dark:text-white text-sm" id="rateUSD">...</span>
                       </div>
                       <div class="flex justify-between items-center p-1.5 bg-slate-50 dark:bg-slate-800 rounded">
-                          <span class="font-bold text-slate-600 dark:text-slate-300">EUR</span>
-                          <span class="font-mono font-bold text-slate-900 dark:text-white" id="rateEUR">...</span>
+                          <span class="font-bold text-slate-500 text-xs">EUR</span>
+                          <span class="font-mono font-bold text-slate-800 dark:text-white text-sm" id="rateEUR">...</span>
                       </div>
                   </div>
               </div>
@@ -353,22 +305,22 @@
 
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
               
-              <div class="glass-card p-6 rounded-xl flex flex-col">
-                  <h3 class="text-sm font-bold text-slate-800 dark:text-white uppercase mb-4">Kayıt Dağılımı</h3>
-                  <div class="flex-1 flex items-center justify-center">
-                      <div id="chart" class="w-full"></div>
+              <div class="glass-card rounded-xl p-5 flex flex-col animate-fade-in">
+                  <div class="flex justify-between items-center mb-4">
+                      <h3 class="text-sm font-bold text-slate-800 dark:text-white uppercase" id="chartTitle">Grafik</h3>
                   </div>
+                  <div id="mainChart" class="w-full flex items-center justify-center h-48"></div>
               </div>
 
-              <div class="lg:col-span-2 glass-card rounded-xl flex flex-col overflow-hidden h-[400px]">
+              <div class="lg:col-span-2 glass-card rounded-xl flex flex-col overflow-hidden h-[300px] animate-fade-in">
                   <div class="p-4 border-b border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-800/50 flex justify-between items-center">
                       <h3 class="text-sm font-bold text-slate-800 dark:text-white uppercase">Son İşlemler</h3>
-                      <button onclick="fetchActivities()" class="text-xs text-slate-400 hover:text-indigo-500 flex items-center gap-1"><i data-lucide="refresh-cw" class="w-3 h-3"></i> Yenile</button>
+                      <button onclick="fetchActivities()" class="text-xs text-slate-400 hover:text-indigo-500 flex items-center gap-1"><i data-lucide="refresh-cw" class="w-3 h-3"></i></button>
                   </div>
-                  <div class="flex-1 overflow-y-auto p-0 custom-scroll" id="activityFeed">
+                  <div class="flex-1 overflow-y-auto custom-scroll p-0" id="activityFeed">
                       <div class="flex flex-col items-center justify-center h-full text-slate-400">
-                          <i data-lucide="activity" class="w-8 h-8 mb-2 opacity-50"></i>
-                          <span class="text-xs">Henüz işlem kaydı yok.</span>
+                          <i data-lucide="loader-2" class="w-6 h-6 animate-spin mb-2"></i>
+                          <span class="text-xs">Yükleniyor...</span>
                       </div>
                   </div>
               </div>
@@ -378,90 +330,23 @@
   </main>
 
   <div id="favModal" class="fixed inset-0 z-[75] hidden flex items-center justify-center p-4">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="document.getElementById('favModal').classList.add('hidden')"></div>
-      <div class="relative bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl shadow-2xl animate-pop border border-slate-200 dark:border-slate-800 p-6">
-          <div class="flex justify-between items-center mb-4">
-              <h3 class="text-lg font-bold text-slate-900 dark:text-white">Favori Araçlarını Seç</h3>
-              <button onclick="document.getElementById('favModal').classList.add('hidden')" class="text-slate-400 hover:text-red-500"><i data-lucide="x" class="w-5 h-5"></i></button>
-          </div>
-          <div class="space-y-2 mb-4" id="favCheckList"></div>
-          <button onclick="saveFavorites()" class="w-full py-2 rounded-lg bg-indigo-600 text-white text-sm font-bold shadow-lg shadow-indigo-600/20">Kaydet</button>
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="document.getElementById('favModal').classList.add('hidden')"></div>
+      <div class="relative bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl shadow-2xl p-6 border border-slate-200 dark:border-slate-800">
+          <h3 class="text-lg font-bold mb-4 text-slate-900 dark:text-white">Favori Araçlar</h3>
+          <div id="favCheckList" class="space-y-2 mb-4"></div>
+          <button onclick="saveFavorites()" class="w-full py-2 bg-indigo-600 text-white rounded-lg font-bold">Kaydet</button>
       </div>
   </div>
 
   <div id="settingsModal" class="fixed inset-0 z-50 hidden">
-      <div class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" onclick="closeSettings()"></div>
-      <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl modal-enter flex flex-col">
-          <div class="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
-              <h2 class="text-xl font-bold text-slate-900 dark:text-white">Kullanıcı Ayarları</h2>
-              <button onclick="closeSettings()" class="text-slate-500 hover:text-red-500 transition"><i data-lucide="x" class="w-6 h-6"></i></button>
+      <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="document.getElementById('settingsModal').classList.add('hidden')"></div>
+      <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl p-6 flex flex-col">
+          <h2 class="text-xl font-bold mb-6 text-slate-900 dark:text-white">Ayarlar</h2>
+          <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-xl mb-4">
+              <span class="font-bold text-slate-700 dark:text-slate-200">Karanlık Mod</span>
+              <input type="checkbox" id="themeToggle" onchange="toggleTheme()" class="accent-indigo-600 w-5 h-5">
           </div>
-          <div class="flex-1 overflow-y-auto p-6 space-y-8">
-              <section>
-                  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Profil Bilgileri</h3>
-                  <div class="flex items-center gap-4 mb-4">
-                      <div class="w-16 h-16 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-2xl font-bold text-indigo-600 dark:text-indigo-400" id="modalAvatar">U</div>
-                      <div><p class="font-bold text-slate-900 dark:text-white text-lg" id="modalName">...</p><p class="text-sm text-slate-500" id="modalEmail">...</p></div>
-                  </div>
-              </section>
-              <section>
-                  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Görünüm</h3>
-                  <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                      <div class="flex items-center gap-3"><div class="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400"><i data-lucide="moon" class="w-5 h-5"></i></div><div><p class="text-sm font-bold text-slate-800 dark:text-white">Karanlık Mod</p><p class="text-xs text-slate-500">Göz yormayan koyu tema</p></div></div>
-                      <label class="relative inline-flex items-center cursor-pointer">
-                          <input type="checkbox" id="themeToggle" class="sr-only peer" onchange="toggleTheme()">
-                          <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-                      </label>
-                  </div>
-              </section>
-              <section><button onclick="handleLogout()" class="w-full py-3 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 font-bold transition flex items-center justify-center gap-2"><i data-lucide="log-out" class="w-4 h-4"></i> Çıkış Yap</button></section>
-          </div>
-      </div>
-  </div>
-
-  <div id="notifModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="closeNotification()"></div>
-      <div class="relative bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl shadow-2xl animate-pop border border-slate-200 dark:border-slate-800 overflow-hidden transform scale-100">
-          <div class="p-6 text-center">
-              <div id="notifIcon" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-in"></div>
-              <h3 id="notifTitle" class="text-xl font-bold text-slate-900 dark:text-white mb-2">Başlık</h3>
-              <p id="notifMsg" class="text-sm text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">Mesaj</p>
-              <button onclick="closeNotification()" class="w-full py-3 rounded-xl font-bold transition shadow-lg text-white bg-indigo-600 hover:bg-indigo-500">Tamam</button>
-          </div>
-      </div>
-  </div>
-
-  <div id="adminAuthModal" class="fixed inset-0 z-[80] hidden flex items-center justify-center p-4">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="document.getElementById('adminAuthModal').classList.add('hidden')"></div>
-      <div class="relative bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl shadow-2xl animate-pop border border-slate-200 dark:border-slate-800 p-6 text-center">
-          <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex items-center justify-center mx-auto mb-4"><i data-lucide="lock" class="w-6 h-6"></i></div>
-          <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Yönetici Erişimi</h3>
-          <p class="text-xs text-slate-500 mb-4">Bu alana sadece şirket yöneticileri erişebilir.</p>
-          <input type="password" placeholder="Şifre Giriniz" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 mb-4 text-sm focus:outline-none focus:border-indigo-500">
-          <button onclick="showNotification('Erişim Reddedildi', 'Yetkili şifresi hatalı.', 'error'); document.getElementById('adminAuthModal').classList.add('hidden');" class="w-full py-2 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-bold shadow-lg">Giriş Yap</button>
-      </div>
-  </div>
-
-  <div id="calcModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="closeCalcModal()"></div>
-      <div class="relative bg-white dark:bg-slate-900 w-full max-w-5xl rounded-3xl shadow-2xl animate-pop border border-slate-200 dark:border-slate-800 flex flex-col max-h-[90vh]">
-          <div class="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
-              <div class="flex items-center gap-3">
-                  <div class="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg text-indigo-600 dark:text-indigo-400"><i data-lucide="calculator" class="w-6 h-6"></i></div>
-                  <div><h2 class="text-xl font-bold text-slate-900 dark:text-white">Hesaplama Merkezi</h2><p class="text-xs text-slate-500">Kullanmak istediğiniz analiz aracını seçin.</p></div>
-              </div>
-              <button onclick="closeCalcModal()" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition"><i data-lucide="x" class="w-6 h-6"></i></button>
-          </div>
-          <div class="p-6 overflow-y-auto custom-scroll">
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <a href="tool/anlik-kayip.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-red-500/50 dark:hover:border-red-500/50 group transition"><div class="flex justify-between items-start mb-4"><div class="p-3 rounded-lg bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400"><i data-lucide="scan-line" class="w-6 h-6"></i></div><i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-red-500 transition"></i></div><h3 class="font-bold text-slate-800 dark:text-white mb-1">Saha Kayıp Analizi</h3><p class="text-xs text-slate-500 dark:text-slate-400">Kaçak tespiti.</p></a>
-                  <a href="tool/roi.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-orange-500/50 group transition"><div class="flex justify-between items-start mb-4"><div class="p-3 rounded-lg bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400"><i data-lucide="flame" class="w-6 h-6"></i></div><i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-orange-500 transition"></i></div><h3 class="font-bold text-slate-800 dark:text-white mb-1">Termal ROI</h3><p class="text-xs text-slate-500">Amortisman.</p></a>
-                  <a href="tool/yalitim-performans.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-purple-500/50 group transition"><div class="flex justify-between items-start mb-4"><div class="p-3 rounded-lg bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400"><i data-lucide="layers" class="w-6 h-6"></i></div><i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-purple-500 transition"></i></div><h3 class="font-bold text-slate-800 dark:text-white mb-1">Optimum Kalınlık</h3><p class="text-xs text-slate-500">Ekonomik kalınlık.</p></a>
-                  <a href="tool/yogusma-hesaplama.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-blue-500/50 group transition"><div class="flex justify-between items-start mb-4"><div class="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"><i data-lucide="droplets" class="w-6 h-6"></i></div><i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-blue-500 transition"></i></div><h3 class="font-bold text-slate-800 dark:text-white mb-1">Yoğuşma Kontrol</h3><p class="text-xs text-slate-500">Terleme önleme.</p></a>
-                  <a href="tool/chiller-roi.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-cyan-500/50 dark:hover:border-cyan-500/50 group transition"><div class="flex justify-between items-start mb-4"><div class="p-3 rounded-lg bg-cyan-100 dark:bg-cyan-900/20 text-cyan-600 dark:text-cyan-400"><i data-lucide="snowflake" class="w-6 h-6"></i></div><i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-cyan-500 transition"></i></div><h3 class="font-bold text-slate-800 dark:text-white mb-1">Chiller ROI</h3><p class="text-xs text-slate-500 dark:text-slate-400">Soğutma hatları.</p></a>
-                  <a href="tool/boiler.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-amber-500/50 dark:hover:border-amber-500/50 group transition"><div class="flex justify-between items-start mb-4"><div class="p-3 rounded-lg bg-amber-100 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400"><i data-lucide="gauge" class="w-6 h-6"></i></div><i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-amber-500 transition"></i></div><h3 class="font-bold text-slate-800 dark:text-white mb-1">Kazan Verimliliği</h3><p class="text-xs text-slate-500 dark:text-slate-400">Kazan hesabı.</p></a>
-              </div>
-          </div>
+          <button onclick="handleLogout()" class="w-full py-3 border border-red-200 text-red-600 rounded-xl font-bold hover:bg-red-50 mt-auto">Çıkış Yap</button>
       </div>
   </div>
 
@@ -470,339 +355,299 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    let isSidebarCollapsed = false;
     let currentUser = null;
-    let showKDV = false; // KDV Durumu
-    let financialData = { proposals: 0, sales: 0 };
-    
-    // --- ARAÇ TANIMLARI ---
+    let currentMode = 'sales'; // 'sales' or 'project'
+    let favTools = ['roi', 'scan'];
+    let chartInstance = null;
+
     const TOOLS = {
-        'roi': { name: 'Termal ROI', desc: 'Amortisman hesabı', icon: 'flame', color: 'orange', url: 'tool/roi.html' },
-        'cond': { name: 'Yoğuşma Kontrol', desc: 'Terleme önleme', icon: 'droplets', color: 'blue', url: 'tool/yogusma-hesaplama.html' },
-        'iso': { name: 'Optimum Kalınlık', desc: 'Ekonomik kalınlık', icon: 'layers', color: 'purple', url: 'tool/yalitim-performans.html' },
-        'scan': { name: 'Saha Kayıp', desc: 'Kaçak tespiti', icon: 'scan-line', color: 'red', url: 'tool/anlik-kayip.html' },
-        'chill': { name: 'Chiller ROI', desc: 'Soğutma hatları', icon: 'snowflake', color: 'cyan', url: 'tool/chiller-roi.html' },
-        'boiler': { name: 'Kazan Verimliliği', desc: 'Kazan hesabı', icon: 'gauge', color: 'amber', url: 'tool/boiler.html' }
+        'roi': { name: 'Termal ROI', icon: 'flame', url: 'tool/roi.html' },
+        'cond': { name: 'Yoğuşma', icon: 'droplets', url: 'tool/yogusma-hesaplama.html' },
+        'scan': { name: 'Saha Kayıp', icon: 'scan-line', url: 'tool/anlik-kayip.html' },
+        'iso': { name: 'Yalıtım Perf.', icon: 'layers', url: 'tool/yalitim-performans.html' }
     };
 
-    let favTools = ['roi', 'scan']; // Default
+    // --- MOD DEĞİŞTİRME MANTIĞI ---
+    function setDashboardMode(mode) {
+        currentMode = mode;
+        const btnSales = document.getElementById('btnSales');
+        const btnProject = document.getElementById('btnProject');
+        const bg = document.getElementById('modeBg');
+        const orb1 = document.getElementById('bgOrb1');
+        const orb2 = document.getElementById('bgOrb2');
 
-    // --- SIDEBAR & MENU ---
-    function toggleSidebar() {
-        const sidebar = document.getElementById('mainSidebar');
-        isSidebarCollapsed = !isSidebarCollapsed;
-        sidebar.classList.toggle('collapsed');
-    }
+        if (mode === 'sales') {
+            btnSales.classList.add('active');
+            btnProject.classList.remove('active');
+            bg.style.transform = 'translateX(0%)';
+            bg.className = 'mode-bg bg-sales'; // İndigo
+            
+            // Arka plan rengini değiştir
+            orb1.className = "absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-500/20 dark:bg-indigo-600/10 rounded-full blur-[100px] transition-colors duration-700";
+            orb2.className = "absolute bottom-0 right-0 w-[500px] h-[500px] bg-purple-500/20 dark:bg-purple-600/10 rounded-full blur-[100px] transition-colors duration-700";
 
-    document.addEventListener('click', function(event) {
-        const dropdown = document.getElementById('notifDropdown');
-        const bellBtn = document.getElementById('bellBtn');
-        if (!dropdown.classList.contains('hidden')) {
-            if (!dropdown.contains(event.target) && !bellBtn.contains(event.target)) {
-                dropdown.classList.add('hidden');
-            }
-        }
-    });
-
-    // --- PROFILE & SETTINGS SYNC ---
-    async function loadUserProfile() {
-        if (!currentUser) return;
-
-        let { data, error } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
-
-        if (error && error.code === 'PGRST116') {
-            const defaultFavs = ['roi', 'scan'];
-            const { data: newData } = await supabaseClient.from('profiles').insert([{ id: currentUser.id, theme: 'light', favorite_tools: defaultFavs, full_name: currentUser.user_metadata?.full_name || 'Kullanıcı' }]).select().single();
-            if (newData) data = newData;
-        }
-
-        if (data) {
-            if (data.theme === 'dark') { document.documentElement.classList.add('dark'); document.getElementById('themeToggle').checked = true; }
-            else { document.documentElement.classList.remove('dark'); document.getElementById('themeToggle').checked = false; }
-            if (data.favorite_tools) { favTools = data.favorite_tools; renderFavToolsSidebar(); }
-        }
-    }
-
-    async function toggleTheme() {
-        const isDark = document.getElementById('themeToggle').checked;
-        const newTheme = isDark ? 'dark' : 'light';
-        if (isDark) document.documentElement.classList.add('dark');
-        else document.documentElement.classList.remove('dark');
-        if (currentUser) await supabaseClient.from('profiles').update({ theme: newTheme }).eq('id', currentUser.id);
-    }
-
-    // --- FAVORITE TOOLS LOGIC ---
-    function renderFavToolsSidebar() {
-        const container = document.getElementById('favToolsSidebar');
-        container.innerHTML = '';
-        favTools.forEach(key => {
-            const tool = TOOLS[key];
-            if(tool) {
-                container.innerHTML += `<a href="${tool.url}" class="sidebar-link"><i data-lucide="${tool.icon}" class="w-4 h-4 text-indigo-500"></i> <span class="sidebar-text">${tool.name}</span></a>`;
-            }
-        });
-        lucide.createIcons();
-    }
-
-    function openFavModal() {
-        const list = document.getElementById('favCheckList');
-        list.innerHTML = '';
-        Object.keys(TOOLS).forEach(key => {
-            const t = TOOLS[key];
-            const checked = favTools.includes(key) ? 'checked' : '';
-            list.insertAdjacentHTML('beforeend', `
-                <label class="flex items-center justify-between p-3 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800">
-                    <div class="flex items-center gap-3">
-                        <div class="p-2 bg-${t.color}-100 dark:bg-${t.color}-900/30 text-${t.color}-600 rounded"><i data-lucide="${t.icon}" class="w-4 h-4"></i></div>
-                        <span class="text-sm font-bold text-slate-700 dark:text-slate-200">${t.name}</span>
-                    </div>
-                    <input type="checkbox" value="${key}" class="w-4 h-4 rounded text-indigo-600" ${checked}>
-                </label>
-            `);
-        });
-        lucide.createIcons();
-        document.getElementById('favModal').classList.remove('hidden');
-    }
-
-    async function saveFavorites() {
-        const checks = document.querySelectorAll('#favCheckList input:checked');
-        favTools = Array.from(checks).map(c => c.value);
-        renderFavToolsSidebar();
-        document.getElementById('favModal').classList.add('hidden');
-        if (currentUser) await supabaseClient.from('profiles').update({ favorite_tools: favTools }).eq('id', currentUser.id);
-    }
-
-    function toggleSubmenu(menuId, btn) {
-        if (isSidebarCollapsed) return;
-        const menu = document.getElementById(menuId);
-        const icon = btn.querySelector('.chevron');
-        if (menu.classList.contains('open')) {
-            menu.classList.remove('open');
-            if(icon) icon.style.transform = 'rotate(0deg)';
+            updateCardsForSales();
+            renderSalesChart();
         } else {
-            menu.classList.add('open');
-            if(icon) icon.style.transform = 'rotate(180deg)';
+            btnSales.classList.remove('active');
+            btnProject.classList.add('active');
+            bg.style.transform = 'translateX(100%)';
+            bg.className = 'mode-bg bg-project'; // Yeşil
+            
+            // Arka plan rengini değiştir
+            orb1.className = "absolute top-0 left-0 w-[500px] h-[500px] bg-emerald-500/20 dark:bg-emerald-600/10 rounded-full blur-[100px] transition-colors duration-700";
+            orb2.className = "absolute bottom-0 right-0 w-[500px] h-[500px] bg-teal-500/20 dark:bg-teal-600/10 rounded-full blur-[100px] transition-colors duration-700";
+
+            updateCardsForProject();
+            renderProjectChart();
         }
     }
-    
-    function quickAction(type) {
-        const titles = { 'client': 'Yeni Müşteri Ekle', 'proposal': 'Yeni Teklif Oluştur', 'sale': 'Hızlı Satış Girişi', 'stockIn': 'Hammadde Girişi', 'stockOut': 'Hammadde Çıkışı' };
-        showNotification('Hızlı Ekle', `${titles[type] || 'İşlem'} ekranı açılacak.`, 'info');
-    }
-    
-    function checkAdminAccess() { document.getElementById('adminAuthModal').classList.remove('hidden'); }
-    function openSettings() { document.getElementById('settingsModal').classList.remove('hidden'); }
-    function closeSettings() { document.getElementById('settingsModal').classList.add('hidden'); }
-    function openCalcModal() { document.getElementById('calcModal').classList.remove('hidden'); lucide.createIcons(); }
-    function closeCalcModal() { document.getElementById('calcModal').classList.add('hidden'); }
-    function closeNotification() { document.getElementById('notifModal').classList.add('hidden'); }
 
-    function showNotification(title, message, type = 'success') {
-        const modal = document.getElementById('notifModal');
-        const iconCont = document.getElementById('notifIcon');
-        document.getElementById('notifTitle').innerText = title;
-        document.getElementById('notifMsg').innerText = message;
-        iconCont.className = 'w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-in';
-        if (type === 'success') { iconCont.classList.add('bg-green-100', 'text-green-600'); iconCont.innerHTML = '<i data-lucide="check" class="w-8 h-8"></i>'; }
-        else if (type === 'info') { iconCont.classList.add('bg-indigo-100', 'text-indigo-600'); iconCont.innerHTML = '<i data-lucide="info" class="w-8 h-8"></i>'; }
-        else { iconCont.classList.add('bg-red-100', 'text-red-600'); iconCont.innerHTML = '<i data-lucide="alert-triangle" class="w-8 h-8"></i>'; }
-        modal.classList.remove('hidden'); lucide.createIcons();
+    function updateCardsForSales() {
+        // Kart 1: Teklifler
+        setCard('card1', 'Toplam Teklif', '37 Adet', 'file-text', 'border-indigo-500', 'text-indigo-600', 'bg-indigo-100');
+        // Kart 2: Satışlar
+        setCard('card2', 'Onaylanan Satış', '9 Adet', 'check-circle', 'border-purple-500', 'text-purple-600', 'bg-purple-100');
+        // Kart 3: Hedef
+        setCard('card3', 'Aylık Hedef', '%72', 'target', 'border-pink-500', 'text-pink-600', 'bg-pink-100');
+        
+        document.getElementById('chartTitle').innerText = "Satış Hunisi";
     }
 
-    // --- CHART LOGIC ---
-    async function renderChart() {
+    async function updateCardsForProject() {
+        // Canlı veritabanından çekilecek
+        const { data } = await supabaseClient.from('calculations').select('total_loss, total_co2, total_savings').eq('user_id', currentUser.id);
+        let loss = 0, co2 = 0, savings = 0;
+        if(data) data.forEach(d => { loss += Number(d.total_loss)||0; co2 += Number(d.total_co2)||0; savings += Number(d.total_savings)||0; });
+
+        // Kart 1: Toplam Proje
+        setCard('card1', 'Kayıtlı Proje', (data?.length || 0) + ' Adet', 'folder', 'border-emerald-500', 'text-emerald-600', 'bg-emerald-100');
+        // Kart 2: Isı Kaybı
+        setCard('card2', 'Toplam Kayıp', loss.toFixed(0) + ' kWh', 'flame', 'border-orange-500', 'text-orange-600', 'bg-orange-100');
+        // Kart 3: CO2
+        setCard('card3', 'CO2 Tasarruf', co2.toFixed(1) + ' Ton', 'leaf', 'border-teal-500', 'text-teal-600', 'bg-teal-100');
+        
+        document.getElementById('chartTitle').innerText = "Analiz Dağılımı";
+    }
+
+    function setCard(id, title, val, icon, borderClass, textClass, bgClass) {
+        const card = document.getElementById(id);
+        const iconEl = document.getElementById(id.replace('card', 'icon'));
+        
+        document.getElementById(id.replace('card', 'label')).innerText = title;
+        document.getElementById(id.replace('card', 'val')).innerText = val;
+        
+        // Renk Sınıflarını Temizle ve Ekle
+        card.className = `glass-card compact-card rounded-xl border-l-4 transition-all duration-500 ${borderClass}`;
+        iconEl.className = `p-2 rounded-lg transition-colors duration-500 ${bgClass} ${textClass} dark:bg-opacity-20`;
+        iconEl.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i>`;
+        lucide.createIcons();
+    }
+
+    // --- GRAFİKLER (APEXCHARTS) ---
+    function renderSalesChart() {
+        if(chartInstance) chartInstance.destroy();
+        var options = {
+            series: [{ name: 'Adet', data: [30, 20, 15, 9] }],
+            chart: { type: 'bar', height: 200, toolbar: { show: false }, fontFamily: 'Plus Jakarta Sans' },
+            colors: ['#6366f1'],
+            plotOptions: { bar: { borderRadius: 4, horizontal: true } },
+            xaxis: { categories: ['Görüşülen', 'Teklif', 'Pazarlık', 'Satış'] },
+            theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+        };
+        chartInstance = new ApexCharts(document.querySelector("#mainChart"), options);
+        chartInstance.render();
+    }
+
+    async function renderProjectChart() {
+        if(chartInstance) chartInstance.destroy();
+        // Gerçek veri çek
         const { data } = await supabaseClient.from('calculations').select('calculation_type').eq('user_id', currentUser.id);
-        let counts = { 'roi': 0, 'isolation': 0, 'condensation': 0, 'anlik-kayip': 0 };
-        if (data) {
+        let counts = { 'roi': 0, 'cond': 0, 'scan': 0, 'iso': 0 };
+        if(data) {
             data.forEach(d => {
-                if (counts[d.calculation_type] !== undefined) counts[d.calculation_type]++;
-                else counts['roi']++; 
+                if(d.calculation_type === 'roi') counts.roi++;
+                else if(d.calculation_type === 'condensation') counts.cond++;
+                else if(d.calculation_type === 'anlik-kayip') counts.scan++;
+                else counts.iso++;
             });
         }
 
         var options = {
-            series: [counts['roi'], counts['isolation'], counts['condensation'], counts['anlik-kayip']],
-            chart: { type: 'donut', height: 220, fontFamily: 'Plus Jakarta Sans', background: 'transparent' },
-            labels: ['Termal ROI', 'Yalıtım Perf.', 'Yoğuşma', 'Saha Kayıp'],
-            colors: ['#f97316', '#a855f7', '#3b82f6', '#ef4444'],
-            plotOptions: { pie: { donut: { size: '70%' } } },
-            dataLabels: { enabled: false },
-            legend: { position: 'bottom', fontSize: '11px' },
+            series: [counts.roi, counts.scan, counts.cond, counts.iso],
+            chart: { type: 'donut', height: 200, fontFamily: 'Plus Jakarta Sans', background: 'transparent' },
+            labels: ['ROI', 'Kayıp', 'Yoğuşma', 'Yalıtım'],
+            colors: ['#f97316', '#ef4444', '#3b82f6', '#a855f7'],
+            legend: { position: 'right', fontSize: '11px' },
             stroke: { show: false },
             theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
         };
-        var chart = new ApexCharts(document.querySelector("#chart"), options);
-        chart.render();
+        chartInstance = new ApexCharts(document.querySelector("#mainChart"), options);
+        chartInstance.render();
     }
 
-    // --- CURRENCY API ---
-    async function fetchCurrency() {
-        try {
-            const res = await fetch('https://api.frankfurter.app/latest?from=TRY&to=USD,EUR');
-            const data = await res.json();
-            document.getElementById('rateUSD').innerText = (1 / data.rates.USD).toFixed(2);
-            document.getElementById('rateEUR').innerText = (1 / data.rates.EUR).toFixed(2);
-        } catch { console.log('Döviz çekilemedi'); }
-    }
-
-    // --- FİNANSAL VERİLER ---
-    async function fetchFinancials() {
-        const { data: props } = await supabaseClient.from('proposals').select('amount').eq('user_id', currentUser.id);
-        const { data: sales } = await supabaseClient.from('sales').select('amount').eq('user_id', currentUser.id);
-
-        let totalProp = 0, totalSale = 0;
-        if (props) totalProp = props.reduce((acc, curr) => acc + (curr.amount || 0), 0);
-        if (sales) totalSale = sales.reduce((acc, curr) => acc + (curr.amount || 0), 0);
-
-        financialData = { proposals: totalProp, sales: totalSale, pCount: props?.length || 0, sCount: sales?.length || 0 };
-        renderFinancials();
-    }
-
-    function renderFinancials() {
-        const multiplier = showKDV ? 1.20 : 1.0;
-        const formatTL = (val) => (val * multiplier).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
-
-        document.getElementById('totalProposalVal').innerText = formatTL(financialData.proposals);
-        document.getElementById('totalProposalCount').innerText = financialData.pCount;
-        document.getElementById('totalSalesVal').innerText = formatTL(financialData.sales);
-        document.getElementById('totalSalesCount').innerText = financialData.sCount;
-    }
-
-    function setKDV(status) {
-        showKDV = status;
-        const activeClass = "bg-white dark:bg-slate-600 shadow text-slate-800 dark:text-white";
-        const passiveClass = "text-slate-500 hover:text-slate-800 dark:hover:text-white bg-transparent";
-        document.getElementById('btnNoKDV').className = `px-3 py-1.5 text-xs font-bold rounded-md transition ${!status ? activeClass : passiveClass}`;
-        document.getElementById('btnWithKDV').className = `px-3 py-1.5 text-xs font-bold rounded-md transition ${status ? activeClass : passiveClass}`;
-        renderFinancials();
-    }
-
-    // --- ARAÇ İSTATİSTİKLERİ ---
-    async function fetchToolStats() {
-        const { data } = await supabaseClient.from('calculations').select('total_loss, total_co2').eq('user_id', currentUser.id);
-        let loss = 0, co2 = 0;
-        if (data) {
-            data.forEach(d => { loss += Number(d.total_loss) || 0; co2 += Number(d.total_co2) || 0; });
-        }
-        document.getElementById('totalLoss').innerText = loss.toLocaleString('tr-TR', {maximumFractionDigits:0}) + ' kWh';
-        document.getElementById('totalCO2').innerText = co2.toLocaleString('tr-TR', {maximumFractionDigits:1}) + ' Ton';
-    }
-
-    // --- AKTİVİTE AKIŞI ---
+    // --- SON İŞLEMLER (FIXED) ---
     async function fetchActivities() {
-        await supabaseClient.rpc('delete_old_activities');
-        const { data: activities } = await supabaseClient.from('activities').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(20);
+        const feed = document.getElementById('activityFeed');
+        feed.innerHTML = '<div class="text-center p-4 text-xs text-slate-400"><i data-lucide="loader-2" class="animate-spin w-4 h-4 mx-auto mb-1"></i> Yükleniyor...</div>';
+        lucide.createIcons();
 
-        const list = document.getElementById('activityFeed');
-        list.innerHTML = '';
+        // Activities tablosundan çek (User ID filtreli)
+        const { data, error } = await supabaseClient
+            .from('activities')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .order('created_at', { ascending: false })
+            .limit(10);
 
-        if (!activities || activities.length === 0) {
-            list.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-slate-400 py-10"><i data-lucide="activity" class="w-8 h-8 mb-2 opacity-50"></i><span class="text-xs">Henüz işlem kaydı yok.</span></div>`;
-            lucide.createIcons(); return;
+        feed.innerHTML = '';
+
+        if (!data || data.length === 0) {
+            feed.innerHTML = '<div class="text-center p-4 text-xs text-slate-400">Henüz işlem yok.</div>';
+            return;
         }
 
         const userName = currentUser.user_metadata?.full_name || 'Kullanıcı';
-        activities.forEach(act => {
+
+        data.forEach(act => {
             let color = 'gray', label = 'İşlem';
-            if (act.action_type === 'teklif') { color = 'blue'; label = 'Teklif'; }
-            if (act.action_type === 'satis') { color = 'green'; label = 'Satış'; }
-            if (act.action_type === 'rapor') { color = 'orange'; label = 'Rapor'; }
-            if (act.action_type === 'musteri') { color = 'purple'; label = 'Müşteri'; }
+            if (act.action_type === 'teklif') { color = 'indigo'; label = 'Teklif'; }
+            if (act.action_type === 'satis') { color = 'purple'; label = 'Satış'; }
+            if (act.action_type === 'proje') { color = 'emerald'; label = 'Proje'; }
+            
+            const date = new Date(act.created_at).toLocaleString('tr-TR', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
 
-            const time = new Date(act.created_at).toLocaleString('tr-TR', { day: 'numeric', month: 'short', hour:'2-digit', minute:'2-digit' });
-            const html = `
-            <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex items-start gap-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
-                <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-300">${userName.charAt(0)}</div>
-                <div class="flex-1">
-                    <div class="text-[10px] text-slate-400 mb-0.5">${time} <span class="font-bold text-slate-700 dark:text-slate-200 ml-1">${userName}</span></div>
-                    <div class="text-xs text-slate-600 dark:text-slate-400 leading-snug">${act.description}</div>
+            const item = `
+            <div class="p-3 border-b border-slate-100 dark:border-white/5 flex items-start gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition">
+                <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-600 dark:text-slate-300">
+                    ${userName.charAt(0)}
                 </div>
-                <span class="bg-${color}-100 dark:bg-${color}-900/30 text-${color}-600 dark:text-${color}-400 text-[9px] font-bold px-2 py-0.5 rounded uppercase">${label}</span>
-            </div>`;
-            list.insertAdjacentHTML('beforeend', html);
-        });
-    }
-
-    // --- GLOBAL NOTIFICATION LOGIC ---
-    function toggleNotifDropdown() {
-        document.getElementById('notifDropdown').classList.toggle('hidden');
-    }
-    
-    async function dismissReminder(id, event) {
-        event.stopPropagation(); 
-        const { error } = await supabaseClient.from('calculations').update({ reminder_date: null }).eq('id', id);
-        if(!error) { checkReminders(); }
-    }
-    
-    async function checkReminders(forceOpen = false) {
-        if(!currentUser) return;
-        const { data: allProjects } = await supabaseClient.from('calculations').select('id, project_name, client_name, reminder_date').eq('user_id', currentUser.id);
-        if(!allProjects) return;
-
-        const now = new Date(); 
-        const activeReminders = allProjects.filter(p => {
-            if (!p.reminder_date) return false;
-            const rDate = new Date(p.reminder_date);
-            return rDate <= now;
-        });
-        
-        const dot = document.getElementById('notifDot');
-        const list = document.getElementById('notifList');
-        
-        if(activeReminders.length > 0) {
-            dot.classList.remove('hidden');
-            list.innerHTML = '';
-            activeReminders.forEach(p => {
-                const dateObj = new Date(p.reminder_date);
-                const dateStr = dateObj.toLocaleString('tr-TR', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-                const div = document.createElement('div');
-                div.className = 'p-3 border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition flex items-center justify-between gap-3';
-                div.innerHTML = `
-                    <div class="flex items-center gap-3 cursor-pointer flex-1" onclick="window.location.href='tool/roi.html?load_id=${p.id}'">
-                        <div class="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 p-2 rounded-lg shrink-0"><i data-lucide="clock" class="w-4 h-4"></i></div>
-                        <div><div class="text-sm font-bold text-slate-800 dark:text-slate-200 line-clamp-1">${p.client_name || p.project_name || 'İsimsiz'}</div><div class="text-xs text-slate-500">Zamanı geldi!</div><div class="text-[10px] text-slate-400 mt-1">${dateStr}</div></div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex justify-between items-center mb-0.5">
+                        <span class="text-[10px] font-bold text-slate-700 dark:text-slate-200">${userName}</span>
+                        <span class="text-[9px] text-slate-400">${date}</span>
                     </div>
-                    <button onclick="dismissReminder('${p.id}', event)" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition" title="Bildirimi Kaldır"><i data-lucide="check" class="w-4 h-4"></i></button>
-                `;
-                list.appendChild(div);
-            });
-        } else {
-            dot.classList.add('hidden');
-            list.innerHTML = '<div class="p-4 text-center text-xs text-slate-400">Okunmamış bildirim yok.</div>';
-        }
-        lucide.createIcons();
+                    <p class="text-xs text-slate-600 dark:text-slate-400 truncate">${act.description || 'İşlem yapıldı.'}</p>
+                </div>
+                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-${color}-100 dark:bg-${color}-900/30 text-${color}-600 dark:text-${color}-400 border border-${color}-200 dark:border-${color}-800">${label}</span>
+            </div>`;
+            feed.insertAdjacentHTML('beforeend', item);
+        });
     }
 
-    setInterval(() => { if(currentUser) checkReminders(); }, 30000);
+    // --- DÖVİZ (ALIŞ/SATIŞ) ---
+    async function fetchCurrency() {
+        const mode = document.getElementById('currencyMode').value; // buy or sell
+        try {
+            const res = await fetch('https://api.frankfurter.app/latest?from=TRY&to=USD,EUR');
+            const data = await res.json();
+            
+            // API 1 TRY = X USD verir. Biz 1 USD = X TRY istiyoruz.
+            let usd = 1 / data.rates.USD;
+            let eur = 1 / data.rates.EUR;
 
-    async function initPage() {
+            // Satış ise %2 makas ekle (Simülasyon)
+            if (mode === 'sell') {
+                usd = usd * 1.02;
+                eur = eur * 1.02;
+            }
+
+            document.getElementById('rateUSD').innerText = usd.toFixed(2);
+            document.getElementById('rateEUR').innerText = eur.toFixed(2);
+        } catch { console.log('Döviz Hatası'); }
+    }
+
+    // --- BAŞLANGIÇ ---
+    async function initDashboard() {
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) { window.location.href = 'login.html'; return; }
-
+        
         currentUser = session.user;
-        const fullName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
-        document.getElementById('sidebarUserName').textContent = fullName;
-        document.getElementById('avatarInitial').textContent = fullName.charAt(0).toUpperCase();
-        document.getElementById('modalName').textContent = fullName;
-        document.getElementById('modalEmail').textContent = currentUser.email;
-        document.getElementById('modalAvatar').textContent = fullName.charAt(0).toUpperCase();
+        const name = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
+        document.getElementById('sidebarUserName').innerText = name;
+        document.getElementById('avatarInitial').innerText = name.charAt(0).toUpperCase();
 
-        await loadUserProfile();
-        fetchFinancials();
-        fetchToolStats();
-        fetchActivities();
-        renderChart();
+        await loadUserProfile(); // Tema ve Favoriler
+        renderFavToolsSidebar();
+        
+        // Varsayılan Modu Yükle
+        setDashboardMode('sales'); 
+        
+        // Döviz ve Aktiviteler
         fetchCurrency();
+        fetchActivities();
+        
+        // Hatırlatma
         checkReminders();
+        
         lucide.createIcons();
+    }
+
+    // --- YARDIMCI FONKSİYONLAR ---
+    function toggleSidebar() { document.getElementById('mainSidebar').classList.toggle('collapsed'); }
+    function toggleSubmenu(id, btn) { 
+        document.getElementById(id).classList.toggle('open'); 
+        const icon = btn.querySelector('.chevron');
+        if(icon) icon.style.transform = icon.style.transform === 'rotate(180deg)' ? 'rotate(0deg)' : 'rotate(180deg)';
+    }
+    async function loadUserProfile() {
+        let { data } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
+        if (data) {
+            if (data.theme === 'dark') { document.documentElement.classList.add('dark'); }
+            if (data.favorite_tools) { favTools = data.favorite_tools; }
+        }
+    }
+    function renderFavToolsSidebar() {
+        const div = document.getElementById('favToolsSidebar');
+        div.innerHTML = '';
+        favTools.forEach(k => {
+            if(TOOLS[k]) div.innerHTML += `<a href="${TOOLS[k].url}" class="sidebar-link"><i data-lucide="${TOOLS[k].icon}" class="w-4 h-4 text-indigo-500"></i> <span>${TOOLS[k].name}</span></a>`;
+        });
+        lucide.createIcons();
+    }
+    function openFavModal() {
+        const list = document.getElementById('favCheckList');
+        list.innerHTML = '';
+        Object.keys(TOOLS).forEach(k => {
+            const chk = favTools.includes(k) ? 'checked' : '';
+            list.innerHTML += `<label class="flex justify-between items-center p-2 border rounded mb-2 cursor-pointer dark:border-slate-700"><span>${TOOLS[k].name}</span><input type="checkbox" value="${k}" ${chk}></label>`;
+        });
+        document.getElementById('favModal').classList.remove('hidden');
+    }
+    async function saveFavorites() {
+        const chks = document.querySelectorAll('#favCheckList input:checked');
+        favTools = Array.from(chks).map(c => c.value);
+        await supabaseClient.from('profiles').update({ favorite_tools: favTools }).eq('id', currentUser.id);
+        renderFavToolsSidebar();
+        document.getElementById('favModal').classList.add('hidden');
+    }
+    function openSettings() { document.getElementById('settingsModal').classList.remove('hidden'); }
+    function closeSettings() { document.getElementById('settingsModal').classList.add('hidden'); }
+    function toggleNotifDropdown() { document.getElementById('notifDropdown').classList.toggle('hidden'); }
+    
+    // Hatırlatma
+    async function checkReminders() {
+        const now = new Date();
+        const { data } = await supabaseClient.from('calculations').select('project_name, reminder_date').eq('user_id', currentUser.id).not('reminder_date', 'is', null);
+        if(data) {
+            const active = data.filter(p => new Date(p.reminder_date) <= now);
+            if(active.length > 0) {
+                document.getElementById('notifDot').classList.remove('hidden');
+                const list = document.getElementById('notifList');
+                list.innerHTML = '';
+                active.forEach(p => {
+                    list.innerHTML += `<div class="p-2 border-b dark:border-slate-700 text-xs"><div class="font-bold text-indigo-500">${p.project_name}</div><div>Hatırlatma zamanı geldi.</div></div>`;
+                });
+            }
+        }
     }
 
     async function handleLogout() {
-      const { error } = await supabaseClient.auth.signOut();
-      if (!error) window.location.href = 'login.html';
+        await supabaseClient.auth.signOut();
+        window.location.href = 'login.html';
     }
 
-    initPage();
+    initDashboard();
   </script>
 </body>
 </html>
