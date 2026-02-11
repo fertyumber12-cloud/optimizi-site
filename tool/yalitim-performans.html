@@ -510,17 +510,55 @@
         else { content.classList.add('collapsed'); icon.classList.add('collapsed'); }
     }
 
-    async function saveProjectToDB() {
-        const payload = {
-            company: document.getElementById('inp-company').value,
-            representative: document.getElementById('inp-rep').value,
-            provider: document.getElementById('inp-provider').value,
-            items: reportQueue,
-            created_at: new Date().toISOString()
-        };
-        console.log("Payload ready for localhost:", payload);
-        showNotification("Başarıyla Kaydedildi", `Proje verileri sisteme aktarıldı.<br><span class="text-xs text-slate-400 font-mono bg-slate-50 px-2 py-1 rounded mt-2 inline-block">Localhost: Sync Pending...</span>`, 'success');
+  // --- DATABASE KAYIT FONKSİYONU ---
+async function saveProjectToDB() {
+    // 1. Önce kullanıcı giriş yapmış mı bakalım
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    
+    if (!session) {
+        showNotification("Giriş Yapılmadı", "Projeyi kaydetmek için sisteme giriş yapmalısınız.", "error");
+        return;
     }
+
+    // Listede veri var mı?
+    if (reportQueue.length === 0) {
+        showNotification("Liste Boş", "Kaydedilecek hesaplama bulunamadı. Önce listeye ekleme yapın.", "error");
+        return;
+    }
+
+    const companyName = document.getElementById('inp-company').value || "İsimsiz Performans Analizi";
+    const contactName = document.getElementById('inp-rep').value;
+    const providerName = document.getElementById('inp-provider').value;
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('calculations')
+            .insert({
+                user_id: session.user.id,
+                project_name: companyName,
+                client_contact: contactName,
+                provider_name: providerName,
+                
+                // EN ÖNEMLİ KISIM BURASI:
+                // ROI aracı ile karışmaması için tipine 'performance' diyoruz.
+                calculation_type: 'insulation_performance', 
+                
+                // Senin tüm hesaplama listen burada JSON olarak gidiyor
+                items: reportQueue,
+                
+                audit_date: new Date().toISOString()
+            })
+            .select();
+
+        if (error) throw error;
+
+        showNotification("Başarılı", `<strong>${companyName}</strong> başarıyla kaydedildi!`, "success");
+
+    } catch (err) {
+        console.error("Kayıt Hatası:", err);
+        showNotification("Hata", "Kaydetme sırasında bir sorun oluştu.", "error");
+    }
+}
 
     // --- REPORT LOGIC ---
     function addToQueue() {
