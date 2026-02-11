@@ -221,7 +221,7 @@
                 <i data-lucide="printer" class="w-3 h-3"></i> Rapor Al
              </button>
 
-             <button onclick="saveProjectToDB()" class="text-xs bg-slate-900 text-white px-4 py-2 rounded-lg font-bold hover:bg-slate-800 transition shadow-lg shadow-slate-200 flex items-center gap-2 cursor-pointer">
+             <button onclick="ToDB()" class="text-xs bg-slate-900 text-white px-4 py-2 rounded-lg font-bold hover:bg-slate-800 transition shadow-lg shadow-slate-200 flex items-center gap-2 cursor-pointer">
                  <i data-lucide="save" class="w-3 h-3"></i> Kaydet
              </button>
           </div>
@@ -510,56 +510,47 @@
         else { content.classList.add('collapsed'); icon.classList.add('collapsed'); }
     }
 
-  // --- DATABASE KAYIT FONKSİYONU ---
-async function saveProjectToDB() {
-    // 1. Önce kullanıcı giriş yapmış mı bakalım
+ async function saveProjectToDB() {
+    // 1. Giriş kontrolü
     const { data: { session } } = await supabaseClient.auth.getSession();
-    
     if (!session) {
-        showNotification("Giriş Yapılmadı", "Projeyi kaydetmek için sisteme giriş yapmalısınız.", "error");
+        showNotification("Giriş Yapılmadı", "Kaydetmek için lütfen giriş yapın.", "error");
         return;
     }
 
-    // Listede veri var mı?
+    // 2. Liste boş mu kontrolü
     if (reportQueue.length === 0) {
-        showNotification("Liste Boş", "Kaydedilecek hesaplama bulunamadı. Önce listeye ekleme yapın.", "error");
+        showNotification("Liste Boş", "Kaydedilecek veri yok.", "error");
         return;
     }
 
-    const companyName = document.getElementById('inp-company').value || "İsimsiz Performans Analizi";
-    const contactName = document.getElementById('inp-rep').value;
-    const providerName = document.getElementById('inp-provider').value;
+    // Form verilerini al
+    const company = document.getElementById('inp-company').value || "İsimsiz Performans Raporu";
+    const contact = document.getElementById('inp-rep').value;
+    const provider = document.getElementById('inp-provider').value;
 
     try {
+        // YENİ TABLOYA KAYIT
         const { data, error } = await supabaseClient
-            .from('calculations')
+            .from('performance_reports') // <--- Yeni tablo adımız
             .insert({
                 user_id: session.user.id,
-                project_name: companyName,
-                client_contact: contactName,
-                provider_name: providerName,
-                
-                // EN ÖNEMLİ KISIM BURASI:
-                // ROI aracı ile karışmaması için tipine 'performance' diyoruz.
-                calculation_type: 'insulation_performance', 
-                
-                // Senin tüm hesaplama listen burada JSON olarak gidiyor
-                items: reportQueue,
-                
-                audit_date: new Date().toISOString()
+                project_name: company,
+                client_contact: contact,
+                provider_name: provider,
+                items: reportQueue // Listeyi JSON olarak basıyoruz
             })
             .select();
 
         if (error) throw error;
 
-        showNotification("Başarılı", `<strong>${companyName}</strong> başarıyla kaydedildi!`, "success");
+        showNotification("Başarılı", `<strong>${company}</strong> raporu başarıyla kaydedildi!`, "success");
 
     } catch (err) {
         console.error("Kayıt Hatası:", err);
-        showNotification("Hata", "Kaydetme sırasında bir sorun oluştu.", "error");
+        showNotification("Hata", "Kaydetme başarısız: " + err.message, "error");
     }
 }
-
     // --- REPORT LOGIC ---
     function addToQueue() {
         const data = captureCurrentState();
@@ -721,16 +712,13 @@ async function saveProjectToDB() {
 
 // --- KAYITLI PROJEYİ GERİ YÜKLEME ---
 window.addEventListener('DOMContentLoaded', async () => {
-    // URL'de "load_id" var mı diye bakıyoruz
     const urlParams = new URLSearchParams(window.location.search);
-    const loadId = urlParams.get('load_id');
+    const loadId = urlParams.get('load_id'); // URL'den ID'yi al
 
     if (loadId) {
-        console.log("Proje yükleniyor, ID:", loadId);
-        
-        // Veritabanından çek
+        // YENİ TABLODAN ÇEKME İŞLEMİ
         const { data, error } = await supabaseClient
-            .from('calculations')
+            .from('performance_reports') // <--- Yeni tablo adımız
             .select('*')
             .eq('id', loadId)
             .single();
@@ -740,27 +728,27 @@ window.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // 1. Form alanlarını geri doldur
+        // Form alanlarını doldur
         if(data.project_name) document.getElementById('inp-company').value = data.project_name;
         if(data.client_contact) document.getElementById('inp-rep').value = data.client_contact;
         if(data.provider_name) document.getElementById('inp-provider').value = data.provider_name;
 
-        // 2. Listeyi geri yükle
+        // Listeyi doldur ve arayüzü güncelle
         if (data.items && Array.isArray(data.items)) {
             reportQueue = data.items;
             
-            // Buton üzerindeki sayıları güncelle
+            // "Rapor Al" butonundaki sayıyı güncelle
             const topBtn = document.getElementById('topReportBtn');
             const addBtn = document.getElementById('btnAdd');
-            
             if(topBtn) topBtn.innerHTML = `<i data-lucide="printer" class="w-3 h-3"></i> Rapor Al (${reportQueue.length})`;
-            
-            // Kullanıcıya haber ver
-            showNotification("Yüklendi", `<strong>${data.project_name}</strong> verileri başarıyla yüklendi.`, "success");
+
+            // Opsiyonel: Tabloyu hemen ekrana çizmek istersen renderPrintTable() çağırabilirsin
+            // renderPrintTable(); 
+
+            showNotification("Yüklendi", `<strong>${data.project_name}</strong> başarıyla yüklendi.`, "success");
         }
     }
 });
-
 </script>
 </body>
 </html>
