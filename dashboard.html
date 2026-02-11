@@ -153,10 +153,6 @@
     .animate-pop { animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
     @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
   </style>
-  
-  <script>
-      // Tema kontrolü
-  </script>
 </head>
 <body class="flex h-screen w-full text-slate-800 dark:text-slate-100 transition-colors duration-300">
 
@@ -176,9 +172,9 @@
       <div class="flex-1 overflow-y-auto py-6 px-4 custom-scroll">
           
           <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2 sidebar-title">Genel</div>
-          <a href="#" class="sidebar-link active"><i data-lucide="layout-dashboard"></i> <span>Anasayfa</span></a>
+          <a href="#" class="sidebar-link active"><i data-lucide="layout-dashboard"></i> <span>Proje Panel</span></a>
+          <a href="#" onclick="showNotification('Bilgi', 'Satış Paneli yakında aktif olacak.', 'info')" class="sidebar-link"><i data-lucide="shopping-cart"></i> <span>Satış Teklif Panel</span></a>
           <a href="projelerim.html" class="sidebar-link"><i data-lucide="folder-open"></i> <span>Projelerim</span></a>
-          
           <div class="mt-6">
               <button onclick="toggleSubmenu('offerMenu', this)" class="sidebar-link justify-between group">
                   <div class="flex items-center gap-3"><i data-lucide="file-text"></i> <span>Teklif Yönetimi</span></div>
@@ -272,10 +268,10 @@
           </div>
           
           <div class="flex items-center gap-4">
-
+              
               <div class="relative hidden md:block">
                   <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-slate-400"></i>
-                  <input type="text" placeholder="Proje ara..." class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-full pl-10 pr-4 py-2 text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 w-64 transition shadow-sm">
+                  <input type="text" id="dashboardSearch" onkeyup="filterDashboardTable()" placeholder="Proje ara..." class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-full pl-10 pr-4 py-2 text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 w-64 transition shadow-sm">
               </div>
               
               <div class="relative group">
@@ -492,7 +488,7 @@
                   <button onclick="handleLogout()" class="w-full py-3 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 font-bold transition flex items-center justify-center gap-2"><i data-lucide="log-out" class="w-4 h-4"></i> Çıkış Yap</button>
               </section>
           </div>
-          <div class="p-4 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-400">Optimizi v2.3 • Build 2026</div>
+          <div class="p-4 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-400">Optimizi v2.4 • Build 2026</div>
       </div>
   </div>
 
@@ -504,9 +500,9 @@
     let isSidebarCollapsed = false;
     let currentUser = null;
     let allCalculations = [];
-    let userFavorites = []; // Kullanıcının favorileri burada tutulur
+    let userFavorites = [];
 
-    // GLOBAL TOOL DEFINITIONS (Her yerde kullanılacak)
+    // GLOBAL ARAÇ TANIMLARI
     const TOOL_DEFINITIONS = {
         'roi': { name: 'Termal ROI', desc: 'Amortisman hesabı', url: 'tool/roi.html', icon: 'flame', color: 'orange' },
         'cond': { name: 'Yoğuşma Hesabı', desc: 'Kritik kalınlık', url: 'tool/yogusma-hesaplama.html', icon: 'droplets', color: 'blue' },
@@ -552,9 +548,8 @@
     function openFavModal() {
         const modal = document.getElementById('favModal');
         const listContainer = document.getElementById('favToolsList');
-        listContainer.innerHTML = ''; // Temizle
+        listContainer.innerHTML = '';
 
-        // Tüm araçları listele
         Object.keys(TOOL_DEFINITIONS).forEach(key => {
             const tool = TOOL_DEFINITIONS[key];
             const isChecked = userFavorites.includes(key) ? 'checked' : '';
@@ -578,29 +573,21 @@
         lucide.createIcons();
     }
 
-    function closeFavModal() {
-        document.getElementById('favModal').classList.add('hidden');
-    }
+    function closeFavModal() { document.getElementById('favModal').classList.add('hidden'); }
 
     async function saveFavoriteTools() {
         if (!currentUser) return;
-        
-        // Seçilen checkboxları al
         const checkboxes = document.querySelectorAll('#favToolsList input[type="checkbox"]:checked');
         const selectedKeys = Array.from(checkboxes).map(cb => cb.value);
 
-        // Supabase güncelle
-        const { error } = await supabaseClient
-            .from('profiles')
-            .update({ favorite_tools: selectedKeys })
-            .eq('id', currentUser.id);
+        const { error } = await supabaseClient.from('profiles').update({ favorite_tools: selectedKeys }).eq('id', currentUser.id);
 
         if (error) {
             console.error(error);
             showNotification('Hata', 'Favoriler kaydedilemedi.', 'error');
         } else {
-            userFavorites = selectedKeys; // Lokal değişkeni güncelle
-            renderFavoriteTools(userFavorites); // Arayüzü güncelle
+            userFavorites = selectedKeys;
+            renderFavoriteTools(userFavorites);
             showNotification('Başarılı', 'Favori araçlar güncellendi.');
             closeFavModal();
         }
@@ -650,7 +637,6 @@
         }
 
         if (data) {
-            // TEMA UYGULA
             if (data.theme === 'dark') {
                 document.documentElement.classList.add('dark');
                 document.getElementById('themeToggle').checked = true;
@@ -660,8 +646,7 @@
                 document.getElementById('themeToggle').checked = false;
                 localStorage.setItem('theme', 'light');
             }
-            // FAVORİ ARAÇLARI UYGULA
-            userFavorites = data.favorite_tools || ['roi', 'cond']; // Null check
+            userFavorites = data.favorite_tools || ['roi', 'cond'];
             renderFavoriteTools(userFavorites);
         }
     }
@@ -711,7 +696,7 @@
         lucide.createIcons();
     }
 
-    // --- FAVORİ ARAÇLAR (DİNAMİK RENDER) ---
+    // --- FAVORİ ARAÇLAR & ARAMA & TABLO ---
     function renderFavoriteTools(toolKeys) {
         const container = document.getElementById('favoriteToolsContainer');
         if (!toolKeys || toolKeys.length === 0) {
@@ -736,6 +721,45 @@
         lucide.createIcons();
     }
 
+    // Tabloyu Çizdirme Fonksiyonu
+    function renderDashboardTable(data) {
+        const tableBody = document.getElementById('projectsTableBody');
+        tableBody.innerHTML = '';
+        
+        if (data.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-12 text-center"><p class="text-slate-500 text-sm">Sonuç bulunamadı.</p></td></tr>`;
+            return;
+        }
+
+        // Sadece ilk 5 kaydı göster (Filtrelenmiş datadan)
+        data.slice(0, 5).forEach(proj => {
+            const typeInfo = proj.calculation_type === 'roi' ? {l: 'Termal ROI', i: 'flame'} : {l: 'Hesaplama', i: 'calculator'};
+            const row = `
+            <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition group border-b border-slate-100 dark:border-white/5 last:border-0">
+                <td class="px-6 py-4 font-bold text-slate-700 dark:text-white flex items-center gap-3">
+                    <div class="w-8 h-8 rounded bg-indigo-100 dark:bg-slate-700 flex items-center justify-center text-indigo-600 dark:text-slate-400 group-hover:text-white group-hover:bg-indigo-600 transition"><i data-lucide="${typeInfo.i}" class="w-4 h-4"></i></div>
+                    ${proj.client_name || 'İsimsiz Proje'}
+                </td>
+                <td class="px-6 py-4 text-xs font-bold text-slate-500">${typeInfo.l}</td>
+                <td class="px-6 py-4"><span class="px-2 py-1 rounded bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-400 text-xs font-bold border border-green-200 dark:border-green-500/20">Tamamlandı</span></td>
+                <td class="px-6 py-4 text-right"><button onclick="window.location.href='tool/roi.html?load_id=${proj.id}'" class="text-indigo-600 hover:text-indigo-500 p-1 transition" title="Görüntüle"><i data-lucide="eye" class="w-4 h-4"></i></button></td>
+            </tr>`;
+            tableBody.insertAdjacentHTML('beforeend', row);
+        });
+        lucide.createIcons();
+    }
+
+    // Arama Fonksiyonu
+    function filterDashboardTable() {
+        const query = document.getElementById('dashboardSearch').value.toLowerCase();
+        const filtered = allCalculations.filter(p => {
+            const pName = (p.project_name || '').toLowerCase();
+            const cName = (p.client_name || '').toLowerCase();
+            return pName.includes(query) || cName.includes(query);
+        });
+        renderDashboardTable(filtered);
+    }
+
     // --- AUTH & DATA LOADING ---
     async function initPage() {
         const { data: { session }, error } = await supabaseClient.auth.getSession();
@@ -745,7 +769,6 @@
         const fullName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
         const firstName = fullName.split(' ')[0];
         
-        // UI User Info
         document.getElementById('sidebarUserName').textContent = fullName;
         document.getElementById('avatarInitial').textContent = firstName.charAt(0).toUpperCase();
         document.getElementById('headerGreeting').textContent = firstName;
@@ -753,7 +776,7 @@
         document.getElementById('modalEmail').textContent = currentUser.email;
         document.getElementById('modalAvatar').textContent = firstName.charAt(0).toUpperCase();
 
-        await loadUserProfile(); // Tema ve Favoriler buradan yüklenir
+        await loadUserProfile();
         fetchDashboardData();
     }
 
@@ -763,7 +786,6 @@
         
         allCalculations = data;
         
-        // İstatistikler
         const totalSavings = data.reduce((sum, c) => sum + parseFloat(c.total_savings || 0), 0);
         const totalCo2 = data.reduce((sum, c) => sum + parseFloat(c.total_co2 || 0), 0);
         
@@ -771,28 +793,9 @@
         document.getElementById('statTotalLoss').innerText = totalSavings.toLocaleString('tr-TR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' ₺';
         document.getElementById('statCo2').innerHTML = totalCo2.toFixed(1) + ' <span class="text-sm font-normal text-slate-500">Ton</span>';
         
-        // Son 5 Proje Tablosu
-        const tableBody = document.getElementById('projectsTableBody');
-        if(data.length > 0) {
-            tableBody.innerHTML = '';
-            data.slice(0, 5).forEach(proj => {
-                const typeInfo = proj.calculation_type === 'roi' ? {l: 'Termal ROI', i: 'flame'} : {l: 'Hesaplama', i: 'calculator'};
-                const row = `
-                <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition group border-b border-slate-100 dark:border-white/5 last:border-0">
-                    <td class="px-6 py-4 font-bold text-slate-700 dark:text-white flex items-center gap-3">
-                        <div class="w-8 h-8 rounded bg-indigo-100 dark:bg-slate-700 flex items-center justify-center text-indigo-600 dark:text-slate-400 group-hover:text-white group-hover:bg-indigo-600 transition"><i data-lucide="${typeInfo.i}" class="w-4 h-4"></i></div>
-                        ${proj.client_name || 'İsimsiz Proje'}
-                    </td>
-                    <td class="px-6 py-4 text-xs font-bold text-slate-500">${typeInfo.l}</td>
-                    <td class="px-6 py-4"><span class="px-2 py-1 rounded bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-400 text-xs font-bold border border-green-200 dark:border-green-500/20">Tamamlandı</span></td>
-                    <td class="px-6 py-4 text-right"><button onclick="window.location.href='tool/roi.html?load_id=${proj.id}'" class="text-indigo-600 hover:text-indigo-500 p-1 transition" title="Görüntüle"><i data-lucide="eye" class="w-4 h-4"></i></button></td>
-                </tr>`;
-                tableBody.insertAdjacentHTML('beforeend', row);
-            });
-        }
-        
-        checkReminders(); // Bildirimleri kontrol et
-        lucide.createIcons();
+        // Tabloyu ilk kez çiz
+        renderDashboardTable(allCalculations);
+        checkReminders();
     }
 
     async function handleLogout() {
@@ -800,7 +803,6 @@
       if (!error) window.location.href = 'login.html';
     }
 
-    // 30 saniyede bir bildirimleri yenile
     setInterval(() => { if(allCalculations.length > 0) checkReminders(); }, 30000);
 
     initPage();
