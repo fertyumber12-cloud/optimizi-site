@@ -513,7 +513,7 @@
         else { content.classList.add('collapsed'); icon.classList.add('collapsed'); }
     }
 
-    // --- DB KAYIT İŞLEMİ (GÜNCELLENDİ) ---
+    // --- DB KAYIT İŞLEMİ (GERÇEK ENTEGRASYON) ---
     async function saveProjectToDB() {
         const { data: { session } } = await supabaseClient.auth.getSession();
         
@@ -525,14 +525,15 @@
         const compName = document.getElementById('inp-company').value || 'İsimsiz Firma';
         const repName = document.getElementById('inp-rep').value || 'İsimsiz Proje';
         
+        // Veritabanı şemasına uygun payload hazırlığı
         const payload = {
             user_id: session.user.id,
             client_name: compName,
             project_name: repName,
-            calculation_type: 'isolation', // Yalıtım Performansı için ID
+            calculation_type: 'isolation', // Dashboard'da 'Yalıtım Perf.' olarak görünecek
             input_data: {
                 provider: document.getElementById('inp-provider').value,
-                report_items: reportQueue // Rapordaki tüm satırları kaydet
+                report_items: reportQueue // Hesaplama kuyruğunu kaydet
             },
             result_data: {
                 total_items: reportQueue.length
@@ -545,7 +546,7 @@
             console.error('Kayıt hatası:', error);
             showNotification('Kayıt Başarısız', 'Veritabanı hatası: ' + error.message, 'error');
         } else {
-            showNotification("Başarıyla Kaydedildi", `<b>${compName}</b> projesi başarıyla panelinize eklendi.`, 'success');
+            showNotification("Başarıyla Kaydedildi", `<b>${compName}</b> projesi başarıyla proje panelinize eklendi.`, 'success');
         }
     }
 
@@ -674,8 +675,9 @@
     
     const PIPES={15:21.3,20:26.7,25:33.4,32:42.2,40:48.3,50:60.3,65:73.0,80:88.9,100:114.3,125:141.3,150:168.3,200:219.1,250:273.0,300:323.9,350:355.6,400:406.4,500:508.0};
     
-    // YENİ MALZEME "glasswool" EKLENDİ
-    // Katsayılar: k = 0.031 + 0.00012T + 3.3e-7*T^2
+    // YENİ MALZEME "glasswool" (Camyünü) EKLENDİ
+    // Katsayılar, endüstriyel camyünü (Sanayi Şiltesi) karakteristiğine göre ayarlandı.
+    // k = 0.031 + 0.00012T + 3.3e-7*T^2 (Sıcaklık arttıkça iletkenlik artar)
     const MATS={
         rockwool:{a:0.035,b:0.00017,c:0, limit:650},
         glasswool:{a:0.031,b:0.00012,c:3.3e-7, limit:550, name:"Camyünü"},
