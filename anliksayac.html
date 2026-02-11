@@ -3,23 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Anlık Enerji Kaybınız</title>
+    <title>Canlı Kayıp Takibi</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
             theme: {
-                fontFamily: { sans: ['"Inter"', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] },
-                extend: {
-                    colors: { 
-                        slate: { 850: '#1e293b', 900: '#0f172a' },
-                        danger: { 500: '#ef4444', 900: '#7f1d1d' }
-                    },
+                fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] },
+                extend: { 
+                    colors: { brand: { 500: '#ef4444' } },
                     animation: { 'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite' }
                 }
             }
@@ -27,230 +24,165 @@
     </script>
     <style>
         body { background-color: #0f172a; color: white; -webkit-tap-highlight-color: transparent; }
-        
-        /* Cam Efekti */
-        .glass-card {
-            background: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Sayaç Parlaması */
-        .counter-glow { text-shadow: 0 0 40px rgba(239, 68, 68, 0.4); }
-        
-        /* Arka Plan Işığı */
-        .ambient-light {
-            position: absolute; width: 100%; height: 100%; top: 0; left: 0;
-            background: radial-gradient(circle at 50% 30%, rgba(239,68,68,0.15), transparent 70%);
-            pointer-events: none; z-index: 0;
-        }
+        .glass-dark { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .counter-glow { text-shadow: 0 0 30px rgba(239, 68, 68, 0.6); }
+        .counter-stopped { color: #64748b; text-shadow: none; }
     </style>
 </head>
-<body class="h-[100dvh] flex flex-col relative overflow-hidden">
-
-    <div class="ambient-light animate-pulse-slow"></div>
+<body class="h-[100dvh] flex flex-col overflow-hidden relative">
 
     <div class="z-10 px-6 pt-8 pb-4 flex justify-between items-start">
         <div>
-            <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+            <h1 class="text-xl font-bold flex items-center gap-2">
                 <i data-lucide="zap" class="w-5 h-5 text-red-500 fill-red-500"></i> Optimizi
             </h1>
-            <p id="clientName" class="text-xs text-slate-400 font-medium mt-1">Yükleniyor...</p>
+            <p id="clientName" class="text-xs text-slate-400 mt-1">Yükleniyor...</p>
         </div>
         
-        <div id="statusBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 backdrop-blur-md">
+        <div id="statusBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800 border border-slate-700">
             <span class="relative flex h-2 w-2">
               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
               <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
             </span>
-            <span class="text-[10px] font-bold tracking-wider text-slate-300">CANLI AKIŞ</span>
+            <span class="text-[10px] font-bold text-slate-300">CANLI</span>
         </div>
     </div>
 
-    <div class="z-10 flex-1 flex flex-col items-center justify-center text-center px-4 -mt-10">
+    <div class="flex-1 flex flex-col items-center justify-center text-center px-4 z-10 -mt-10">
+        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4">TOPLAM OPERASYONEL KAYIP</p>
         
-        <div class="mb-4">
-            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">TOPLAM OPERASYONEL KAYIP</p>
-        </div>
-
         <div class="relative">
-            <div id="counter" class="text-[14vw] leading-none font-mono font-bold text-white tracking-tight tabular-nums counter-glow transition-all">
+            <div id="counter" class="text-[14vw] leading-none font-mono font-bold text-white tracking-tight tabular-nums counter-glow">
                 0.0000
             </div>
             <div class="absolute -right-6 top-0 text-xl font-bold text-red-500 translate-x-full">TL</div>
         </div>
 
-        <div class="mt-8 inline-flex items-center gap-3 px-4 py-2 rounded-xl bg-white/5 border border-white/5 backdrop-blur-sm">
-            <div class="p-1.5 bg-red-500/10 rounded-lg">
-                <i data-lucide="gauge" class="w-4 h-4 text-red-500"></i>
-            </div>
+        <div class="mt-8 flex items-center gap-3 px-4 py-2 rounded-xl bg-white/5 border border-white/5 backdrop-blur-sm">
+            <div class="bg-red-500/10 p-1.5 rounded-lg"><i data-lucide="gauge" class="w-4 h-4 text-red-500"></i></div>
             <div class="text-left">
-                <p class="text-[10px] text-slate-400 uppercase font-bold">Anlık Kayıp Hızı</p>
-                <p class="text-sm font-bold text-white"><span id="perMinuteDisplay">...</span> TL / Dakika</p>
+                <p class="text-[9px] text-slate-400 uppercase font-bold">Kayıp Hızı</p>
+                <p class="text-sm font-bold text-white"><span id="perMinute">0.00</span> TL / Dk</p>
             </div>
         </div>
-
     </div>
 
-    <div class="z-10 p-4 pb-8">
-        
-        <div class="glass-card rounded-2xl p-5 mb-4">
-            <div class="grid grid-cols-2 gap-y-4 gap-x-8">
-                
+    <div class="p-4 pb-8 z-10">
+        <div class="glass-dark rounded-2xl p-5 space-y-4">
+            
+            <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <p class="text-[9px] text-slate-500 uppercase font-bold mb-1 flex items-center gap-1.5">
-                        <i data-lucide="fuel" class="w-3 h-3"></i> Yakıt Tipi
-                    </p>
+                    <p class="text-[9px] text-slate-500 uppercase font-bold mb-0.5">Yakıt Tipi</p>
                     <p id="fuelDisplay" class="text-xs font-bold text-slate-200">...</p>
                 </div>
-
                 <div class="text-right">
-                    <p class="text-[9px] text-slate-500 uppercase font-bold mb-1 flex items-center justify-end gap-1.5">
-                        <i data-lucide="calendar-clock" class="w-3 h-3"></i> Yıllık Çalışma
-                    </p>
-                    <p id="hoursDisplay" class="text-xs font-bold text-slate-200">...</p>
+                    <p class="text-[9px] text-slate-500 uppercase font-bold mb-0.5">Yıllık Kota</p>
+                    <p id="hoursDisplay" class="text-xs font-bold text-slate-200">... Saat</p>
                 </div>
+            </div>
 
-                <div class="col-span-2 h-px bg-white/5"></div>
-
-                <div class="col-span-2">
-                    <div class="flex items-start gap-2 text-[10px] text-slate-400 leading-relaxed bg-slate-900/50 p-3 rounded-lg border border-white/5">
-                        <i data-lucide="info" class="w-3 h-3 text-blue-400 mt-0.5 flex-shrink-0"></i>
-                        <span>
-                            <strong class="text-slate-300">Sistem Bilgisi:</strong> 
-                            Bu sayaç, tesisinizin 7/24 çalışma düzenine göre kurgulanmıştır. 
-                            Toplam yıllık çalışma saati (<span id="limitHour" class="text-white">...</span>) 
-                            tamamlandığında sayaç otomatik olarak duracaktır.
-                        </span>
-                    </div>
+            <div>
+                <div class="flex justify-between text-[9px] text-slate-500 font-bold mb-1">
+                    <span>KOTA DOLULUĞU</span>
+                    <span id="percentText">0%</span>
                 </div>
+                <div class="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                    <div id="progressBar" class="h-full bg-red-600 w-0 transition-all duration-1000"></div>
+                </div>
+            </div>
 
+            <div class="flex gap-2 text-[10px] text-slate-400 bg-slate-900/50 p-3 rounded-lg border border-white/5 leading-relaxed">
+                <i data-lucide="info" class="w-3 h-3 text-blue-500 mt-0.5 shrink-0"></i>
+                <p>
+                    <strong>Sistem Durumu:</strong> Sayaç 7/24 aktif çalışma prensibine göre işler. 
+                    Tanımlanan yıllık <span id="infoLimit" class="text-white font-bold">...</span> saatlik kota dolduğunda 
+                    otomatik olarak duracaktır.
+                </p>
             </div>
         </div>
-
-        <div class="px-2">
-            <div class="flex justify-between text-[9px] text-slate-500 font-bold mb-1">
-                <span>YILLIK KOTA DOLULUĞU</span>
-                <span id="progressText">0%</span>
-            </div>
-            <div class="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                <div id="progressBar" class="h-full bg-red-600 rounded-full w-0 transition-all duration-1000"></div>
-            </div>
-        </div>
-
     </div>
 
-    <div id="loader" class="fixed inset-0 z-50 bg-[#0f172a] flex items-center justify-center transition-opacity duration-500">
+    <div id="loader" class="fixed inset-0 z-50 bg-[#0f172a] flex items-center justify-center">
         <div class="w-10 h-10 border-4 border-red-500/20 border-t-red-500 rounded-full animate-spin"></div>
     </div>
 
     <script>
         lucide.createIcons();
 
-        // SUPABASE BAĞLANTISI
+        // SUPABASE
         const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Değişkenler
+        let totalSecondsLimit = 0;
         let burnPerSecond = 0;
-        let totalLimitSeconds = 0;
         let startTimestamp = 0;
-        let isCompleted = false;
 
         async function init() {
             const params = new URLSearchParams(window.location.search);
             const id = params.get('id');
 
-            if (!id) return showError();
+            if (!id) return;
 
-            // Verileri Çek
             const { data, error } = await supabase.from('simulations').select('*').eq('id', id).single();
-            if (error || !data) return showError();
+            if (error || !data) return;
 
-            // Arayüzü Doldur
-            setupUI(data);
-
-            // Hesaplama Parametreleri
-            const annualHours = data.work_hours;
-            const totalAnnualLoss = data.total_annual_loss;
-            
-            // 1. Toplam Çalışma Saniyesi (Kota)
-            totalLimitSeconds = annualHours * 3600;
-            
-            // 2. Saniyelik Kayıp Hızı
-            burnPerSecond = totalAnnualLoss / totalLimitSeconds;
-
-            // 3. Başlangıç Zamanı
-            startTimestamp = new Date(data.start_date).getTime();
-
-            // Yükleme ekranını kaldır
-            document.getElementById('loader').style.opacity = '0';
-            setTimeout(() => document.getElementById('loader').remove(), 500);
-
-            // Sayacı Başlat
-            requestAnimationFrame(updateCounter);
-        }
-
-        function setupUI(data) {
+            // UI Doldurma
             document.getElementById('clientName').innerText = data.client_name;
             
-            const fuelMap = { 'gas': 'Doğalgaz', 'elec': 'Elektrik', 'lng': 'LNG', 'manual': 'Özel', 'fueloil': 'Fuel Oil', 'coal_imp': 'İthal Kömür', 'coal_loc': 'Yerli Kömür' };
-            document.getElementById('fuelDisplay').innerText = fuelMap[data.fuel_type] || 'Bilinmiyor';
+            const fuels = { 'gas': 'Doğalgaz', 'elec': 'Elektrik', 'lng': 'LNG', 'fueloil': 'Fuel Oil', 'coal_imp': 'İthal Kömür', 'coal_loc': 'Yerli Kömür', 'manual': data.fuel_label || 'Özel' };
+            document.getElementById('fuelDisplay').innerText = fuels[data.fuel_type] || data.fuel_type;
             
-            document.getElementById('hoursDisplay').innerText = data.work_hours.toLocaleString('tr-TR') + ' Saat';
-            document.getElementById('limitHour').innerText = data.work_hours + ' saat';
+            document.getElementById('hoursDisplay').innerText = data.work_hours.toLocaleString() + ' Saat';
+            document.getElementById('infoLimit').innerText = data.work_hours.toLocaleString();
 
-            // Dakikalık Kayıp Hesabı (Sadece gösterge için)
-            const minLoss = (data.total_annual_loss / (data.work_hours * 60));
-            document.getElementById('perMinuteDisplay').innerText = minLoss.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            // Hesaplama Temeli
+            totalSecondsLimit = data.work_hours * 3600; // Saati saniyeye çevir (Kota)
+            burnPerSecond = data.total_annual_loss / totalSecondsLimit;
+            startTimestamp = new Date(data.start_date).getTime();
+
+            // Dakikalık Hız
+            document.getElementById('perMinute').innerText = (burnPerSecond * 60).toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+            // Başlat
+            document.getElementById('loader').style.display = 'none';
+            loop();
         }
 
-        function updateCounter() {
+        function loop() {
             const now = Date.now();
-            let elapsedSeconds = (now - startTimestamp) / 1000;
+            let elapsed = (now - startTimestamp) / 1000;
 
-            // Kota Kontrolü (Limitsiz akmasın, yıllık saate gelince dursun)
-            if (elapsedSeconds >= totalLimitSeconds) {
-                elapsedSeconds = totalLimitSeconds;
-                isCompleted = true;
-                showCompletedState();
+            // KOTA KONTROLÜ (DURMA NOKTASI)
+            if (elapsed >= totalSecondsLimit) {
+                elapsed = totalSecondsLimit; // Max sınıra sabitle
+                showStoppedState();
+            } else {
+                requestAnimationFrame(loop);
             }
 
-            // Negatif kontrolü (Gelecek tarihli ise 0 göster)
-            if (elapsedSeconds < 0) elapsedSeconds = 0;
+            if(elapsed < 0) elapsed = 0;
 
-            // Değeri Hesapla
-            const currentLoss = elapsedSeconds * burnPerSecond;
-
-            // Ekrana Bas
-            document.getElementById('counter').innerText = currentLoss.toLocaleString('tr-TR', {
-                minimumFractionDigits: 4,
-                maximumFractionDigits: 4
+            // Ekrana Yaz
+            const currentVal = elapsed * burnPerSecond;
+            document.getElementById('counter').innerText = currentVal.toLocaleString('tr-TR', {
+                minimumFractionDigits: 4, maximumFractionDigits: 4
             });
 
-            // Progress Bar Güncelle
-            const percent = Math.min((elapsedSeconds / totalLimitSeconds) * 100, 100);
-            document.getElementById('progressBar').style.width = percent + '%';
-            document.getElementById('progressText').innerText = percent.toFixed(1) + '%';
-
-            if (!isCompleted) {
-                requestAnimationFrame(updateCounter);
-            }
+            // Progress
+            const percent = (elapsed / totalSecondsLimit) * 100;
+            document.getElementById('progressBar').style.width = Math.min(percent, 100) + '%';
+            document.getElementById('percentText').innerText = Math.min(percent, 100).toFixed(1) + '%';
         }
 
-        function showCompletedState() {
+        function showStoppedState() {
             const badge = document.getElementById('statusBadge');
             badge.className = "flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-700 border border-slate-600";
-            badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-gray-400"></span><span class="text-[10px] font-bold text-gray-300">TAMAMLANDI</span>';
+            badge.innerHTML = '<div class="w-2 h-2 bg-slate-400 rounded-full"></div><span class="text-[10px] font-bold text-slate-300">SAYAÇ DURDU</span>';
             
-            document.getElementById('counter').classList.remove('counter-glow');
-            document.getElementById('counter').classList.add('text-slate-400');
-        }
-
-        function showError() {
-            document.body.innerHTML = '<div class="flex h-screen items-center justify-center text-white">Veri bulunamadı.</div>';
+            const ctr = document.getElementById('counter');
+            ctr.classList.remove('counter-glow');
+            ctr.classList.add('counter-stopped');
         }
 
         init();
