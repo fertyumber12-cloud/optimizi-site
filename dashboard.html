@@ -35,7 +35,7 @@
   </script>
 
   <style>
-    /* TEMEL STİLLER (Projelerim.html ile Eşitlendi) */
+    /* TEMEL STİLLER */
     :root {
         --bg-grad: radial-gradient(ellipse at top, #f8fafc 0%, #e2e8f0 40%, #cbd5e1 100%);
         --glass-panel: rgba(255, 255, 255, 0.8);
@@ -92,7 +92,7 @@
     ::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
 
-    /* Sidebar Styles (Projelerim.html'den alındı) */
+    /* Sidebar Styles */
     .sidebar-link {
         display: flex; align-items: center; gap: 12px;
         padding: 12px 16px; margin-bottom: 4px;
@@ -155,7 +155,7 @@
   </style>
   
   <script>
-      // Tema kontrolü JS içinde loadUserProfile ile yapılacak
+      // Tema kontrolü
   </script>
 </head>
 <body class="flex h-screen w-full text-slate-800 dark:text-slate-100 transition-colors duration-300">
@@ -376,7 +376,9 @@
                   <div class="glass-card rounded-2xl p-6 bg-white dark:bg-transparent">
                       <div class="flex justify-between items-center mb-4">
                         <h3 class="font-bold text-slate-800 dark:text-white text-sm uppercase tracking-wide">Favori Araçlar</h3>
-                        <button onclick="openCalcModal()" class="text-[10px] text-indigo-500 hover:underline">Düzenle</button>
+                        <button onclick="openFavModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition" title="Düzenle">
+                            <i data-lucide="settings-2" class="w-4 h-4"></i>
+                        </button>
                       </div>
                       <div class="space-y-3" id="favoriteToolsContainer">
                           <div class="text-center py-4 text-xs text-slate-400">Yükleniyor...</div>
@@ -398,6 +400,25 @@
       </div>
   </main>
 
+  <div id="favModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="closeFavModal()"></div>
+      <div class="relative bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl shadow-2xl animate-pop border border-slate-200 dark:border-slate-800 p-6">
+          <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-bold text-slate-900 dark:text-white">Araçları Düzenle</h3>
+              <button onclick="closeFavModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
+          </div>
+          <p class="text-xs text-slate-500 mb-4">Anasayfada hızlı erişmek istediğiniz araçları seçin.</p>
+          
+          <div class="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scroll" id="favToolsList">
+              </div>
+
+          <div class="mt-6 flex gap-3">
+              <button onclick="closeFavModal()" class="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition">İptal</button>
+              <button onclick="saveFavoriteTools()" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold shadow-lg shadow-indigo-600/20 transition">Kaydet</button>
+          </div>
+      </div>
+  </div>
+  
   <div id="adminAuthModal" class="fixed inset-0 z-[80] hidden flex items-center justify-center p-4">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="document.getElementById('adminAuthModal').classList.add('hidden')"></div>
       <div class="relative bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl shadow-2xl animate-pop border border-slate-200 dark:border-slate-800 p-6 text-center">
@@ -475,7 +496,7 @@
                   <button onclick="handleLogout()" class="w-full py-3 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 font-bold transition flex items-center justify-center gap-2"><i data-lucide="log-out" class="w-4 h-4"></i> Çıkış Yap</button>
               </section>
           </div>
-          <div class="p-4 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-400">Optimizi v2.2 • Build 2026</div>
+          <div class="p-4 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-400">Optimizi v2.3 • Build 2026</div>
       </div>
   </div>
 
@@ -487,6 +508,17 @@
     let isSidebarCollapsed = false;
     let currentUser = null;
     let allCalculations = [];
+    let userFavorites = []; // Kullanıcının favorileri burada tutulur
+
+    // GLOBAL TOOL DEFINITIONS (Her yerde kullanılacak)
+    const TOOL_DEFINITIONS = {
+        'roi': { name: 'Termal ROI', desc: 'Amortisman hesabı', url: 'tool/roi.html', icon: 'flame', color: 'orange' },
+        'cond': { name: 'Yoğuşma Hesabı', desc: 'Kritik kalınlık', url: 'tool/yogusma-hesaplama.html', icon: 'droplets', color: 'blue' },
+        'optimum': { name: 'Optimum Kalınlık', desc: 'Ekonomik yalıtım', url: 'tool/yalitim-performans.html', icon: 'layers', color: 'purple' },
+        'leak': { name: 'Saha Kayıp', desc: 'Kaçak tespiti', url: 'tool/anlik-kayip.html', icon: 'scan-line', color: 'red' },
+        'chiller': { name: 'Chiller ROI', desc: 'Soğutma analizi', url: 'tool/chiller-roi.html', icon: 'snowflake', color: 'cyan' },
+        'boiler': { name: 'Kazan Verimi', desc: 'Kazan hesabı', url: 'tool/boiler.html', icon: 'gauge', color: 'amber' }
+    };
 
     // --- SIDEBAR FONKSİYONLARI ---
     function toggleSidebar() {
@@ -520,6 +552,64 @@
     function closeCalcModal() { document.getElementById('calcModal').classList.add('hidden'); }
     function checkAdminAccess() { document.getElementById('adminAuthModal').classList.remove('hidden'); }
     
+    // --- FAVORİ ARAÇ MODALI FONKSİYONLARI ---
+    function openFavModal() {
+        const modal = document.getElementById('favModal');
+        const listContainer = document.getElementById('favToolsList');
+        listContainer.innerHTML = ''; // Temizle
+
+        // Tüm araçları listele
+        Object.keys(TOOL_DEFINITIONS).forEach(key => {
+            const tool = TOOL_DEFINITIONS[key];
+            const isChecked = userFavorites.includes(key) ? 'checked' : '';
+            
+            const item = `
+                <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition group">
+                    <input type="checkbox" value="${key}" class="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" ${isChecked}>
+                    <div class="w-10 h-10 rounded-lg bg-${tool.color}-100 dark:bg-${tool.color}-500/10 text-${tool.color}-600 dark:text-${tool.color}-400 flex items-center justify-center">
+                        <i data-lucide="${tool.icon}" class="w-5 h-5"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-bold text-slate-800 dark:text-white">${tool.name}</p>
+                        <p class="text-xs text-slate-500">${tool.desc}</p>
+                    </div>
+                </label>
+            `;
+            listContainer.insertAdjacentHTML('beforeend', item);
+        });
+
+        modal.classList.remove('hidden');
+        lucide.createIcons();
+    }
+
+    function closeFavModal() {
+        document.getElementById('favModal').classList.add('hidden');
+    }
+
+    async function saveFavoriteTools() {
+        if (!currentUser) return;
+        
+        // Seçilen checkboxları al
+        const checkboxes = document.querySelectorAll('#favToolsList input[type="checkbox"]:checked');
+        const selectedKeys = Array.from(checkboxes).map(cb => cb.value);
+
+        // Supabase güncelle
+        const { error } = await supabaseClient
+            .from('profiles')
+            .update({ favorite_tools: selectedKeys })
+            .eq('id', currentUser.id);
+
+        if (error) {
+            console.error(error);
+            showNotification('Hata', 'Favoriler kaydedilemedi.', 'error');
+        } else {
+            userFavorites = selectedKeys; // Lokal değişkeni güncelle
+            renderFavoriteTools(userFavorites); // Arayüzü güncelle
+            showNotification('Başarılı', 'Favori araçlar güncellendi.');
+            closeFavModal();
+        }
+    }
+
     function showNotification(title, message, type = 'success') {
         const modal = document.getElementById('notifModal');
         const iconCont = document.getElementById('notifIcon');
@@ -543,7 +633,7 @@
     
     function closeNotification() { document.getElementById('notifModal').classList.add('hidden'); }
 
-    // --- BİLDİRİM VE THEME SİSTEMİ (Projelerim.html'den) ---
+    // --- BİLDİRİM VE THEME SİSTEMİ ---
     function toggleNotifDropdown() { document.getElementById('notifDropdown').classList.toggle('hidden'); }
     
     document.addEventListener('click', function(event) {
@@ -575,7 +665,8 @@
                 localStorage.setItem('theme', 'light');
             }
             // FAVORİ ARAÇLARI UYGULA
-            renderFavoriteTools(data.favorite_tools);
+            userFavorites = data.favorite_tools || ['roi', 'cond']; // Null check
+            renderFavoriteTools(userFavorites);
         }
     }
 
@@ -627,20 +718,14 @@
     // --- FAVORİ ARAÇLAR (DİNAMİK RENDER) ---
     function renderFavoriteTools(toolKeys) {
         const container = document.getElementById('favoriteToolsContainer');
-        if (!toolKeys || toolKeys.length === 0) toolKeys = ['roi', 'cond']; // Varsayılan
-
-        const toolDefinitions = {
-            'roi': { name: 'Termal ROI', desc: 'Amortisman hesabı', url: 'tool/roi.html', icon: 'flame', color: 'orange' },
-            'cond': { name: 'Yoğuşma Hesabı', desc: 'Kritik kalınlık', url: 'tool/yogusma-hesaplama.html', icon: 'droplets', color: 'blue' },
-            'optimum': { name: 'Optimum Kalınlık', desc: 'Ekonomik yalıtım', url: 'tool/yalitim-performans.html', icon: 'layers', color: 'purple' },
-            'leak': { name: 'Saha Kayıp', desc: 'Kaçak tespiti', url: 'tool/anlik-kayip.html', icon: 'scan-line', color: 'red' },
-            'chiller': { name: 'Chiller ROI', desc: 'Soğutma analizi', url: 'tool/chiller-roi.html', icon: 'snowflake', color: 'cyan' },
-            'boiler': { name: 'Kazan Verimi', desc: 'Kazan hesabı', url: 'tool/boiler.html', icon: 'gauge', color: 'amber' }
-        };
+        if (!toolKeys || toolKeys.length === 0) {
+            container.innerHTML = '<div class="text-center py-4 text-xs text-slate-400">Henüz favori araç seçilmedi.</div>';
+            return;
+        }
 
         let html = '';
         toolKeys.forEach(key => {
-            const t = toolDefinitions[key] || toolDefinitions['roi'];
+            const t = TOOL_DEFINITIONS[key] || TOOL_DEFINITIONS['roi'];
             html += `
             <a href="${t.url}" class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-white/5 hover:border-indigo-500/30 transition group">
                 <div class="w-10 h-10 rounded-lg bg-${t.color}-100 dark:bg-${t.color}-500/10 text-${t.color}-600 dark:text-${t.color}-400 flex items-center justify-center"><i data-lucide="${t.icon}" class="w-5 h-5"></i></div>
