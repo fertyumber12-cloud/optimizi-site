@@ -209,7 +209,7 @@
 <div class="relative z-10 flex flex-col min-h-screen main-interface">
     <nav class="sticky top-0 z-50 glass-card !bg-white/95 !border-x-0 !border-t-0 !rounded-none border-b border-slate-200 backdrop-blur-xl">
       <div class="container mx-auto px-6 h-16 flex items-center justify-between max-w-[1400px]">
-          <a href="../index.html" class="flex items-center gap-3 group">
+          <a href="../dashboard.html" class="flex items-center gap-3 group">
               <div><h1 class="text-lg font-bold text-slate-800 tracking-wide">Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600">.Yalıtım Performansı</span></h1></div>
           </a>
           <div class="flex items-center gap-3">
@@ -343,6 +343,7 @@
                             <div class="col-span-2">
                                 <select id="mat1" class="glass-input text-xs" onchange="calc()">
                                     <option value="rockwool" selected>Taş Yünü (Sanayi)</option>
+                                    <option value="glasswool">Camyünü (İzocam Sanayi)</option>
                                     <option value="needlemat">İğnelenmiş Cam Elyaf (650°C)</option>
                                     <option value="ceramic">Seramik Yünü (1260°C)</option>
                                     <option value="aerogel">Aerogel (Pyrogel XT)</option>
@@ -368,6 +369,7 @@
                              <div class="grid grid-cols-3 gap-3">
                                 <div class="col-span-2">
                                     <select id="mat2" class="glass-input text-xs" onchange="calc()">
+                                        <option value="glasswool">Camyünü (İzocam Sanayi)</option>
                                         <option value="rubber">Elastomerik Kauçuk</option>
                                         <option value="aerogel">Aerogel (Pyrogel XT)</option>
                                         <option value="needlemat">İğnelenmiş Cam Elyaf</option>
@@ -465,6 +467,9 @@
 
 <script>
     let reportQueue = [];
+    const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // --- NOTIFICATION SYSTEM (INTERNAL POPUPS) ---
     function showNotification(title, message, type = 'success') {
@@ -508,16 +513,40 @@
         else { content.classList.add('collapsed'); icon.classList.add('collapsed'); }
     }
 
+    // --- DB KAYIT İŞLEMİ (GÜNCELLENDİ) ---
     async function saveProjectToDB() {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        
+        if (!session) {
+            showNotification('Hata', 'Kayıt yapabilmek için oturum açmalısınız.', 'error');
+            return;
+        }
+
+        const compName = document.getElementById('inp-company').value || 'İsimsiz Firma';
+        const repName = document.getElementById('inp-rep').value || 'İsimsiz Proje';
+        
         const payload = {
-            company: document.getElementById('inp-company').value,
-            representative: document.getElementById('inp-rep').value,
-            provider: document.getElementById('inp-provider').value,
-            items: reportQueue,
-            created_at: new Date().toISOString()
+            user_id: session.user.id,
+            client_name: compName,
+            project_name: repName,
+            calculation_type: 'isolation', // Yalıtım Performansı için ID
+            input_data: {
+                provider: document.getElementById('inp-provider').value,
+                report_items: reportQueue // Rapordaki tüm satırları kaydet
+            },
+            result_data: {
+                total_items: reportQueue.length
+            }
         };
-        console.log("Payload ready for localhost:", payload);
-        showNotification("Başarıyla Kaydedildi", `Proje verileri sisteme aktarıldı.<br><span class="text-xs text-slate-400 font-mono bg-slate-50 px-2 py-1 rounded mt-2 inline-block">Localhost: Sync Pending...</span>`, 'success');
+
+        const { error } = await supabaseClient.from('calculations').insert([payload]);
+
+        if (error) {
+            console.error('Kayıt hatası:', error);
+            showNotification('Kayıt Başarısız', 'Veritabanı hatası: ' + error.message, 'error');
+        } else {
+            showNotification("Başarıyla Kaydedildi", `<b>${compName}</b> projesi başarıyla panelinize eklendi.`, 'success');
+        }
     }
 
     // --- REPORT LOGIC ---
@@ -545,12 +574,11 @@
         if(show) m.classList.remove('hidden'); else m.classList.add('hidden');
     }
 
-    // --- SAFE PRINT FUNCTION (ERROR PROOF) ---
+    // --- SAFE PRINT FUNCTION ---
     function confirmPrint(lang) {
         try {
             toggleLangModal(false);
             
-            // Safe Element Setter Helper
             const safeSet = (id, val) => {
                 const el = document.getElementById(id);
                 if(el) el.innerText = val;
@@ -561,7 +589,6 @@
             const provider = document.getElementById('inp-provider').value || "Optimizi Engineering";
             const dateStr = new Date().toLocaleDateString(lang==='en'?'en-GB':'tr-TR');
             
-            // Set Cover Data Safely
             safeSet('cover-project', comp);
             safeSet('cover-rep', rep);
             safeSet('cover-provider', provider);
@@ -582,7 +609,7 @@
 
     function renderPrintTable() {
         const container = document.getElementById('print-rows');
-        if(!container) return; // Safety check
+        if(!container) return;
         
         container.innerHTML = '';
         reportQueue.forEach((item) => {
@@ -646,7 +673,19 @@
     }
     
     const PIPES={15:21.3,20:26.7,25:33.4,32:42.2,40:48.3,50:60.3,65:73.0,80:88.9,100:114.3,125:141.3,150:168.3,200:219.1,250:273.0,300:323.9,350:355.6,400:406.4,500:508.0};
-    const MATS={rockwool:{a:0.035,b:0.00017,c:0, limit:650},needlemat:{a:0.033,b:0.00015,c:0, limit:650, name:"İğnelenmiş Cam Elyaf"},ceramic:{a:0.025,b:0.00012,c:1.2e-7, limit:1200},aerogel:{a:0.019,b:0.00004,c:5e-8, limit:650},rubber:{a:0.034,b:0.000075,c:0, limit:105},pu:{a:0.024,b:0.000075,c:0, limit:100}};
+    
+    // YENİ MALZEME "glasswool" EKLENDİ
+    // Katsayılar: k = 0.031 + 0.00012T + 3.3e-7*T^2
+    const MATS={
+        rockwool:{a:0.035,b:0.00017,c:0, limit:650},
+        glasswool:{a:0.031,b:0.00012,c:3.3e-7, limit:550, name:"Camyünü"},
+        needlemat:{a:0.033,b:0.00015,c:0, limit:650, name:"İğnelenmiş Cam Elyaf"},
+        ceramic:{a:0.025,b:0.00012,c:1.2e-7, limit:1200},
+        aerogel:{a:0.019,b:0.00004,c:5e-8, limit:650},
+        rubber:{a:0.034,b:0.000075,c:0, limit:105},
+        pu:{a:0.024,b:0.000075,c:0, limit:100}
+    };
+
     const VALVE_FACTORS={gate:1.2,globe:1.4,butterfly:0.6,ball:1.0,strainer:1.5,check:0.9};
     function initApp(){ fillDN('dn'); setType('pipe'); lucide.createIcons(); calc(); toggleProjectInfo(); }
     function setStd(val){ document.getElementById('calcStd').value = val; document.querySelectorAll('.std-btn').forEach(b=>b.classList.remove('active')); document.getElementById('std-'+val).classList.add('active'); const n={iso:'TS EN ISO 12241',astm:'ASTM C680',vdi:'VDI 2055'}; document.getElementById('stdBadge').innerText=n[val]; calc(); }
