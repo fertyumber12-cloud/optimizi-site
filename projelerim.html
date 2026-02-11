@@ -145,10 +145,6 @@
     .animate-pop { animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
     @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
   </style>
-  
-  <script>
-      // Tema kontrolü artık JS içinde loadUserProfile ile yapılacak
-  </script>
 </head>
 <body class="flex h-screen w-full text-slate-800 dark:text-slate-100 transition-colors duration-300">
 
@@ -168,9 +164,9 @@
       <div class="flex-1 overflow-y-auto py-6 px-4 custom-scroll">
           
           <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2 sidebar-title">Genel</div>
-          <a href="dashboard.html" class="sidebar-link"><i data-lucide="layout-dashboard"></i> <span>Anasayfa</span></a>
+          <a href="dashboard.html" class="sidebar-link"><i data-lucide="layout-dashboard"></i> <span>Proje Panel</span></a>
+          <a href="#" onclick="showNotification('Bilgi', 'Satış Paneli yakında aktif olacak.', 'info')" class="sidebar-link"><i data-lucide="shopping-cart"></i> <span>Satış Teklif Panel</span></a>
           <a href="#" class="sidebar-link active"><i data-lucide="folder-open"></i> <span>Projelerim</span></a>
-          
           <div class="mt-6">
               <button onclick="toggleSubmenu('offerMenu', this)" class="sidebar-link justify-between group">
                   <div class="flex items-center gap-3"><i data-lucide="file-text"></i> <span>Teklif Yönetimi</span></div>
@@ -264,7 +260,11 @@
           </div>
           
           <div class="flex items-center gap-4">
-                    
+              <button onclick="toggleTheme()" class="p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition" title="Temayı Değiştir">
+                  <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                  <i data-lucide="moon" class="w-5 h-5 dark:hidden"></i>
+              </button>
+              
               <div class="relative hidden md:block">
                   <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-slate-400"></i>
                   <input type="text" id="searchInput" onkeyup="filterProjects()" placeholder="Listede ara..." class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-full pl-10 pr-4 py-2 text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 w-64 transition shadow-sm">
@@ -470,7 +470,7 @@
     let projectToDeleteId = null;
     let reminderProjectId = null;
     let isSidebarCollapsed = false;
-    let currentUser = null; // KULLANICI DEĞİŞKENİ EKLENDİ
+    let currentUser = null; 
 
     // --- SIDEBAR & MENU LOGIC ---
     function toggleSidebar() {
@@ -489,18 +489,16 @@
         }
     });
 
-    // --- THEME & PROFILE LOGIC (GÜNCELLENDİ) ---
+    // --- THEME & PROFILE LOGIC ---
     async function loadUserProfile() {
         if (!currentUser) return;
 
-        // Profili çek
         let { data, error } = await supabaseClient
             .from('profiles')
             .select('*')
             .eq('id', currentUser.id)
             .single();
 
-        // Eğer profil yoksa (yeni/eski kullanıcı), yeni oluştur (Otomatik)
         if (error && error.code === 'PGRST116') {
             const { data: newData } = await supabaseClient
                 .from('profiles')
@@ -516,7 +514,6 @@
         }
 
         if (data) {
-            // Temayı Uygula
             if (data.theme === 'dark') {
                 document.documentElement.classList.add('dark');
                 document.getElementById('themeToggle').checked = true;
@@ -533,11 +530,9 @@
         const isDark = document.getElementById('themeToggle').checked;
         const newTheme = isDark ? 'dark' : 'light';
         
-        // UI Güncelle
         if (isDark) document.documentElement.classList.add('dark');
         else document.documentElement.classList.remove('dark');
         
-        // DB Güncelle
         if (currentUser) {
             await supabaseClient.from('profiles').update({ theme: newTheme }).eq('id', currentUser.id);
         }
@@ -685,7 +680,7 @@
         }
     }
     
-    // --- BİLDİRİM KONTROL (Sadece Tarihi Gelenler) ---
+    // --- BİLDİRİM KONTROL ---
     function checkReminders(forceOpen = false) {
         const now = new Date(); 
         const activeReminders = allProjects.filter(p => {
@@ -696,7 +691,6 @@
         
         const dot = document.getElementById('notifDot');
         const list = document.getElementById('notifList');
-        const dropdown = document.getElementById('notifDropdown');
         
         if(activeReminders.length > 0) {
             dot.classList.remove('hidden');
@@ -724,7 +718,6 @@
         lucide.createIcons();
     }
 
-    // 30 sn'de bir kontrol et
     setInterval(() => { if(allProjects.length > 0) checkReminders(); }, 30000);
 
     function escapeHtml(text) {
@@ -736,7 +729,7 @@
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) { window.location.href = 'login.html'; return; }
 
-        currentUser = session.user; // KULLANICIYI KAYDET
+        currentUser = session.user;
         const fullName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
         document.getElementById('sidebarUserName').textContent = fullName;
         document.getElementById('avatarInitial').textContent = fullName.charAt(0).toUpperCase();
@@ -744,7 +737,7 @@
         document.getElementById('modalEmail').textContent = currentUser.email;
         document.getElementById('modalAvatar').textContent = fullName.charAt(0).toUpperCase();
 
-        await loadUserProfile(); // TEMA AYARINI ÇEK
+        await loadUserProfile();
         fetchProjects(currentUser.id);
     }
 
@@ -789,16 +782,15 @@
             else if (proj.calculation_type === 'condensation') { typeLabel = 'Yoğuşma'; typeIcon = 'droplets'; toolUrl = 'tool/yogusma-hesaplama.html'; colorClass = 'text-blue-600 bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400'; }
             else if (proj.calculation_type === 'anlik-kayip') { typeLabel = 'Saha Kayıp'; typeIcon = 'scan-line'; toolUrl = 'tool/anlik-kayip.html'; colorClass = 'text-red-600 bg-red-100 dark:bg-red-900/20 dark:text-red-400'; }
 
-            // ZİL RENK MANTIĞI
-            let reminderIconClass = "text-slate-300 hover:text-slate-500 bg-slate-50 dark:bg-slate-800"; // Varsayılan (Gri/Boş)
+            let reminderIconClass = "text-slate-300 hover:text-slate-500 bg-slate-50 dark:bg-slate-800";
             const now = new Date();
             
             if(proj.reminder_date) {
                 const rDate = new Date(proj.reminder_date);
                 if (rDate <= now) {
-                    reminderIconClass = "text-red-600 bg-red-50 dark:bg-red-900/30 animate-pulse"; // Vakti Gelmiş
+                    reminderIconClass = "text-red-600 bg-red-50 dark:bg-red-900/30 animate-pulse";
                 } else {
-                    reminderIconClass = "text-green-600 bg-green-50 dark:bg-green-900/30"; // Gelecekte
+                    reminderIconClass = "text-green-600 bg-green-50 dark:bg-green-900/30";
                 }
             }
 
