@@ -9,7 +9,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
+ <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png"> 
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -109,7 +109,7 @@
         transition: max-height 0.3s ease-out;
         max-height: 0;
     }
-    .submenu.open { max-height: 800px; } /* Increased for deeper menus */
+    .submenu.open { max-height: 800px; } 
     
     .submenu-item {
         display: flex; align-items: center; justify-content: space-between;
@@ -139,13 +139,6 @@
     }
     .submenu-link:hover { color: #6366f1; }
     .submenu-link:hover:before { background: #6366f1; opacity: 1; }
-
-    /* Indented sub-sub menu items */
-    .submenu-indent {
-        padding-left: 60px !important;
-        font-size: 0.8rem;
-    }
-    .submenu-indent:before { left: 45px !important; }
 
     .quick-action-btn {
         opacity: 0; transform: translateX(-5px); transition: all 0.2s;
@@ -330,12 +323,12 @@
               <div class="relative group">
                   <button id="bellBtn" onclick="toggleNotifDropdown()" class="p-2 relative text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-white transition">
                       <i data-lucide="bell"></i>
-                      <span id="notifDot" class="hidden absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
+                      <span id="notifDot" class="hidden absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-900 animate-pulse"></span>
                   </button>
                   <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden transform origin-top-right transition-all">
                       <div class="p-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 font-bold text-xs uppercase text-slate-500 dark:text-slate-400 flex justify-between">
                           <span>Hatırlatmalar</span>
-                          <span class="text-[10px] font-normal cursor-pointer hover:text-indigo-600" onclick="checkReminders()">Yenile</span>
+                          <span class="text-[10px] font-normal cursor-pointer hover:text-indigo-600" onclick="checkReminders(true)">Yenile</span>
                       </div>
                       <div id="notifList" class="max-h-64 overflow-y-auto">
                           </div>
@@ -365,13 +358,12 @@
                               <th class="px-6 py-4 w-1/3">Müşteri / Proje</th>
                               <th class="px-6 py-4">Tür</th>
                               <th class="px-6 py-4">Tarih</th>
-                              <th class="px-6 py-4">Hatırlatma</th>
                               <th class="px-6 py-4 text-right">İşlemler</th>
                           </tr>
                       </thead>
                       <tbody class="divide-y divide-slate-100 dark:divide-white/5" id="projectsTableBody">
                           <tr>
-                              <td colspan="5" class="px-6 py-20 text-center">
+                              <td colspan="4" class="px-6 py-20 text-center">
                                   <div class="inline-flex items-center justify-center w-12 h-12 bg-slate-100 dark:bg-slate-800/50 rounded-full mb-3 text-indigo-500 animate-pulse">
                                       <i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i>
                                   </div>
@@ -410,9 +402,19 @@
               <i data-lucide="calendar-clock" class="w-6 h-6"></i>
           </div>
           <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Hatırlatma Kur</h3>
-          <p class="text-xs text-slate-500 mb-4">Seçtiğiniz tarih ve saatte bildirim alacaksınız.</p>
+          <p class="text-xs text-slate-500 mb-4">Bildirim almak istediğiniz zamanı seçin.</p>
           
-          <input type="datetime-local" id="reminderDateInput" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 mb-4 text-sm focus:outline-none focus:border-indigo-500">
+          <div class="space-y-3 mb-4">
+              <div>
+                  <label class="text-[10px] uppercase text-slate-400 font-bold block mb-1">Tarih</label>
+                  <input type="date" id="dateInput" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-indigo-500">
+              </div>
+              <div>
+                  <label class="text-[10px] uppercase text-slate-400 font-bold block mb-1">Saat (Opsiyonel)</label>
+                  <input type="time" id="timeInput" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-indigo-500">
+              </div>
+              <p class="text-[10px] text-slate-400">Saat girilmezse gün başlangıcı (00:00) kabul edilir.</p>
+          </div>
           
           <div class="flex gap-2">
               <button onclick="closeReminderModal()" class="flex-1 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-bold">İptal</button>
@@ -462,10 +464,10 @@
           </div>
           <div class="p-6 overflow-y-auto custom-scroll">
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <a href="tool/roi.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-orange-500/50 group transition"><div class="flex justify-between items-start mb-4"><div class="p-3 rounded-lg bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400"><i data-lucide="flame" class="w-6 h-6"></i></div><i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-orange-500 transition"></i></div><h3 class="font-bold text-slate-800 dark:text-white mb-1">Termal ROI</h3><p class="text-xs text-slate-500">Yatırım geri dönüş hesabı.</p></a>
-                  <a href="tool/yogusma-hesaplama.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-blue-500/50 group transition"><div class="flex justify-between items-start mb-4"><div class="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"><i data-lucide="droplets" class="w-6 h-6"></i></div><i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-blue-500 transition"></i></div><h3 class="font-bold text-slate-800 dark:text-white mb-1">Yoğuşma Kontrol</h3><p class="text-xs text-slate-500">Terleme önleme analizi.</p></a>
-                  <a href="tool/yalitim-performans.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-purple-500/50 group transition"><div class="flex justify-between items-start mb-4"><div class="p-3 rounded-lg bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400"><i data-lucide="layers" class="w-6 h-6"></i></div><i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-purple-500 transition"></i></div><h3 class="font-bold text-slate-800 dark:text-white mb-1">Optimum Kalınlık</h3><p class="text-xs text-slate-500">Ekonomik kalınlık.</p></a>
                   <a href="tool/anlik-kayip.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-red-500/50 dark:hover:border-red-500/50 group transition"><div class="flex justify-between items-start mb-4"><div class="p-3 rounded-lg bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400"><i data-lucide="scan-line" class="w-6 h-6"></i></div><i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-red-500 transition"></i></div><h3 class="font-bold text-slate-800 dark:text-white mb-1">Saha Kayıp Analizi</h3><p class="text-xs text-slate-500 dark:text-slate-400">Kaçak tespiti.</p></a>
+                  <a href="tool/roi.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-orange-500/50 group transition"><div class="flex justify-between items-start mb-4"><div class="p-3 rounded-lg bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400"><i data-lucide="flame" class="w-6 h-6"></i></div><i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-orange-500 transition"></i></div><h3 class="font-bold text-slate-800 dark:text-white mb-1">Termal ROI</h3><p class="text-xs text-slate-500">Amortisman.</p></a>
+                  <a href="tool/yalitim-performans.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-purple-500/50 group transition"><div class="flex justify-between items-start mb-4"><div class="p-3 rounded-lg bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400"><i data-lucide="layers" class="w-6 h-6"></i></div><i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-purple-500 transition"></i></div><h3 class="font-bold text-slate-800 dark:text-white mb-1">Optimum Kalınlık</h3><p class="text-xs text-slate-500">Ekonomik kalınlık.</p></a>
+                  <a href="tool/yogusma-hesaplama.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-blue-500/50 group transition"><div class="flex justify-between items-start mb-4"><div class="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"><i data-lucide="droplets" class="w-6 h-6"></i></div><i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-blue-500 transition"></i></div><h3 class="font-bold text-slate-800 dark:text-white mb-1">Yoğuşma Kontrol</h3><p class="text-xs text-slate-500">Terleme önleme.</p></a>
                   <a href="tool/chiller-roi.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-cyan-500/50 dark:hover:border-cyan-500/50 group transition"><div class="flex justify-between items-start mb-4"><div class="p-3 rounded-lg bg-cyan-100 dark:bg-cyan-900/20 text-cyan-600 dark:text-cyan-400"><i data-lucide="snowflake" class="w-6 h-6"></i></div><i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-cyan-500 transition"></i></div><h3 class="font-bold text-slate-800 dark:text-white mb-1">Chiller ROI</h3><p class="text-xs text-slate-500 dark:text-slate-400">Soğutma hatları.</p></a>
                   <a href="tool/boiler.html" class="glass-card p-5 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-amber-500/50 dark:hover:border-amber-500/50 group transition"><div class="flex justify-between items-start mb-4"><div class="p-3 rounded-lg bg-amber-100 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400"><i data-lucide="gauge" class="w-6 h-6"></i></div><i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-amber-500 transition"></i></div><h3 class="font-bold text-slate-800 dark:text-white mb-1">Kazan Verimliliği</h3><p class="text-xs text-slate-500 dark:text-slate-400">Kazan hesabı.</p></a>
               </div>
@@ -553,8 +555,7 @@
 
     // --- SIDEBAR DROPDOWN LOGIC ---
     function toggleSubmenu(menuId, btn) {
-        if (isSidebarCollapsed) return; // Don't expand menus if sidebar is collapsed
-        
+        if (isSidebarCollapsed) return;
         const menu = document.getElementById(menuId);
         const icon = btn.querySelector('.chevron');
         if (menu.classList.contains('open')) {
@@ -566,7 +567,6 @@
         }
     }
     
-    // --- QUICK ACTION (PLUS BTN) LOGIC (UPDATED) ---
     function quickAction(type) {
         const titles = {
             'client': 'Yeni Müşteri Ekle',
@@ -611,10 +611,11 @@
         lucide.createIcons();
     }
 
-    // --- REMINDER LOGIC (SAATLİ) ---
+    // --- REMINDER LOGIC (YENİLENDİ: AYRI TARİH/SAAT) ---
     function openReminderModal(id) {
         reminderProjectId = id;
-        document.getElementById('reminderDateInput').value = '';
+        document.getElementById('dateInput').value = '';
+        document.getElementById('timeInput').value = '';
         document.getElementById('reminderModal').classList.remove('hidden');
     }
     
@@ -624,12 +625,18 @@
     }
     
     async function saveReminder() {
-        const dateVal = document.getElementById('reminderDateInput').value;
-        if(!dateVal || !reminderProjectId) return;
+        const d = document.getElementById('dateInput').value;
+        let t = document.getElementById('timeInput').value;
+        
+        if(!d || !reminderProjectId) return;
+        
+        if(!t) t = "00:00"; // Saat yoksa gün başı
+        
+        const fullDate = new Date(`${d}T${t}`).toISOString();
         
         const { error } = await supabaseClient
             .from('calculations')
-            .update({ reminder_date: dateVal })
+            .update({ reminder_date: fullDate })
             .eq('id', reminderProjectId);
             
         if(error) {
@@ -638,7 +645,7 @@
         } else {
             showNotification('Başarılı', 'Hatırlatma kuruldu.', 'success');
             const p = allProjects.find(x => x.id === reminderProjectId);
-            if(p) p.reminder_date = dateVal;
+            if(p) p.reminder_date = fullDate;
             renderProjects(allProjects);
             checkReminders(); 
         }
@@ -666,6 +673,7 @@
         }
     }
     
+    // --- AKILLI HATIRLATMA KONTROLÜ (OTOMATİK) ---
     function checkReminders() {
         const now = new Date(); 
         const activeReminders = allProjects.filter(p => {
@@ -680,6 +688,13 @@
         if(activeReminders.length > 0) {
             dot.classList.remove('hidden');
             list.innerHTML = '';
+            
+            // Eğer kapalıysa ve yeni bildirim varsa OTOMATİK AÇ
+            const dd = document.getElementById('notifDropdown');
+            if (dd.classList.contains('hidden')) {
+               dd.classList.remove('hidden');
+            }
+
             activeReminders.forEach(p => {
                 const dateObj = new Date(p.reminder_date);
                 const dateStr = dateObj.toLocaleString('tr-TR', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -701,6 +716,11 @@
         }
         lucide.createIcons();
     }
+
+    // HER 30 SANİYEDE BİR KONTROL ET
+    setInterval(() => {
+        if(allProjects.length > 0) checkReminders();
+    }, 30000);
 
     function escapeHtml(text) {
         if (!text) return text;
@@ -747,7 +767,7 @@
         document.getElementById('projectCountDisplay').innerText = `Toplam ${projects.length} proje`;
 
         if (projects.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center"><div class="inline-flex items-center justify-center w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full mb-3 text-slate-400"><i data-lucide="inbox" class="w-6 h-6"></i></div><p class="text-slate-500 font-medium">Henüz kayıtlı proje bulunamadı.</p></td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-12 text-center"><div class="inline-flex items-center justify-center w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full mb-3 text-slate-400"><i data-lucide="inbox" class="w-6 h-6"></i></div><p class="text-slate-500 font-medium">Henüz kayıtlı proje bulunamadı.</p></td></tr>`;
             lucide.createIcons();
             return;
         }
@@ -766,14 +786,16 @@
 
             const savings = proj.total_savings ? parseFloat(proj.total_savings).toLocaleString('tr-TR', {minimumFractionDigits: 2}) + ' ₺' : '-';
             
-            let reminderIconClass = "text-slate-300 hover:text-indigo-500";
+            // --- BUTON RENK MANTIĞI ---
+            let reminderIconClass = "text-slate-300 hover:text-slate-500 bg-slate-50 dark:bg-slate-800"; // Default (Gri)
             const now = new Date();
+            
             if(proj.reminder_date) {
                 const rDate = new Date(proj.reminder_date);
                 if (rDate <= now) {
-                    reminderIconClass = "text-red-500 bg-red-50 dark:bg-red-900/20 animate-pulse";
+                    reminderIconClass = "text-red-600 bg-red-50 dark:bg-red-900/30 animate-pulse"; // Vakti Gelmiş (Kırmızı)
                 } else {
-                    reminderIconClass = "text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20";
+                    reminderIconClass = "text-green-600 bg-green-50 dark:bg-green-900/30"; // Gelecekte (Yeşil)
                 }
             }
 
@@ -789,11 +811,12 @@
                         </div>
                     </td>
                     <td class="px-6 py-4 text-slate-600 dark:text-slate-400 font-medium text-xs">${date}</td>
-                    <td class="px-6 py-4 text-center">
-                        <button onclick="openReminderModal('${proj.id}')" class="p-2 rounded-lg transition ${reminderIconClass}" title="Hatırlatma Kur"><i data-lucide="bell" class="w-4 h-4"></i></button>
-                    </td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex items-center justify-end gap-2">
+                            <button onclick="openReminderModal('${proj.id}')" class="p-2 rounded-lg transition ${reminderIconClass}" title="Hatırlatma Kur">
+                                <i data-lucide="bell" class="w-4 h-4"></i>
+                            </button>
+                            <div class="w-px h-4 bg-slate-200 dark:bg-slate-700 mx-1"></div>
                             <button onclick="openProject('${toolUrl}', '${proj.id}')" class="p-2 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition" title="Görüntüle"><i data-lucide="external-link" class="w-4 h-4"></i></button>
                             <button onclick="confirmDelete('${proj.id}')" class="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition" title="Sil"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                         </div>
