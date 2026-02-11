@@ -3,23 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Yalıtım Performans Analizi</title>
+<title>Yalıtım Performans Analizi | Optimizi</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="icon" href="../favicon.png" type="image/png">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/auth-guard.js"></script>
+
+<script src="../auth-guard.js"></script>
+
 <style>
+  /* Sayfa yüklenirken beyaz ekran sorununu önleyen ve auth kontrolü yapan stil */
   body:not(.auth-checked) { opacity: 0; visibility: hidden; }
   body.auth-checked { opacity: 1; visibility: visible; transition: opacity 0.3s ease; }
 </style>
-<script>
-  setTimeout(function(){ if(document.body) document.body.classList.add('auth-checked'); }, 500);
-</script>
 
 <script>
+  /* Auth guard dosyası yüklenemezse bile 0.5sn sonra sayfayı görünür yap (Fallback) */
+  setTimeout(function(){ if(document.body) document.body.classList.add('auth-checked'); }, 500);
+
   tailwind.config = {
     theme: {
       fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] },
@@ -101,7 +104,7 @@
   }
 </style>
 </head>
-<body class="antialiased selection:bg-indigo-500/30 selection:text-indigo-700" onload="initApp()">
+<body class="antialiased selection:bg-indigo-500/30 selection:text-indigo-700">
 
 <div id="langModal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8 border border-slate-100 relative transform transition-all animate-pop">
@@ -469,7 +472,17 @@
     let reportQueue = [];
     const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Hata önlemek için try-catch
+    let supabaseClient = null;
+    try {
+        if(window.supabase) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } else {
+            console.error("Supabase kütüphanesi yüklenemedi!");
+        }
+    } catch(e) {
+        console.error("Supabase başlatılamadı:", e);
+    }
 
     // --- NOTIFICATION SYSTEM (INTERNAL POPUPS) ---
     function showNotification(title, message, type = 'success') {
@@ -515,6 +528,11 @@
 
     // --- DB KAYIT İŞLEMİ (GERÇEK ENTEGRASYON) ---
     async function saveProjectToDB() {
+        if (!supabaseClient) {
+            showNotification('Sistem Hatası', 'Veritabanı bağlantısı kurulamadı. Lütfen sayfayı yenileyin.', 'error');
+            return;
+        }
+
         const { data: { session } } = await supabaseClient.auth.getSession();
         
         if (!session) {
@@ -676,8 +694,7 @@
     const PIPES={15:21.3,20:26.7,25:33.4,32:42.2,40:48.3,50:60.3,65:73.0,80:88.9,100:114.3,125:141.3,150:168.3,200:219.1,250:273.0,300:323.9,350:355.6,400:406.4,500:508.0};
     
     // YENİ MALZEME "glasswool" (Camyünü) EKLENDİ
-    // Katsayılar, endüstriyel camyünü (Sanayi Şiltesi) karakteristiğine göre ayarlandı.
-    // k = 0.031 + 0.00012T + 3.3e-7*T^2 (Sıcaklık arttıkça iletkenlik artar)
+    // Katsayılar, sıcaklığa bağlı polinom: k = 0.031 + 0.00012T + 3.3e-7*T^2
     const MATS={
         rockwool:{a:0.035,b:0.00017,c:0, limit:650},
         glasswool:{a:0.031,b:0.00012,c:3.3e-7, limit:550, name:"Camyünü"},
@@ -689,9 +706,31 @@
     };
 
     const VALVE_FACTORS={gate:1.2,globe:1.4,butterfly:0.6,ball:1.0,strainer:1.5,check:0.9};
-    function initApp(){ fillDN('dn'); setType('pipe'); lucide.createIcons(); calc(); toggleProjectInfo(); }
+    
+    function initApp(){ 
+        console.log("Uygulama başlatılıyor...");
+        fillDN('dn'); 
+        setType('pipe'); 
+        lucide.createIcons(); 
+        calc(); 
+        toggleProjectInfo(); 
+    }
+
     function setStd(val){ document.getElementById('calcStd').value = val; document.querySelectorAll('.std-btn').forEach(b=>b.classList.remove('active')); document.getElementById('std-'+val).classList.add('active'); const n={iso:'TS EN ISO 12241',astm:'ASTM C680',vdi:'VDI 2055'}; document.getElementById('stdBadge').innerText=n[val]; calc(); }
-    function fillDN(id){ const el=document.getElementById(id); el.innerHTML=''; for(const[k,v]of Object.entries(PIPES)){let o=document.createElement('option'); o.value=k; o.text=`DN ${k} (${v}mm)`; el.add(o);} el.value='100'; }
+    
+    function fillDN(id){ 
+        const el=document.getElementById(id); 
+        if(!el) return;
+        el.innerHTML=''; 
+        for(const[k,v]of Object.entries(PIPES)){
+            let o=document.createElement('option'); 
+            o.value=k; 
+            o.text=`DN ${k} (${v}mm)`; 
+            el.add(o);
+        } 
+        el.value='100'; 
+    }
+
     function setType(t){ document.getElementById('type').value=t; document.querySelectorAll('[id^="btn-"]').forEach(b=>b.className="flex-1 py-2 text-[10px] font-bold rounded-lg transition-all text-slate-500 hover:text-slate-800 bg-white shadow-sm"); document.getElementById('btn-'+t).className="flex-1 py-2 text-[10px] font-bold rounded-lg transition-all text-white bg-indigo-600 shadow-md"; document.getElementById('box-valve').classList.add('hidden'); document.getElementById('row-dn').classList.remove('hidden'); document.getElementById('row-dims').classList.add('hidden'); const lbl=document.getElementById('lblQty'); if(t==='flat'){document.getElementById('row-dn').classList.add('hidden');document.getElementById('row-dims').classList.remove('hidden');}else if(t==='valve'){document.getElementById('box-valve').classList.remove('hidden');lbl.innerText="Adet";}else if(t==='flange'){lbl.innerText="Adet";}else{lbl.innerText="Metraj (m)";} calc(); }
     function toggleFlatShape(){ const s=document.querySelector('input[name="flatShape"]:checked').value; if(s==='rect'){document.getElementById('box-rect').classList.remove('hidden');document.getElementById('box-circle').classList.add('hidden');}else{document.getElementById('box-rect').classList.add('hidden');document.getElementById('box-circle').classList.remove('hidden');} calc(); }
     function toggleL2(){ const c=document.getElementById('useL2').checked; if(c){document.getElementById('layer2Box').classList.remove('hidden');document.getElementById('rowInter').classList.remove('hidden');}else{document.getElementById('layer2Box').classList.add('hidden');document.getElementById('rowInter').classList.add('hidden');} calc(); }
@@ -719,6 +758,9 @@
         lucide.createIcons(); renderEnergyClass(Qu,dn,tP,tA,isF);
     }
     function renderEnergyClass(q,d,p,a,f){ const c=document.getElementById('eiifChart'); c.innerHTML=''; if(f){c.innerHTML=`<div class="text-center text-xs text-slate-400 py-4 border border-dashed border-slate-200 rounded-lg">Düz yüzey: Sınıflandırma Yok</div>`;return;} const l=getEiifLimits(d,p,a); const cls=['A','B','C','D','E','F','G']; let mc='G'; if(q<=l.F)mc='F';if(q<=l.E)mc='E';if(q<=l.D)mc='D';if(q<=l.C)mc='C';if(q<=l.B)mc='B';if(q<=l.A)mc='A'; cls.forEach(k=>{const ia=(k===mc);c.innerHTML+=`<div class="eiif-row ${ia?'active':''}"><div class="eiif-label">${k}</div><div class="eiif-bar-container"><div class="eiif-bar w-${k.toLowerCase()}">${ia?'<span class="ml-auto mr-2 bg-white text-slate-900 px-1.5 py-0.5 rounded text-[9px] shadow font-bold">SİZİN</span>':''}</div></div><div class="eiif-val">&lt; ${Math.round(l[k]||(l.G*1.5))}</div></div>`;}); }
+
+    // SAYFA YÜKLENDİĞİNDE BAŞLAT (GARANTİ YÖNTEM)
+    document.addEventListener('DOMContentLoaded', initApp);
 </script>
 </body>
 </html>
