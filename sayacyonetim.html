@@ -3,435 +3,342 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Optimizi Kayıp Simülatörü</title>
+    <title>Optimizi Sayaç Yönetimi</title>
     <link rel="icon" href="favicon.png" type="image/png">
-
-<!-- AUTH GUARD - Sayfa Koruma -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/auth-guard.js"></script>
-    
-    <!-- Flash Problemi Çözümü -->
-    <style>
-      body {
-        opacity: 0;
-        visibility: hidden;
-      }
-      body.auth-checked {
-        opacity: 1;
-        visibility: visible;
-        transition: opacity 0.3s ease;
-      }
-    </style>
-</head>
     
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <!-- Supabase JS Library -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- Authentication Guard -->
-<script src="/auth-guard.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script>tailwind.config = { theme: { fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] } } }</script>
+    <script>
+        tailwind.config = {
+            theme: {
+                fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                extend: {
+                    colors: {
+                        primary: { 50: '#fff1f2', 100: '#ffe4e6', 500: '#f43f5e', 600: '#e11d48', 900: '#881337' } // Rose Tonları
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body { background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 24px 24px; }
-        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 20px 40px -5px rgba(0,0,0,0.1); }
-        .highlight-box { background: linear-gradient(135deg, #fef2f2 0%, #fff 100%); border-left: 4px solid #dc2626; }
+        body { background-color: #f8fafc; }
+        .soft-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.7); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); }
+        .input-soft { background: #fff; border: 1px solid #e2e8f0; transition: all 0.2s; }
+        .input-soft:focus { border-color: #f43f5e; ring: 2px solid #ffe4e6; outline: none; box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.1); }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4 text-slate-800">
+<body class="min-h-screen flex items-center justify-center p-4 text-slate-600">
 
-    <div class="glass-panel w-full max-w-6xl rounded-3xl p-8 relative overflow-hidden border-t-8 border-red-600">
+    <div class="soft-card w-full max-w-5xl rounded-[2rem] p-8 relative overflow-hidden">
         
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center justify-between mb-8">
             <div>
-                <h1 class="text-2xl font-black tracking-tight text-slate-900">Optimizi<span class="text-red-600">.Sayaç Yönetim Paneli</span></h1>
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Operasyonel Kayıp Simülatörü</p>
+                <h1 class="text-2xl font-bold tracking-tight text-slate-800">Optimizi<span class="text-primary-500">.Yönetim</span></h1>
+                <p class="text-sm font-medium text-slate-400 mt-1">Operasyonel Kayıp Simülasyonu Oluşturucu</p>
             </div>
-            <div class="bg-red-50 p-3 rounded-2xl"><i data-lucide="activity" class="w-6 h-6 text-red-600"></i></div>
+            <div class="bg-primary-50 p-3 rounded-2xl">
+                <i data-lucide="zap" class="w-6 h-6 text-primary-500"></i>
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
-            <!-- Sol Panel - Bilgiler -->
-            <div class="space-y-4">
-            
-            <div class="grid grid-cols-2 gap-3">
-                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Müşteri</label><input type="text" id="client" placeholder="ABC Tesisleri" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:border-red-500 transition"></div>
-                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Rapor No</label><input type="text" id="serial" value="LSS-001" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:border-red-500 transition"></div>
-            </div>
-
-            <div class="bg-white p-4 rounded-2xl border border-red-100 shadow-sm relative overflow-hidden group focus-within:ring-2 ring-red-100 transition">
-                <div class="absolute right-0 top-0 p-4 opacity-5 group-focus-within:opacity-10 transition"><i data-lucide="coins" class="w-16 h-16 text-red-600"></i></div>
-                <label class="text-[10px] font-bold text-red-600 uppercase flex items-center gap-1 mb-1"><i data-lucide="trending-down" class="w-3 h-3"></i> Toplam Yıllık Kayıp (TL)</label>
-                <div class="relative z-10">
-                    <input type="text" id="totalValue" oninput="calculatePreview()" placeholder="Örn: 530272" class="w-full text-2xl font-black text-slate-800 bg-transparent border-none p-0 outline-none placeholder-slate-200">
-                    <span class="absolute right-0 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">TL / Yıl</span>
+            <div class="lg:col-span-5 space-y-5">
+                
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">Müşteri Bilgisi</label>
+                    <input type="text" id="client" placeholder="Firma Adı" class="input-soft w-full rounded-xl px-4 py-3 text-sm font-bold text-slate-700 placeholder-slate-300">
                 </div>
-            </div>
 
-            <div class="grid grid-cols-2 gap-3">
-                <div class="bg-white p-3 rounded-xl border border-slate-200">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Yıllık Çalışma (Saat)</label>
-                    <input type="number" id="workHours" oninput="calculatePreview()" value="4800" class="w-full font-bold text-slate-700 outline-none border-none p-0 bg-transparent focus:ring-0">
-                    <p class="text-[9px] text-slate-400 mt-1">*Operasyonel hız için kritik</p>
+                <div class="bg-gradient-to-br from-white to-primary-50 p-6 rounded-2xl border border-primary-100 shadow-sm relative group">
+                    <div class="absolute right-4 top-4 opacity-10"><i data-lucide="banknote" class="w-12 h-12 text-primary-600"></i></div>
+                    <label class="text-xs font-bold text-primary-600 uppercase tracking-wider mb-2 block flex items-center gap-2">
+                        <i data-lucide="trending-down" class="w-3 h-3"></i> Toplam Yıllık Kayıp
+                    </label>
+                    <div class="relative">
+                        <input type="text" id="totalValue" oninput="calculatePreview()" placeholder="0" class="w-full text-3xl font-black text-slate-800 bg-transparent border-none p-0 outline-none placeholder-slate-200 focus:ring-0">
+                        <span class="text-sm font-bold text-slate-400 absolute right-0 bottom-2">TL / Yıl</span>
+                    </div>
                 </div>
-                <div class="bg-white p-3 rounded-xl border border-slate-200">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Enerji Birim Fiyat</label>
-                    <input type="number" id="unitPrice" placeholder="16.00" step="0.01" class="w-full font-bold text-slate-700 outline-none border-none p-0 bg-transparent">
-                </div>
-            </div>
 
-            <div id="previewCard" class="highlight-box rounded-xl p-4 hidden animate-[fadeIn_0.5s_ease-out]">
-                <div class="flex items-center justify-between">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-white p-4 rounded-2xl border border-slate-100">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase block mb-2">Çalışma Saati</label>
+                        <input type="number" id="workHours" oninput="calculatePreview()" value="4800" class="input-soft w-full rounded-lg px-3 py-2 font-bold text-slate-700 text-sm">
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-slate-100">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase block mb-2">Birim Fiyat</label>
+                        <input type="number" id="unitPrice" placeholder="0.00" step="0.01" class="input-soft w-full rounded-lg px-3 py-2 font-bold text-slate-700 text-sm">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <p class="text-[9px] font-bold text-red-600 uppercase tracking-wider mb-1">TESİS ÇALIŞIRKEN GERÇEKLEŞEN KAYIP</p>
-                        <div class="flex items-baseline gap-2">
-                            <span id="previewMin" class="text-2xl font-black text-slate-900">0.00</span>
-                            <span class="text-xs font-bold text-slate-500">TL / Dakika</span>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Yakıt</label>
+                        <select id="fuel" class="input-soft w-full rounded-xl px-3 py-2 text-sm font-bold text-slate-600">
+                            <option value="gas">Doğalgaz</option>
+                            <option value="elec">Elektrik</option>
+                            <option value="lng">LNG</option>
+                            <option value="manual">Diğer</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Başlangıç</label>
+                        <div class="flex gap-1">
+                            <input type="date" id="installDate" class="input-soft w-full rounded-xl px-2 py-2 text-xs font-bold text-slate-600">
+                            <input type="time" id="installTime" class="input-soft w-16 rounded-xl px-1 py-2 text-xs font-bold text-slate-600 text-center">
                         </div>
                     </div>
-                    <div class="text-right">
-                        <p class="text-[9px] font-bold text-slate-400 uppercase mb-1">SAATLİK ZARAR</p>
-                        <span id="previewHour" class="text-sm font-bold text-slate-700">0.00 TL</span>
+                </div>
+
+                <div id="previewCard" class="hidden bg-slate-800 text-white p-5 rounded-2xl shadow-lg transform transition-all duration-500 hover:scale-[1.02]">
+                    <div class="flex justify-between items-end">
+                        <div>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Anlık Kayıp Hızı</p>
+                            <div class="text-2xl font-bold tracking-tight"><span id="previewMin">0.00</span> <span class="text-sm text-slate-500 font-medium">TL/dk</span></div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Saatlik</p>
+                            <div id="previewHour" class="text-sm font-bold text-primary-400">0 TL</div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
             </div>
             
-            <!-- Sağ Panel - Vardiya Planı -->
-            <div class="space-y-4">
-            
-            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                <label class="text-[10px] font-bold text-slate-600 uppercase block mb-3">📅 Haftalık Vardiya Planı</label>
-                <div class="grid grid-cols-1 xl:grid-cols-[1fr_auto] gap-4">
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    <div class="bg-white p-2 rounded-lg border border-slate-200">
-                        <label class="flex items-center gap-1 mb-1.5 cursor-pointer">
-                            <input type="checkbox" id="day1" checked onchange="calculateTotalHours()" class="rounded text-red-600">
-                            <span class="text-[10px] font-bold text-slate-700">Pzt</span>
-                        </label>
-                        <input type="time" id="start1" value="08:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 mb-1 rounded border border-slate-300">
-                        <input type="time" id="end1" value="17:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 rounded border border-slate-300">
-                    </div>
-                    <div class="bg-white p-2 rounded-lg border border-slate-200">
-                        <label class="flex items-center gap-1 mb-1.5 cursor-pointer">
-                            <input type="checkbox" id="day2" checked onchange="calculateTotalHours()" class="rounded text-red-600">
-                            <span class="text-[10px] font-bold text-slate-700">Sal</span>
-                        </label>
-                        <input type="time" id="start2" value="08:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 mb-1 rounded border border-slate-300">
-                        <input type="time" id="end2" value="17:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 rounded border border-slate-300">
-                    </div>
-                    <div class="bg-white p-2 rounded-lg border border-slate-200">
-                        <label class="flex items-center gap-1 mb-1.5 cursor-pointer">
-                            <input type="checkbox" id="day3" checked onchange="calculateTotalHours()" class="rounded text-red-600">
-                            <span class="text-[10px] font-bold text-slate-700">Çar</span>
-                        </label>
-                        <input type="time" id="start3" value="08:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 mb-1 rounded border border-slate-300">
-                        <input type="time" id="end3" value="17:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 rounded border border-slate-300">
-                    </div>
-                    <div class="bg-white p-2 rounded-lg border border-slate-200">
-                        <label class="flex items-center gap-1 mb-1.5 cursor-pointer">
-                            <input type="checkbox" id="day4" checked onchange="calculateTotalHours()" class="rounded text-red-600">
-                            <span class="text-[10px] font-bold text-slate-700">Per</span>
-                        </label>
-                        <input type="time" id="start4" value="08:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 mb-1 rounded border border-slate-300">
-                        <input type="time" id="end4" value="17:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 rounded border border-slate-300">
-                    </div>
-                    <div class="bg-white p-2 rounded-lg border border-slate-200">
-                        <label class="flex items-center gap-1 mb-1.5 cursor-pointer">
-                            <input type="checkbox" id="day5" checked onchange="calculateTotalHours()" class="rounded text-red-600">
-                            <span class="text-[10px] font-bold text-slate-700">Cum</span>
-                        </label>
-                        <input type="time" id="start5" value="08:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 mb-1 rounded border border-slate-300">
-                        <input type="time" id="end5" value="17:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 rounded border border-slate-300">
-                    </div>
-                    <div class="bg-white p-2 rounded-lg border border-slate-200">
-                        <label class="flex items-center gap-1 mb-1.5 cursor-pointer">
-                            <input type="checkbox" id="day6" onchange="calculateTotalHours()" class="rounded text-red-600">
-                            <span class="text-[10px] font-bold text-slate-700">Cmt</span>
-                        </label>
-                        <input type="time" id="start6" value="08:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 mb-1 rounded border border-slate-300">
-                        <input type="time" id="end6" value="17:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 rounded border border-slate-300">
-                    </div>
-                    <div class="bg-white p-2 rounded-lg border border-slate-200">
-                        <label class="flex items-center gap-1 mb-1.5 cursor-pointer">
-                            <input type="checkbox" id="day7" onchange="calculateTotalHours()" class="rounded text-red-600">
-                            <span class="text-[10px] font-bold text-slate-700">Paz</span>
-                        </label>
-                        <input type="time" id="start7" value="08:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 mb-1 rounded border border-slate-300">
-                        <input type="time" id="end7" value="17:00" onchange="calculateTotalHours()" class="w-full text-[10px] px-2 py-1 rounded border border-slate-300">
-                    </div>
-                </div>
+            <div class="lg:col-span-7 space-y-5">
                 
-                <!-- Toplam Saat Hesaplama Paneli -->
-                <div class="bg-white p-4 rounded-xl border-2 border-red-200">
-                    <div class="text-center mb-3">
-                        <p class="text-[9px] font-bold text-slate-500 uppercase mb-1">Toplam Yıllık Çalışma</p>
-                        <div class="text-3xl font-black text-red-600" id="calculatedHours">2340</div>
-                        <p class="text-[10px] font-bold text-slate-600">Saat / Yıl</p>
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm h-full">
+                    <div class="flex items-center justify-between mb-4">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">🗓️ Haftalık Vardiya Planı</label>
+                        <span id="calculatedHoursDisplay" class="text-xs font-bold text-primary-600 bg-primary-50 px-2 py-1 rounded-lg">Yıllık: 0 saat</span>
                     </div>
-                    <div class="border-t border-slate-200 pt-3 space-y-2">
-                        <div class="flex justify-between text-[9px]">
-                            <span class="text-slate-500">Haftalık:</span>
-                            <span class="font-bold text-slate-700" id="weeklyHours">45</span>
-                        </div>
-                        <div class="flex justify-between text-[9px]">
-                            <span class="text-slate-500">Günlük Ort:</span>
-                            <span class="font-bold text-slate-700" id="dailyAvg">9.0</span>
-                        </div>
-                        <div class="flex justify-between text-[9px]">
-                            <span class="text-slate-500">Aktif Gün:</span>
-                            <span class="font-bold text-slate-700" id="activeDays">5</span>
-                        </div>
+                    
+                    <div class="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scroll">
+                        <div id="shiftContainer">
+                            </div>
                     </div>
-                    <div id="hoursDiff" class="mt-3 p-2 rounded-lg bg-yellow-50 border border-yellow-200 hidden">
-                        <p class="text-[9px] text-yellow-700 text-center font-bold"></p>
-                    </div>
-                </div>
-                
-                </div>
-            </div>
 
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Yakıt Tipi</label>
-                    <select id="fuel" onchange="toggleManualFuel()" class="w-full bg-white border border-slate-200 rounded-xl px-2 py-2 text-sm font-bold text-slate-700 outline-none">
-                        <option value="gas">Doğalgaz (m³)</option>
-                        <option value="elec">Elektrik (kWh)</option>
-                        <option value="lng">LNG (kg)</option>
-                        <option value="fueloil">Fuel Oil (kg)</option>
-                        <option value="coal_imp">İthal Kömür (kg)</option>
-                        <option value="coal_loc">Yerli Kömür (kg)</option>
-                        <option value="manual" class="text-red-600 font-bold">⚡ Paçal Kömür / Özel</option>
-                    </select>
+                    <div class="mt-4 pt-4 border-t border-slate-100">
+                        <button onclick="generateQR()" id="createBtn" class="w-full bg-slate-900 hover:bg-primary-600 text-white p-4 rounded-xl font-bold text-sm shadow-xl hover:shadow-primary-500/30 transition-all duration-300 transform active:scale-[0.98] flex items-center justify-center gap-2 group">
+                            <span id="btnText">Simülasyonu Oluştur & QR Üret</span>
+                            <i data-lucide="qr-code" class="group-hover:rotate-180 transition duration-500"></i>
+                        </button>
+                    </div>
                 </div>
-                <div>
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Başlangıç Tarihi</label>
-                    <input type="date" id="installDate" class="w-full bg-white border border-slate-200 rounded-xl px-2 py-2 text-sm font-bold text-slate-700 outline-none">
-                </div>
-            </div>
 
-            <div id="manualFuelFields" class="hidden bg-slate-50 p-3 rounded-xl border border-slate-200 grid grid-cols-2 gap-2 animate-[fadeIn_0.3s_ease-out]">
-                <div class="col-span-2">
-                    <label class="text-[9px] font-bold text-slate-400 uppercase">Yakıt Adı</label>
-                    <input type="text" id="customFuelLabel" placeholder="Örn: Paçal Kömür" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-slate-700 outline-none">
-                </div>
-                <div>
-                    <label class="text-[9px] font-bold text-slate-400 uppercase">Kalori (kcal/kg)</label>
-                    <input type="number" id="customFuelLhv" placeholder="4500" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-slate-700 outline-none">
-                </div>
-                <div>
-                    <label class="text-[9px] font-bold text-slate-400 uppercase">CO2 (kg/br)</label>
-                    <input type="number" id="customFuelCo2" placeholder="0.36" step="0.001" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-slate-700 outline-none">
-                </div>
-                <input type="hidden" id="customFuelUnit" value="kg">
             </div>
-            
-            <div>
-                <label class="text-[10px] font-bold text-slate-400 uppercase">Başlangıç Saati</label>
-                <input type="time" id="installTime" class="w-full bg-white border border-slate-200 rounded-xl px-2 py-2 text-sm font-bold text-slate-700 outline-none text-center">
-            </div>
-            
-            </div>
-            
         </div>
 
-            <button onclick="generateQR()" class="w-full bg-slate-900 hover:bg-red-600 text-white p-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-red-600/30 transition transform active:scale-[0.98] flex items-center justify-center gap-2 group mt-6">
-                <i data-lucide="qr-code" class="group-hover:rotate-180 transition duration-500"></i> Simülasyonu Başlat
-            </button>
-
-        <div id="resultCard" class="hidden mt-6 pt-6 border-t border-slate-200 text-center bg-white p-4 rounded-xl">
-            <div id="qrcode" class="flex justify-center mb-4"></div>
-            <p class="text-[10px] text-slate-400 mb-2">Bu QR Kod, yukarıdaki çalışma saati baz alınarak hesaplanan gerçek hızı içerir.</p>
-            <code id="linkText" class="text-[9px] bg-slate-100 p-2 rounded block mb-2 break-all font-mono text-slate-500">...</code>
-            <a id="downloadBtn" download="optimizi_kayip.png" href="#" class="inline-flex items-center gap-2 text-xs font-bold text-red-600 bg-red-50 px-4 py-2 rounded-full hover:bg-red-100 transition">QR Kodunu İndir</a>
+        <div id="resultModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+            <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl text-center transform scale-95 opacity-0 transition-all duration-300" id="resultContent">
+                <div class="mx-auto bg-primary-50 w-16 h-16 rounded-full flex items-center justify-center mb-4">
+                    <i data-lucide="check" class="w-8 h-8 text-primary-600"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800 mb-2">Simülasyon Hazır!</h3>
+                <p class="text-xs text-slate-400 mb-6">Müşteriye özel takip sayfası oluşturuldu.</p>
+                
+                <div id="qrcode" class="flex justify-center bg-white p-4 rounded-xl border-2 border-slate-100 mb-4 mx-auto w-fit"></div>
+                
+                <div class="flex gap-2 justify-center">
+                    <a id="downloadBtn" download="optimizi_qr.png" href="#" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-xs font-bold transition">QR İndir</a>
+                    <button onclick="closeModal()" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-xs font-bold transition">Kapat</button>
+                </div>
+                <div class="mt-4 pt-4 border-t border-slate-100">
+                    <code id="linkText" class="text-[10px] text-slate-400 break-all font-mono">...</code>
+                </div>
+            </div>
         </div>
+
     </div>
 
     <script>
         lucide.createIcons();
+
+        // --- SUPABASE AYARLARI ---
+        const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
+        // Bu senin ANON key'in. Public olması normaldir, RLS ile korunur.
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
+        
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // --- BAŞLANGIÇ AYARLARI ---
         const now = new Date();
         document.getElementById('installDate').valueAsDate = now;
+        document.getElementById('installTime').value = now.toTimeString().substring(0,5);
+
+        // --- VARDİYA GÜNLERİNİ OLUŞTUR ---
+        const days = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+        const container = document.getElementById('shiftContainer');
         
-        const hh = String(now.getHours()).padStart(2, '0');
-        const mm = String(now.getMinutes()).padStart(2, '0');
-        document.getElementById('installTime').value = `${hh}:${mm}`;
+        days.forEach((day, index) => {
+            const i = index + 1; // 1-7
+            const isWeekend = i > 5;
+            
+            const html = `
+            <div class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-primary-200 transition bg-white group">
+                <div class="flex items-center h-5">
+                    <input id="day${i}" type="checkbox" ${!isWeekend ? 'checked' : ''} onchange="calculateShiftHours()" class="w-4 h-4 text-primary-600 border-slate-300 rounded focus:ring-primary-500">
+                </div>
+                <div class="flex-1 min-w-0">
+                    <label for="day${i}" class="text-sm font-bold text-slate-700 select-none cursor-pointer">${day}</label>
+                </div>
+                <div class="flex gap-2">
+                    <input type="time" id="start${i}" value="08:00" onchange="calculateShiftHours()" class="input-soft rounded-lg px-2 py-1 text-xs font-medium text-slate-600">
+                    <span class="text-slate-300 self-center">-</span>
+                    <input type="time" id="end${i}" value="18:00" onchange="calculateShiftHours()" class="input-soft rounded-lg px-2 py-1 text-xs font-medium text-slate-600">
+                </div>
+            </div>`;
+            container.innerHTML += html;
+        });
 
-        // Vardiya toplam saat hesaplama
-        function calculateTotalHours() {
+        // --- HESAPLAMA FONKSİYONLARI ---
+        function calculateShiftHours() {
             let totalWeeklyHours = 0;
-            let activeDayCount = 0;
-            
             for (let i = 1; i <= 7; i++) {
-                const checkbox = document.getElementById(`day${i}`);
-                if (!checkbox.checked) continue;
-                
-                activeDayCount++;
-                
-                const start = document.getElementById(`start${i}`).value;
-                const end = document.getElementById(`end${i}`).value;
-                
-                if (!start || !end) continue;
-                
-                const [sh, sm] = start.split(':').map(n => parseInt(n));
-                const [eh, em] = end.split(':').map(n => parseInt(n));
-                
-                const dailyHours = ((eh * 60 + em) - (sh * 60 + sm)) / 60;
-                totalWeeklyHours += dailyHours;
-            }
-            
-            const yearlyHours = Math.round(totalWeeklyHours * 52);
-            const dailyAvg = activeDayCount > 0 ? (totalWeeklyHours / activeDayCount).toFixed(1) : 0;
-            
-            // Göster
-            document.getElementById('calculatedHours').innerText = yearlyHours.toLocaleString('tr-TR');
-            document.getElementById('weeklyHours').innerText = totalWeeklyHours.toFixed(1) + ' saat';
-            document.getElementById('dailyAvg').innerText = dailyAvg + ' saat';
-            document.getElementById('activeDays').innerText = activeDayCount + ' gün';
-            
-            // Hedef ile karşılaştır
-            const targetHours = parseFloat(document.getElementById('workHours').value) || 0;
-            const diffElement = document.getElementById('hoursDiff');
-            
-            if (targetHours > 0) {
-                const diff = yearlyHours - targetHours;
-                const diffP = document.querySelector('#hoursDiff p');
-                
-                if (Math.abs(diff) < 50) {
-                    diffElement.classList.add('hidden');
-                } else {
-                    diffElement.classList.remove('hidden');
-                    diffElement.className = 'mt-3 p-2 rounded-lg';
-                    
-                    if (diff > 0) {
-                        diffElement.classList.add('bg-orange-50', 'border', 'border-orange-200');
-                        diffP.className = 'text-[9px] text-orange-700 text-center font-bold';
-                        diffP.innerText = `⚠️ Hedeften ${diff} saat fazla`;
-                    } else {
-                        diffElement.classList.add('bg-red-50', 'border', 'border-red-200');
-                        diffP.className = 'text-[9px] text-red-700 text-center font-bold';
-                        diffP.innerText = `⚠️ Hedeften ${Math.abs(diff)} saat eksik`;
-                    }
-                }
-            }
-        }
-
-        // Sayfa yüklendiğinde hesapla
-        calculateTotalHours();
-
-        // Canlı Hesaplama Fonksiyonu
-        function calculatePreview() {
-            let rawVal = document.getElementById('totalValue').value;
-            rawVal = rawVal.replace(/\./g, '').replace(',', '.');
-            const totalVal = parseFloat(rawVal);
-            const wHours = parseFloat(document.getElementById('workHours').value);
-            const previewCard = document.getElementById('previewCard');
-
-            if (totalVal > 0 && wHours > 0) {
-                const hourlyLoss = totalVal / wHours;
-                const minutelyLoss = hourlyLoss / 60;
-                
-                document.getElementById('previewHour').innerText = hourlyLoss.toLocaleString('tr-TR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' TL';
-                document.getElementById('previewMin').innerText = minutelyLoss.toLocaleString('tr-TR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                
-                previewCard.classList.remove('hidden');
-            } else {
-                previewCard.classList.add('hidden');
-            }
-        }
-
-        function toggleManualFuel() {
-            const fuelSelect = document.getElementById('fuel').value;
-            const manualFields = document.getElementById('manualFuelFields');
-            if(fuelSelect === 'manual') {
-                manualFields.classList.remove('hidden');
-                document.getElementById('customFuelLabel').value = "Paçal Kömür";
-                document.getElementById('customFuelCo2').value = "0.36";
-                document.getElementById('customFuelLhv').value = ""; 
-            } else {
-                manualFields.classList.add('hidden');
-            }
-        }
-
-        function generateQR() {
-            const client = document.getElementById('client').value.trim();
-            const serial = document.getElementById('serial').value.trim();
-            let rawVal = document.getElementById('totalValue').value;
-            const uPrice = document.getElementById('unitPrice').value;
-            const wHours = document.getElementById('workHours').value;
-            const fuel = document.getElementById('fuel').value;
-            
-            const dateStr = document.getElementById('installDate').value; 
-            const timeStr = document.getElementById('installTime').value; 
-            const fullDateTime = `${dateStr}-${timeStr.replace(':', '-')}`; 
-
-            rawVal = rawVal.replace(/\./g, '').replace(',', '.');
-            const totalVal = parseFloat(rawVal);
-
-            if(!totalVal || !uPrice) { alert("Lütfen kayıp tutarını ve birim fiyatı giriniz."); return; }
-
-            // Ön Hesaplama: Saniyelik Yanma Hızı (Burn Per Second)
-            // Manuel vardiyaları topla
-            const shifts = [];
-            for (let i = 1; i <= 7; i++) {
-                if (document.getElementById(`day${i}`).checked) {
+                const cb = document.getElementById(`day${i}`);
+                if (cb.checked) {
                     const start = document.getElementById(`start${i}`).value;
                     const end = document.getElementById(`end${i}`).value;
-                    if (start && end) {
-                        shifts.push({ days: [i], start: start, end: end });
-                    }
+                    const [sh, sm] = start.split(':').map(Number);
+                    const [eh, em] = end.split(':').map(Number);
+                    totalWeeklyHours += ((eh*60+em) - (sh*60+sm)) / 60;
                 }
             }
-
-            if (shifts.length === 0) {
-                alert("Lütfen en az bir çalışma günü seçin!");
-                return;
-            }
-
-            // Takip sistemi bunu kullanırsa 8760 saat yerine gerçek çalışma saatini baz alır.
-            const secondsInWorkYear = wHours * 3600;
-            const burnPerSecond = totalVal / secondsInWorkYear;
-
-            const baseUrl = "https://optimizi.app/anliksayac.html";
-            // bps (Burn Per Second) parametresi eklendi.
-            let finalUrl = `${baseUrl}?c=${encodeURIComponent(client)}&s=${encodeURIComponent(serial)}&v=${totalVal}&up=${uPrice}&wh=${wHours}&f=${fuel}&d=${fullDateTime}&bps=${burnPerSecond.toFixed(6)}&shifts=${encodeURIComponent(JSON.stringify(shifts))}`;
-
-            if(fuel === 'manual') {
-                let cLabel = document.getElementById('customFuelLabel').value || 'Paçal Kömür';
-                const cUnit = document.getElementById('customFuelUnit').value || 'kg';
-                const cCo2 = document.getElementById('customFuelCo2').value || '0.36';
-                const cLhv = document.getElementById('customFuelLhv').value;
-
-                if(cLhv) { cLabel += ` (${cLhv} kcal)`; }
-                
-                finalUrl += `&fl=${encodeURIComponent(cLabel)}&fu=${encodeURIComponent(cUnit)}&fc=${encodeURIComponent(cCo2)}`;
-            }
-
-            const resultCard = document.getElementById('resultCard');
-            resultCard.classList.remove('hidden');
-
-            const qrContainer = document.getElementById('qrcode');
-            qrContainer.innerHTML = '';
-
-            new QRCode(qrContainer, { 
-                text: finalUrl, 
-                width: 160, 
-                height: 160, 
-                colorDark : "#0f172a", 
-                colorLight : "#ffffff", 
-                correctLevel : QRCode.CorrectLevel.M 
-            });
-
-            document.getElementById('linkText').innerText = finalUrl;
+            const yearly = Math.round(totalWeeklyHours * 52);
+            document.getElementById('calculatedHoursDisplay').innerText = `Hesaplanan: ${yearly} saat/yıl`;
             
-            setTimeout(() => { 
-                const img = qrContainer.querySelector("img");
-                if(img) document.getElementById('downloadBtn').href = img.src; 
-            }, 150);
+            // Kullanıcı isterse bunu inputa yazabiliriz ama şimdilik sadece gösterelim
+            // document.getElementById('workHours').value = yearly; 
         }
+
+        function calculatePreview() {
+            let rawVal = document.getElementById('totalValue').value.replace(/\./g, '').replace(',', '.');
+            const totalVal = parseFloat(rawVal) || 0;
+            const wHours = parseFloat(document.getElementById('workHours').value) || 1;
+            
+            if (totalVal > 0) {
+                const hourly = totalVal / wHours;
+                const minutely = hourly / 60;
+                document.getElementById('previewMin').innerText = minutely.toFixed(2);
+                document.getElementById('previewHour').innerText = hourly.toFixed(0) + ' TL';
+                document.getElementById('previewCard').classList.remove('hidden');
+            } else {
+                document.getElementById('previewCard').classList.add('hidden');
+            }
+        }
+
+        // --- DATABASE KAYIT VE QR ---
+        async function generateQR() {
+            const btn = document.getElementById('createBtn');
+            const btnText = document.getElementById('btnText');
+            const originalText = btnText.innerText;
+            
+            btnText.innerText = 'Veritabanına Kaydediliyor...';
+            btn.disabled = true;
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+
+            try {
+                // 1. Verileri Hazırla
+                const client = document.getElementById('client').value.trim();
+                let rawVal = document.getElementById('totalValue').value.replace(/\./g, '').replace(',', '.');
+                const totalVal = parseFloat(rawVal);
+                const uPrice = parseFloat(document.getElementById('unitPrice').value);
+                const wHours = parseFloat(document.getElementById('workHours').value);
+                const fuel = document.getElementById('fuel').value;
+                
+                const dateStr = document.getElementById('installDate').value;
+                const timeStr = document.getElementById('installTime').value;
+                const startDateTime = new Date(`${dateStr}T${timeStr}:00`);
+
+                if (!totalVal || !uPrice) throw new Error("Lütfen tutar ve birim fiyat alanlarını doldurun.");
+                if (!client) throw new Error("Müşteri adı giriniz.");
+
+                // 2. Vardiya JSON Oluştur
+                const shifts = [];
+                for (let i = 1; i <= 7; i++) {
+                    if (document.getElementById(`day${i}`).checked) {
+                        shifts.push({
+                            dayIndex: i, // 1=Pzt, 7=Paz
+                            start: document.getElementById(`start${i}`).value,
+                            end: document.getElementById(`end${i}`).value
+                        });
+                    }
+                }
+
+                if (shifts.length === 0) throw new Error("En az bir iş günü seçmelisiniz.");
+
+                // 3. Supabase INSERT
+                const { data, error } = await supabase
+                    .from('simulations')
+                    .insert([{
+                        client_name: client,
+                        total_annual_loss: totalVal,
+                        work_hours: wHours,
+                        unit_price: uPrice,
+                        fuel_type: fuel,
+                        start_date: startDateTime.toISOString(),
+                        shift_config: shifts
+                    }])
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                // 4. QR Oluştur
+                const finalUrl = `https://optimizi.app/anliksayac.html?id=${data.id}`;
+                
+                const qrContainer = document.getElementById('qrcode');
+                qrContainer.innerHTML = '';
+                new QRCode(qrContainer, { 
+                    text: finalUrl, 
+                    width: 180, 
+                    height: 180, 
+                    colorDark : "#0f172a", 
+                    colorLight : "#ffffff", 
+                    correctLevel : QRCode.CorrectLevel.M 
+                });
+
+                document.getElementById('linkText').innerText = finalUrl;
+                
+                // Modalı Aç
+                const modal = document.getElementById('resultModal');
+                const content = document.getElementById('resultContent');
+                modal.classList.remove('hidden');
+                
+                // Animasyon
+                setTimeout(() => {
+                    content.classList.remove('scale-95', 'opacity-0');
+                    content.classList.add('scale-100', 'opacity-100');
+                    
+                    const img = qrContainer.querySelector("img");
+                    if(img) document.getElementById('downloadBtn').href = img.src;
+                }, 10);
+
+            } catch (err) {
+                alert('Hata: ' + err.message);
+            } finally {
+                btnText.innerText = originalText;
+                btn.disabled = false;
+                btn.classList.remove('opacity-75', 'cursor-not-allowed');
+            }
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('resultModal');
+            const content = document.getElementById('resultContent');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        // Başlangıç
+        calculateShiftHours();
     </script>
 </body>
 </html>
