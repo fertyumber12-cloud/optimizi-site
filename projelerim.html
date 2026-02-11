@@ -9,7 +9,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -275,7 +275,7 @@
               </div>
 
               <div class="relative group">
-                  <button onclick="toggleNotifDropdown()" class="p-2 relative text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-white transition">
+                  <button id="bellBtn" onclick="toggleNotifDropdown()" class="p-2 relative text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-white transition">
                       <i data-lucide="bell"></i>
                       <span id="notifDot" class="hidden absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
                   </button>
@@ -344,9 +344,9 @@
               <i data-lucide="calendar-clock" class="w-6 h-6"></i>
           </div>
           <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Hatırlatma Kur</h3>
-          <p class="text-xs text-slate-500 mb-4">Seçtiğiniz tarih geldiğinde bildirim alacaksınız.</p>
+          <p class="text-xs text-slate-500 mb-4">Seçtiğiniz tarih ve saatte bildirim alacaksınız.</p>
           
-          <input type="date" id="reminderDateInput" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 mb-4 text-sm focus:outline-none focus:border-indigo-500">
+          <input type="datetime-local" id="reminderDateInput" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 mb-4 text-sm focus:outline-none focus:border-indigo-500">
           
           <div class="flex gap-2">
               <button onclick="closeReminderModal()" class="flex-1 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-bold">İptal</button>
@@ -462,6 +462,19 @@
     let projectToDeleteId = null;
     let reminderProjectId = null;
 
+    // --- CLICK OUTSIDE LOGIC (YENİ EKLENDİ) ---
+    document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('notifDropdown');
+        const bellBtn = document.getElementById('bellBtn');
+
+        if (!dropdown.classList.contains('hidden')) {
+            // Tıklanan yer dropdown değilse VE zil butonu değilse kapat
+            if (!dropdown.contains(event.target) && !bellBtn.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        }
+    });
+
     // --- THEME LOGIC ---
     function toggleTheme() {
         const isDark = document.documentElement.classList.toggle('dark');
@@ -525,7 +538,7 @@
         lucide.createIcons();
     }
 
-    // --- REMINDER LOGIC (GÜNCELLENMİŞ) ---
+    // --- REMINDER LOGIC (SAATLİ - GÜNCELLENDİ) ---
     function openReminderModal(id) {
         reminderProjectId = id;
         document.getElementById('reminderDateInput').value = '';
@@ -555,7 +568,7 @@
             const p = allProjects.find(x => x.id === reminderProjectId);
             if(p) p.reminder_date = dateVal;
             renderProjects(allProjects);
-            checkReminders(); // Bildirimleri tekrar kontrol et
+            checkReminders(); 
         }
         closeReminderModal();
     }
@@ -564,36 +577,33 @@
         document.getElementById('notifDropdown').classList.toggle('hidden');
     }
     
-    // YENİ HATIRLATMA SİLME (OKUNDU SAYMA)
     async function dismissReminder(id, event) {
-        event.stopPropagation(); // Satıra tıklamayı engelle
+        event.stopPropagation(); 
         
         const { error } = await supabaseClient
             .from('calculations')
-            .update({ reminder_date: null }) // Tarihi sıfırla
+            .update({ reminder_date: null }) 
             .eq('id', id);
             
         if(error) {
             console.error('Bildirim silinemedi', error);
         } else {
-            // Yerel listeyi güncelle ve yeniden çiz
             const p = allProjects.find(x => x.id === id);
             if(p) p.reminder_date = null;
-            renderProjects(allProjects); // Tablodaki zilin rengi değişsin diye
-            checkReminders(); // Kırmızı noktayı ve listeyi güncelle
+            renderProjects(allProjects);
+            checkReminders(); 
         }
     }
     
-    // GÜNCELLENMİŞ HATIRLATMA KONTROLÜ (TARİH KONTROLLÜ)
+    // GÜNCELLENMİŞ SAATLİ HATIRLATMA KONTROLÜ
     function checkReminders() {
-        const today = new Date().toISOString().split('T')[0];
+        const now = new Date(); // Şu anki tarih ve saat
         
-        // Sadece BUGÜN veya GEÇMİŞ tarihli olanları al
         const activeReminders = allProjects.filter(p => {
             if (!p.reminder_date) return false;
-            // Veritabanındaki tarih (timestamp) formatından sadece YYYY-MM-DD kısmını alıp kıyasla
-            const rDate = new Date(p.reminder_date).toISOString().split('T')[0];
-            return rDate <= today;
+            const rDate = new Date(p.reminder_date);
+            // Saniye hassasiyeti bazen karışabilir, "küçük veya eşitse" göster
+            return rDate <= now;
         });
         
         const dot = document.getElementById('notifDot');
@@ -603,10 +613,17 @@
             dot.classList.remove('hidden');
             list.innerHTML = '';
             activeReminders.forEach(p => {
+                const dateObj = new Date(p.reminder_date);
+                // Türkçe format: 12 Şubat 2024, 14:30
+                const dateStr = dateObj.toLocaleString('tr-TR', { 
+                    month: 'long', 
+                    day: 'numeric', 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+
                 const div = document.createElement('div');
                 div.className = 'p-3 border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition flex items-center justify-between gap-3';
-                
-                // Sol taraf: İkon ve Metin (Tıklayınca projeye git)
                 div.innerHTML = `
                     <div class="flex items-center gap-3 cursor-pointer flex-1" onclick="window.location.href='tool/roi.html?load_id=${p.id}'">
                         <div class="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 p-2 rounded-lg shrink-0">
@@ -614,8 +631,8 @@
                         </div>
                         <div>
                             <div class="text-sm font-bold text-slate-800 dark:text-slate-200 line-clamp-1">${p.client_name || p.project_name || 'İsimsiz'}</div>
-                            <div class="text-xs text-slate-500">Hatırlatma zamanı geldi!</div>
-                            <div class="text-[10px] text-slate-400 mt-1">${new Date(p.reminder_date).toLocaleDateString('tr-TR')}</div>
+                            <div class="text-xs text-slate-500">Zamanı geldi!</div>
+                            <div class="text-[10px] text-slate-400 mt-1">${dateStr}</div>
                         </div>
                     </div>
                     <button onclick="dismissReminder('${p.id}', event)" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition" title="Bildirimi Kaldır">
@@ -667,7 +684,7 @@
 
         allProjects = data;
         renderProjects(allProjects);
-        checkReminders(); // Bildirimleri kontrol et (Tarihe göre)
+        checkReminders(); 
     }
 
     function renderProjects(projects) {
@@ -695,20 +712,19 @@
 
             const savings = proj.total_savings ? parseFloat(proj.total_savings).toLocaleString('tr-TR', {minimumFractionDigits: 2}) + ' ₺' : '-';
             
-            // Hatırlatma İkonu Durumu (Bugün veya geçmişteyse kırmızı yap)
+            // Hatırlatma İkonu Durumu (Saatli Kontrol)
             let reminderIconClass = "text-slate-300 hover:text-indigo-500";
-            const today = new Date().toISOString().split('T')[0];
+            const now = new Date();
             
             if(proj.reminder_date) {
-                const rDate = new Date(proj.reminder_date).toISOString().split('T')[0];
-                if (rDate <= today) {
-                    reminderIconClass = "text-red-500 bg-red-50 dark:bg-red-900/20 animate-pulse"; // Günü gelmişse kırmızı ve yanıp söner
+                const rDate = new Date(proj.reminder_date);
+                if (rDate <= now) {
+                    reminderIconClass = "text-red-500 bg-red-50 dark:bg-red-900/20 animate-pulse"; // Süresi gelmiş/geçmiş
                 } else {
-                    reminderIconClass = "text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20"; // Gelecekteyse mavi
+                    reminderIconClass = "text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20"; // Gelecekte
                 }
             }
 
-            // TABLO DÜZENİ DEĞİŞTİ: Müşteri Adı üstte (Kalın), Proje adı altta (İnce)
             const row = `
                 <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition group border-b border-slate-100 dark:border-white/5 last:border-0">
                     <td class="px-6 py-4">
@@ -739,7 +755,6 @@
         lucide.createIcons();
     }
 
-    // ARAMA MANTIĞI (GÜÇLENDİRİLDİ)
     function filterProjects() {
         const query = document.getElementById('searchInput').value.toLowerCase();
         
