@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Optimizi Kayıp Simülatör Paneli</title>
-    <link rel="icon" href="favicon.png" type="image/png">
+    <title>Optimizi Sayaç Yönetim Paneli</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script>tailwind.config = { theme: { fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] } } }</script>
+    
     <style>
         body { background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 24px 24px; }
         .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 20px 40px -5px rgba(0,0,0,0.1); }
@@ -25,23 +25,30 @@
         
         <div class="flex items-center justify-between mb-6">
             <div>
-                <h1 class="text-2xl font-black tracking-tight text-slate-900">Optimizi<span class="text-red-600">.QR PANELİ</span></h1>
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Operasyonel Kayıp Simülatörü</p>
+                <h1 class="text-2xl font-black tracking-tight text-slate-900">Optimizi<span class="text-red-600">.Panel</span></h1>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Sayaç Yönetim Sistemi</p>
             </div>
             <div class="bg-red-50 p-3 rounded-2xl"><i data-lucide="activity" class="w-6 h-6 text-red-600"></i></div>
         </div>
 
         <div class="space-y-4">
+            
             <div class="grid grid-cols-2 gap-3">
-                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Müşteri</label><input type="text" id="client" placeholder="ABC Tesisleri" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:border-red-500 transition"></div>
-                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Rapor No</label><input type="text" id="serial" value="LSS-001" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:border-red-500 transition"></div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Müşteri</label>
+                    <input type="text" id="client" placeholder="ABC Tesisleri" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:border-red-500 transition">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Rapor No</label>
+                    <input type="text" id="serial" value="LSS-001" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:border-red-500 transition">
+                </div>
             </div>
 
             <div class="bg-white p-4 rounded-2xl border border-red-100 shadow-sm relative overflow-hidden group focus-within:ring-2 ring-red-100 transition">
                 <div class="absolute right-0 top-0 p-4 opacity-5 group-focus-within:opacity-10 transition"><i data-lucide="coins" class="w-16 h-16 text-red-600"></i></div>
                 <label class="text-[10px] font-bold text-red-600 uppercase flex items-center gap-1 mb-1"><i data-lucide="trending-down" class="w-3 h-3"></i> Toplam Yıllık Kayıp (TL)</label>
                 <div class="relative z-10">
-                    <input type="text" id="totalValue" oninput="calculatePreview()" placeholder="Örn: 530272" class="w-full text-2xl font-black text-slate-800 bg-transparent border-none p-0 outline-none placeholder-slate-200">
+                    <input type="text" id="totalValue" oninput="calculatePreview()" placeholder="Örn: 500000" class="w-full text-2xl font-black text-slate-800 bg-transparent border-none p-0 outline-none placeholder-slate-200">
                     <span class="absolute right-0 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">TL / Yıl</span>
                 </div>
             </div>
@@ -50,7 +57,7 @@
                 <div class="bg-white p-3 rounded-xl border border-slate-200">
                     <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Yıllık Çalışma (Saat)</label>
                     <input type="number" id="workHours" oninput="calculatePreview()" value="4800" class="w-full font-bold text-slate-700 outline-none border-none p-0 bg-transparent focus:ring-0">
-                    <p class="text-[9px] text-slate-400 mt-1">*Kota dolunca sayaç durur</p>
+                    <p class="text-[9px] text-slate-400 mt-1">*Operasyonel hız için kritik</p>
                 </div>
                 <div class="bg-white p-3 rounded-xl border border-slate-200">
                     <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Enerji Birim Fiyat</label>
@@ -119,10 +126,9 @@
             </button>
         </div>
 
-        <div id="resultCard" class="hidden mt-6 pt-6 border-t border-slate-200 text-center bg-white p-4 rounded-xl">
+        <div id="resultCard" class="hidden mt-6 pt-6 border-t border-slate-200 text-center bg-white p-4 rounded-xl animate-[fadeIn_0.5s_ease-out]">
             <div id="qrcode" class="flex justify-center mb-4"></div>
-            
-            <p class="text-[10px] text-slate-400 mb-2">Bu QR Kod, veritabanına kaydedilen simülasyonu açar.</p>
+            <p class="text-[10px] text-slate-400 mb-2">Simülasyon oluşturuldu ve veritabanına kaydedildi.</p>
             <code id="linkText" class="text-[9px] bg-slate-100 p-2 rounded block mb-2 break-all font-mono text-slate-500">...</code>
             <a id="downloadBtn" download="optimizi_kayip.png" href="#" class="inline-flex items-center gap-2 text-xs font-bold text-red-600 bg-red-50 px-4 py-2 rounded-full hover:bg-red-100 transition">QR Kodunu İndir</a>
         </div>
@@ -130,13 +136,13 @@
 
     <script>
         lucide.createIcons();
-        
+
         // SUPABASE BAĞLANTISI
         const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Tarih ve Saat Başlangıç Değerleri
+        // Tarih Saat Ayarı
         const now = new Date();
         document.getElementById('installDate').valueAsDate = now;
         const hh = String(now.getHours()).padStart(2, '0');
@@ -186,11 +192,12 @@
             const unitPrice = document.getElementById('unitPrice').value;
             const fuel = document.getElementById('fuel').value;
             
+            // Tarih ve Saat Birleştirme
             const dateStr = document.getElementById('installDate').value; 
             const timeStr = document.getElementById('installTime').value; 
             const startDateTime = new Date(`${dateStr}T${timeStr}`);
 
-            if(!totalVal || !unitPrice || !workHours) { alert("Lütfen ana değerleri giriniz."); return; }
+            if(!client || !totalVal || !workHours) { alert("Lütfen ana bilgileri eksiksiz girin."); return; }
 
             // Buton Animasyonu
             const oldHTML = btn.innerHTML;
@@ -198,28 +205,27 @@
             btn.disabled = true;
 
             try {
-                // Manuel Yakıt Bilgilerini Topla
+                // Manuel Yakıt Bilgileri
                 let fLabel = null;
                 let fLhv = null;
                 let fCo2 = null;
                 let fUnit = 'kg';
 
                 if(fuel === 'manual') {
-                    fLabel = document.getElementById('customFuelLabel').value || 'Özel Yakıt';
+                    fLabel = document.getElementById('customFuelLabel').value || 'Paçal Kömür';
                     fLhv = parseFloat(document.getElementById('customFuelLhv').value) || 0;
                     fCo2 = parseFloat(document.getElementById('customFuelCo2').value) || 0;
-                    fUnit = document.getElementById('customFuelUnit').value || 'kg';
                 }
 
-                // 1. Veritabanına Yaz
+                // 1. VERİTABANINA KAYIT
                 const { data, error } = await supabase
                     .from('simulations')
                     .insert([{
                         client_name: client,
                         report_no: serial,
-                        total_annual_loss: totalVal,
+                        total_annual_loss: parseFloat(totalVal),
                         work_hours: parseFloat(workHours),
-                        unit_price: parseFloat(unitPrice),
+                        unit_price: parseFloat(unitPrice || 0),
                         fuel_type: fuel,
                         fuel_label: fLabel,
                         fuel_lhv: fLhv,
@@ -232,19 +238,19 @@
 
                 if (error) throw error;
 
-                // 2. QR Kod Üret
+                // 2. QR KOD ÜRETME
                 const finalUrl = `https://optimizi.app/anliksayac.html?id=${data.id}`;
                 
                 const resultCard = document.getElementById('resultCard');
                 const qrContainer = document.getElementById('qrcode');
                 
-                // KRİTİK: Önce container'ı görünür yap!
+                // ÖNCE GÖRÜNÜR YAP (Hata olmaması için)
                 resultCard.classList.remove('hidden');
                 
-                // Sonra temizle
+                // TEMİZLE
                 qrContainer.innerHTML = '';
 
-                // Sonra çiz (Görünür olduğu için çalışır)
+                // ÇİZ
                 new QRCode(qrContainer, { 
                     text: finalUrl, 
                     width: 160, 
@@ -256,12 +262,13 @@
 
                 document.getElementById('linkText').innerText = finalUrl;
                 
+                // İNDİRME LİNKİ
                 setTimeout(() => { 
                     const img = qrContainer.querySelector("img");
                     if(img) document.getElementById('downloadBtn').href = img.src; 
                 }, 300);
 
-                btn.innerHTML = '✅ Simülasyon Hazır';
+                btn.innerHTML = '✅ Başarılı';
                 setTimeout(() => { btn.disabled = false; btn.innerHTML = oldHTML; }, 2000);
 
             } catch(err) {
