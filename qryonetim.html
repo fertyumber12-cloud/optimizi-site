@@ -156,6 +156,12 @@
                     </div>
                 </div>
 
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 block ml-1">Başlangıç Saati</label>
+                    <input type="time" id="installTime" 
+                        class="input-dark w-full rounded-xl px-2 py-2.5 text-xs font-bold text-center">
+                </div>
+
                 <div id="manualFuelFields" class="hidden bg-slate-800/50 p-3 rounded-xl border border-dashed border-slate-700 grid grid-cols-2 gap-2">
                     <div class="col-span-2">
                         <label class="text-[9px] font-bold text-slate-400 uppercase">Özel Yakıt Adı</label>
@@ -171,9 +177,6 @@
                     </div>
                     <input type="hidden" id="customFuelUnit" value="kg">
                 </div>
-
-                <div class="hidden">
-                    <input type="time" id="installTime"> </div>
 
                 <button onclick="generateQR()" class="w-full bg-brand-600 hover:bg-brand-500 text-white p-4 rounded-xl font-bold text-sm shadow-lg shadow-brand-900/20 transition-all transform active:scale-[0.98] flex items-center justify-center gap-2 mt-4 group">
                     <i data-lucide="qr-code" class="w-4 h-4 transition group-hover:scale-110"></i>
@@ -254,6 +257,8 @@
             
             const dateStr = document.getElementById('installDate').value; 
             const timeStr = document.getElementById('installTime').value; 
+            
+            // Tarih formatlama (Linkteki sistemin aynısı)
             const fullDateTime = `${dateStr}-${timeStr.replace(':', '-')}`; 
 
             rawVal = rawVal.replace(/\./g, '').replace(',', '.');
