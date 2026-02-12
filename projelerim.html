@@ -6,6 +6,10 @@
   <title>Projelerim</title>
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- AUTH GUARD - 5 dakikalık inaktivite kontrolü -->
+  <script src="auth-guard.js"></script>
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -723,10 +727,15 @@
     }
 
     async function initPage() {
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        if (!session) { window.location.href = 'login.html'; return; }
+        // currentUser auth-guard.js tarafından zaten set ediliyor
+        if (!window.currentUser) {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) { window.location.href = 'login.html'; return; }
+            currentUser = session.user;
+        } else {
+            currentUser = window.currentUser;
+        }
 
-        currentUser = session.user;
         const fullName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
         document.getElementById('sidebarUserName').textContent = fullName;
         document.getElementById('avatarInitial').textContent = fullName.charAt(0).toUpperCase();
@@ -848,8 +857,13 @@
     });
 
     async function handleLogout() {
-      const { error } = await supabaseClient.auth.signOut();
-      if (!error) window.location.href = 'login.html';
+      // window.logout auth-guard.js'den geliyor
+      if (window.logout) {
+        await window.logout();
+      } else {
+        const { error } = await supabaseClient.auth.signOut();
+        if (!error) window.location.href = 'login.html';
+      }
     }
 
     initPage();
