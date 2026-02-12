@@ -4,6 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Yoğuşma Kontrol Analizi</title>
+  <style>
+  /* Auth kontrolü yapılana kadar sayfa gizli */
+  body:not(.auth-checked) {
+    opacity: 0;
+    pointer-events: none;
+  }
+  
+  body.auth-checked {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+  }
+</style>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
