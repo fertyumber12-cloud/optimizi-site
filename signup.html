@@ -69,6 +69,14 @@
       border-radius: 2px;
       transition: all 0.3s ease;
     }
+    .logo-link {
+      display: inline-block;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    .logo-link:hover {
+      transform: translateY(-2px);
+      opacity: 0.9;
+    }
     
     /* Modal Styles */
     .modal-overlay {
@@ -147,14 +155,17 @@
       <div class="absolute bottom-0 -right-1/4 w-[600px] h-[600px] bg-orange-600/10 rounded-full blur-[120px] animate-blob" style="animation-delay: 5s;"></div>
   </div>
 
-  <div class="relative z-10 w-full max-w-md px-6">
+  <div class="relative z-10 w-full max-w-md px-6 py-8">
     
-    <div class="flex flex-col items-center mb-12">
+    <!-- Logo ve Başlık - Tıklanabilir -->
+    <div class="flex flex-col items-center mb-16">
         <div class="text-center">
-            <div class="font-black text-4xl lg:text-5xl tracking-tighter text-white">
-                Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-orange-400">.App</span>
-            </div>
-            <div class="flex items-center justify-center gap-2 mt-4">
+            <a href="index.html" class="logo-link">
+                <div class="font-black text-4xl lg:text-5xl tracking-tighter text-white">
+                    Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-orange-400">.App</span>
+                </div>
+            </a>
+            <div class="flex items-center justify-center gap-2 mt-5">
                 <span class="h-px w-8 bg-gradient-to-r from-transparent to-slate-600"></span>
                 <p class="text-slate-400 text-[11px] font-bold uppercase tracking-[0.3em]">Hesap Oluştur</p>
                 <span class="h-px w-8 bg-gradient-to-l from-transparent to-slate-600"></span>
@@ -195,7 +206,7 @@
                 </div>
                 <div class="flex-1">
                     <h4 class="text-sm font-bold text-green-300 mb-1">Kayıt Başarılı! 🎉</h4>
-                    <p class="text-xs text-green-200/80">Hesabınız oluşturuldu. Giriş sayfasına yönlendiriliyorsunuz...</p>
+                    <p class="text-xs text-green-200/80" id="successText">Hesabınız oluşturuldu. Giriş sayfasına yönlendiriliyorsunuz...</p>
                 </div>
             </div>
         </div>
@@ -314,30 +325,26 @@
                     <input type="checkbox" id="termsCheckbox" class="mt-0.5 rounded border-white/10 bg-slate-800 text-indigo-600 focus:ring-indigo-500" required>
                     <span class="text-xs">
                         <a href="#" onclick="openModal('termsModal'); return false;" class="text-indigo-400 hover:text-indigo-300 font-semibold">Kullanım Şartları</a>'nı ve 
-                        <a href="#" onclick="openModal('privacyModal'); return false;" class="text-indigo-400 hover:text-indigo-300 font-semibold">Gizlilik Politikası</a>'nı okudum, kabul ediyorum.
+                        <a href="#" onclick="openModal('privacyModal'); return false;" class="text-indigo-400 hover:text-indigo-300 font-semibold">Gizlilik Politikası</a>'nı okudum ve kabul ediyorum.
                     </span>
                 </label>
             </div>
 
-            <button 
-                type="submit" 
-                id="submitBtn"
-                class="w-full py-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-orange-500 hover:from-indigo-500 hover:to-orange-400 text-white rounded-xl font-bold transition shadow-lg shadow-indigo-500/25 active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100">
+            <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-indigo-600 to-orange-600 hover:from-indigo-700 hover:to-orange-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-indigo-500/50 flex items-center justify-center gap-2">
                 <span id="btnText">Hesap Oluştur</span>
                 <svg id="btnIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                 </svg>
                 <div id="btnSpinner" class="spinner hidden"></div>
             </button>
         </form>
 
-        <div class="mt-8 pt-6 border-t border-white/5 text-center">
-            <p class="text-sm text-slate-400">Zaten hesabınız var mı? <a href="login.html" class="text-white font-bold hover:text-indigo-400 transition">Giriş Yapın</a></p>
+        <div class="mt-6 text-center">
+            <p class="text-xs text-slate-500">
+                Zaten hesabınız var mı? 
+                <a href="login.html" class="text-indigo-400 hover:text-indigo-300 font-semibold transition">Giriş Yap</a>
+            </p>
         </div>
-    </div>
-
-    <div class="text-center mt-10">
-        <p class="text-[10px] text-slate-600 uppercase tracking-[0.2em] font-bold">&copy; 2025 Optimizi Inc • Tüm Hakları Saklıdır.</p>
     </div>
   </div>
 
@@ -354,34 +361,47 @@
       </div>
       <div class="modal-body text-slate-300 space-y-4 text-sm leading-relaxed">
         <p class="text-xs text-slate-500 italic">Son Güncelleme: 8 Şubat 2025</p>
+        <p>Optimizi Inc. platformunu kullanarak aşağıdaki şartları kabul etmiş sayılırsınız:</p>
         
-        <h3 class="text-lg font-bold text-white mt-6">1. Hizmetin Kapsamı</h3>
-        <p>Optimizi.App, endüstriyel enerji verimliliği hesaplama araçları sunan bir SaaS platformudur. Platform üzerinden ısı kaybı, ROI, yalıtım kalınlığı ve diğer enerji verimliliği hesaplamalarını yapabilirsiniz.</p>
+        <h3 class="text-lg font-bold text-white mt-6">1. Hizmet Tanımı</h3>
+        <p>Optimizi.App, endüstriyel üretim hesaplamaları için geliştirilmiş bir SaaS platformudur. Platform, çevrimiçi hesaplama araçları, veri saklama ve raporlama hizmetleri sunar.</p>
         
-        <h3 class="text-lg font-bold text-white mt-6">2. Kullanıcı Hesabı</h3>
-        <p>Platform kullanımı için kayıt olmanız gerekmektedir. Hesap bilgilerinizin güvenliğinden siz sorumlusunuz. Hesabınızın yetkisiz kullanımını derhal bize bildirmelisiniz.</p>
+        <h3 class="text-lg font-bold text-white mt-6">2. Hesap Oluşturma ve Güvenlik</h3>
+        <ul class="list-disc list-inside space-y-2 ml-4">
+          <li>Hesap oluşturmak için doğru ve güncel bilgiler sağlamalısınız.</li>
+          <li>Şifrenizi güvenli tutmak sizin sorumluluğunuzdadır.</li>
+          <li>Hesabınızda gerçekleşen tüm aktivitelerden siz sorumlusunuz.</li>
+          <li>Şüpheli aktivite tespit ederseniz derhal bizimle iletişime geçmelisiniz.</li>
+        </ul>
         
-        <h3 class="text-lg font-bold text-white mt-6">3. Hesaplama Sonuçları</h3>
-        <p>Platformumuzda yapılan tüm hesaplamalar ISO 12241, ASTM C680 ve VDI 2055 gibi mühendislik standartlarına dayanmaktadır. Ancak, hesaplama sonuçları bilgilendirme amaçlıdır ve profesyonel mühendislik onayı gerektiren durumlarda yetkili kişilerle çalışılması önerilir.</p>
+        <h3 class="text-lg font-bold text-white mt-6">3. Kullanım Kuralları</h3>
+        <p>Platformu kullanırken şunları <strong>yapmamalısınız</strong>:</p>
+        <ul class="list-disc list-inside space-y-2 ml-4">
+          <li>Yasadışı amaçlarla kullanmak</li>
+          <li>Sistemin güvenliğini test etmek veya ihlal etmeye çalışmak</li>
+          <li>Spam veya zararlı yazılım göndermek</li>
+          <li>Başkasının hesabını izinsiz kullanmak</li>
+          <li>Platformu otomatik araçlarla aşırı yüklemek</li>
+        </ul>
         
-        <h3 class="text-lg font-bold text-white mt-6">4. Fikri Mülkiyet Hakları</h3>
-        <p>Platform üzerindeki tüm içerik, yazılım, tasarım ve hesaplama algoritmaları Optimizi Inc.'e aittir. İzinsiz kopyalama, dağıtma veya ticari kullanım yasaktır.</p>
+        <h3 class="text-lg font-bold text-white mt-6">4. Fikri Mülkiyet</h3>
+        <p>Platformdaki tüm içerik, tasarım, kod ve hesaplama algoritmaları Optimizi Inc.'in mülkiyetindedir. İzinsiz kopyalama, dağıtma veya türev çalışmalar yasaktır.</p>
         
-        <h3 class="text-lg font-bold text-white mt-6">5. Abonelik ve Ödeme</h3>
-        <p>Seçtiğiniz pakete göre aylık veya yıllık ödeme yaparsınız. Ödemeler otomatik olarak yenilenir. İptal talebiniz bir sonraki fatura döneminde geçerli olur.</p>
+        <h3 class="text-lg font-bold text-white mt-6">5. Veri Kullanımı ve Gizlilik</h3>
+        <p>Girdiğiniz hesaplama verileri şifrelenmiş olarak saklanır. Gizlilik politikamız için ayrı bir dokümana bakınız. Verilerinizi üçüncü taraflarla paylaşmayız.</p>
         
-        <h3 class="text-lg font-bold text-white mt-6">6. Hizmetin Durdurulması</h3>
-        <p>Optimizi.App, kullanım şartlarını ihlal eden kullanıcıların hesaplarını askıya alma veya sonlandırma hakkını saklı tutar.</p>
+        <h3 class="text-lg font-bold text-white mt-6">6. Sorumluluk Reddi</h3>
+        <p>Platform "olduğu gibi" sunulur. Hesaplama sonuçlarının doğruluğundan emin olmak kullanıcının sorumluluğundadır. Optimizi Inc., platformun kesintisiz veya hatasız olacağını garanti etmez.</p>
         
-        <h3 class="text-lg font-bold text-white mt-6">7. Sorumluluk Sınırlaması</h3>
-        <p>Platformumuz "olduğu gibi" sunulmaktadır. Hesaplama sonuçlarının kullanımından doğacak zararlardan Optimizi Inc. sorumlu tutulamaz.</p>
+        <h3 class="text-lg font-bold text-white mt-6">7. Hesap İptali</h3>
+        <p>Şartları ihlal eden hesaplar önceden haber verilmeksizin askıya alınabilir veya sonlandırılabilir. Hesabınızı dilediğiniz zaman kapatabilirsiniz.</p>
         
         <h3 class="text-lg font-bold text-white mt-6">8. Değişiklikler</h3>
         <p>Bu kullanım şartları zaman zaman güncellenebilir. Önemli değişiklikler e-posta ile bildirilecektir.</p>
         
         <div class="mt-8 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
           <p class="text-xs text-indigo-300">
-            <strong>İletişim:</strong> Sorularınız için <a href="mailto:destek@optimizi.app" class="underline">destek@optimizi.app</a> adresinden bize ulaşabilirsiniz.
+            <strong>İletişim:</strong> Sorularınız için <a href="mailto:support@optimizi.app" class="underline">support@optimizi.app</a> adresinden bize ulaşabilirsiniz.
           </p>
         </div>
       </div>
@@ -447,7 +467,7 @@
         <p>Gizlilik ile ilgili sorularınız veya haklarınızı kullanmak için:</p>
         <div class="mt-4 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
           <p class="text-xs text-indigo-300">
-            <strong>E-posta:</strong> <a href="mailto:kvkk@optimizi.app" class="underline">kvkk@optimizi.app</a><br>
+            <strong>E-posta:</strong> <a href="mailto:privacy@optimizi.app" class="underline">privacy@optimizi.app</a><br>
             <strong>Adres:</strong> Optimizi Inc., [Adresiniz buraya gelecek]
           </p>
         </div>
@@ -692,14 +712,7 @@
     // Remove error when user starts typing
     document.getElementById('emailInput').addEventListener('input', hideError);
     document.getElementById('passwordInput').addEventListener('input', hideError);
-    
-    // Check if user is already logged in
-    supabaseClient.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        // Already logged in, redirect to dashboard
-        window.location.href = 'dashboard.html';
-      }
-    });
   </script>
+
 </body>
 </html>
