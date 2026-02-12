@@ -6,7 +6,6 @@
   <title>Projelerim</title>
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="auth.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -460,6 +459,9 @@
   </div>
 
   <script>
+    const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let allProjects = [];
     let projectToDeleteId = null;
@@ -720,15 +722,11 @@
         return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
-async function initPage() {
-    // currentUser auth.js'den geliyor
-    if (!window.currentUser) {
+    async function initPage() {
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) { window.location.href = 'login.html'; return; }
+
         currentUser = session.user;
-    } else {
-        currentUser = window.currentUser;
-    }
         const fullName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
         document.getElementById('sidebarUserName').textContent = fullName;
         document.getElementById('avatarInitial').textContent = fullName.charAt(0).toUpperCase();
