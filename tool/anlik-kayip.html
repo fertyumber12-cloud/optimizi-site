@@ -4,6 +4,18 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Enerji Kayıp ve Kaçak Analizi</title>
+ <style>
+  /* Auth kontrolü yapılana kadar sayfa gizli */
+  body:not(.auth-checked) {
+    opacity: 0;
+    pointer-events: none;
+  }
+  
+  body.auth-checked {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+  }
+</style>
 <meta name="description" content="İşletmenizdeki yalıtımsız yüzeylerden kaynaklanan yıllık finansal kaybı hesaplayın.">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
@@ -1559,6 +1571,7 @@
 </script>
 </body>
 </html>
+
 
 
 
