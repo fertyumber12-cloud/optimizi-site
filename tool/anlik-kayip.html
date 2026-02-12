@@ -568,7 +568,7 @@
          </div>
 
         <div class="border-t-2 border-slate-100 pt-4 mt-auto">
-            <p class="text-[10px] text-slate-400 text-center font-medium leading-relaxed" id="sumNote">Hesaplamalar ISO 12241 mühendislik standartlarına göre, ölçülen yüzey sıcaklıkları baz alınarak yapılmıştır.</p>
+            <p class="text-[10px] text-slate-400 text-center font-medium leading-relaxed" id="sumNote">Bu raporda yer alan tüm hesaplamalar ISO 12241 mühendislik standartlarına göre, ölçülen yüzey sıcaklıkları ve verilen parametreler baz alınarak bilgisayar simülasyonu ile yapılmıştır. Sonuçlar teorik değerleri yansıtmakta olup, fiili koşullardaki sapmalara bağlı olarak değişiklik gösterebilir. Bu rapor garanti niteliği taşımamaktadır.</p>
         </div>
     </div>
 </div>
@@ -1292,30 +1292,51 @@
             qrContainer.style.width = '200px';
             qrContainer.style.height = '200px';
             
+            // QR YÖNETİM İLE AYNI ŞEKİLDE
             const clientName = document.getElementById('cName').value || 'Müşteri';
-            const unitPrice = parseFloat(document.getElementById('price').value) || 1;
-            const hours = parseFloat(document.getElementById('hours').value) || 8000;
-            const fuelType = document.getElementById('fuel').value;
-            const totalLossVal = gLoss.toFixed(2);
-            const secondsInYear = hours * 3600;
-            const burnPerSecond = gLoss / secondsInYear;
-            const now = new Date();
-            const dateStr = now.toISOString().split('T')[0];
-            const timeStr = now.toTimeString().split(' ')[0].substring(0,5);
-            const fullDateTime = `${dateStr}-${timeStr.replace(':', '-')}`;
-
-            // YENİ QR SİSTEMİ: qrtakip.html yönlendirmesi
             const serialNo = 'LOSS-' + Math.floor(Math.random() * 10000);
-            let trackUrl = `https://optimizi.app/qrtakip.html?c=${encodeURIComponent(clientName)}&s=${encodeURIComponent(serialNo)}&v=${totalLossVal}&up=${unitPrice}&wh=${hours}&f=${fuelType}&d=${fullDateTime}&bps=${burnPerSecond.toFixed(6)}`;
+            const totalVal = gLoss;  // Hesaplanan toplam kayıp (sayı olarak)
+            const uPrice = document.getElementById('price').value;  // String olarak bırak
+            const wHours = document.getElementById('hours').value;  // String olarak bırak
+            const fuel = document.getElementById('fuel').value;
             
-            if(fuelType === 'manual'){
-                const cLhv = document.getElementById('fuelLhv').value || 0;
-                const cUnit = document.getElementById('fuelUnit').value || 'unit';
-                const cCo2 = document.getElementById('fuelCo2').value || '0.3';
+            // Tarih formatı QR yönetim ile aynı
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];  // YYYY-MM-DD
+            const hh = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
+            const timeStr = `${hh}:${min}`;
+            const fullDateTime = `${dateStr}-${timeStr.replace(':', '-')}`; // YYYY-MM-DD-HH-MM
+            
+            // Hesaplama QR yönetim ile aynı
+            const secondsInWorkYear = wHours * 3600;
+            const burnPerSecond = totalVal / secondsInWorkYear;
+
+            // URL oluşturma QR yönetim ile TAM AYNI
+            const baseUrl = "https://optimizi.app/qrtakip.html";
+            let trackUrl = `${baseUrl}?c=${encodeURIComponent(clientName)}&s=${encodeURIComponent(serialNo)}&v=${totalVal}&up=${uPrice}&wh=${wHours}&f=${fuel}&d=${fullDateTime}&bps=${burnPerSecond.toFixed(6)}`;
+            
+            if(fuel === 'manual'){
                 let cLabel = document.getElementById('fuelLabel').value || 'Özel Yakıt';
+                const cUnit = document.getElementById('fuelUnit').value || 'kg';
+                const cCo2 = document.getElementById('fuelCo2').value || '0.36';
+                const cLhv = document.getElementById('fuelLhv').value;
                 if(cLhv) { cLabel += ` (${cLhv} kcal)`; }
                 trackUrl += `&fl=${encodeURIComponent(cLabel)}&fu=${encodeURIComponent(cUnit)}&fc=${encodeURIComponent(cCo2)}`;
             }
+            
+            // DEBUG - Konsola yazdır
+            console.log('QR URL Parametreleri:', {
+                client: clientName,
+                serial: serialNo,
+                totalValue: totalVal,
+                unitPrice: uPrice,
+                workHours: wHours,
+                fuel: fuel,
+                date: fullDateTime,
+                burnPerSecond: burnPerSecond.toFixed(6),
+                url: trackUrl
+            });
 
             new QRCode(qrContainer, { 
                 text: trackUrl, 
