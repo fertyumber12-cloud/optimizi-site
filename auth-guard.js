@@ -13,7 +13,7 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 // ============================================
 // INACTIVITY TIMEOUT SETTINGS
 // ============================================
-const INACTIVITY_TIMEOUT = 2 * 60 * 1000; // 2 dakika (milisaniye cinsinden)
+const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 dakika (milisaniye cinsinden)
 let inactivityTimer = null;
 
 // Authentication kontrolü
@@ -56,7 +56,7 @@ let inactivityTimer = null;
 
 // İnaktivite timer'ını başlat
 function startInactivityTimer() {
-  console.log('🕐 İnaktivite timer başlatıldı (2 dakika)');
+  console.log('🕐 İnaktivite timer başlatıldı (5 dakika)');
   
   // Önceki timer varsa temizle
   if (inactivityTimer) {
@@ -65,7 +65,7 @@ function startInactivityTimer() {
   
   // Yeni timer başlat
   inactivityTimer = setTimeout(() => {
-    console.log('⏰ 2 dakika hareketsizlik - Otomatik çıkış yapılıyor...');
+    console.log('⏰ 5 dakika hareketsizlik - Otomatik çıkış yapılıyor...');
     logoutDueToInactivity();
   }, INACTIVITY_TIMEOUT);
 }
@@ -156,7 +156,7 @@ function showInactivityPopup() {
           line-height: 1.6;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         ">
-          Hesabınız 2 dakika boyunca hareketsiz kaldığı için güvenlik nedeniyle oturumunuz sonlandırıldı.
+          Hesabınız 5 dakika boyunca hareketsiz kaldığı için güvenlik nedeniyle oturumunuz sonlandırıldı.
         </p>
         
         <button id="inactivityPopupBtn" style="
@@ -338,4 +338,4 @@ window.handleLogoClick = function(event) {
   }
 };
 
-console.log('🔐 Auth Guard aktif - İnaktivite süresi: 2 dakika');
+console.log('🔐 Auth Guard aktif - İnaktivite süresi: 5 dakika');
