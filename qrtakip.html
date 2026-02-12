@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Anlık Kayıp Sayacı</title>
+    <title>Canlı Kayıp Sayacı</title>
     <link rel="icon" href="favicon.png" type="image/png">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -28,7 +28,7 @@
             background-color: #0f172a; 
             color: white; 
             overflow: hidden; 
-            font-family: 'Plus Jakarta Sans', sans-serif; /* Ana Font Güncellendi */
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .counter-shadow { text-shadow: 0 0 20px rgba(220, 38, 38, 0.6); }
         .counter-shadow.paused { text-shadow: 0 0 20px rgba(251, 146, 60, 0.6); }
@@ -45,25 +45,26 @@
         }
         
         @keyframes pulse-red { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        @keyframes pulse-orange { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         .animate-pulse-fast { animation: pulse-red 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        .animate-pulse-paused { animation: pulse-orange 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         .status-badge { transition: all 0.3s ease; }
         .grayscale-50 { filter: grayscale(0.5) brightness(0.7); }
 
-        /* Yeni Kayan Yazı Stili */
-        .ticker-container {
-            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-        }
-        @keyframes scroll-left {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
+        /* --- DÜZELTİLEN KAYAN YAZI STİLİ --- */
+        .ticker-wrap {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            box-sizing: border-box;
         }
         .scroll-text {
-            animation: scroll-left 20s linear infinite;
+            display: inline-block;
             white-space: nowrap;
-            padding-left: 100%; /* Başlangıçta boşluk */
+            /* Mobilde garanti çalışması için 100vw (ekran genişliği) kadar sağdan başlatıyoruz */
+            animation: scroll-left 25s linear infinite;
+        }
+        @keyframes scroll-left {
+            0% { transform: translateX(100vw); } /* Ekranın sağ dışından başla */
+            100% { transform: translateX(-100%); } /* Kendi genişliğin kadar sola git */
         }
     </style>
 </head>
@@ -90,19 +91,12 @@
     </div>
 
     <div class="z-10 w-full max-w-md mt-4">
-        <div class="ticker-container relative w-full overflow-hidden bg-white/5 rounded-full py-1.5 backdrop-blur-sm border border-white/5">
-            <div class="scroll-text flex items-center gap-4">
-                <span class="text-[11px] text-slate-300 font-medium flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> 
-                    Bu sayaç 7/24 sürekli akış modundadır
-                </span>
-                <span class="text-[11px] text-slate-300 font-medium flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                    Yıllık <span id="scrollQuotaHours" class="font-bold text-white">0</span> saatlik kota dolduğunda otomatik durur
-                </span>
-                <span class="text-[11px] text-slate-300 font-medium flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                    Gerçek zamanlı operasyonel kayıp izleme
+        <div class="ticker-wrap bg-white/5 rounded-full py-1.5 backdrop-blur-sm border border-white/5 relative">
+            <div class="scroll-text">
+                <span class="text-[11px] text-slate-300 font-medium inline-flex items-center gap-4">
+                    <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Bu sayaç 7/24 sürekli akış modundadır</span>
+                    <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Yıllık <span id="scrollQuotaHours" class="font-bold text-white">0</span> saatlik kota dolduğunda otomatik durur</span>
+                    <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Gerçek zamanlı operasyonel kayıp izleme</span>
                 </span>
             </div>
         </div>
@@ -166,219 +160,123 @@
     <script>
         lucide.createIcons();
 
-        // Yakıt Tipini İsimlendirme
+        // SUPABASE BAĞLANTISI
+        const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         const fuelMap = {
-            'gas': 'Doğalgaz (m³)',
-            'elec': 'Elektrik (kWh)',
-            'lng': 'LNG (kg)',
-            'fueloil': 'Fuel Oil (kg)',
-            'coal_imp': 'İthal Kömür',
-            'coal_loc': 'Yerli Kömür',
-            'manual': 'Özel / Paçal'
+            'gas': 'Doğalgaz (m³)', 'elec': 'Elektrik (kWh)', 'lng': 'LNG (kg)', 'fueloil': 'Fuel Oil (kg)', 'coal_imp': 'İthal Kömür', 'coal_loc': 'Yerli Kömür', 'manual': 'Özel / Paçal'
         };
 
-        const params = new URLSearchParams(window.location.search);
-        
-        // Verileri Al
-        const client = params.get('c') || 'Bilinmeyen Müşteri';
-        const totalValue = parseFloat(params.get('v')) || 0; 
-        const workHours = parseFloat(params.get('wh')) || 4800; 
-        const unitPrice = parseFloat(params.get('up')) || 0;
-        const fuelCode = params.get('f') || 'gas';
-        let fuelLabel = fuelMap[fuelCode] || 'Bilinmiyor';
-        
-        // Manuel Yakıt Adı varsa onu kullan
-        if (params.get('fl')) { fuelLabel = decodeURIComponent(params.get('fl')); }
+        let startMoment = 0;
+        let burnPerSecond = 0;
+        let totalLimitSeconds = 0; // KOTA
 
-        const dateStr = params.get('d'); 
-        
-        // --- HESAPLAMALAR ---
-        // Saniyelik Yanma Hızı (Burn Per Second)
-        let burnPerSecond = parseFloat(params.get('bps'));
-        if (!burnPerSecond) {
-            const secondsInYear = workHours * 3600;
-            burnPerSecond = totalValue / secondsInYear;
-        }
+        async function init() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
 
-        // Dakikalık Yanma Hızı
-        const burnPerMinute = burnPerSecond * 60;
+            if (!id) return; // ID yoksa dur
 
-        // --- ARAYÜZÜ DOLDUR ---
-        document.getElementById('clientName').innerText = client;
-        
-        // Kayan yazıdaki saati güncelle
-        document.getElementById('scrollQuotaHours').innerText = workHours.toLocaleString('tr-TR');
+            // Veritabanından Çek
+            const { data, error } = await supabase.from('simulations').select('*').eq('id', id).single();
+            if (error || !data) { console.error("Veri bulunamadı"); return; }
 
-        // 1. Şeffaflık Tablosu Doldurma
-        document.getElementById('infoTotal').innerText = totalValue.toLocaleString('tr-TR') + ' TL';
-        document.getElementById('infoHours').innerText = workHours.toLocaleString('tr-TR') + ' Saat/Yıl';
-        document.getElementById('infoPrice').innerText = unitPrice.toLocaleString('tr-TR', {minimumFractionDigits: 2}) + ' TL';
-        document.getElementById('infoFuel').innerText = fuelLabel;
-
-        // 2. Hız Göstergesi
-        document.getElementById('speedDisplay').innerHTML = `Dakikalık Zarar: <span class="text-white">${burnPerMinute.toLocaleString('tr-TR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} TL</span>`;
-
-        // 3. Tarih
-        let startMoment = new Date();
-        if (dateStr) {
-            const parts = dateStr.split('-'); 
-            if (parts.length >= 5) {
-                // ParseInt ekleyerek sayıya çevirmeyi garanti ediyoruz
-                startMoment = new Date(
-                    parseInt(parts[0]), 
-                    parseInt(parts[1])-1, 
-                    parseInt(parts[2]), 
-                    parseInt(parts[3]), 
-                    parseInt(parts[4])
-                );
-            }
-        }
-        
-        // MANUEL FORMATLAMA (Tarayıcı bağımsız çözüm)
-        const trMonths = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
-        const day = startMoment.getDate();
-        const month = trMonths[startMoment.getMonth()];
-        const year = startMoment.getFullYear();
-        const hour = String(startMoment.getHours()).padStart(2, '0');
-        const minute = String(startMoment.getMinutes()).padStart(2, '0');
-
-        document.getElementById('startDate').innerText = `${day} ${month} ${year} ${hour}:${minute}`;
-
-        // --- VARDİYA KONTROLÜ (Gerekirse) ---
-        const shiftsParam = params.get('shifts');
-        let shifts = [];
-        if (shiftsParam) {
-            try { shifts = JSON.parse(decodeURIComponent(shiftsParam)); } catch(e) { console.error('Vardiya parse hatası:', e); }
-        }
-        
-        function isWorkingHours(currentDate) {
-            if (shifts.length === 0) return true;
-            const dayOfWeek = currentDate.getDay() === 0 ? 7 : currentDate.getDay();
-            const currentMinutes = currentDate.getHours() * 60 + currentDate.getMinutes();
+            // UI Doldur
+            document.getElementById('clientName').innerText = data.client_name || 'Bilinmiyor';
+            document.getElementById('scrollQuotaHours').innerText = data.work_hours.toLocaleString('tr-TR');
+            document.getElementById('infoTotal').innerText = data.total_annual_loss.toLocaleString('tr-TR') + ' TL';
+            document.getElementById('infoHours').innerText = data.work_hours.toLocaleString('tr-TR') + ' Saat';
+            document.getElementById('infoPrice').innerText = data.unit_price.toLocaleString('tr-TR', {minimumFractionDigits: 2}) + ' TL';
             
-            for (const shift of shifts) {
-                if (!shift.days.includes(dayOfWeek)) continue;
-                const [startHour, startMin] = shift.start.split(':').map(n => parseInt(n));
-                const [endHour, endMin] = shift.end.split(':').map(n => parseInt(n));
-                const startMinutes = startHour * 60 + startMin;
-                const endMinutes = endHour * 60 + endMin;
-                if (currentMinutes >= startMinutes && currentMinutes <= endMinutes) return true;
-            }
-            return false;
-        }
+            let fuelLabel = fuelMap[data.fuel_type];
+            if(data.fuel_type === 'manual') fuelLabel = data.fuel_label;
+            document.getElementById('infoFuel').innerText = fuelLabel;
 
-        // --- SAYAÇ MOTORU ---
-        const counterEl = document.getElementById('counter');
-        const elapsedEl = document.getElementById('elapsedTime');
-        
-        // Yıllık Kota Kontrolü için Değişkenler
-        let totalWorkSeconds = 0; // Vardiya modunda biriken
-        let lastUpdateTime = Date.now();
-        const maxQuotaSeconds = workHours * 3600; // Yıllık saniye kotası
+            // Hesaplama Değerleri
+            startMoment = new Date(data.start_date);
+            totalLimitSeconds = data.work_hours * 3600; // Saati saniyeye çevir (Kota)
+            burnPerSecond = data.total_annual_loss / totalLimitSeconds;
+            
+            // Dakikalık Hız
+            const burnPerMinute = burnPerSecond * 60;
+            document.getElementById('speedDisplay').innerHTML = `Dakikalık Zarar: <span class="text-white">${burnPerMinute.toLocaleString('tr-TR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} TL</span>`;
+
+            // Başlangıç Tarihini Formatla
+            const d = startMoment.getDate();
+            const m = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"][startMoment.getMonth()];
+            const y = startMoment.getFullYear();
+            const hh = String(startMoment.getHours()).padStart(2, '0');
+            const mm = String(startMoment.getMinutes()).padStart(2, '0');
+            document.getElementById('startDate').innerText = `${d} ${m} ${y} ${hh}:${mm}`;
+
+            // Döngüyü Başlat
+            requestAnimationFrame(updateCounter);
+        }
 
         function updateCounter() {
             const now = new Date();
-            const currentTime = Date.now();
-            const diffSeconds = (now - startMoment) / 1000; // Toplam geçen gerçek saniye
+            let diffSeconds = (now - startMoment) / 1000;
             
-            if (diffSeconds < 0) {
-                counterEl.innerText = "0,0000";
-                elapsedEl.innerText = "Başlamadı";
-                requestAnimationFrame(updateCounter);
-                return;
+            // Durum Kontrolü
+            let isRunning = true;
+
+            // KOTA KONTROLÜ (DURDURMA)
+            if (diffSeconds >= totalLimitSeconds) {
+                diffSeconds = totalLimitSeconds; // Maksimuma sabitle
+                isRunning = false;
             }
 
-            // Vardiya var mı? Yoksa 7/24 varsay.
-            const isWorking = isWorkingHours(now);
-            
-            // Eğer vardiya sistemi yoksa (7/24 ise), totalWorkSeconds doğrudan geçen süredir.
-            // Ancak "KOTA" kontrolü için diffSeconds kullanacağız.
-            
-            // --- KOTA KONTROLÜ (DURDURMA NOKTASI) ---
-            if (shifts.length === 0) {
-                // Vardiyasız modda: Başlangıçtan beri geçen süre kotayı geçti mi?
-                if (diffSeconds >= maxQuotaSeconds) {
-                    forceStop(maxQuotaSeconds);
-                    return;
-                }
-            } else {
-                // Vardiyalı modda: Sadece çalışılan anları topluyoruz
-                if (isWorking) {
-                    if (currentTime - lastUpdateTime >= 1000) {
-                        totalWorkSeconds += 1;
-                        lastUpdateTime = currentTime;
-                    }
-                }
-                // (Buraya vardiyalı mod için de kota eklenebilir ama şu an basit tutuyoruz)
-            }
+            if (diffSeconds < 0) { diffSeconds = 0; }
 
-            // Durum göstergelerini güncelle
-            const statusBadge = document.getElementById('statusBadge');
-            const statusPing = document.getElementById('statusPing');
-            const statusDot = document.getElementById('statusDot');
-            const statusText = document.getElementById('statusText');
-            const counterIcon = document.getElementById('counterIcon');
-            const glow = document.getElementById('glowEffect');
-            
-            if (isWorking) {
-                // ÇALIŞIYOR
-                statusBadge.className = 'bg-slate-800/50 p-2 rounded-xl border border-white/10 status-badge';
-                statusPing.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75';
-                statusDot.className = 'relative inline-flex rounded-full h-2 w-2 bg-red-500';
-                statusText.className = 'text-[10px] font-bold text-red-400 uppercase';
-                statusText.innerText = 'CANLI';
-                counterIcon.className = 'w-12 h-12 text-red-500 mx-auto animate-pulse-fast relative z-10';
-                counterEl.className = 'text-5xl sm:text-6xl font-mono font-bold text-white tracking-tighter counter-shadow tabular-nums';
-                glow.style.display = 'block';
-            } else {
-                // DURAKLADI (Vardiya dışı)
-                statusBadge.className = 'bg-orange-900/30 p-2 rounded-xl border border-orange-500/30 status-badge';
-                statusPing.className = 'animate-pulse-paused absolute inline-flex h-full w-full rounded-full bg-orange-500 opacity-75';
-                statusDot.className = 'relative inline-flex rounded-full h-2 w-2 bg-orange-500';
-                statusText.className = 'text-[10px] font-bold text-orange-400 uppercase';
-                statusText.innerText = 'DURAKLADI';
-                counterIcon.className = 'w-12 h-12 text-orange-500 mx-auto animate-pulse-paused relative z-10';
-                counterEl.className = 'text-5xl sm:text-6xl font-mono font-bold text-white tracking-tighter counter-shadow paused tabular-nums';
-                glow.style.display = 'none';
-            }
-
-            // Hesaplama: Vardiya varsa biriken süreyi, yoksa toplam geçen süreyi kullan
-            let secondsToCalculate = (shifts.length > 0) ? totalWorkSeconds : diffSeconds;
-            const currentLoss = secondsToCalculate * burnPerSecond;
-
-            counterEl.innerText = currentLoss.toLocaleString('tr-TR', {
-                minimumFractionDigits: 4,
-                maximumFractionDigits: 4
+            // Ekrana Yazma
+            const currentLoss = diffSeconds * burnPerSecond;
+            document.getElementById('counter').innerText = currentLoss.toLocaleString('tr-TR', {
+                minimumFractionDigits: 4, maximumFractionDigits: 4
             });
 
-            // Zaman Göstergesi
+            // Zaman Formatlama
             const d = Math.floor(diffSeconds / (3600*24));
             const h = Math.floor((diffSeconds % (3600*24)) / 3600);
             const m = Math.floor((diffSeconds % 3600) / 60);
             const s = Math.floor(diffSeconds % 60);
-            
-            elapsedEl.innerText = `${d}g ${h}sa ${m}dk ${s}sn`;
+            document.getElementById('elapsedTime').innerText = `${d}g ${h}sa ${m}dk ${s}sn`;
 
-            requestAnimationFrame(updateCounter);
+            // Görsel Durum Güncelleme
+            updateVisuals(isRunning);
+
+            if (isRunning) {
+                requestAnimationFrame(updateCounter);
+            }
         }
 
-        function forceStop(limitSecs) {
-            // Kota dolduğunda çalışacak fonksiyon
-            const maxLoss = limitSecs * burnPerSecond;
-            
-            document.getElementById('counter').innerText = maxLoss.toLocaleString('tr-TR', {
-                minimumFractionDigits: 4, maximumFractionDigits: 4
-            });
-            
-            // Görselleri güncelle (DURDU MODU)
-            document.getElementById('statusBadge').innerHTML = '<div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-slate-400"></span><span class="text-[10px] font-bold text-slate-400 uppercase">KOTA DOLDU</span></div>';
-            document.getElementById('counterIcon').className = 'w-12 h-12 text-slate-600 mx-auto relative z-10';
-            document.getElementById('glowEffect').style.display = 'none';
-            document.getElementById('counter').classList.add('text-slate-400');
-            document.querySelector('.scroll-text').innerHTML = '<span class="text-red-400 font-bold">⚠️ YILLIK ÇALIŞMA KOTASI TAMAMLANDI - SAYAÇ DURDURULDU</span>';
+        function updateVisuals(isRunning) {
+            const badge = document.getElementById('statusBadge');
+            const ping = document.getElementById('statusPing');
+            const dot = document.getElementById('statusDot');
+            const txt = document.getElementById('statusText');
+            const icon = document.getElementById('counterIcon');
+            const ctr = document.getElementById('counter');
+            const glow = document.getElementById('glowEffect');
+
+            if (!isRunning) {
+                // DURDU / TAMAMLANDI
+                badge.className = 'bg-slate-700/50 p-2 rounded-xl border border-slate-600 status-badge';
+                ping.className = 'hidden';
+                dot.className = 'relative inline-flex rounded-full h-2 w-2 bg-slate-400';
+                txt.className = 'text-[10px] font-bold text-slate-400 uppercase';
+                txt.innerText = 'TAMAMLANDI';
+                
+                icon.className = 'w-12 h-12 text-slate-500 mx-auto relative z-10'; // Animasyon yok
+                ctr.classList.remove('counter-shadow');
+                ctr.classList.add('counter-shadow', 'paused');
+                glow.style.display = 'none';
+            }
         }
 
-        requestAnimationFrame(updateCounter);
+        // Başlat
+        init();
 
     </script>
 </body>
