@@ -217,20 +217,19 @@ function showInactivityPopup() {
 
 // Aktivite olaylarını dinle
 function setupActivityListeners() {
+  // Sadece site içindeki GERÇEK aktiviteleri dinle
+  // mousemove ve keypress KALDIRILDI - bunlar genel sistem aktiviteleri
   const activityEvents = [
-    'mousedown',
-    'mousemove',
-    'keypress',
-    'scroll',
-    'touchstart',
-    'click'
+    'click',        // Site içinde herhangi bir yere tıklama
+    'scroll',       // Site içinde scroll yapma
+    'touchstart'    // Mobil dokunma
   ];
   
   activityEvents.forEach(event => {
     document.addEventListener(event, resetInactivityTimer, true);
   });
   
-  console.log('👂 Aktivite dinleyicileri kuruldu');
+  console.log('👂 Aktivite dinleyicileri kuruldu (sadece click ve scroll)');
 }
 
 // Sayfa yüklendiğinde aktivite dinleyicilerini kur
