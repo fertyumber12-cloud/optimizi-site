@@ -5,11 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Optimizi QR Yönetimi</title>
     <link rel="icon" href="favicon.png" type="image/png">
+
+ <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/auth-guard.js"></script>
+    
+    <style>
+      body:not(.auth-checked) {
+        opacity: 0;
+        visibility: hidden;
+      }
+      body.auth-checked {
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 0.3s ease;
+      }
+    </style>
+    <script>
+      setTimeout(function(){ if(document.body) document.body.classList.add('auth-checked'); }, 500);
+    </script>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    
+    <script src="/auth-guard.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 
     <script>
