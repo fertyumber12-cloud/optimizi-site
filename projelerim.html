@@ -720,11 +720,15 @@
         return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
-    async function initPage() {
+async function initPage() {
+    // currentUser auth.js'den geliyor
+    if (!window.currentUser) {
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) { window.location.href = 'login.html'; return; }
-
         currentUser = session.user;
+    } else {
+        currentUser = window.currentUser;
+    }
         const fullName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
         document.getElementById('sidebarUserName').textContent = fullName;
         document.getElementById('avatarInitial').textContent = fullName.charAt(0).toUpperCase();
