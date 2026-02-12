@@ -184,7 +184,7 @@
                   <i data-lucide="save" class="w-4 h-4"></i> Kaydet
               </button>
               
-              <button onclick="printRep()" class="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition shadow-lg shadow-red-600/20 active:scale-95 ml-2 cursor-pointer">
+              <button onclick="showReportLangPopup()" class="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition shadow-lg shadow-red-600/20 active:scale-95 ml-2 cursor-pointer">
                   <i data-lucide="file-warning" class="w-4 h-4"></i> Kayıp Raporu
               </button>
           </div>
@@ -394,10 +394,6 @@
                     <div class="p-4 border-b border-slate-200 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-slate-900/30">
                         <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2"><i data-lucide="list" class="w-4 h-4 text-red-500"></i> Kaçak Noktası Listesi</h3>
                         <div class="flex gap-2">
-                             <input type="file" id="csvInput" class="hidden" accept=".csv" onchange="importCSV(this)">
-                             <button onclick="document.getElementById('csvInput').click()" class="flex items-center gap-1 text-[10px] bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-2 py-1 rounded transition cursor-pointer dark:bg-emerald-900/30 dark:text-emerald-400 dark:hover:bg-emerald-900/50"><i data-lucide="upload" class="w-3 h-3"></i> Excel Yükle</button>
-                             <button onclick="exportCSV()" class="flex items-center gap-1 text-[10px] bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded transition cursor-pointer dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"><i data-lucide="download" class="w-3 h-3"></i> Excel İndir</button>
-                             <div class="w-px h-4 bg-slate-300 dark:bg-slate-700 mx-1"></div>
                              <button onclick="clearAll()" class="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition cursor-pointer">Temizle</button>
                         </div>
                     </div>
@@ -440,16 +436,16 @@
                 
                 <div class="mt-20 space-y-8">
                     <div>
-                        <div class="text-[10px] uppercase text-slate-500 font-bold mb-1">Firma / Müşteri</div>
+                        <div class="text-[10px] uppercase text-slate-500 font-bold mb-1" id="covClientLabel">Firma / Müşteri</div>
                         <div class="text-2xl font-bold text-white leading-tight" id="covClient">FİRMA ADI</div>
                         <div class="text-sm text-slate-400 mt-1" id="covContact">Yetkili Kişi</div>
                     </div>
                     <div>
-                        <div class="text-[10px] uppercase text-slate-500 font-bold mb-1">Denetleyen / Hazırlayan</div>
+                        <div class="text-[10px] uppercase text-slate-500 font-bold mb-1" id="covProvLabel">Denetleyen / Hazırlayan</div>
                         <div class="text-xl font-bold text-white" id="covProv">TEDARİKÇİ</div>
                     </div>
                     <div>
-                        <div class="text-[10px] uppercase text-slate-500 font-bold mb-1">Rapor Tarihi</div>
+                        <div class="text-[10px] uppercase text-slate-500 font-bold mb-1" id="covDateLabel">Rapor Tarihi</div>
                         <div class="text-xl font-bold text-white font-mono" id="covDate">...</div>
                     </div>
                 </div>
@@ -458,7 +454,7 @@
             <div class="relative z-10">
                 <div class="p-4 bg-white/5 rounded-xl border border-white/10 backdrop-blur-sm">
                     <img id="covQrCode" src="" class="w-24 h-24 object-contain opacity-90 mb-2 mix-blend-screen bg-white rounded p-1" alt="QR">
-                    <div class="text-[9px] text-slate-400 leading-tight">Bu karekodu okutarak kayıp maliyetini canlı sayaç üzerinde anlık olarak takip edebilirsiniz.</div>
+                    <div class="text-[9px] text-slate-400 leading-tight" id="covQrNote">Bu karekodu okutarak kayıp maliyetini canlı sayaç üzerinde anlık olarak takip edebilirsiniz.</div>
                 </div>
             </div>
         </div>
@@ -467,28 +463,28 @@
              <div class="absolute top-0 right-0 p-12 opacity-5"><i data-lucide="flame" class="w-64 h-64 text-slate-900"></i></div>
 
              <div class="flex-1 flex flex-col justify-center relative z-10">
-                <div class="inline-block bg-red-100 text-red-700 px-3 py-1 rounded text-[10px] font-bold uppercase tracking-wider w-max mb-4">ISO 12241 Standartlarına Göre</div>
-                <h1 class="text-6xl font-black text-slate-900 leading-none mb-6">TERMAL <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-600">KAYIP</span> ANALİZİ</h1>
+                <div class="inline-block bg-red-100 text-red-700 px-3 py-1 rounded text-[10px] font-bold uppercase tracking-wider w-max mb-4" id="covIsoLabel">ISO 12241 Standartlarına Göre</div>
+                <h1 class="text-6xl font-black text-slate-900 leading-none mb-6" id="covMainTitle">TERMAL <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-600">KAYIP</span> ANALİZİ</h1>
                 
-                <p class="text-sm text-slate-500 leading-relaxed mb-6 max-w-lg text-justify">
+                <p class="text-sm text-slate-500 leading-relaxed mb-6 max-w-lg text-justify" id="covIntro">
                     Tesisinizde gerçekleştirilen termal denetimler sonucunda; yalıtımsız ekipmanlardan kaynaklanan ısı kayıpları ve finansal maliyetler hesaplanmıştır. Aşağıdaki veriler mevcut durumun özetidir.
                 </p>
 
                 <div class="flex flex-col gap-3 mb-6">
                     <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
-                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wide w-24">GÜNLÜK</div>
+                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wide w-24" id="covDailyLabel">GÜNLÜK</div>
                          <div class="text-xl font-black text-slate-700 text-right flex-1" id="covMoneyDay">0</div>
                     </div>
                     <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
-                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wide w-24">HAFTALIK</div>
+                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wide w-24" id="covWeeklyLabel">HAFTALIK</div>
                          <div class="text-xl font-black text-slate-700 text-right flex-1" id="covMoneyWeek">0</div>
                     </div>
                     <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
-                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wide w-24">AYLIK</div>
+                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wide w-24" id="covMonthlyLabel">AYLIK</div>
                          <div class="text-xl font-black text-slate-700 text-right flex-1" id="covMoneyMonth">0</div>
                     </div>
                     <div class="p-3 bg-red-50 rounded-xl border border-red-100 flex items-center justify-between relative overflow-hidden">
-                         <div class="text-xs font-bold text-red-400 uppercase tracking-wide w-24">YILLIK</div>
+                         <div class="text-xs font-bold text-red-400 uppercase tracking-wide w-24" id="covYearlyLabel">YILLIK</div>
                          <div class="text-3xl font-black text-red-600 text-right flex-1" id="covMoneyYear">0</div>
                     </div>
                 </div>
@@ -497,7 +493,7 @@
              <div class="mt-auto border-t-2 border-slate-900 pt-6 flex justify-between items-end">
                 <div class="text-[10px] text-slate-500 w-2/3 leading-relaxed" id="covNarrative">...</div>
                 <div class="text-right">
-                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Toplam Enerji İsrafı</div>
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1" id="covEnergyLabel">Toplam Enerji İsrafı</div>
                     <div class="text-4xl font-black text-slate-900 leading-none"><span id="covKwhTotal">0</span> <span class="text-lg font-bold text-slate-400">kWh</span></div>
                 </div>
              </div>
@@ -556,6 +552,45 @@
 
         <div class="border-t-2 border-slate-100 pt-4 mt-8">
             <p class="text-[10px] text-slate-400 text-center font-medium leading-relaxed">Hesaplamalar ISO 12241 mühendislik standartlarına göre, ölçülen yüzey sıcaklıkları baz alınarak yapılmıştır.</p>
+        </div>
+    </div>
+</div>
+
+<div id="reportLangPopup" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/50 backdrop-blur-sm" style="display:none;">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0" id="reportLangPopupInner">
+        <div class="text-center mb-6">
+            <div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="languages" class="w-7 h-7 text-red-600 dark:text-red-500"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Rapor Dili Seçin</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Raporun tüm içeriği seçtiğiniz dilde oluşturulacaktır.</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <button onclick="generateReport('tr')" class="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-600 hover:border-red-500 dark:hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition cursor-pointer group">
+                <span class="text-3xl">🇹🇷</span>
+                <span class="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-red-600 dark:group-hover:text-red-400">Türkçe</span>
+            </button>
+            <button onclick="generateReport('en')" class="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-600 hover:border-red-500 dark:hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition cursor-pointer group">
+                <span class="text-3xl">🇬🇧</span>
+                <span class="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-red-600 dark:group-hover:text-red-400">English</span>
+            </button>
+        </div>
+        <button onclick="closeReportLangPopup()" class="w-full text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition py-2 cursor-pointer">İptal</button>
+    </div>
+</div>
+
+<div id="deleteConfirmPopup" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/50 backdrop-blur-sm" style="display:none;">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 transform transition-all" id="deleteConfirmInner">
+        <div class="text-center mb-6">
+            <div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="trash-2" class="w-7 h-7 text-red-600"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Silme Onayı</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2" id="deleteConfirmMsg">Bu kalemi silmek istediğinize emin misiniz?</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+            <button onclick="closeDeletePopup()" class="py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer">İptal</button>
+            <button onclick="confirmDelete()" class="py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-sm transition cursor-pointer shadow-lg shadow-red-600/20">Sil</button>
         </div>
     </div>
 </div>
@@ -836,6 +871,8 @@
     function calc(){LIST.push(getCalculationResult());resetForm();render();}
     function finishUpdate(){if(editingIndex!==null)LIST[editingIndex]=getCalculationResult();editingIndex=null;document.getElementById('btnAdd').classList.remove('hidden');document.getElementById('btnUpdate').classList.add('hidden');resetForm();render();}
     
+    let pendingDeleteIndex = null;
+
     function edit(i){
         editingIndex=i; const d=LIST[i].inputs;
         setType(d.type);
@@ -859,7 +896,40 @@
         document.getElementById('btnAdd').classList.add('hidden'); document.getElementById('btnUpdate').classList.remove('hidden');
     }
 
-    function del(i){if(confirm('Silmek istediğine emin misin?')){LIST.splice(i,1);render();}}
+    function showDeletePopup(idx) {
+        pendingDeleteIndex = idx;
+        const popup = document.getElementById('deleteConfirmPopup');
+        const inner = document.getElementById('deleteConfirmInner');
+        popup.style.display = 'flex';
+        setTimeout(() => {
+            popup.classList.remove('hidden');
+            inner.style.transform = 'scale(1)';
+            inner.style.opacity = '1';
+        }, 10);
+        lucide.createIcons();
+    }
+
+    function closeDeletePopup() {
+        pendingDeleteIndex = null;
+        const popup = document.getElementById('deleteConfirmPopup');
+        const inner = document.getElementById('deleteConfirmInner');
+        inner.style.transform = 'scale(0.95)';
+        inner.style.opacity = '0';
+        setTimeout(() => {
+            popup.classList.add('hidden');
+            popup.style.display = 'none';
+        }, 200);
+    }
+
+    function confirmDelete() {
+        if (pendingDeleteIndex !== null) {
+            LIST.splice(pendingDeleteIndex, 1);
+            render();
+        }
+        closeDeletePopup();
+    }
+
+    function del(i){ showDeletePopup(i); }
     function resetForm(){ currImg=null; document.getElementById('prevImg').classList.add('hidden'); document.getElementById('location').value=''; document.getElementById('vWind').value=0; currentSurfaces = []; renderSurfaces(); } 
     function clearAll(){if(confirm('Tüm listeyi temizle?')){LIST=[];render();}}
     
@@ -932,8 +1002,14 @@
                 
                 <td class="px-6 py-4 text-right font-black text-red-600 dark:text-red-400">${currSym}${Math.round(i.moneyLoss).toLocaleString()}</td>
                 <td class="px-6 py-4 text-right">
-                    <button onclick="edit(${x})" class="text-indigo-500 mr-2"><i data-lucide="pencil" class="w-4 h-4"></i></button>
-                    <button onclick="del(${x})" class="text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    <div class="flex items-center justify-end gap-1">
+                        <button onclick="edit(${x})" class="p-1.5 rounded-lg bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 transition" title="Düzenle">
+                            <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                        </button>
+                        <button onclick="del(${x})" class="p-1.5 rounded-lg bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 transition" title="Sil">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
                 </td>
             </tr>`);
         });
@@ -945,9 +1021,152 @@
         lucide.createIcons();
     }
 
+    // Rapor Dili Seçim Popup
+    function showReportLangPopup() {
+        if(LIST.length === 0) {
+            alert('Rapor oluşturmak için en az bir kaçak noktası eklemelisiniz.');
+            return;
+        }
+        const popup = document.getElementById('reportLangPopup');
+        const inner = document.getElementById('reportLangPopupInner');
+        popup.style.display = 'flex';
+        setTimeout(() => {
+            popup.classList.remove('hidden');
+            inner.style.transform = 'scale(1)';
+            inner.style.opacity = '1';
+        }, 10);
+        lucide.createIcons();
+    }
+
+    function closeReportLangPopup() {
+        const popup = document.getElementById('reportLangPopup');
+        const inner = document.getElementById('reportLangPopupInner');
+        inner.style.transform = 'scale(0.95)';
+        inner.style.opacity = '0';
+        setTimeout(() => {
+            popup.classList.add('hidden');
+            popup.style.display = 'none';
+        }, 200);
+    }
+
+    function generateReport(lang) {
+        closeReportLangPopup();
+        setTimeout(() => printRep(lang), 300);
+    }
+
     let printTemplateCache = null;
-    function printRep(){
+    
+    // Çeviri sistemi
+    const translations = {
+        tr: {
+            // Cover Page
+            clientLabel: 'Firma / Müşteri',
+            providerLabel: 'Denetleyen / Hazırlayan',
+            reportDateLabel: 'Rapor Tarihi',
+            isoLabel: 'ISO 12241 Standartlarına Göre',
+            mainTitle: 'TERMAL <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-600">KAYIP</span> ANALİZİ',
+            introText: 'Tesisinizde gerçekleştirilen termal denetimler sonucunda; yalıtımsız ekipmanlardan kaynaklanan ısı kayıpları ve finansal maliyetler hesaplanmıştır. Aşağıdaki veriler mevcut durumun özetidir.',
+            daily: 'GÜNLÜK',
+            weekly: 'HAFTALIK',
+            monthly: 'AYLIK',
+            yearly: 'YILLIK',
+            totalEnergyLabel: 'Toplam Enerji İsrafı',
+            qrNote: 'Bu karekodu okutarak kayıp maliyetini canlı sayaç üzerinde anlık olarak takip edebilirsiniz.',
+            // Table
+            reportTitle: 'TERMAL KAYIP ANALİZİ',
+            reportSubtitle: 'KAYIP',
+            isoStandard: 'ISO 12241 Standartlarına Göre',
+            reportIntro: 'Tesisinizde gerçekleştirilen termal denetimler sonucunda; yalıtımsız ekipmanlardan kaynaklanan ısı kayıpları ve finansal maliyetler hesaplanmıştır. Aşağıdaki veriler mevcut durumun özetidir.',
+            totalEnergyWaste: 'Toplam Enerji İsrafı',
+            leakPoints: 'Tespit Edilen Kaçak Noktaları',
+            image: 'Görsel',
+            leakSource: 'Kaçak Kaynağı',
+            temperature: 'Sıcaklık',
+            quantity: 'Miktar',
+            bareLoss: 'Çıplak<br>Kayıp (kWh)',
+            insulatedLoss: 'Yalıtımlı<br>Kayıp (kWh)',
+            saving: 'Kazanç<br>(kWh)',
+            financialLoss: 'FİNANSAL KAYIP',
+            page: 'Sayfa',
+            // Summary
+            managementSummary: 'Yönetici Özeti',
+            totalFinancialLoss: 'TOPLAM FİNANSAL KAYIP',
+            perYear: '/ Yıl',
+            lossNote: 'Bu tutar, yalıtım yapılmadığı sürece her yıl işletme gideri olarak kaybedilmektedir.',
+            energyWaste: 'ENERJİ İSRAFI',
+            fuelWaste: 'YAKIT İSRAFI',
+            unit: 'Birim',
+            environmentalImpact: 'Çevresel Etki',
+            carbonFootprint: 'KARBON AYAK İZİ',
+            ton: 'Ton',
+            carbonNote: 'Atmosfere salınan fazladan CO₂',
+            fiveYearProjection: '5 Yıllık Kümülatif Zarar Projeksiyonu',
+            atEndOfFiveYears: '5 YIL SONUNDA',
+            totalLoss: 'TOPLAM ZARAR',
+            year: 'Yıl',
+            yearLoss: '. Yıl Zararı',
+            cumulative: 'Kümülatif',
+            total: 'TOPLAM',
+            calculationNote: 'Hesaplamalar ISO 12241 mühendislik standartlarına göre, ölçülen yüzey sıcaklıkları baz alınarak yapılmıştır.',
+            narrative: 'Bu analiz, <strong>{{temp}}°C</strong> ortam sıcaklığı, <strong>{{wind}} m/s</strong> rüzgar hızı ve <strong>%{{eff}}</strong> sistem verimliliği varsayımlarıyla hesaplanmıştır. Tesisin yıllık <strong>{{hours}} saat</strong> aktif çalıştığı öngörülmüştür.'
+        },
+        en: {
+            // Cover Page
+            clientLabel: 'Client / Customer',
+            providerLabel: 'Inspector / Prepared By',
+            reportDateLabel: 'Report Date',
+            isoLabel: 'According to ISO 12241 Standards',
+            mainTitle: 'THERMAL <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-600">LOSS</span> ANALYSIS',
+            introText: 'Following thermal inspections conducted at your facility, heat losses and financial costs from uninsulated equipment have been calculated. The data below summarizes the current situation.',
+            daily: 'DAILY',
+            weekly: 'WEEKLY',
+            monthly: 'MONTHLY',
+            yearly: 'YEARLY',
+            totalEnergyLabel: 'Total Energy Waste',
+            qrNote: 'Scan this QR code to track the loss cost in real-time on the live counter.',
+            // Table
+            reportTitle: 'THERMAL LOSS ANALYSIS',
+            reportSubtitle: 'LOSS',
+            isoStandard: 'According to ISO 12241 Standards',
+            reportIntro: 'Following thermal inspections conducted at your facility, heat losses and financial costs from uninsulated equipment have been calculated. The data below summarizes the current situation.',
+            totalEnergyWaste: 'Total Energy Waste',
+            leakPoints: 'Identified Leak Points',
+            image: 'Image',
+            leakSource: 'Leak Source',
+            temperature: 'Temperature',
+            quantity: 'Quantity',
+            bareLoss: 'Bare<br>Loss (kWh)',
+            insulatedLoss: 'Insulated<br>Loss (kWh)',
+            saving: 'Savings<br>(kWh)',
+            financialLoss: 'FINANCIAL LOSS',
+            page: 'Page',
+            // Summary
+            managementSummary: 'Executive Summary',
+            totalFinancialLoss: 'TOTAL FINANCIAL LOSS',
+            perYear: '/ Year',
+            lossNote: 'This amount is lost as operating expense every year as long as insulation is not installed.',
+            energyWaste: 'ENERGY WASTE',
+            fuelWaste: 'FUEL WASTE',
+            unit: 'Unit',
+            environmentalImpact: 'Environmental Impact',
+            carbonFootprint: 'CARBON FOOTPRINT',
+            ton: 'Tons',
+            carbonNote: 'Additional CO₂ released into atmosphere',
+            fiveYearProjection: '5-Year Cumulative Loss Projection',
+            atEndOfFiveYears: 'AT END OF 5 YEARS',
+            totalLoss: 'TOTAL LOSS',
+            year: 'Year',
+            yearLoss: ' Year Loss',
+            cumulative: 'Cumulative',
+            total: 'TOTAL',
+            calculationNote: 'Calculations are based on ISO 12241 engineering standards and measured surface temperatures.',
+            narrative: 'This analysis is calculated with assumptions of <strong>{{temp}}°C</strong> ambient temperature, <strong>{{wind}} m/s</strong> wind speed, and <strong>{{eff}}%</strong> system efficiency. The facility is projected to operate <strong>{{hours}} hours</strong> annually.'
+        }
+    };
+
+    function printRep(lang = 'tr'){
         try{
+            const t = translations[lang]; // Çeviri objesi
             const printArea = document.getElementById('print-area');
             if(!printTemplateCache){ printTemplateCache = printArea.innerHTML; }
             printArea.innerHTML = printTemplateCache;
@@ -961,7 +1180,9 @@
             LIST.forEach(i => { gLoss += i.moneyLoss; gEnergy += i.rawKwhLoss; gCo2 += i.co2; gFuelLost += i.fuelLost; lastFuelUnit = i.fuelUnit; });
 
             const qrContainer = document.getElementById('qr-generator-dump');
-            qrContainer.innerHTML = ''; 
+            // Logoyu koruyarak temizle - QR yönetim dosyasındaki gibi
+            qrContainer.innerHTML = '<div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-slate-100 z-10"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#dc2626" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-flame"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></div>';
+            qrContainer.style.position = 'relative';
             
             const clientName = document.getElementById('cName').value || 'Müşteri';
             const unitPrice = parseFloat(document.getElementById('price').value) || 1;
@@ -987,7 +1208,14 @@
                 trackUrl += `&fl=${encodeURIComponent(cLabel)}&fu=${encodeURIComponent(cUnit)}&fc=${encodeURIComponent(cCo2)}`;
             }
 
-            new QRCode(qrContainer, { text: trackUrl, width: 200, height: 200, correctLevel : QRCode.CorrectLevel.H });
+            new QRCode(qrContainer, { 
+                text: trackUrl, 
+                width: 200, 
+                height: 200, 
+                colorDark : "#0f172a", 
+                colorLight : "#ffffff", 
+                correctLevel : QRCode.CorrectLevel.H 
+            });
             
             setTimeout(() => {
                 const img = qrContainer.querySelector("img");
@@ -1011,14 +1239,14 @@
             // RAPOR TABLOSU: SÜTUNLAR REVIZE EDİLDİ
             const tableHeaderHTML = `
                 <th class="w-6">#</th>
-                <th class="w-20 text-center">Görsel</th>
-                <th class="text-left w-48">Kaçak Kaynağı</th>
-                <th class="text-center w-20">Sıcaklık</th>
-                <th class="text-center w-20">Miktar</th>
-                <th class="text-right text-red-500 text-[9px]">Çıplak<br>Kayıp (kWh)</th>
-                <th class="text-right text-orange-500 text-[9px]">Yalıtımlı<br>Kayıp (kWh)</th>
-                <th class="text-right text-emerald-600 font-bold">Kazanç<br>(kWh)</th> 
-                <th class="text-right text-red-600 font-black">FİNANSAL KAYIP</th>`;
+                <th class="w-20 text-center">${t.image}</th>
+                <th class="text-left w-48">${t.leakSource}</th>
+                <th class="text-center w-20">${t.temperature}</th>
+                <th class="text-center w-20">${t.quantity}</th>
+                <th class="text-right text-red-500 text-[9px]">${t.bareLoss}</th>
+                <th class="text-right text-orange-500 text-[9px]">${t.insulatedLoss}</th>
+                <th class="text-right text-emerald-600 font-bold">${t.saving}</th> 
+                <th class="text-right text-red-600 font-black">${t.financialLoss}</th>`;
 
             chunks.forEach((chunk, index) => {
                 const newPage = tablePageTemplate ? tablePageTemplate.cloneNode(true) : document.createElement('div');
@@ -1027,13 +1255,13 @@
                 
                 const titleEl = newPage.querySelector('h2'); 
                 if(titleEl) {
-                    titleEl.innerText = "Tespit Edilen Kaçak Noktaları";
+                    titleEl.innerText = t.leakPoints;
                     if(index > 0) { titleEl.innerHTML += ` <span class="text-sm text-slate-400 font-normal">(${index+1})</span>`; }
                 }
                 
                 const dateEl = newPage.querySelector('#rDate'); if(dateEl) dateEl.innerText = d;
                 const theadTr = newPage.querySelector('thead tr'); if(theadTr) theadTr.innerHTML = tableHeaderHTML;
-                const pageNumEl = newPage.querySelector('.page-num'); if(pageNumEl) pageNumEl.innerText = `Sayfa ${index + 2} / ${totalPages}`;
+                const pageNumEl = newPage.querySelector('.page-num'); if(pageNumEl) pageNumEl.innerText = `${t.page} ${index + 2} / ${totalPages}`;
                 
                 const tbody = newPage.querySelector('tbody'); 
                 if(tbody) {
@@ -1061,6 +1289,20 @@
                 printArea.insertBefore(newPage, summaryPage);
             });
 
+            // COVER PAGE METINLER - DİLE GÖRE
+            document.getElementById('covClientLabel').innerText = t.clientLabel;
+            document.getElementById('covProvLabel').innerText = t.providerLabel;
+            document.getElementById('covDateLabel').innerText = t.reportDateLabel;
+            document.getElementById('covIsoLabel').innerText = t.isoLabel;
+            document.getElementById('covMainTitle').innerHTML = t.mainTitle;
+            document.getElementById('covIntro').innerText = t.introText;
+            document.getElementById('covDailyLabel').innerText = t.daily;
+            document.getElementById('covWeeklyLabel').innerText = t.weekly;
+            document.getElementById('covMonthlyLabel').innerText = t.monthly;
+            document.getElementById('covYearlyLabel').innerText = t.yearly;
+            document.getElementById('covEnergyLabel').innerText = t.totalEnergyLabel;
+            document.getElementById('covQrNote').innerText = t.qrNote;
+
             document.getElementById('covClient').innerText = document.getElementById('cName').value || "FİRMA ADI";
             document.getElementById('covContact').innerText = document.getElementById('cEng').value || "";
             document.getElementById('covProv').innerText = document.getElementById('pName').value || "TEDARİKÇİ";
@@ -1080,7 +1322,11 @@
             const tAmb = document.getElementById('tAmb').value;
             const vWind = document.getElementById('vWind').value;
             const eff = document.getElementById('eff').value;
-            const narrative = `Bu analiz, <strong>${tAmb}°C</strong> ortam sıcaklığı, <strong>${vWind} m/s</strong> rüzgar hızı ve <strong>%${eff}</strong> sistem verimliliği varsayımlarıyla hesaplanmıştır. Tesisin yıllık <strong>${hours} saat</strong> aktif çalıştığı öngörülmüştür.`;
+            const narrative = t.narrative
+                .replace('{{temp}}', tAmb)
+                .replace('{{wind}}', vWind)
+                .replace('{{eff}}', eff)
+                .replace('{{hours}}', hours);
             document.getElementById('covNarrative').innerHTML = narrative;
 
             document.getElementById('sumLoss').innerText = currSym + Math.round(gLoss).toLocaleString();
