@@ -165,7 +165,7 @@
 <div id="app-layer" class="relative z-10 flex flex-col min-h-screen">
     <nav class="sticky top-0 z-50 glass-card !bg-white/90 dark:!bg-slate-900/80 !border-x-0 !border-t-0 !rounded-none border-b border-slate-200 dark:border-white/10 backdrop-blur-xl">
       <div class="app-container px-6 h-16 flex items-center justify-between">
-          <a href="../index.html" class="flex items-center gap-3 group">
+          <a href="dashboard.html" class="flex items-center gap-3 group cursor-pointer hover:opacity-80 transition">
               <div><h1 class="text-lg font-bold text-slate-800 dark:text-white tracking-wide">Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500">.Anlık Kayıp</span></h1></div>
           </a>
           <div class="flex items-center gap-3">
@@ -178,6 +178,10 @@
               <button onclick="toggleTheme()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-400 hover:text-red-600 dark:hover:text-white transition cursor-pointer">
                   <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
                   <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+              </button>
+              
+              <button onclick="saveData()" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition shadow-lg shadow-emerald-600/20 active:scale-95 cursor-pointer">
+                  <i data-lucide="save" class="w-4 h-4"></i> Kaydet
               </button>
               
               <button onclick="printRep()" class="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition shadow-lg shadow-red-600/20 active:scale-95 ml-2 cursor-pointer">
@@ -210,7 +214,7 @@
         </div>
 
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
-            <div class="xl:col-span-4 space-y-6">
+            <div class="xl:col-span-4 space-y-6 max-h-[calc(100vh-120px)] overflow-y-auto pr-2">
                 <div class="glass-card p-6 rounded-2xl">
                    <h3 class="text-red-500 dark:text-red-400 text-xs font-bold uppercase mb-4 flex items-center gap-2"><i data-lucide="briefcase" class="w-4 h-4"></i> Firma & Proje</h3>
                    <div class="space-y-4">
@@ -397,7 +401,7 @@
                              <button onclick="clearAll()" class="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition cursor-pointer">Temizle</button>
                         </div>
                     </div>
-                    <div class="overflow-x-auto flex-1">
+                    <div class="overflow-x-auto overflow-y-auto max-h-[500px] flex-1">
                         <table class="w-full text-left text-sm" id="grid">
                         <thead class="bg-slate-100 dark:bg-slate-900/80 text-[10px] uppercase text-slate-500 dark:text-slate-400 font-semibold sticky top-0 backdrop-blur-md">
                             <tr>
@@ -971,16 +975,19 @@
             const timeStr = now.toTimeString().split(' ')[0].substring(0,5);
             const fullDateTime = `${dateStr}-${timeStr.replace(':', '-')}`;
 
-            let trackUrl = `https://optimizi.app/track.html?c=${encodeURIComponent(clientName)}&s=AUDIT-${Math.floor(Math.random()*1000)}&v=${totalLossVal}&up=${unitPrice}&wh=${hours}&f=${fuelType}&d=${fullDateTime}&bps=${burnPerSecond.toFixed(8)}`;
+            // YENİ QR SİSTEMİ: qrtakip.html yönlendirmesi
+            let trackUrl = `https://optimizi.app/qrtakip.html?c=${encodeURIComponent(clientName)}&s=AUDIT-${Math.floor(Math.random()*1000)}&v=${totalLossVal}&up=${unitPrice}&wh=${hours}&f=${fuelType}&d=${fullDateTime}&bps=${burnPerSecond.toFixed(6)}`;
             
             if(fuelType === 'manual'){
                 const cLhv = document.getElementById('fuelLhv').value || 0;
                 const cUnit = document.getElementById('fuelUnit').value || 'unit';
-                const cLabel = `Özel Yakıt (${cLhv} kcal)`;
-                trackUrl += `&fl=${encodeURIComponent(cLabel)}&fu=${encodeURIComponent(cUnit)}&fc=0.3`;
+                const cCo2 = document.getElementById('fuelCo2').value || '0.3';
+                let cLabel = document.getElementById('fuelLabel').value || 'Özel Yakıt';
+                if(cLhv) { cLabel += ` (${cLhv} kcal)`; }
+                trackUrl += `&fl=${encodeURIComponent(cLabel)}&fu=${encodeURIComponent(cUnit)}&fc=${encodeURIComponent(cCo2)}`;
             }
 
-            new QRCode(qrContainer, { text: trackUrl, width: 200, height: 200, correctLevel : QRCode.CorrectLevel.M });
+            new QRCode(qrContainer, { text: trackUrl, width: 200, height: 200, correctLevel : QRCode.CorrectLevel.H });
             
             setTimeout(() => {
                 const img = qrContainer.querySelector("img");
@@ -1108,6 +1115,38 @@
 
             setTimeout(()=>{ lucide.createIcons(); window.print(); }, 250); 
         }catch(e){ alert('Rapor hatası: ' + e.message); console.error(e); }
+    }
+
+    // KAYDET FONKSİYONU - Veritabanına kaydetme işlevi (başka bir sohbette detaylandırılacak)
+    function saveData() {
+        if(LIST.length === 0) {
+            alert('Kayıt yapılacak veri bulunmuyor. Lütfen önce kaçak noktaları ekleyin.');
+            return;
+        }
+        // Bu fonksiyon başka bir sohbette Supabase ile entegre edilecek
+        alert('Kaydet özelliği aktif edilecek. Verileriniz veritabanına kaydedilecek.');
+        console.log('Kaydedilecek veri:', {
+            firmaBilgileri: {
+                hazirlayan: document.getElementById('pName').value,
+                muhendis: document.getElementById('pEng').value,
+                firma: document.getElementById('cName').value,
+                yetkili: document.getElementById('cEng').value
+            },
+            ortamVerileri: {
+                ortamSicaklik: document.getElementById('tAmb').value,
+                ruzgarHizi: document.getElementById('vWind').value,
+                verimlilik: document.getElementById('eff').value,
+                yakitTipi: document.getElementById('fuel').value,
+                birimFiyat: document.getElementById('price').value,
+                yillikSaat: document.getElementById('hours').value
+            },
+            kayipListesi: LIST,
+            toplamlar: {
+                toplamKayip: LIST.reduce((sum, i) => sum + i.moneyLoss, 0),
+                toplamEnerji: LIST.reduce((sum, i) => sum + i.rawKwhLoss, 0),
+                toplamCo2: LIST.reduce((sum, i) => sum + i.co2, 0)
+            }
+        });
     }
 </script>
 </body>
