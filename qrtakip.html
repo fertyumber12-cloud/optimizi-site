@@ -58,17 +58,28 @@
             -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
         }
         
+        .ticker-container {
+            overflow: hidden;
+            position: relative;
+        }
+        
         .ticker-track {
             display: flex;
             width: max-content;
             /* 30 saniyede bir tur atar, lineer ve sonsuz */
-            animation: scroll 30s linear infinite; 
+            animation: scroll 30s linear infinite;
+            will-change: transform; /* GPU accelerated */
         }
         
         /* İçerik kopyalandığı için %50 kaydırıp başa sarıyoruz (Kusursuz döngü) */
         @keyframes scroll {
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); } 
+        }
+        
+        /* Animasyonu hemen başlat */
+        .ticker-track {
+            animation-play-state: running;
         }
 
         /* Responsive Düzenleme */
