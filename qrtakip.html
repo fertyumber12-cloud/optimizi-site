@@ -2,13 +2,12 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Canlı Takip</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Canlı Kayıp</title>
     <link rel="icon" href="favicon.png" type="image/png">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     
@@ -17,26 +16,25 @@
             theme: { 
                 fontFamily: { 
                     sans: ['"Plus Jakarta Sans"', 'sans-serif'], 
-                    mono: ['"Plus Jakarta Sans"', 'monospace'] // Rakamlar için de aynı modern font
+                    mono: ['"Plus Jakarta Sans"', 'monospace'] 
                 } 
             } 
         }
     </script>
     
     <style>
-        /* TEMEL AYARLAR */
         body { 
             background-color: #0f172a; 
             color: white; 
             overflow: hidden; /* Sayfa kaymasını engelle */
             font-family: 'Plus Jakarta Sans', sans-serif;
+            /* Mobil tarayıcılarda adres çubuğu gizlendiğinde boyutu koru */
+            height: 100dvh;
         }
 
-        /* SAYAÇ EFEKTLERİ */
         .counter-shadow { text-shadow: 0 0 30px rgba(220, 38, 38, 0.5); }
         .counter-stopped { color: #64748b; text-shadow: none; filter: grayscale(1); }
         
-        /* CAM PANELLER */
         .glass-panel { 
             background: rgba(30, 41, 59, 0.6); 
             backdrop-filter: blur(12px); 
@@ -48,32 +46,32 @@
             backdrop-filter: blur(10px);
         }
         
-        /* ANİMASYONLAR */
         @keyframes pulse-red { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.05); } }
         .animate-pulse-slow { animation: pulse-red 3s ease-in-out infinite; }
 
-        /* --- KESİNTİSİZ KAYAN YAZI (Seamless Ticker) --- */
-        .ticker-wrapper {
+        /* --- KESİNTİSİZ SONSUZ KAYAN YAZI (Seamless Loop) --- */
+        .ticker-container {
             width: 100%;
             overflow: hidden;
-            display: flex;
-            white-space: nowrap;
-            mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-            -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+            position: relative;
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
         }
         
         .ticker-track {
             display: flex;
-            animation: scroll 20s linear infinite;
+            width: max-content;
+            /* 30 saniyede bir tur atar, lineer ve sonsuz */
+            animation: scroll 30s linear infinite; 
         }
         
-        /* İçerik iki kez tekrarlandığı için %50 kaydırıp başa sarıyoruz */
+        /* İçerik kopyalandığı için %50 kaydırıp başa sarıyoruz (Kusursuz döngü) */
         @keyframes scroll {
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); } 
         }
 
-        /* ÇAKIŞMAYI ÖNLEYEN LAYOUT */
+        /* Responsive Düzenleme */
         .safe-layout {
             padding-top: max(env(safe-area-inset-top), 16px);
             padding-bottom: max(env(safe-area-inset-bottom), 16px);
@@ -93,10 +91,10 @@
 
         <div class="flex justify-between items-center mb-2 shrink-0">
             <div>
-                <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
-                    Optimizi<span class="text-red-500">.Takip</span>
+                <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-1.5">
+                    Optimizi<span class="text-red-500">.Anlık Kayıp</span>
                 </h1>
-                <p id="clientName" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-0.5 truncate max-w-[150px]">Yükleniyor...</p>
+                <p id="clientName" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-0.5 truncate max-w-[180px]">Yükleniyor...</p>
             </div>
             
             <div id="statusBadge" class="bg-slate-900/80 px-3 py-1.5 rounded-full border border-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.2)]">
@@ -111,7 +109,7 @@
         </div>
 
         <div class="mb-4 shrink-0">
-            <div class="bg-white/5 rounded-full py-1.5 backdrop-blur-md border border-white/5 ticker-wrapper">
+            <div class="bg-white/5 rounded-full py-1.5 backdrop-blur-md border border-white/5 ticker-container">
                 <div class="ticker-track">
                     <span class="text-[11px] text-slate-300 font-medium inline-flex items-center gap-8 px-4">
                         <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Bu sayaç 7/24 sürekli akış modundadır</span>
@@ -127,32 +125,32 @@
             </div>
         </div>
 
-        <div class="flex-1 flex flex-col justify-center items-center text-center py-2">
+        <div class="flex-1 flex flex-col justify-center items-center text-center py-2 min-h-0">
             
-            <div class="mb-6 relative group">
+            <div class="mb-6 relative group shrink-0">
                 <div class="absolute inset-0 bg-red-500 blur-[60px] opacity-20 rounded-full group-hover:opacity-30 transition duration-500"></div>
                 <i data-lucide="flame" class="w-14 h-14 text-red-500 mx-auto animate-pulse-slow relative z-10 fill-red-500/20"></i>
             </div>
 
-            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] mb-2">TOPLAM OPERASYONEL KAYIP</p>
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] mb-2 shrink-0">TOPLAM OPERASYONEL KAYIP</p>
             
-            <div class="relative mb-6">
+            <div class="relative mb-6 shrink-0">
                 <div id="counter" class="text-6xl sm:text-7xl font-bold text-white tracking-tighter counter-shadow tabular-nums leading-none">
                     0,00
                 </div>
-                <div class="text-lg font-bold text-red-500 mt-2 flex items-center justify-center gap-1">
-                    TL <span class="text-xs text-red-500/50 font-medium align-top">TRY</span>
+                <div class="text-lg font-bold text-red-500 mt-2">
+                    TL
                 </div>
             </div>
 
-            <div class="inline-flex items-center gap-2 px-4 py-2 bg-slate-800/80 rounded-full border border-white/5 mb-4 shadow-lg">
+            <div class="inline-flex items-center gap-2 px-4 py-2 bg-slate-800/80 rounded-full border border-white/5 mb-4 shadow-lg shrink-0">
                 <i data-lucide="gauge" class="w-3.5 h-3.5 text-slate-400"></i>
                 <span id="speedDisplay" class="text-[10px] font-medium text-slate-300">Hesaplanıyor...</span>
             </div>
 
         </div>
 
-        <div class="space-y-3 shrink-0 pb-4">
+        <div class="space-y-3 shrink-0 pb-2">
             
             <div class="w-full glass-info rounded-2xl p-5 grid grid-cols-2 gap-y-4 gap-x-6 text-left shadow-2xl">
                 <div class="space-y-1">
@@ -211,7 +209,6 @@
         // --- HESAPLAMA MOTORU ---
         let burnPerSecond = parseFloat(params.get('bps'));
         if (!burnPerSecond) {
-            // Eğer linkten gelmezse, yıllık saat üzerinden hesapla
             const secondsInYear = workHours * 3600;
             burnPerSecond = totalValue / secondsInYear;
         }
@@ -220,7 +217,7 @@
         // --- ARAYÜZ DOLDURMA ---
         document.getElementById('clientName').innerText = client;
         
-        // Kayan yazıdaki tüm class'ları güncelle (İki tane var çünkü)
+        // Kayan yazıdaki saatleri güncelle (Class selector çünkü birden fazla var)
         document.querySelectorAll('.scrollQuotaHours').forEach(el => {
             el.innerText = workHours.toLocaleString('tr-TR');
         });
@@ -271,7 +268,6 @@
                 document.getElementById('statusBadge').className = 'bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700';
                 counterEl.classList.add('counter-stopped');
                 counterEl.classList.remove('counter-shadow');
-                // Hız göstergesini sıfırla
                 document.getElementById('speedDisplay').innerText = "Süre Doldu";
             }
 
