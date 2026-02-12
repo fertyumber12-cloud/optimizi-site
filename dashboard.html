@@ -5,7 +5,12 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Yönetim Paneli</title>
   
+  <!-- Supabase - SADECE BİR KEZ -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- AUTH GUARD - Supabase'den HEMEN SONRA -->
+  <script src="auth-guard.js"></script>
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -494,9 +499,8 @@
   </div>
 
   <script>
-    const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // SUPABASE CLIENT - auth-guard.js'den geliyor, tekrar tanımlamaya gerek YOK
+    // window.supabaseClient zaten mevcut
     
     let isSidebarCollapsed = false;
     let currentUser = null;
@@ -581,7 +585,7 @@
         const checkboxes = document.querySelectorAll('#favToolsList input[type="checkbox"]:checked');
         const selectedKeys = Array.from(checkboxes).map(cb => cb.value);
 
-        const { error } = await supabaseClient.from('profiles').update({ favorite_tools: selectedKeys }).eq('id', currentUser.id);
+        const { error } = await window.supabaseClient.from('profiles').update({ favorite_tools: selectedKeys }).eq('id', currentUser.id);
 
         if (error) {
             console.error(error);
@@ -630,10 +634,10 @@
 
     async function loadUserProfile() {
         if (!currentUser) return;
-        let { data, error } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
+        let { data, error } = await window.supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
 
         if (error && error.code === 'PGRST116') {
-            const { data: newData } = await supabaseClient.from('profiles').insert([{ id: currentUser.id, theme: 'light', favorite_tools: ['roi', 'cond'], full_name: currentUser.user_metadata?.full_name || 'Kullanıcı' }]).select().single();
+            const { data: newData } = await window.supabaseClient.from('profiles').insert([{ id: currentUser.id, theme: 'light', favorite_tools: ['roi', 'cond'], full_name: currentUser.user_metadata?.full_name || 'Kullanıcı' }]).select().single();
             if (newData) data = newData;
         }
 
@@ -656,12 +660,12 @@
         const isDark = document.getElementById('themeToggle').checked;
         const newTheme = isDark ? 'dark' : 'light';
         if (isDark) document.documentElement.classList.add('dark'); else document.documentElement.classList.remove('dark');
-        if (currentUser) { await supabaseClient.from('profiles').update({ theme: newTheme }).eq('id', currentUser.id); }
+        if (currentUser) { await window.supabaseClient.from('profiles').update({ theme: newTheme }).eq('id', currentUser.id); }
     }
 
     async function dismissReminder(id, event) {
         event.stopPropagation();
-        const { error } = await supabaseClient.from('calculations').update({ reminder_date: null }).eq('id', id);
+        const { error } = await window.supabaseClient.from('calculations').update({ reminder_date: null }).eq('id', id);
         if(!error) {
             const p = allCalculations.find(x => x.id === id);
             if(p) p.reminder_date = null;
@@ -763,10 +767,16 @@
 
     // --- AUTH & DATA LOADING ---
     async function initPage() {
-        const { data: { session }, error } = await supabaseClient.auth.getSession();
-        if (!session) { window.location.href = 'login.html'; return; }
+        // currentUser auth-guard.js tarafından zaten set ediliyor
+        // Ama yine de kontrol edelim
+        if (!window.currentUser) {
+            const { data: { session } } = await window.supabaseClient.auth.getSession();
+            if (!session) { window.location.href = 'login.html'; return; }
+            currentUser = session.user;
+        } else {
+            currentUser = window.currentUser;
+        }
         
-        currentUser = session.user;
         const fullName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
         const firstName = fullName.split(' ')[0];
         
@@ -782,7 +792,7 @@
     }
 
     async function fetchDashboardData() {
-        const { data, error } = await supabaseClient.from('calculations').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+        const { data, error } = await window.supabaseClient.from('calculations').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
         if (error) return;
         
         allCalculations = data;
@@ -800,12 +810,18 @@
     }
 
     async function handleLogout() {
-      const { error } = await supabaseClient.auth.signOut();
-      if (!error) window.location.href = 'login.html';
+      // window.logout auth-guard.js'den geliyor
+      if (window.logout) {
+        await window.logout();
+      } else {
+        const { error } = await window.supabaseClient.auth.signOut();
+        if (!error) window.location.href = 'login.html';
+      }
     }
 
     setInterval(() => { if(allCalculations.length > 0) checkReminders(); }, 30000);
 
+    // Sayfa yüklendiğinde init
     initPage();
     lucide.createIcons();
   </script>
