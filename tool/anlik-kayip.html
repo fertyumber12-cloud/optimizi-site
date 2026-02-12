@@ -430,7 +430,7 @@
             <div class="absolute top-0 right-0 p-8 opacity-[0.03]"><i data-lucide="flame" class="w-64 h-64 text-slate-900"></i></div>
             
             <!-- Header -->
-            <div class="flex justify-between items-start mb-6 relative z-10">
+            <div class="flex justify-between items-start mb-4 relative z-10">
                 <div>
                     <div class="text-4xl font-black tracking-tighter text-slate-900">Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500">.App</span></div>
                     <div class="text-[9px] uppercase tracking-[4px] text-slate-400 mt-0.5">Energy Loss Detection</div>
@@ -438,8 +438,8 @@
                 <div class="inline-block bg-red-100 text-red-700 px-3 py-1 rounded text-[9px] font-bold uppercase tracking-wider" id="covIsoLabel">ISO 12241</div>
             </div>
 
-            <!-- Title -->
-            <div class="relative z-10 mb-5">
+            <!-- Title - Aşağı alındı -->
+            <div class="relative z-10 mb-4 mt-8">
                 <h1 class="text-5xl font-black text-slate-900 leading-none mb-3" id="covMainTitle">TERMAL <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-600">KAYIP</span> ANALİZİ</h1>
                 <p class="text-xs text-slate-500 leading-relaxed max-w-lg" id="covIntro">
                     Tesisinizde gerçekleştirilen termal denetimler sonucunda; yalıtımsız ekipmanlardan kaynaklanan ısı kayıpları ve finansal maliyetler hesaplanmıştır.
@@ -447,7 +447,7 @@
             </div>
 
             <!-- Info Cards Row -->
-            <div class="grid grid-cols-2 gap-3 mb-5 relative z-10">
+            <div class="grid grid-cols-2 gap-3 mb-4 relative z-10">
                 <div class="border border-slate-200 rounded-xl p-3">
                     <div class="text-[9px] uppercase text-slate-400 font-bold mb-1" id="covClientLabel">Firma / Müşteri</div>
                     <div class="text-base font-bold text-slate-900 leading-tight" id="covClient">FİRMA ADI</div>
@@ -461,7 +461,7 @@
             </div>
 
             <!-- Simulation Parameters -->
-            <div class="bg-slate-50 rounded-xl border border-slate-200 p-4 mb-5 relative z-10">
+            <div class="bg-slate-50 rounded-xl border border-slate-200 p-4 mb-4 relative z-10">
                 <div class="text-[9px] uppercase text-slate-400 font-bold mb-2 tracking-wider">Simülasyon Parametreleri</div>
                 <div class="text-xs text-slate-600 leading-relaxed" id="covNarrative">...</div>
             </div>
@@ -487,10 +487,10 @@
             </div>
         </div>
 
-        <!-- Bottom Bar -->
+        <!-- Bottom Bar - QR büyütüldü -->
         <div class="border-t-2 border-slate-900 mx-12 pt-3 pb-5 flex justify-between items-end relative z-10">
             <div class="qr-report-section">
-                <img id="covQrCode" src="" class="w-16 h-16 object-contain opacity-50" alt="QR">
+                <img id="covQrCode" src="" class="w-32 h-32 object-contain" alt="QR">
             </div>
             <div class="text-right">
                 <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1" id="covEnergyLabel">Toplam Enerji İsrafı</div>
@@ -507,51 +507,68 @@
     </div>
     
     <div id="p-summary" class="print-page p-12 flex flex-col h-full hidden">
-        <h2 class="text-2xl font-black text-slate-900 uppercase mb-8 border-b-2 border-slate-900 pb-4">Yönetici Özeti</h2>
+        <h2 class="text-2xl font-black text-slate-900 uppercase mb-8 border-b-2 border-slate-900 pb-4" id="sumTitle">Yönetici Özeti</h2>
         
-        <div class="flex flex-col gap-6 mb-12">
-            <div class="pl-6 border-l-4 border-red-600 py-4 bg-red-50">
-                <div class="text-xs font-bold text-red-500 uppercase tracking-widest mb-1">TOPLAM FİNANSAL KAYIP</div>
-                <div class="flex items-end gap-4">
-                    <div class="text-6xl font-black text-red-600 tracking-tight leading-none" id="sumLoss">0</div>
-                    <div class="text-lg font-bold text-slate-500 mb-2">/ Yıl</div>
+        <div class="flex flex-col mb-12">
+            <div class="py-6 border-b border-slate-200 flex justify-between items-center group">
+                <div>
+                    <div class="text-sm text-red-500 font-bold uppercase tracking-widest flex items-center gap-2"><i data-lucide="flame" class="w-4 h-4"></i> <span id="sumLossLabel">Mevcut Yıllık Kayıp</span></div>
+                    <div class="text-xs text-slate-400 mt-1 font-medium"><span id="sumFuelLost">...</span> <span id="sumFuelUnitLabel">Birim</span></div>
                 </div>
-                <div class="text-[10px] text-red-800 mt-2 font-bold opacity-70">Bu tutar, yalıtım yapılmadığı sürece her yıl işletme gideri olarak kaybedilmektedir.</div>
+                <div class="text-5xl font-black text-red-600" id="sumLoss">0</div>
             </div>
-            
-            <div class="grid grid-cols-2 gap-6">
-                <div class="pl-6 border-l-4 border-orange-400 py-2">
-                    <div class="text-xs font-bold text-orange-400 uppercase tracking-widest mb-1">ENERJİ İSRAFI</div>
-                    <div class="text-4xl font-black text-slate-800 tracking-tight leading-none" id="sumEnergy">0</div>
-                    <div class="text-xs text-slate-500 mt-1">kWh / Yıl</div>
+
+            <div class="py-6 border-b border-slate-200 flex justify-between items-center group">
+                <div>
+                    <div class="text-sm text-orange-500 font-bold uppercase tracking-widest flex items-center gap-2"><i data-lucide="zap-off" class="w-4 h-4"></i> <span id="sumEnergyLabel">Enerji İsrafı</span></div>
+                    <div class="text-xs text-slate-400 mt-1">Yıllık Toplam</div>
                 </div>
-                <div class="pl-6 border-l-4 border-slate-400 py-2">
-                    <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">YAKIT İSRAFI</div>
-                    <div class="text-4xl font-black text-slate-800 tracking-tight leading-none" id="sumFuelLost">0</div>
-                    <div class="text-xs text-slate-500 mt-1" id="sumFuelUnitLabel">Birim</div>
+                <div class="text-5xl font-black text-orange-600" id="sumEnergy">0</div>
+            </div>
+
+            <div class="py-6 border-b border-slate-900 flex justify-between items-center group">
+                <div>
+                    <div class="text-sm text-slate-500 font-bold uppercase tracking-widest flex items-center gap-2"><i data-lucide="factory" class="w-4 h-4"></i> <span id="sumCo2Label">Karbon Ayak İzi</span></div>
+                    <div class="text-xs text-slate-400 mt-1">CO₂ Emisyonu</div>
                 </div>
+                <div class="text-5xl font-black text-slate-800"><span id="sumCo2">0</span> <span class="text-2xl font-normal text-slate-500">Ton</span></div>
             </div>
         </div>
 
-        <div class="flex-1 mb-8">
-             <h3 class="text-sm font-bold text-slate-900 uppercase mb-4 flex items-center gap-2"><i data-lucide="leaf" class="w-4 h-4"></i> Çevresel Etki</h3>
-             <div class="bg-gradient-to-br from-slate-100 to-slate-200 border border-slate-300 rounded-xl p-8 flex items-center justify-between relative overflow-hidden">
-                 <div class="absolute right-0 bottom-0 opacity-10"><i data-lucide="factory" class="w-32 h-32 text-slate-600"></i></div>
-                 <div class="relative z-10">
-                     <div class="text-xs font-bold text-slate-600 uppercase tracking-widest mb-1">KARBON AYAK İZİ</div>
-                     <div class="text-5xl font-black text-slate-900"><span id="sumCo2">0</span> <span class="text-xl font-medium text-slate-600">Ton</span></div>
-                     <div class="text-[10px] text-slate-600 mt-2 font-medium">Atmosfere salınan fazladan CO₂</div>
+        <div class="mb-8">
+            <h3 class="text-sm font-bold text-slate-900 uppercase mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-4 h-4"></i> <span id="sum5YearLabel">Finansal Projeksiyon (5 Yıl)</span></h3>
+            <table class="w-full text-xs text-right border-collapse">
+                <thead>
+                    <tr class="bg-slate-100 text-slate-500">
+                        <th class="p-2 text-left" id="sumScenarioLabel">Senaryo</th>
+                        <th class="p-2" id="sumYear1Label">Yıl 1</th>
+                        <th class="p-2" id="sumYear2Label">Yıl 2</th>
+                        <th class="p-2" id="sumYear3Label">Yıl 3</th>
+                        <th class="p-2" id="sumYear4Label">Yıl 4</th>
+                        <th class="p-2" id="sumYear5Label">Yıl 5</th>
+                        <th class="p-2 font-black" id="sumTotalLabel">TOPLAM</th>
+                    </tr>
+                </thead>
+                <tbody class="font-mono" id="projTable"></tbody>
+            </table>
+        </div>
+        
+        <div class="flex gap-8 mb-4">
+             <div class="flex-1 rounded-xl p-6 flex items-center justify-between relative overflow-hidden h-full border-2 border-red-200" style="background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%); color: white;">
+                  <div class="absolute right-0 bottom-0 opacity-10 pointer-events-none translate-x-4 translate-y-4"><i data-lucide="flame" class="w-48 h-48 text-white"></i></div>
+                 <div class="z-10">
+                     <div class="text-sm font-bold uppercase tracking-widest" style="color: #fca5a5;" id="sumCumulativeLabel">5 YILLIK KÜMÜLATİF ZARAR</div>
+                     <div class="text-5xl font-black mt-2" id="sumCumulativeLoss">0</div>
+                 </div>
+                 <div class="text-right z-10 pl-8" style="border-left: 1px solid #991b1b;">
+                     <div class="text-5xl font-black" id="sumCumulativePercent">500%</div>
+                     <div class="text-sm mt-1" style="color: #fca5a5;">Artış Oranı</div>
                  </div>
              </div>
-        </div>
+         </div>
 
-        <div class="mt-auto">
-            <h3 class="text-sm font-bold text-slate-900 uppercase mb-4 flex items-center gap-2"><i data-lucide="pie-chart" class="w-4 h-4"></i> 5 Yıllık Kümülatif Zarar Projeksiyonu</h3>
-            <div id="rep_proj_section" class="bg-slate-50 border border-slate-200 rounded-xl p-6 flex items-center justify-around h-64"></div>
-        </div>
-
-        <div class="border-t-2 border-slate-100 pt-4 mt-8">
-            <p class="text-[10px] text-slate-400 text-center font-medium leading-relaxed">Hesaplamalar ISO 12241 mühendislik standartlarına göre, ölçülen yüzey sıcaklıkları baz alınarak yapılmıştır.</p>
+        <div class="border-t-2 border-slate-100 pt-4 mt-auto">
+            <p class="text-[10px] text-slate-400 text-center font-medium leading-relaxed" id="sumNote">Hesaplamalar ISO 12241 mühendislik standartlarına göre, ölçülen yüzey sıcaklıkları baz alınarak yapılmıştır.</p>
         </div>
     </div>
 </div>
@@ -1311,10 +1328,60 @@
             
             setTimeout(() => {
                 const canvas = qrContainer.querySelector("canvas");
-                if(canvas) { 
+                if(canvas) {
+                    // Canvas'tan QR kodunu al
                     const qrDataUrl = canvas.toDataURL("image/png");
-                    document.getElementById('covQrCode').src = qrDataUrl;
-                    document.getElementById('covQrCode').classList.remove('opacity-90');
+                    
+                    // Yeni bir canvas oluştur (QR + Alev simgesi için)
+                    const finalCanvas = document.createElement('canvas');
+                    finalCanvas.width = 200;
+                    finalCanvas.height = 200;
+                    const ctx = finalCanvas.getContext('2d');
+                    
+                    // QR kodunu çiz
+                    const qrImg = new Image();
+                    qrImg.onload = function() {
+                        ctx.drawImage(qrImg, 0, 0, 200, 200);
+                        
+                        // Ortaya beyaz daire çiz
+                        ctx.fillStyle = '#ffffff';
+                        ctx.beginPath();
+                        ctx.arc(100, 100, 20, 0, 2 * Math.PI);
+                        ctx.fill();
+                        
+                        // Daire etrafına border
+                        ctx.strokeStyle = '#e2e8f0';
+                        ctx.lineWidth = 4;
+                        ctx.beginPath();
+                        ctx.arc(100, 100, 20, 0, 2 * Math.PI);
+                        ctx.stroke();
+                        
+                        // Alev simgesi SVG path'ini çiz
+                        const flamePath = new Path2D('M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z');
+                        
+                        // Alev simgesini ortala ve ölçeklendir
+                        ctx.save();
+                        ctx.translate(100, 100); // Merkeze taşı
+                        ctx.scale(1.2, 1.2); // Ölçeklendir
+                        ctx.translate(-12, -12); // SVG merkezini ayarla (24x24 icon için)
+                        
+                        // Alev dolgusunu çiz
+                        ctx.fillStyle = '#dc2626';
+                        ctx.fill(flamePath);
+                        
+                        // Alev konturunu çiz
+                        ctx.strokeStyle = '#dc2626';
+                        ctx.lineWidth = 1.5;
+                        ctx.stroke(flamePath);
+                        
+                        ctx.restore();
+                        
+                        // Final görüntüyü rapor cover'a aktar
+                        const finalDataUrl = finalCanvas.toDataURL("image/png");
+                        document.getElementById('covQrCode').src = finalDataUrl;
+                        document.getElementById('covQrCode').classList.remove('opacity-50');
+                    };
+                    qrImg.src = qrDataUrl;
                 }
             }, 100);
 
@@ -1424,37 +1491,33 @@
             document.getElementById('covNarrative').innerHTML = narrative;
 
             document.getElementById('sumLoss').innerText = currSym + Math.round(gLoss).toLocaleString();
-            document.getElementById('sumFuelLost').innerText = Math.round(gFuelLost).toLocaleString(); // HATA GİDERİLDİ
+            document.getElementById('sumFuelLost').innerText = Math.round(gFuelLost).toLocaleString();
             document.getElementById('sumFuelUnitLabel').innerText = lastFuelUnit;
-            document.getElementById('sumEnergy').innerText = Math.round(gEnergy).toLocaleString();
+            document.getElementById('sumEnergy').innerText = Math.round(gEnergy).toLocaleString() + ' kWh';
             document.getElementById('sumCo2').innerText = gCo2.toFixed(1);
 
-            const projSection = document.getElementById('rep_proj_section');
-            const totalProj = gLoss * 5; 
+            // 5 Yıllık Projeksiyon Tablosu
+            const projTable = document.getElementById('projTable');
+            const totalProj = gLoss * 5;
             
-            const donutHTML = `
-            <div class="flex items-center justify-center gap-12 w-full">
-                <div class="relative w-56 h-56 rounded-full shadow-2xl flex-shrink-0" 
-                     style="background: conic-gradient(#fca5a5 0% 20%, #f87171 20% 40%, #ef4444 40% 60%, #dc2626 60% 80%, #b91c1c 80% 100%);">
-                     <div class="absolute inset-6 bg-white rounded-full flex flex-col items-center justify-center text-center p-2 shadow-inner">
-                        <div class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-1">5 YIL SONUNDA</div>
-                        <div class="text-xs text-slate-500 font-bold mb-1">TOPLAM ZARAR</div>
-                        <div class="text-sm font-black text-red-600 leading-tight break-all max-w-full px-1">${currSym}${Math.round(totalProj).toLocaleString()}</div>
-                     </div>
-                </div>
-                <div class="space-y-3 min-w-[200px]">
-                    <div class="flex items-center gap-3 text-xs text-slate-600 border-b border-slate-100 pb-1"><div class="w-4 h-4 bg-red-300 rounded shadow-sm"></div><div class="flex-1">1. Yıl Zararı</div><div class="font-bold">${currSym}${Math.round(gLoss).toLocaleString()}</div></div>
-                    <div class="flex items-center gap-3 text-xs text-slate-600 border-b border-slate-100 pb-1"><div class="w-4 h-4 bg-red-400 rounded shadow-sm"></div><div class="flex-1">2. Yıl (Kümülatif)</div><div class="font-bold">${currSym}${Math.round(gLoss*2).toLocaleString()}</div></div>
-                    <div class="flex items-center gap-3 text-xs text-slate-600 border-b border-slate-100 pb-1"><div class="w-4 h-4 bg-red-500 rounded shadow-sm"></div><div class="flex-1">3. Yıl (Kümülatif)</div><div class="font-bold">${currSym}${Math.round(gLoss*3).toLocaleString()}</div></div>
-                    <div class="flex items-center gap-3 text-xs text-slate-600 border-b border-slate-100 pb-1"><div class="w-4 h-4 bg-red-600 rounded shadow-sm"></div><div class="flex-1">4. Yıl (Kümülatif)</div><div class="font-bold">${currSym}${Math.round(gLoss*4).toLocaleString()}</div></div>
-                    <div class="flex items-center gap-3 text-sm text-red-700 font-bold bg-red-50 p-1 rounded"><div class="w-4 h-4 bg-red-800 rounded shadow-sm"></div><div class="flex-1">5. Yıl (TOPLAM)</div><div>${currSym}${Math.round(totalProj).toLocaleString()}</div></div>
-                </div>
-            </div>`;
+            projTable.innerHTML = `
+                <tr class="border-b border-slate-100">
+                    <td class="p-2 text-left font-bold text-slate-700">Kayıp Devam Ederse</td>
+                    <td class="p-2 text-red-600 font-bold">${currSym}${Math.round(gLoss).toLocaleString()}</td>
+                    <td class="p-2 text-red-600 font-bold">${currSym}${Math.round(gLoss*2).toLocaleString()}</td>
+                    <td class="p-2 text-red-600 font-bold">${currSym}${Math.round(gLoss*3).toLocaleString()}</td>
+                    <td class="p-2 text-red-600 font-bold">${currSym}${Math.round(gLoss*4).toLocaleString()}</td>
+                    <td class="p-2 text-red-600 font-bold">${currSym}${Math.round(gLoss*5).toLocaleString()}</td>
+                    <td class="p-2 text-red-700 font-black">${currSym}${Math.round(totalProj).toLocaleString()}</td>
+                </tr>
+            `;
             
-            projSection.innerHTML = donutHTML;
+            // Kümülatif zarar kartı
+            document.getElementById('sumCumulativeLoss').innerText = currSym + Math.round(totalProj).toLocaleString();
+            document.getElementById('sumCumulativePercent').innerText = '500%';
 
             setTimeout(()=>{ lucide.createIcons(); window.print(); }, 250); 
-        }catch(e){ alert('Rapor hatası: ' + e.message); console.error(e); }
+        }catch(e){ customAlert('Rapor hatası: ' + e.message, 'Hata'); console.error(e); }
     }
 
     // KAYDET FONKSİYONU - Veritabanına kaydetme işlevi (başka bir sohbette detaylandırılacak)
