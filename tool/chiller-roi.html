@@ -654,10 +654,77 @@
         if(LIST.length === 0) { showAlert("Kayıt edilecek veri yok."); return; }
         openPopup('saveConfirmPopup');
     }
-    function confirmSave(){
+    async function confirmSave(){
         closePopup('saveConfirmPopup');
-        // Placeholder for Supabase
-        showAlert("Veriler kaydedildi (Simülasyon). Veritabanı bağlantısı hazırlanıyor.", "Başarılı");
+        
+        if(LIST.length === 0) { showAlert("Kaydedilecek hesaplama bulunamadı."); return; }
+        
+        // Supabase client kontrolü
+        const activeSupabase = window.supabaseClient || window.supabase;
+        if(!activeSupabase) { showAlert("Veritabanı bağlantısı bulunamadı.", "Hata"); return; }
+        
+        // Kullanıcı kontrolü
+        const { data: { session } } = await activeSupabase.auth.getSession();
+        if(!session) {
+            showAlert("Lütfen önce giriş yapın.", "Hata");
+            setTimeout(() => { window.location.href = '/login'; }, 2000);
+            return;
+        }
+        
+        // Özet verileri hesapla
+        const reportCurr = document.getElementById('curr').value;
+        let reportRate = FX[reportCurr];
+        if(!reportRate || (reportCurr !== 'TL' && reportRate <= 1.1)) {
+            if(reportCurr === 'USD') reportRate = 34.50; else if(reportCurr === 'EUR') reportRate = 36.50; else reportRate = 1;
+        }
+        
+        let gInv = 0, gSave = 0, gCo2 = 0;
+        LIST.forEach(item => {
+            const invDisp = item.invTL / reportRate;
+            const saveDisp = item.saveTL / reportRate;
+            gInv += invDisp;
+            gSave += saveDisp;
+            gCo2 += (item.kwhSave * 0.44 / 1000);
+        });
+        
+        const totalRoi = gSave > 0 ? (gInv / gSave * 12) : 0;
+        
+        try {
+            const { data, error } = await activeSupabase
+                .from('calculations')
+                .insert({
+                    user_id: session.user.id,
+                    project_name: document.getElementById('pName').value || "İsimsiz Proje",
+                    client_name: document.getElementById('cName').value || "",
+                    client_contact: document.getElementById('cEng').value || "",
+                    provider_name: document.getElementById('pName').value || "",
+                    provider_engineer: document.getElementById('pEng').value || "",
+                    calculation_type: 'chiller-roi',
+                    items: LIST,
+                    total_investment: gInv,
+                    total_savings: gSave,
+                    total_loss: 0,
+                    total_co2: gCo2,
+                    roi_months: totalRoi,
+                    currency: reportCurr,
+                    ambient_temp: parseFloat(document.getElementById('tAmb').value),
+                    wind_speed: parseFloat(document.getElementById('vWind').value),
+                    energy_price: parseFloat(document.getElementById('price').value),
+                    annual_hours: parseInt(document.getElementById('hours').value)
+                })
+                .select();
+            
+            if(error) {
+                console.error('Kayıt hatası:', error);
+                showAlert("Kaydetme sırasında hata oluştu: " + error.message, "Hata");
+            } else {
+                const saveName = document.getElementById('cName').value || document.getElementById('pName').value || 'Proje';
+                showAlert(`"${saveName}" başarıyla veritabanına kaydedildi! Dashboard'dan görüntüleyebilirsiniz.`, "Başarılı 🎉");
+            }
+        } catch(err) {
+            console.error('Beklenmeyen hata:', err);
+            showAlert("Bir hata oluştu: " + err.message, "Hata");
+        }
     }
 
     // ===================== DROPDOWNS =====================
@@ -1287,6 +1354,42 @@
         printArea.innerHTML = coverPage + tablePages + summaryPage;
         setTimeout(()=>{ window.print(); }, 400);
     }
+</script>
+<script>
+    window.addEventListener('DOMContentLoaded', async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const loadId = urlParams.get('load_id');
+        if (!loadId) return;
+
+        console.log('Chiller ROI proje yükleniyor ID:', loadId);
+        const activeSupabase = window.supabaseClient || window.supabase;
+        if (!activeSupabase) { console.error('Supabase bağlantısı bulunamadı!'); return; }
+
+        const { data, error } = await activeSupabase
+            .from('calculations')
+            .select('*')
+            .eq('id', loadId)
+            .single();
+
+        if (error) { console.error('Veri çekme hatası:', error); return; }
+
+        if (data) {
+            if(data.project_name) document.getElementById('pName').value = data.project_name;
+            if(data.client_name) document.getElementById('cName').value = data.client_name;
+            if(data.client_contact) document.getElementById('cEng').value = data.client_contact;
+            if(data.provider_engineer) document.getElementById('pEng').value = data.provider_engineer;
+            if(data.ambient_temp) document.getElementById('tAmb').value = data.ambient_temp;
+            if(data.wind_speed !== null && data.wind_speed !== undefined) document.getElementById('vWind').value = data.wind_speed;
+            if(data.energy_price) document.getElementById('price').value = data.energy_price;
+            if(data.annual_hours) document.getElementById('hours').value = data.annual_hours;
+
+            if (data.items && Array.isArray(data.items)) {
+                LIST = data.items;
+                if(typeof render === 'function') render();
+                console.log("Chiller ROI projesi başarıyla yüklendi:", data.project_name);
+            }
+        }
+    });
 </script>
 </body>
 </html>
