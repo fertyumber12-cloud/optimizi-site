@@ -511,6 +511,18 @@
         'boiler': { name: 'Kazan Verimi', desc: 'Kazan hesabı', url: 'tool/boiler.html', icon: 'gauge', color: 'amber' }
     };
 
+    // Hesaplama tipine göre doğru araç URL'sini döndür
+    function getToolUrl(proj) {
+        const urlMap = {
+            'roi': 'tool/roi.html',
+            'chiller-roi': 'tool/chiller-roi.html',
+            'anlik-kayip': 'tool/anlik-kayip.html',
+            'isolation': 'tool/yalitim-performans.html',
+            'condensation': 'tool/yogusma-hesaplama.html'
+        };
+        return urlMap[proj.calculation_type] || 'tool/roi.html';
+    }
+
     // --- SIDEBAR FONKSİYONLARI ---
     function toggleSidebar() {
         const sidebar = document.getElementById('mainSidebar');
@@ -681,7 +693,7 @@
                 const dateStr = dateObj.toLocaleString('tr-TR', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
                 list.innerHTML += `
                     <div class="p-3 border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition flex items-center justify-between gap-3">
-                        <div class="flex items-center gap-3 cursor-pointer flex-1" onclick="window.location.href='tool/roi.html?load_id=${p.id}'">
+                        <div class="flex items-center gap-3 cursor-pointer flex-1" onclick="window.location.href='${getToolUrl(p)}?load_id=${p.id}'">>
                             <div class="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 p-2 rounded-lg shrink-0"><i data-lucide="clock" class="w-4 h-4"></i></div>
                             <div><div class="text-sm font-bold text-slate-800 dark:text-slate-200 line-clamp-1">${p.client_name || 'İsimsiz'}</div><div class="text-xs text-slate-500">Zamanı geldi!</div><div class="text-[10px] text-slate-400 mt-1">${dateStr}</div></div>
                         </div>
@@ -732,16 +744,21 @@
 
         // Sadece ilk 5 kaydı göster (Filtrelenmiş datadan)
         data.slice(0, 5).forEach(proj => {
-            const typeInfo = proj.calculation_type === 'roi' ? {l: 'Termal ROI', i: 'flame'} : {l: 'Hesaplama', i: 'calculator'};
+            let typeInfo = {l: 'Hesaplama', i: 'calculator', color: 'indigo', url: 'tool/roi.html'};
+            if (proj.calculation_type === 'roi') { typeInfo = {l: 'Termal ROI', i: 'flame', color: 'orange', url: 'tool/roi.html'}; }
+            else if (proj.calculation_type === 'chiller-roi') { typeInfo = {l: 'Chiller ROI', i: 'snowflake', color: 'cyan', url: 'tool/chiller-roi.html'}; }
+            else if (proj.calculation_type === 'anlik-kayip') { typeInfo = {l: 'Saha Kayıp', i: 'scan-line', color: 'red', url: 'tool/anlik-kayip.html'}; }
+            else if (proj.calculation_type === 'isolation') { typeInfo = {l: 'Yalıtım Perf.', i: 'layers', color: 'purple', url: 'tool/yalitim-performans.html'}; }
+            else if (proj.calculation_type === 'condensation') { typeInfo = {l: 'Yoğuşma', i: 'droplets', color: 'blue', url: 'tool/yogusma-hesaplama.html'}; }
             const row = `
             <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition group border-b border-slate-100 dark:border-white/5 last:border-0">
                 <td class="px-6 py-4 font-bold text-slate-700 dark:text-white flex items-center gap-3">
-                    <div class="w-8 h-8 rounded bg-indigo-100 dark:bg-slate-700 flex items-center justify-center text-indigo-600 dark:text-slate-400 group-hover:text-white group-hover:bg-indigo-600 transition"><i data-lucide="${typeInfo.i}" class="w-4 h-4"></i></div>
+                    <div class="w-8 h-8 rounded bg-${typeInfo.color}-100 dark:bg-slate-700 flex items-center justify-center text-${typeInfo.color}-600 dark:text-slate-400 group-hover:text-white group-hover:bg-${typeInfo.color}-600 transition"><i data-lucide="${typeInfo.i}" class="w-4 h-4"></i></div>
                     ${proj.client_name || 'İsimsiz Proje'}
                 </td>
                 <td class="px-6 py-4 text-xs font-bold text-slate-500">${typeInfo.l}</td>
                 <td class="px-6 py-4"><span class="px-2 py-1 rounded bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-400 text-xs font-bold border border-green-200 dark:border-green-500/20">Tamamlandı</span></td>
-                <td class="px-6 py-4 text-right"><button onclick="window.location.href='tool/roi.html?load_id=${proj.id}'" class="text-indigo-600 hover:text-indigo-500 p-1 transition" title="Görüntüle"><i data-lucide="eye" class="w-4 h-4"></i></button></td>
+                <td class="px-6 py-4 text-right"><button onclick="window.location.href='${typeInfo.url}?load_id=${proj.id}'" class="text-indigo-600 hover:text-indigo-500 p-1 transition" title="Görüntüle"><i data-lucide="eye" class="w-4 h-4"></i></button></td>
             </tr>`;
             tableBody.insertAdjacentHTML('beforeend', row);
         });
