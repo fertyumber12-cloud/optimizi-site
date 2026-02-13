@@ -5,12 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Giriş Yap</title>
   
-  <!-- Supabase JS Library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -22,9 +20,6 @@
             'blob': 'blob 20s infinite',
             'gradient-x': 'gradientX 8s ease infinite',
             'shake': 'shake 0.5s ease-in-out',
-            'spin-slow': 'spin 1s linear infinite',
-            'fade-in': 'fadeIn 0.3s ease-out',
-            'slide-down': 'slideDown 0.3s ease-out',
           },
           keyframes: {
             blob: {
@@ -34,19 +29,7 @@
               '100%': { transform: 'translate(0px, 0px) scale(1)' },
             },
             gradientX: { '0%, 100%': { 'background-position': '0% 50%' }, '50%': { 'background-position': '100% 50%' } },
-            shake: {
-              '0%, 100%': { transform: 'translateX(0)' },
-              '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-4px)' },
-              '20%, 40%, 60%, 80%': { transform: 'translateX(4px)' },
-            },
-            fadeIn: {
-              '0%': { opacity: '0', transform: 'translateY(-10px)' },
-              '100%': { opacity: '1', transform: 'translateY(0)' },
-            },
-            slideDown: {
-              '0%': { opacity: '0', transform: 'translateY(-10px)', maxHeight: '0' },
-              '100%': { opacity: '1', transform: 'translateY(0)', maxHeight: '100px' },
-            }
+            shake: { '0%, 100%': { transform: 'translateX(0)' }, '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-4px)' }, '20%, 40%, 60%, 80%': { transform: 'translateX(4px)' } },
           }
         }
       }
@@ -56,67 +39,14 @@
   <style>
     body { 
       background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%);
-      background-attachment: fixed; color: #f1f5f9; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      background-attachment: fixed; min-height: 100vh;
     }
     .bg-grid { background-size: 60px 60px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px); mask-image: radial-gradient(circle at center, black 40%, transparent 80%); }
     .glass-card { backdrop-filter: blur(16px); background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.5) 100%); border: 1px solid rgba(255,255,255,0.08); }
-    .text-gradient-dynamic { background: linear-gradient(to right, #818cf8, #c084fc, #fb923c, #ef4444); background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: gradientX 8s ease infinite; }
-    input:focus { outline: none; border-color: #818cf8; box-shadow: 0 0 15px rgba(129, 140, 248, 0.2); }
-    .error-input { border-color: #ef4444 !important; animation: shake 0.5s ease-in-out; }
-    .error-input:focus { box-shadow: 0 0 15px rgba(239, 68, 68, 0.3) !important; }
     .spinner { border: 2px solid rgba(255, 255, 255, 0.3); border-top: 2px solid white; border-radius: 50%; width: 20px; height: 20px; animation: spin 0.8s linear infinite; }
-    
-    /* Modal Styles */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(8px);
-      z-index: 1000;
-      animation: fadeIn 0.3s ease;
-    }
-    .modal-overlay.active {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-content {
-      background: linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 24px;
-      max-width: 500px;
-      width: 90%;
-      overflow: hidden;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      animation: slideUp 0.3s ease;
-    }
-    .modal-header {
-      padding: 24px;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .modal-body {
-      padding: 24px;
-    }
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
   </style>
 </head>
-<body class="antialiased">
+<body class="antialiased flex items-center justify-center p-6">
 
   <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
       <div class="absolute inset-0 bg-grid"></div>
@@ -124,452 +54,80 @@
       <div class="absolute bottom-0 -right-1/4 w-[600px] h-[600px] bg-orange-600/10 rounded-full blur-[120px] animate-blob" style="animation-delay: 5s;"></div>
   </div>
 
-  <div class="relative z-10 w-full max-w-md px-6">
+  <div class="relative z-10 w-full max-w-5xl flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-24">
     
-    <div class="flex flex-col items-center mb-12">
-       <a href="index.html" class="inline-block hover:opacity-90 transition-opacity">
-    <div class="font-black text-4xl lg:text-5xl tracking-tighter text-white">
-        Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-orange-400">.App</span>
-    </div>
-</a>
-            <div class="flex items-center justify-center gap-2 mt-4">
-                <span class="h-px w-8 bg-gradient-to-r from-transparent to-slate-600"></span>
-                <p class="text-slate-400 text-[11px] font-bold uppercase tracking-[0.3em]">Yönetim Paneli</p>
-                <span class="h-px w-8 bg-gradient-to-l from-transparent to-slate-600"></span>
+    <div class="flex-1 text-center md:text-left">
+        <a href="index.html" class="inline-block hover:opacity-90 transition-opacity">
+            <div class="font-black text-5xl lg:text-7xl tracking-tighter text-white">
+                Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-orange-400">.App</span>
             </div>
+        </a>
+        <div class="flex items-center justify-center md:justify-start gap-3 mt-4">
+            <span class="h-px w-8 bg-gradient-to-r from-transparent to-slate-600"></span>
+            <p class="text-slate-400 text-xs font-bold uppercase tracking-[0.4em]">Yönetim Paneli</p>
         </div>
     </div>
 
-    <div class="glass-card p-8 rounded-3xl shadow-2xl border border-white/10 relative overflow-hidden">
-        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-orange-500"></div>
+    <div class="w-full max-w-md">
+        <div class="glass-card p-8 rounded-3xl shadow-2xl relative overflow-hidden border border-white/10">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-orange-500"></div>
 
-        <!-- Error Message Container -->
-        <div id="errorMessage" class="hidden mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl animate-slide-down">
-            <div class="flex items-start gap-3">
-                <div class="flex-shrink-0 mt-0.5">
-                    <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
+            <form id="loginForm" class="space-y-6 mt-2">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-2 ml-1">E-Posta Adresi</label>
+                    <div class="relative group">
+                        <input type="email" id="emailInput" placeholder="isim@sirket.com" class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-4 pl-4 pr-4 text-white transition focus:bg-slate-900 focus:border-indigo-500/50 outline-none" required>
+                    </div>
                 </div>
-                <div class="flex-1">
-                    <h4 class="text-sm font-bold text-red-300 mb-1">Giriş Başarısız</h4>
-                    <p class="text-xs text-red-200/80" id="errorText">E-posta veya şifre hatalı. Lütfen tekrar deneyin.</p>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-2 ml-1">Şifre</label>
+                    <div class="relative group">
+                        <input type="password" id="passwordInput" placeholder="••••••••" class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-4 pl-4 pr-12 text-white transition focus:bg-slate-900 focus:border-indigo-500/50 outline-none" required>
+                    </div>
                 </div>
-                <button onclick="hideError()" class="flex-shrink-0 text-red-400 hover:text-red-300 transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
+
+                <div class="flex items-center justify-between text-xs">
+                    <label class="flex items-center gap-2 cursor-pointer text-slate-400 hover:text-white transition">
+                        <input type="checkbox" class="rounded border-white/10 bg-slate-800 text-indigo-600"> Beni Hatırla
+                    </label>
+                    <a href="#" class="text-indigo-400 hover:text-indigo-300 transition font-semibold">Şifremi Unuttum?</a>
+                </div>
+
+                <button type="submit" id="submitBtn" class="w-full py-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-orange-500 hover:from-indigo-500 hover:to-orange-400 text-white rounded-xl font-bold transition shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2">
+                    <span id="btnText">Giriş Yap</span>
+                    <svg id="btnIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                 </button>
+            </form>
+
+            <div class="mt-8 pt-6 border-t border-white/5 text-center">
+                <p class="text-sm text-slate-400">Henüz hesabınız yok mu? <a href="signup.html" class="text-white font-bold hover:text-indigo-400 transition">Kaydolun</a></p>
             </div>
         </div>
-
-        <!-- Success Message Container -->
-        <div id="successMessage" class="hidden mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-xl animate-slide-down">
-            <div class="flex items-start gap-3">
-                <div class="flex-shrink-0 mt-0.5">
-                    <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                </div>
-                <div class="flex-1">
-                    <h4 class="text-sm font-bold text-green-300 mb-1">Giriş Başarılı!</h4>
-                    <p class="text-xs text-green-200/80">Yönlendiriliyorsunuz...</p>
-                </div>
-            </div>
-        </div>
-
-        <form id="loginForm" class="space-y-6">
-            <div>
-                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">E-Posta Adresi</label>
-                <div class="relative group">
-                    <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-indigo-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                    </svg>
-                    <input 
-                        type="email" 
-                        id="emailInput"
-                        placeholder="isim@sirket.com" 
-                        class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-4 pl-12 pr-4 text-white transition focus:bg-slate-900 focus:border-indigo-500/50" 
-                        required>
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Şifre</label>
-                <div class="relative group">
-                    <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-indigo-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                    </svg>
-                    <input 
-                        type="password" 
-                        id="passwordInput"
-                        placeholder="••••••••" 
-                        class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-4 pl-12 pr-12 text-white transition focus:bg-slate-900 focus:border-indigo-500/50" 
-                        required>
-                    <!-- Password Toggle Button -->
-                    <button 
-                        type="button"
-                        onclick="togglePassword()"
-                        class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-indigo-400 transition focus:outline-none"
-                        aria-label="Şifreyi göster/gizle">
-                        <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                        </svg>
-                        <svg id="eyeOffIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <div class="flex items-center justify-between text-xs">
-                <label class="flex items-center gap-2 cursor-pointer text-slate-400 hover:text-white transition">
-                    <input type="checkbox" class="rounded border-white/10 bg-slate-800 text-indigo-600 focus:ring-indigo-500"> Beni Hatırla
-                </label>
-                <a href="#" onclick="openForgotPasswordModal(); return false;" class="text-indigo-400 hover:text-indigo-300 transition font-semibold">Şifremi Unuttum?</a>
-            </div>
-
-            <button 
-                type="submit" 
-                id="submitBtn"
-                class="w-full py-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-orange-500 hover:from-indigo-500 hover:to-orange-400 text-white rounded-xl font-bold transition shadow-lg shadow-indigo-500/25 active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100">
-                <span id="btnText">Giriş Yap</span>
-                <svg id="btnIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-                <div id="btnSpinner" class="spinner hidden"></div>
-            </button>
-        </form>
-
-        <div class="mt-8 pt-6 border-t border-white/5 text-center">
-            <p class="text-sm text-slate-400">Henüz hesabınız yok mu? <a href="signup.html" class="text-white font-bold hover:text-indigo-400 transition">Kaydolun</a></p>
-        </div>
-    </div>
-
-    <div class="text-center mt-10">
-        <p class="text-[10px] text-slate-600 uppercase tracking-[0.2em] font-bold">&copy; 2025 Optimizi Inc • Tüm Hakları Saklıdır.</p>
-    </div>
-  </div>
-
-  <!-- ŞİFREMİ UNUTTUM MODAL -->
-  <div id="forgotPasswordModal" class="modal-overlay" onclick="closeModalOnOverlay(event, 'forgotPasswordModal')">
-    <div class="modal-content" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <h2 class="text-2xl font-bold text-white">Şifremi Unuttum</h2>
-        <button onclick="closeForgotPasswordModal()" class="text-slate-400 hover:text-white transition">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button>
-      </div>
-      <div class="modal-body">
-        <!-- Success Message -->
-        <div id="resetSuccessMessage" class="hidden mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
-          <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 mt-0.5">
-              <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-            </div>
-            <div class="flex-1">
-              <h4 class="text-sm font-bold text-green-300 mb-1">Email Gönderildi! 📧</h4>
-              <p class="text-xs text-green-200/80">Şifre sıfırlama linki email adresinize gönderildi. Lütfen kontrol edin.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Error Message -->
-        <div id="resetErrorMessage" class="hidden mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
-          <div class="flex items-start gap-3">
-            <div class="flex-shrink-0 mt-0.5">
-              <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-            </div>
-            <div class="flex-1">
-              <p class="text-xs text-red-200/80" id="resetErrorText">Bir hata oluştu.</p>
-            </div>
-          </div>
-        </div>
-
-        <p class="text-sm text-slate-300 mb-6">
-          E-posta adresinizi girin, size şifre sıfırlama linki gönderelim.
-        </p>
         
-        <form id="forgotPasswordForm" class="space-y-6">
-          <div>
-            <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">E-Posta Adresi</label>
-            <div class="relative group">
-              <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-indigo-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-              </svg>
-              <input 
-                type="email" 
-                id="resetEmailInput"
-                placeholder="isim@sirket.com" 
-                class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-4 pl-12 pr-4 text-white transition focus:bg-slate-900 focus:border-indigo-500/50 focus:outline-none" 
-                required>
-            </div>
-          </div>
-
-          <button 
-            type="submit" 
-            id="resetSubmitBtn"
-            class="w-full py-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-orange-500 hover:from-indigo-500 hover:to-orange-400 text-white rounded-xl font-bold transition shadow-lg shadow-indigo-500/25 active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-            <span id="resetBtnText">Sıfırlama Linki Gönder</span>
-            <svg id="resetBtnIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-            <div id="resetBtnSpinner" class="spinner hidden"></div>
-          </button>
-        </form>
-      </div>
+        <p class="text-[9px] text-slate-600 uppercase tracking-[0.2em] font-bold text-center mt-6">
+            &copy; 2025 OPTİMİZİ INC • TÜM HAKLARI SAKLIDIR.
+        </p>
     </div>
   </div>
 
-  <!-- Supabase Config - Inline -->
   <script>
-    // Supabase Configuration
     const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
-    
-    // Supabase client'ı başlat
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
-    console.log('✅ Supabase bağlantısı kuruldu');
-  </script>
-  
-  <script>
-    // Modal Functions
-    function openForgotPasswordModal() {
-      document.getElementById('forgotPasswordModal').classList.add('active');
-      document.body.style.overflow = 'hidden';
-    }
-    
-    function closeForgotPasswordModal() {
-      document.getElementById('forgotPasswordModal').classList.remove('active');
-      document.body.style.overflow = 'auto';
-      // Reset form
-      document.getElementById('forgotPasswordForm').reset();
-      document.getElementById('resetSuccessMessage').classList.add('hidden');
-      document.getElementById('resetErrorMessage').classList.add('hidden');
-    }
-    
-    function closeModalOnOverlay(event, modalId) {
-      if (event.target.id === modalId) {
-        closeForgotPasswordModal();
-      }
-    }
-    
-    // Close on ESC
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
-        closeForgotPasswordModal();
-      }
-    });
-    
-    // Password Toggle Function
-    function togglePassword() {
-      const passwordInput = document.getElementById('passwordInput');
-      const eyeIcon = document.getElementById('eyeIcon');
-      const eyeOffIcon = document.getElementById('eyeOffIcon');
-      
-      if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        eyeIcon.classList.add('hidden');
-        eyeOffIcon.classList.remove('hidden');
-      } else {
-        passwordInput.type = 'password';
-        eyeIcon.classList.remove('hidden');
-        eyeOffIcon.classList.add('hidden');
-      }
-    }
 
-    // Show Error Message
-    function showError(message) {
-      const errorMessage = document.getElementById('errorMessage');
-      const successMessage = document.getElementById('successMessage');
-      const errorText = document.getElementById('errorText');
-      const emailInput = document.getElementById('emailInput');
-      const passwordInput = document.getElementById('passwordInput');
-      
-      successMessage.classList.add('hidden');
-      errorText.textContent = message;
-      errorMessage.classList.remove('hidden');
-      emailInput.classList.add('error-input');
-      passwordInput.classList.add('error-input');
-      
-      // Auto-hide after 5 seconds
-      setTimeout(hideError, 5000);
-    }
-
-    // Show Success Message
-    function showSuccess() {
-      const errorMessage = document.getElementById('errorMessage');
-      const successMessage = document.getElementById('successMessage');
-      
-      errorMessage.classList.add('hidden');
-      successMessage.classList.remove('hidden');
-    }
-
-    // Hide Error Message
-    function hideError() {
-      const errorMessage = document.getElementById('errorMessage');
-      const emailInput = document.getElementById('emailInput');
-      const passwordInput = document.getElementById('passwordInput');
-      
-      errorMessage.classList.add('hidden');
-      emailInput.classList.remove('error-input');
-      passwordInput.classList.remove('error-input');
-    }
-
-    // Loading State Functions
-    function setLoading(isLoading) {
-      const submitBtn = document.getElementById('submitBtn');
-      const btnText = document.getElementById('btnText');
-      const btnIcon = document.getElementById('btnIcon');
-      const btnSpinner = document.getElementById('btnSpinner');
-      
-      if (isLoading) {
-        submitBtn.disabled = true;
-        btnText.textContent = 'Giriş yapılıyor...';
-        btnIcon.classList.add('hidden');
-        btnSpinner.classList.remove('hidden');
-      } else {
-        submitBtn.disabled = false;
-        btnText.textContent = 'Giriş Yap';
-        btnIcon.classList.remove('hidden');
-        btnSpinner.classList.add('hidden');
-      }
-    }
-
-    // Form Submit Handler - SUPABASE ENTEGRE
-    document.getElementById('loginForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      // Hide any existing errors
-      hideError();
-      
-      // Get form values
-      const email = document.getElementById('emailInput').value;
-      const password = document.getElementById('passwordInput').value;
-      
-      // Show loading state
-      setLoading(true);
-      
-      try {
-        // Supabase ile giriş yap
-        const { data, error } = await supabaseClient.auth.signInWithPassword({
-          email: email,
-          password: password,
-        });
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('emailInput').value;
+        const password = document.getElementById('passwordInput').value;
+        
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
         
         if (error) {
-          // Hata durumu
-          setLoading(false);
-          
-          // Türkçe hata mesajları
-          let errorMessage = 'Giriş başarısız. Lütfen tekrar deneyin.';
-          if (error.message.includes('Invalid login credentials')) {
-            errorMessage = 'E-posta veya şifre hatalı. Lütfen kontrol edin.';
-          } else if (error.message.includes('Email not confirmed')) {
-            errorMessage = 'E-posta adresinizi doğrulamanız gerekiyor.';
-          }
-          
-          showError(errorMessage);
-          console.error('Login error:', error);
+            alert("Hata: " + error.message);
         } else {
-          // Başarılı giriş
-          console.log('✅ Giriş başarılı:', data);
-          showSuccess();
-          
-          // 1.5 saniye sonra dashboard'a yönlendir
-          setTimeout(() => {
             window.location.href = 'dashboard.html';
-          }, 1500);
         }
-      } catch (err) {
-        setLoading(false);
-        showError('Bir hata oluştu. Lütfen tekrar deneyin.');
-        console.error('Unexpected error:', err);
-      }
-    });
-
-    // Remove error when user starts typing
-    document.getElementById('emailInput').addEventListener('input', hideError);
-    document.getElementById('passwordInput').addEventListener('input', hideError);
-    
-    // Forgot Password Form Handler
-    document.getElementById('forgotPasswordForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      const email = document.getElementById('resetEmailInput').value;
-      const submitBtn = document.getElementById('resetSubmitBtn');
-      const btnText = document.getElementById('resetBtnText');
-      const btnIcon = document.getElementById('resetBtnIcon');
-      const btnSpinner = document.getElementById('resetBtnSpinner');
-      const successMsg = document.getElementById('resetSuccessMessage');
-      const errorMsg = document.getElementById('resetErrorMessage');
-      const errorText = document.getElementById('resetErrorText');
-      
-      // Hide messages
-      successMsg.classList.add('hidden');
-      errorMsg.classList.add('hidden');
-      
-      // Loading state
-      submitBtn.disabled = true;
-      btnText.textContent = 'Gönderiliyor...';
-      btnIcon.classList.add('hidden');
-      btnSpinner.classList.remove('hidden');
-      
-      try {
-        const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-          redirectTo: window.location.origin + '/reset-password.html',
-        });
-        
-        if (error) {
-          // Error
-          submitBtn.disabled = false;
-          btnText.textContent = 'Sıfırlama Linki Gönder';
-          btnIcon.classList.remove('hidden');
-          btnSpinner.classList.add('hidden');
-          
-          errorText.textContent = error.message.includes('not found') 
-            ? 'Bu e-posta adresi sistemimizde kayıtlı değil.' 
-            : 'Bir hata oluştu. Lütfen tekrar deneyin.';
-          errorMsg.classList.remove('hidden');
-        } else {
-          // Success
-          submitBtn.disabled = false;
-          btnText.textContent = 'Sıfırlama Linki Gönder';
-          btnIcon.classList.remove('hidden');
-          btnSpinner.classList.add('hidden');
-          
-          successMsg.classList.remove('hidden');
-          
-          // Close modal after 3 seconds
-          setTimeout(() => {
-            closeForgotPasswordModal();
-          }, 3000);
-        }
-      } catch (err) {
-        submitBtn.disabled = false;
-        btnText.textContent = 'Sıfırlama Linki Gönder';
-        btnIcon.classList.remove('hidden');
-        btnSpinner.classList.add('hidden');
-        
-        errorText.textContent = 'Bir hata oluştu. Lütfen tekrar deneyin.';
-        errorMsg.classList.remove('hidden');
-      }
-    });
-    
-    // Check if user is already logged in
-    supabaseClient.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        // Already logged in, redirect to dashboard
-        window.location.href = 'dashboard.html';
-      }
     });
   </script>
 </body>
