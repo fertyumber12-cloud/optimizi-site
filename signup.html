@@ -5,12 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Kayıt Ol</title>
   
-  <!-- Supabase JS Library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -20,11 +18,7 @@
           colors: { slate: { 850: '#151e2e', 900: '#0f172a', 950: '#020617' } },
           animation: {
             'blob': 'blob 20s infinite',
-            'gradient-x': 'gradientX 8s ease infinite',
             'shake': 'shake 0.5s ease-in-out',
-            'spin-slow': 'spin 1s linear infinite',
-            'fade-in': 'fadeIn 0.3s ease-out',
-            'slide-down': 'slideDown 0.3s ease-out',
           },
           keyframes: {
             blob: {
@@ -33,20 +27,7 @@
               '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
               '100%': { transform: 'translate(0px, 0px) scale(1)' },
             },
-            gradientX: { '0%, 100%': { 'background-position': '0% 50%' }, '50%': { 'background-position': '100% 50%' } },
-            shake: {
-              '0%, 100%': { transform: 'translateX(0)' },
-              '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-4px)' },
-              '20%, 40%, 60%, 80%': { transform: 'translateX(4px)' },
-            },
-            fadeIn: {
-              '0%': { opacity: '0', transform: 'translateY(-10px)' },
-              '100%': { opacity: '1', transform: 'translateY(0)' },
-            },
-            slideDown: {
-              '0%': { opacity: '0', transform: 'translateY(-10px)', maxHeight: '0' },
-              '100%': { opacity: '1', transform: 'translateY(0)', maxHeight: '150px' },
-            }
+            shake: { '0%, 100%': { transform: 'translateX(0)' }, '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-4px)' }, '20%, 40%, 60%, 80%': { transform: 'translateX(4px)' } },
           }
         }
       }
@@ -56,98 +37,15 @@
   <style>
     body { 
       background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%);
-      background-attachment: fixed; color: #f1f5f9; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      background-attachment: fixed; min-height: 100vh;
     }
     .bg-grid { background-size: 60px 60px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px); mask-image: radial-gradient(circle at center, black 40%, transparent 80%); }
     .glass-card { backdrop-filter: blur(16px); background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.5) 100%); border: 1px solid rgba(255,255,255,0.08); }
-    input:focus { outline: none; border-color: #818cf8; box-shadow: 0 0 15px rgba(129, 140, 248, 0.2); }
-    .error-input { border-color: #ef4444 !important; animation: shake 0.5s ease-in-out; }
-    .error-input:focus { box-shadow: 0 0 15px rgba(239, 68, 68, 0.3) !important; }
     .spinner { border: 2px solid rgba(255, 255, 255, 0.3); border-top: 2px solid white; border-radius: 50%; width: 20px; height: 20px; animation: spin 0.8s linear infinite; }
-    .password-strength-bar {
-      height: 4px;
-      border-radius: 2px;
-      transition: all 0.3s ease;
-    }
-    .logo-link {
-      display: inline-block;
-      transition: transform 0.3s ease, opacity 0.3s ease;
-    }
-    .logo-link:hover {
-      transform: translateY(-2px);
-      opacity: 0.9;
-    }
-    
-    /* Modal Styles */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(8px);
-      z-index: 1000;
-      animation: fadeIn 0.3s ease;
-    }
-    .modal-overlay.active {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-content {
-      background: linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 24px;
-      max-width: 700px;
-      max-height: 80vh;
-      width: 90%;
-      overflow: hidden;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      animation: slideUp 0.3s ease;
-    }
-    .modal-header {
-      padding: 24px;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .modal-body {
-      padding: 24px;
-      overflow-y: auto;
-      max-height: calc(80vh - 80px);
-      scrollbar-width: thin;
-      scrollbar-color: rgba(129, 140, 248, 0.3) rgba(15, 23, 42, 0.3);
-    }
-    .modal-body::-webkit-scrollbar {
-      width: 8px;
-    }
-    .modal-body::-webkit-scrollbar-track {
-      background: rgba(15, 23, 42, 0.3);
-      border-radius: 4px;
-    }
-    .modal-body::-webkit-scrollbar-thumb {
-      background: rgba(129, 140, 248, 0.3);
-      border-radius: 4px;
-    }
-    .modal-body::-webkit-scrollbar-thumb:hover {
-      background: rgba(129, 140, 248, 0.5);
-    }
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   </style>
 </head>
-<body class="antialiased">
+<body class="antialiased flex items-center justify-center p-6">
 
   <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
       <div class="absolute inset-0 bg-grid"></div>
@@ -155,564 +53,112 @@
       <div class="absolute bottom-0 -right-1/4 w-[600px] h-[600px] bg-orange-600/10 rounded-full blur-[120px] animate-blob" style="animation-delay: 5s;"></div>
   </div>
 
-  <div class="relative z-10 w-full max-w-md px-6 py-8">
+  <div class="relative z-10 w-full max-w-5xl flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-24">
     
-    <!-- Logo ve Başlık - Tıklanabilir -->
-    <div class="flex flex-col items-center mb-16">
-        <div class="text-center">
-            <a href="index.html" class="logo-link">
-                <div class="font-black text-4xl lg:text-5xl tracking-tighter text-white">
-                    Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-orange-400">.App</span>
-                </div>
-            </a>
-            <div class="flex items-center justify-center gap-2 mt-5">
-                <span class="h-px w-8 bg-gradient-to-r from-transparent to-slate-600"></span>
-                <p class="text-slate-400 text-[11px] font-bold uppercase tracking-[0.3em]">Hesap Oluştur</p>
-                <span class="h-px w-8 bg-gradient-to-l from-transparent to-slate-600"></span>
+    <div class="flex-1 text-center md:text-left">
+        <a href="index.html" class="inline-block hover:opacity-90 transition-opacity">
+            <div class="font-black text-5xl lg:text-7xl tracking-tighter text-white">
+                Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-orange-400">.App</span>
             </div>
+        </a>
+        <div class="flex items-center justify-center md:justify-start gap-3 mt-4">
+            <span class="h-px w-8 bg-gradient-to-r from-transparent to-slate-600"></span>
+            <p class="text-slate-400 text-xs font-bold uppercase tracking-[0.4em]">Yeni Hesap Oluştur</p>
         </div>
+        <p class="text-slate-300 mt-6 text-lg max-w-sm hidden md:block">
+            Süreçlerinizi optimize etmeye başlamak için bugün bize katılın.
+        </p>
     </div>
 
-    <div class="glass-card p-8 rounded-3xl shadow-2xl border border-white/10 relative overflow-hidden">
-        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-orange-500"></div>
+    <div class="w-full max-w-md">
+        <div class="glass-card p-8 rounded-3xl shadow-2xl relative overflow-hidden border border-white/10">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-orange-500"></div>
 
-        <!-- Error Message Container -->
-        <div id="errorMessage" class="hidden mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl animate-slide-down">
-            <div class="flex items-start gap-3">
-                <div class="flex-shrink-0 mt-0.5">
-                    <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
-                <div class="flex-1">
-                    <h4 class="text-sm font-bold text-red-300 mb-1">Kayıt Başarısız</h4>
-                    <p class="text-xs text-red-200/80" id="errorText">Bir hata oluştu. Lütfen tekrar deneyin.</p>
-                </div>
-                <button onclick="hideError()" class="flex-shrink-0 text-red-400 hover:text-red-300 transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
+            <div id="errorMessage" class="hidden mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3">
+                <span class="text-red-400 text-sm" id="errorText"></span>
             </div>
-        </div>
-
-        <!-- Success Message Container -->
-        <div id="successMessage" class="hidden mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-xl animate-slide-down">
-            <div class="flex items-start gap-3">
-                <div class="flex-shrink-0 mt-0.5">
-                    <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                </div>
-                <div class="flex-1">
-                    <h4 class="text-sm font-bold text-green-300 mb-1">Kayıt Başarılı! 🎉</h4>
-                    <p class="text-xs text-green-200/80" id="successText">Hesabınız oluşturuldu. Giriş sayfasına yönlendiriliyorsunuz...</p>
-                </div>
-            </div>
-        </div>
-
-        <form id="signupForm" class="space-y-5">
-            <div>
-                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Şirket Adı</label>
-                <div class="relative group">
-                    <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-indigo-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                    </svg>
-                    <input 
-                        type="text" 
-                        id="companyInput"
-                        placeholder="ABC Fabrikası" 
-                        class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-4 pl-12 pr-4 text-white transition focus:bg-slate-900 focus:border-indigo-500/50" 
-                        required>
-                </div>
+            <div id="successMessage" class="hidden mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-xl flex flex-col gap-2">
+                <span class="text-green-400 text-sm font-semibold" id="successText"></span>
             </div>
 
-            <div>
-                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Ad Soyad</label>
-                <div class="relative group">
-                    <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-indigo-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                    </svg>
-                    <input 
-                        type="text" 
-                        id="nameInput"
-                        placeholder="Ahmet Yılmaz" 
-                        class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-4 pl-12 pr-4 text-white transition focus:bg-slate-900 focus:border-indigo-500/50" 
-                        required>
+            <form id="signupForm" class="space-y-5 mt-2">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-2 ml-1">E-Posta Adresi</label>
+                    <input type="email" id="emailInput" placeholder="isim@sirket.com" class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-4 px-4 text-white transition focus:bg-slate-900 focus:border-indigo-500/50 outline-none" required>
                 </div>
-            </div>
 
-            <div>
-                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">E-Posta Adresi</label>
-                <div class="relative group">
-                    <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-indigo-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                    </svg>
-                    <input 
-                        type="email" 
-                        id="emailInput"
-                        placeholder="ahmet@abcfabrika.com" 
-                        class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-4 pl-12 pr-4 text-white transition focus:bg-slate-900 focus:border-indigo-500/50" 
-                        required>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-2 ml-1">Şifre</label>
+                    <input type="password" id="passwordInput" placeholder="••••••••" class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-4 px-4 text-white transition focus:bg-slate-900 focus:border-indigo-500/50 outline-none" required>
                 </div>
-            </div>
 
-            <div>
-                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Şifre</label>
-                <div class="relative group">
-                    <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-indigo-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                    </svg>
-                    <input 
-                        type="password" 
-                        id="passwordInput"
-                        placeholder="En az 8 karakter" 
-                        class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-4 pl-12 pr-12 text-white transition focus:bg-slate-900 focus:border-indigo-500/50" 
-                        required
-                        minlength="8">
-                    <button 
-                        type="button"
-                        onclick="togglePassword('passwordInput', 'eyeIcon1', 'eyeOffIcon1')"
-                        class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-indigo-400 transition focus:outline-none">
-                        <svg id="eyeIcon1" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                        </svg>
-                        <svg id="eyeOffIcon1" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
-                        </svg>
+                <div class="pt-2">
+                    <button type="submit" id="submitBtn" class="w-full py-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-orange-500 hover:from-indigo-500 hover:to-orange-400 text-white rounded-xl font-bold transition shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2">
+                        <span id="btnText">Hesap Oluştur</span>
+                        <div id="btnSpinner" class="spinner hidden"></div>
+                        <svg id="btnIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
                     </button>
                 </div>
-                <!-- Password Strength Indicator -->
-                <div class="mt-2 flex gap-1">
-                    <div id="strength1" class="password-strength-bar flex-1 bg-slate-700"></div>
-                    <div id="strength2" class="password-strength-bar flex-1 bg-slate-700"></div>
-                    <div id="strength3" class="password-strength-bar flex-1 bg-slate-700"></div>
-                    <div id="strength4" class="password-strength-bar flex-1 bg-slate-700"></div>
-                </div>
-                <p id="strengthText" class="text-xs text-slate-500 mt-1 ml-1">Şifre gücü: Zayıf</p>
+            </form>
+
+            <div class="mt-8 pt-6 border-t border-white/5 text-center">
+                <p class="text-sm text-slate-400">Zaten bir hesabınız var mı? <a href="login.html" class="text-white font-bold hover:text-indigo-400 transition">Giriş Yap</a></p>
             </div>
-
-            <div>
-                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Şifre (Tekrar)</label>
-                <div class="relative group">
-                    <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-indigo-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <input 
-                        type="password" 
-                        id="confirmPasswordInput"
-                        placeholder="Şifrenizi tekrar girin" 
-                        class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-4 pl-12 pr-12 text-white transition focus:bg-slate-900 focus:border-indigo-500/50" 
-                        required>
-                    <button 
-                        type="button"
-                        onclick="togglePassword('confirmPasswordInput', 'eyeIcon2', 'eyeOffIcon2')"
-                        class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-indigo-400 transition focus:outline-none">
-                        <svg id="eyeIcon2" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                        </svg>
-                        <svg id="eyeOffIcon2" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <div class="pt-2">
-                <label class="flex items-start gap-3 cursor-pointer text-slate-400 hover:text-white transition">
-                    <input type="checkbox" id="termsCheckbox" class="mt-0.5 rounded border-white/10 bg-slate-800 text-indigo-600 focus:ring-indigo-500" required>
-                    <span class="text-xs">
-                        <a href="#" onclick="openModal('termsModal'); return false;" class="text-indigo-400 hover:text-indigo-300 font-semibold">Kullanım Şartları</a>'nı ve 
-                        <a href="#" onclick="openModal('privacyModal'); return false;" class="text-indigo-400 hover:text-indigo-300 font-semibold">Gizlilik Politikası</a>'nı okudum ve kabul ediyorum.
-                    </span>
-                </label>
-            </div>
-
-            <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-indigo-600 to-orange-600 hover:from-indigo-700 hover:to-orange-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-indigo-500/50 flex items-center justify-center gap-2">
-                <span id="btnText">Hesap Oluştur</span>
-                <svg id="btnIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                </svg>
-                <div id="btnSpinner" class="spinner hidden"></div>
-            </button>
-        </form>
-
-        <div class="mt-6 text-center">
-            <p class="text-xs text-slate-500">
-                Zaten hesabınız var mı? 
-                <a href="login.html" class="text-indigo-400 hover:text-indigo-300 font-semibold transition">Giriş Yap</a>
-            </p>
         </div>
+        
+        <p class="text-[9px] text-slate-600 uppercase tracking-[0.2em] font-bold text-center mt-6">
+            &copy; 2025 OPTİMİZİ INC • TÜM HAKLARI SAKLIDIR.
+        </p>
     </div>
   </div>
 
-  <!-- KULLANIM ŞARTLARI MODAL -->
-  <div id="termsModal" class="modal-overlay" onclick="closeModalOnOverlay(event, 'termsModal')">
-    <div class="modal-content" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <h2 class="text-2xl font-bold text-white">Kullanım Şartları</h2>
-        <button onclick="closeModal('termsModal')" class="text-slate-400 hover:text-white transition">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button>
-      </div>
-      <div class="modal-body text-slate-300 space-y-4 text-sm leading-relaxed">
-        <p class="text-xs text-slate-500 italic">Son Güncelleme: 8 Şubat 2025</p>
-        <p>Optimizi Inc. platformunu kullanarak aşağıdaki şartları kabul etmiş sayılırsınız:</p>
-        
-        <h3 class="text-lg font-bold text-white mt-6">1. Hizmet Tanımı</h3>
-        <p>Optimizi.App, endüstriyel üretim hesaplamaları için geliştirilmiş bir SaaS platformudur. Platform, çevrimiçi hesaplama araçları, veri saklama ve raporlama hizmetleri sunar.</p>
-        
-        <h3 class="text-lg font-bold text-white mt-6">2. Hesap Oluşturma ve Güvenlik</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
-          <li>Hesap oluşturmak için doğru ve güncel bilgiler sağlamalısınız.</li>
-          <li>Şifrenizi güvenli tutmak sizin sorumluluğunuzdadır.</li>
-          <li>Hesabınızda gerçekleşen tüm aktivitelerden siz sorumlusunuz.</li>
-          <li>Şüpheli aktivite tespit ederseniz derhal bizimle iletişime geçmelisiniz.</li>
-        </ul>
-        
-        <h3 class="text-lg font-bold text-white mt-6">3. Kullanım Kuralları</h3>
-        <p>Platformu kullanırken şunları <strong>yapmamalısınız</strong>:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
-          <li>Yasadışı amaçlarla kullanmak</li>
-          <li>Sistemin güvenliğini test etmek veya ihlal etmeye çalışmak</li>
-          <li>Spam veya zararlı yazılım göndermek</li>
-          <li>Başkasının hesabını izinsiz kullanmak</li>
-          <li>Platformu otomatik araçlarla aşırı yüklemek</li>
-        </ul>
-        
-        <h3 class="text-lg font-bold text-white mt-6">4. Fikri Mülkiyet</h3>
-        <p>Platformdaki tüm içerik, tasarım, kod ve hesaplama algoritmaları Optimizi Inc.'in mülkiyetindedir. İzinsiz kopyalama, dağıtma veya türev çalışmalar yasaktır.</p>
-        
-        <h3 class="text-lg font-bold text-white mt-6">5. Veri Kullanımı ve Gizlilik</h3>
-        <p>Girdiğiniz hesaplama verileri şifrelenmiş olarak saklanır. Gizlilik politikamız için ayrı bir dokümana bakınız. Verilerinizi üçüncü taraflarla paylaşmayız.</p>
-        
-        <h3 class="text-lg font-bold text-white mt-6">6. Sorumluluk Reddi</h3>
-        <p>Platform "olduğu gibi" sunulur. Hesaplama sonuçlarının doğruluğundan emin olmak kullanıcının sorumluluğundadır. Optimizi Inc., platformun kesintisiz veya hatasız olacağını garanti etmez.</p>
-        
-        <h3 class="text-lg font-bold text-white mt-6">7. Hesap İptali</h3>
-        <p>Şartları ihlal eden hesaplar önceden haber verilmeksizin askıya alınabilir veya sonlandırılabilir. Hesabınızı dilediğiniz zaman kapatabilirsiniz.</p>
-        
-        <h3 class="text-lg font-bold text-white mt-6">8. Değişiklikler</h3>
-        <p>Bu kullanım şartları zaman zaman güncellenebilir. Önemli değişiklikler e-posta ile bildirilecektir.</p>
-        
-        <div class="mt-8 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
-          <p class="text-xs text-indigo-300">
-            <strong>İletişim:</strong> Sorularınız için <a href="mailto:support@optimizi.app" class="underline">support@optimizi.app</a> adresinden bize ulaşabilirsiniz.
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- GİZLİLİK POLİTİKASI MODAL -->
-  <div id="privacyModal" class="modal-overlay" onclick="closeModalOnOverlay(event, 'privacyModal')">
-    <div class="modal-content" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <h2 class="text-2xl font-bold text-white">Gizlilik Politikası</h2>
-        <button onclick="closeModal('privacyModal')" class="text-slate-400 hover:text-white transition">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button>
-      </div>
-      <div class="modal-body text-slate-300 space-y-4 text-sm leading-relaxed">
-        <p class="text-xs text-slate-500 italic">Son Güncelleme: 8 Şubat 2025</p>
-        <p>Optimizi Inc. olarak kişisel verilerinizin gizliliğini korumayı taahhüt ediyoruz. Bu politika, hangi verileri topladığımızı, nasıl kullandığımızı ve haklarınızı açıklamaktadır.</p>
-        
-        <h3 class="text-lg font-bold text-white mt-6">1. Toplanan Veriler</h3>
-        <p><strong>Hesap Bilgileri:</strong> Ad, soyad, e-posta adresi, şirket adı</p>
-        <p><strong>Hesaplama Verileri:</strong> Yaptığınız hesaplamalar, girdiğiniz parametreler ve sonuçlar</p>
-        <p><strong>Teknik Veriler:</strong> IP adresi, tarayıcı bilgisi, kullanım istatistikleri</p>
-        
-        <h3 class="text-lg font-bold text-white mt-6">2. Verilerin Kullanım Amacı</h3>
-        <ul class="list-disc list-inside space-y-2 ml-4">
-          <li>Hesabınızı oluşturmak ve yönetmek</li>
-          <li>Hesaplama geçmişinizi saklamak</li>
-          <li>Size teknik destek sağlamak</li>
-          <li>Platformu geliştirmek ve iyileştirmek</li>
-          <li>Yasal yükümlülükleri yerine getirmek</li>
-        </ul>
-        
-        <h3 class="text-lg font-bold text-white mt-6">3. Veri Güvenliği</h3>
-        <p>Verileriniz şifrelenmiş sunucularda saklanır. Supabase altyapısını kullanarak endüstri standardı güvenlik önlemleri uygularız. Şifreleriniz kriptografik hash algoritmaları ile korunur.</p>
-        
-        <h3 class="text-lg font-bold text-white mt-6">4. Veri Paylaşımı</h3>
-        <p>Kişisel verilerinizi üçüncü taraflarla <strong>paylaşmıyoruz</strong>, satmıyoruz veya kiralamıyoruz. Aşağıdaki durumlar haricinde:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
-          <li>Yasal zorunluluk durumunda (mahkeme kararı, resmi talep)</li>
-          <li>Hizmet sağlayıcılarımız (Supabase, sunucu sağlayıcıları) - sadece hizmet sunumu için</li>
-        </ul>
-        
-        <h3 class="text-lg font-bold text-white mt-6">5. KVKK Uyarınca Haklarınız</h3>
-        <p>6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamında:</p>
-        <ul class="list-disc list-inside space-y-2 ml-4">
-          <li>Verilerinizin işlenip işlenmediğini öğrenme</li>
-          <li>İşlenmişse bilgi talep etme</li>
-          <li>Verilerin düzeltilmesini isteme</li>
-          <li>Verilerin silinmesini veya yok edilmesini isteme</li>
-          <li>İşleme faaliyetine itiraz etme</li>
-        </ul>
-        
-        <h3 class="text-lg font-bold text-white mt-6">6. Çerezler (Cookies)</h3>
-        <p>Platformumuz, kullanıcı deneyimini iyileştirmek için çerezler kullanır. Oturum çerezleri, giriş durumunuzu saklar. İsterseniz tarayıcı ayarlarınızdan çerezleri devre dışı bırakabilirsiniz.</p>
-        
-        <h3 class="text-lg font-bold text-white mt-6">7. Veri Saklama Süresi</h3>
-        <p>Hesap bilgileriniz, hesabınız aktif olduğu sürece saklanır. Hesap silme talebinde bulunduğunuzda, verileriniz 30 gün içinde sistemden kalıcı olarak silinir.</p>
-        
-        <h3 class="text-lg font-bold text-white mt-6">8. İletişim</h3>
-        <p>Gizlilik ile ilgili sorularınız veya haklarınızı kullanmak için:</p>
-        <div class="mt-4 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
-          <p class="text-xs text-indigo-300">
-            <strong>E-posta:</strong> <a href="mailto:privacy@optimizi.app" class="underline">privacy@optimizi.app</a><br>
-            <strong>Adres:</strong> Optimizi Inc., [Adresiniz buraya gelecek]
-          </p>
-        </div>
-        
-        <div class="mt-6 p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl">
-          <p class="text-xs text-orange-300">
-            <strong>Not:</strong> Bu politika örnek amaçlıdır. Gerçek kullanım için mutlaka bir hukuk uzmanına danışmanız önerilir.
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Supabase Config - Inline -->
   <script>
-    // Supabase Configuration
     const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
-    
-    // Supabase client'ı başlat
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
-    console.log('✅ Supabase bağlantısı kuruldu');
-  </script>
-  
-  <script>
-    // Modal Functions
-    function openModal(modalId) {
-      document.getElementById(modalId).classList.add('active');
-      document.body.style.overflow = 'hidden'; // Prevent background scroll
-    }
-    
-    function closeModal(modalId) {
-      document.getElementById(modalId).classList.remove('active');
-      document.body.style.overflow = 'auto'; // Restore scroll
-    }
-    
-    function closeModalOnOverlay(event, modalId) {
-      if (event.target.id === modalId) {
-        closeModal(modalId);
-      }
-    }
-    
-    // Close modal on ESC key
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
-        closeModal('termsModal');
-        closeModal('privacyModal');
-      }
-    });
-    
-    // Password Toggle Function
-    function togglePassword(inputId, eyeId, eyeOffId) {
-      const passwordInput = document.getElementById(inputId);
-      const eyeIcon = document.getElementById(eyeId);
-      const eyeOffIcon = document.getElementById(eyeOffId);
-      
-      if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        eyeIcon.classList.add('hidden');
-        eyeOffIcon.classList.remove('hidden');
-      } else {
-        passwordInput.type = 'password';
-        eyeIcon.classList.remove('hidden');
-        eyeOffIcon.classList.add('hidden');
-      }
-    }
 
-    // Password Strength Checker
-    function checkPasswordStrength(password) {
-      let strength = 0;
-      const strengthBars = [
-        document.getElementById('strength1'),
-        document.getElementById('strength2'),
-        document.getElementById('strength3'),
-        document.getElementById('strength4')
-      ];
-      const strengthText = document.getElementById('strengthText');
-      
-      // Reset bars
-      strengthBars.forEach(bar => {
-        bar.style.backgroundColor = '#334155'; // slate-700
-      });
-      
-      if (password.length >= 8) strength++;
-      if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
-      if (password.match(/[0-9]/)) strength++;
-      if (password.match(/[^a-zA-Z0-9]/)) strength++;
-      
-      const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e']; // red, orange, yellow, green
-      const texts = ['Çok Zayıf', 'Zayıf', 'Orta', 'Güçlü'];
-      
-      for (let i = 0; i < strength; i++) {
-        strengthBars[i].style.backgroundColor = colors[strength - 1];
-      }
-      
-      strengthText.textContent = `Şifre gücü: ${texts[strength - 1] || 'Çok Zayıf'}`;
-      strengthText.style.color = colors[strength - 1] || '#ef4444';
-    }
+    const signupForm = document.getElementById('signupForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const btnIcon = document.getElementById('btnIcon');
 
-    // Listen to password input
-    document.getElementById('passwordInput').addEventListener('input', (e) => {
-      checkPasswordStrength(e.target.value);
-    });
-
-    // Show Error Message
-    function showError(message) {
-      const errorMessage = document.getElementById('errorMessage');
-      const successMessage = document.getElementById('successMessage');
-      const errorText = document.getElementById('errorText');
-      
-      successMessage.classList.add('hidden');
-      errorText.textContent = message;
-      errorMessage.classList.remove('hidden');
-      
-      setTimeout(hideError, 5000);
-    }
-
-    // Show Success Message
-    function showSuccess() {
-      const errorMessage = document.getElementById('errorMessage');
-      const successMessage = document.getElementById('successMessage');
-      
-      errorMessage.classList.add('hidden');
-      successMessage.classList.remove('hidden');
-    }
-
-    // Hide Error Message
-    function hideError() {
-      const errorMessage = document.getElementById('errorMessage');
-      errorMessage.classList.add('hidden');
-    }
-
-    // Loading State Functions
-    function setLoading(isLoading) {
-      const submitBtn = document.getElementById('submitBtn');
-      const btnText = document.getElementById('btnText');
-      const btnIcon = document.getElementById('btnIcon');
-      const btnSpinner = document.getElementById('btnSpinner');
-      
-      if (isLoading) {
-        submitBtn.disabled = true;
-        btnText.textContent = 'Hesap oluşturuluyor...';
-        btnIcon.classList.add('hidden');
-        btnSpinner.classList.remove('hidden');
-      } else {
-        submitBtn.disabled = false;
-        btnText.textContent = 'Hesap Oluştur';
-        btnIcon.classList.remove('hidden');
-        btnSpinner.classList.add('hidden');
-      }
-    }
-
-    // Form Submit Handler - SUPABASE ENTEGRE
-    document.getElementById('signupForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      hideError();
-      
-      // Get form values
-      const company = document.getElementById('companyInput').value;
-      const name = document.getElementById('nameInput').value;
-      const email = document.getElementById('emailInput').value;
-      const password = document.getElementById('passwordInput').value;
-      const confirmPassword = document.getElementById('confirmPasswordInput').value;
-      const termsAccepted = document.getElementById('termsCheckbox').checked;
-      
-      // Validation
-      if (password !== confirmPassword) {
-        showError('Şifreler eşleşmiyor. Lütfen kontrol edin.');
-        return;
-      }
-      
-      if (password.length < 8) {
-        showError('Şifre en az 8 karakter olmalıdır.');
-        return;
-      }
-      
-      if (!termsAccepted) {
-        showError('Kullanım şartlarını kabul etmelisiniz.');
-        return;
-      }
-      
-      setLoading(true);
-      
-      try {
-        // Supabase ile kayıt ol
-        const { data, error } = await supabaseClient.auth.signUp({
-          email: email,
-          password: password,
-          options: {
-            data: {
-              full_name: name,
-              company: company,
-            }
-          }
-        });
+    signupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
         
-        if (error) {
-          setLoading(false);
-          
-          // Türkçe hata mesajları
-          let errorMessage = 'Kayıt başarısız. Lütfen tekrar deneyin.';
-          if (error.message.includes('User already registered')) {
-            errorMessage = 'Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin.';
-          } else if (error.message.includes('Password should be')) {
-            errorMessage = 'Şifre en az 8 karakter olmalıdır.';
-          }
-          
-          showError(errorMessage);
-          console.error('Signup error:', error);
-        } else {
-          console.log('✅ Kayıt başarılı:', data);
-          
-          // Email doğrulama mesajı göster
-          const successMessage = document.getElementById('successMessage');
-          const successText = document.getElementById('successText');
-          
-          successText.innerHTML = `
-            <strong>🎉 Kayıt Başarılı!</strong><br>
-            <span class="text-sm">Email adresinize bir doğrulama linki gönderdik. Lütfen email kutunuzu kontrol edin ve linke tıklayarak hesabınızı aktifleştirin.</span><br>
-            <span class="text-xs text-green-200/60 mt-2 block">Not: Email bulunamıyorsa spam klasörünü kontrol edin.</span>
-          `;
-          successMessage.classList.remove('hidden');
-          
-          setLoading(false);
-          
-          // Form'u temizle
-          document.getElementById('signupForm').reset();
-          
-          // 8 saniye sonra login sayfasına yönlendir
-          setTimeout(() => {
-            window.location.href = 'login.html';
-          }, 8000);
+        const email = document.getElementById('emailInput').value;
+        const password = document.getElementById('passwordInput').value;
+
+        // UI Durumu: Yükleniyor
+        submitBtn.disabled = true;
+        btnText.textContent = 'İşleniyor...';
+        btnSpinner.classList.remove('hidden');
+        btnIcon.classList.add('hidden');
+
+        try {
+            const { data, error } = await supabaseClient.auth.signUp({
+                email,
+                password,
+                options: { emailRedirectTo: window.location.origin + '/login.html' }
+            });
+
+            if (error) {
+                document.getElementById('errorText').textContent = error.message;
+                document.getElementById('errorMessage').classList.remove('hidden');
+            } else {
+                document.getElementById('successText').innerHTML = 'Kayıt başarılı! Lütfen e-posta adresinize gönderilen doğrulama linkini kontrol edin.';
+                document.getElementById('successMessage').classList.remove('hidden');
+                signupForm.reset();
+            }
+        } catch (err) {
+            console.error('Hata:', err);
+        } finally {
+            submitBtn.disabled = false;
+            btnText.textContent = 'Hesap Oluştur';
+            btnSpinner.classList.add('hidden');
+            btnIcon.classList.remove('hidden');
         }
-      } catch (err) {
-        setLoading(false);
-        showError('Bir hata oluştu. Lütfen tekrar deneyin.');
-        console.error('Unexpected error:', err);
-      }
     });
-
-    // Remove error when user starts typing
-    document.getElementById('emailInput').addEventListener('input', hideError);
-    document.getElementById('passwordInput').addEventListener('input', hideError);
   </script>
-
 </body>
 </html>
