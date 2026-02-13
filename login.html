@@ -8,7 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -18,8 +18,8 @@
           colors: { slate: { 850: '#151e2e', 900: '#0f172a', 950: '#020617' } },
           animation: {
             'blob': 'blob 20s infinite',
-            'gradient-x': 'gradientX 8s ease infinite',
             'shake': 'shake 0.5s ease-in-out',
+            'fade-in': 'fadeIn 0.3s ease-out',
           },
           keyframes: {
             blob: {
@@ -28,8 +28,11 @@
               '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
               '100%': { transform: 'translate(0px, 0px) scale(1)' },
             },
-            gradientX: { '0%, 100%': { 'background-position': '0% 50%' }, '50%': { 'background-position': '100% 50%' } },
             shake: { '0%, 100%': { transform: 'translateX(0)' }, '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-4px)' }, '20%, 40%, 60%, 80%': { transform: 'translateX(4px)' } },
+            fadeIn: {
+              '0%': { opacity: '0', transform: 'translateY(-10px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
           }
         }
       }
@@ -44,6 +47,8 @@
     .bg-grid { background-size: 60px 60px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px); mask-image: radial-gradient(circle at center, black 40%, transparent 80%); }
     .glass-card { backdrop-filter: blur(16px); background: linear-gradient(145deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.5) 100%); border: 1px solid rgba(255,255,255,0.08); }
     .spinner { border: 2px solid rgba(255, 255, 255, 0.3); border-top: 2px solid white; border-radius: 50%; width: 20px; height: 20px; animation: spin 0.8s linear infinite; }
+    .error-input { border-color: #ef4444 !important; animation: shake 0.5s ease-in-out; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   </style>
 </head>
 <body class="antialiased flex items-center justify-center p-6">
@@ -56,7 +61,7 @@
 
   <div class="relative z-10 w-full max-w-5xl flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-24">
     
-    <div class="flex-1 text-center md:text-left">
+    <div class="flex-1 text-center md:text-left mb-8 md:mb-0">
         <a href="index.html" class="inline-block hover:opacity-90 transition-opacity">
             <div class="font-black text-5xl lg:text-7xl tracking-tighter text-white">
                 Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-orange-400">.App</span>
@@ -72,18 +77,36 @@
         <div class="glass-card p-8 rounded-3xl shadow-2xl relative overflow-hidden border border-white/10">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-orange-500"></div>
 
-            <form id="loginForm" class="space-y-6 mt-2">
+            <div id="notificationArea" class="hidden mb-6 animate-fade-in">
+                <div id="notificationContent" class="p-4 rounded-xl border flex items-start gap-3">
+                    <div id="notifIcon" class="flex-shrink-0 mt-0.5"></div>
+                    <div class="flex-1">
+                        <h4 id="notifTitle" class="text-sm font-bold mb-1"></h4>
+                        <p id="notifMessage" class="text-xs opacity-90"></p>
+                    </div>
+                    <button onclick="hideNotification()" class="opacity-70 hover:opacity-100 transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <form id="loginForm" class="space-y-6 mt-2" novalidate>
                 <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-2 ml-1">E-Posta Adresi</label>
                     <div class="relative group">
-                        <input type="email" id="emailInput" placeholder="isim@sirket.com" class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-4 pl-4 pr-4 text-white transition focus:bg-slate-900 focus:border-indigo-500/50 outline-none" required>
+                        <input type="email" id="emailInput" placeholder="isim@sirket.com" class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-4 pl-4 pr-4 text-white transition focus:bg-slate-900 focus:border-indigo-500/50 outline-none">
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-2 ml-1">Şifre</label>
                     <div class="relative group">
-                        <input type="password" id="passwordInput" placeholder="••••••••" class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-4 pl-4 pr-12 text-white transition focus:bg-slate-900 focus:border-indigo-500/50 outline-none" required>
+                        <input type="password" id="passwordInput" placeholder="••••••••" class="w-full bg-slate-900/50 border border-white/5 rounded-xl py-4 pl-4 pr-12 text-white transition focus:bg-slate-900 focus:border-indigo-500/50 outline-none">
+                        
+                        <button type="button" onclick="togglePassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-indigo-400 transition focus:outline-none">
+                            <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            <svg id="eyeOffIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
+                        </button>
                     </div>
                 </div>
 
@@ -96,6 +119,7 @@
 
                 <button type="submit" id="submitBtn" class="w-full py-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-orange-500 hover:from-indigo-500 hover:to-orange-400 text-white rounded-xl font-bold transition shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2">
                     <span id="btnText">Giriş Yap</span>
+                    <div id="btnSpinner" class="spinner hidden"></div>
                     <svg id="btnIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                 </button>
             </form>
@@ -112,23 +136,126 @@
   </div>
 
   <script>
+    // 1. Supabase Bağlantısı
     const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    // 2. UI Elementleri
+    const loginForm = document.getElementById('loginForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const btnIcon = document.getElementById('btnIcon');
+    
+    const notificationArea = document.getElementById('notificationArea');
+    const notificationContent = document.getElementById('notificationContent');
+    const notifTitle = document.getElementById('notifTitle');
+    const notifMessage = document.getElementById('notifMessage');
+    const notifIcon = document.getElementById('notifIcon');
+
+    // 3. Bildirim Gösterme Fonksiyonu (Browser Alert Yerine)
+    function showNotification(type, title, message) {
+        notificationArea.classList.remove('hidden');
+        
+        if (type === 'error') {
+            // Hata Stili (Kırmızı)
+            notificationContent.className = 'p-4 rounded-xl border flex items-start gap-3 bg-red-500/10 border-red-500/20 text-red-200';
+            notifIcon.innerHTML = `<svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+            
+            // Inputları salla
+            document.getElementById('emailInput').classList.add('error-input');
+            document.getElementById('passwordInput').classList.add('error-input');
+        } else {
+            // Başarı Stili (Yeşil)
+            notificationContent.className = 'p-4 rounded-xl border flex items-start gap-3 bg-green-500/10 border-green-500/20 text-green-200';
+            notifIcon.innerHTML = `<svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+        }
+
+        notifTitle.textContent = title;
+        notifMessage.textContent = message;
+    }
+
+    function hideNotification() {
+        notificationArea.classList.add('hidden');
+        document.getElementById('emailInput').classList.remove('error-input');
+        document.getElementById('passwordInput').classList.remove('error-input');
+    }
+
+    // 4. Şifre Göster/Gizle
+    function togglePassword() {
+        const input = document.getElementById('passwordInput');
+        const eye = document.getElementById('eyeIcon');
+        const eyeOff = document.getElementById('eyeOffIcon');
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            eye.classList.add('hidden');
+            eyeOff.classList.remove('hidden');
+        } else {
+            input.type = 'password';
+            eye.classList.remove('hidden');
+            eyeOff.classList.add('hidden');
+        }
+    }
+
+    // 5. Form Gönderimi (Submit)
+    loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        hideNotification();
+
         const email = document.getElementById('emailInput').value;
         const password = document.getElementById('passwordInput').value;
-        
-        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-        
-        if (error) {
-            alert("Hata: " + error.message);
-        } else {
-            window.location.href = 'dashboard.html';
+
+        // Manuel Validasyon (Browser popup'ı çıkmasın diye)
+        if (!email || !password) {
+            showNotification('error', 'Eksik Bilgi', 'Lütfen e-posta ve şifrenizi giriniz.');
+            return;
+        }
+
+        // Yükleniyor durumu
+        submitBtn.disabled = true;
+        btnText.textContent = 'Giriş Yapılıyor...';
+        btnSpinner.classList.remove('hidden');
+        btnIcon.classList.add('hidden');
+
+        try {
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            
+            if (error) {
+                // Supabase Hata Kodlarını Yakala
+                console.log("Supabase Hatası:", error.message);
+
+                if (error.message.includes('Email not confirmed')) {
+                    showNotification('error', 'E-posta Doğrulanmadı', 'Giriş yapabilmek için lütfen mail adresinize gelen linke tıklayarak hesabınızı doğrulayın.');
+                } else if (error.message.includes('Invalid login credentials')) {
+                    showNotification('error', 'Giriş Başarısız', 'E-posta veya şifre hatalı. Lütfen kontrol edin.');
+                } else {
+                    showNotification('error', 'Hata Oluştu', error.message);
+                }
+            } else {
+                // Başarılı
+                showNotification('success', 'Giriş Başarılı', 'Yönlendiriliyorsunuz...');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
+            }
+        } catch (err) {
+            showNotification('error', 'Sistem Hatası', 'Beklenmedik bir hata oluştu.');
+        } finally {
+            // Yükleniyor durumunu kapat (Başarılıysa yönlendirme zaten çalışacak)
+            if (!document.getElementById('notificationArea').innerHTML.includes('Giriş Başarılı')) {
+                submitBtn.disabled = false;
+                btnText.textContent = 'Giriş Yap';
+                btnSpinner.classList.add('hidden');
+                btnIcon.classList.remove('hidden');
+            }
         }
     });
+
+    // Yazmaya başlayınca hatayı gizle
+    document.getElementById('emailInput').addEventListener('input', hideNotification);
+    document.getElementById('passwordInput').addEventListener('input', hideNotification);
   </script>
 </body>
 </html>
