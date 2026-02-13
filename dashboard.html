@@ -187,7 +187,7 @@
           
           <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2 sidebar-title">Genel</div>
           <a href="#" class="sidebar-link active"><i data-lucide="layout-dashboard"></i> <span>Proje Panel</span></a>
-          <a href="#" onclick="showNotification('Bilgi', 'Satış Paneli yakında aktif olacak.', 'info')" class="sidebar-link"><i data-lucide="shopping-cart"></i> <span>Satış Teklif Panel</span></a>
+          <a href="teklif-yonetimi.html" class="sidebar-link"><i data-lucide="shopping-cart"></i> <span>Satış Teklif Panel</span></a>
           <a href="projelerim.html" class="sidebar-link"><i data-lucide="folder-open"></i> <span>Projelerim</span></a>
           <div class="mt-6">
               <button onclick="toggleSubmenu('offerMenu', this)" class="sidebar-link justify-between group">
@@ -195,9 +195,9 @@
                   <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300 text-slate-400 chevron"></i>
               </button>
               <div id="offerMenu" class="submenu">
-                  <div class="submenu-item group/item"><a href="#" onclick="showNotification('Bilgi', 'Müşteri listesi yakında.', 'info')" class="submenu-link">Müşteri Listesi</a><button onclick="quickAction('client')" class="quick-action-btn" title="Yeni Müşteri Ekle"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button></div>
-                  <div class="submenu-item group/item"><a href="#" class="submenu-link">Teklif Geçmişi</a><button onclick="quickAction('proposal')" class="quick-action-btn" title="Hızlı Teklif Oluştur"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button></div>
-                  <div class="submenu-item group/item"><a href="#" onclick="showNotification('Bilgi', 'Hızlı Teklif Ver modülü yakında.', 'info')" class="submenu-link">Hızlı Teklif Ver</a></div>
+                  <div class="submenu-item group/item"><a href="teklif-yonetimi.html" class="submenu-link">Müşteri Listesi</a><button onclick="window.location.href='teklif-yonetimi.html'" class="quick-action-btn" title="Yeni Müşteri Ekle"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button></div>
+                  <div class="submenu-item group/item"><a href="teklif-yonetimi.html#proposals" class="submenu-link">Teklif Geçmişi</a><button onclick="window.location.href='teklif-yonetimi.html'" class="quick-action-btn" title="Hızlı Teklif Oluştur"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button></div>
+                  <div class="submenu-item group/item"><a href="teklif-yonetimi.html#quick" class="submenu-link">Hızlı Teklif Ver</a></div>
               </div>
           </div>
 
