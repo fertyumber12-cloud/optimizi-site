@@ -92,15 +92,74 @@
   .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; border: 2px solid #fff; }
   .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-  /* --- PRINT OPTIMIZATION --- */
+/* --- PRINT OPTIMIZATION (MOBILE FIXED) --- */
   @media print {
-      @page { margin: 0; size: A4; } 
-      html, body { height: 100%; background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      @page { 
+          margin: 0; 
+          size: A4 portrait; /* Kağıdı dik tutmaya zorla */
+      } 
+      
+      html, body { 
+          width: 210mm;
+          min-height: 297mm; 
+          background: white; 
+          margin: 0 !important; 
+          padding: 0 !important; 
+          -webkit-print-color-adjust: exact; 
+          print-color-adjust: exact; 
+          overflow: visible !important;
+      }
+
+      /* Arayüzü Gizle */
       .main-interface, nav, #langModal, #sysNotificationModal { display: none !important; }
-      #print-wrapper { display: block !important; }
-      .print-cover { height: 100vh; width: 100%; position: relative; page-break-after: always; display: flex; flex-direction: column; justify-content: center; background-image: radial-gradient(#e0e7ff 1px, transparent 1px); background-size: 30px 30px; }
-      .print-content-page { padding: 10mm 15mm; height: 100vh; position: relative; display: flex; flex-direction: column; page-break-after: always; }
-      .print-content-page:last-child { page-break-after: auto; }
+      
+      /* Rapor Kapsayıcısını Göster */
+      #print-wrapper { 
+          display: block !important; 
+          position: absolute; 
+          top: 0; 
+          left: 0; 
+          width: 100%;
+          margin: 0; 
+      }
+
+      /* Ortak Sayfa Yapısı (Kapak ve İçerik) */
+      .print-cover, .print-content-page { 
+          width: 210mm; 
+          height: 296mm; /* 297mm yerine 1mm pay bıraktık! */
+          max-height: 297mm;
+          position: relative; 
+          page-break-after: always;
+          break-after: page; 
+          overflow: hidden; /* Taşmaları gizle, yeni sayfa açtırma */
+          margin: 0;
+      }
+
+      /* Kapak Sayfası Özel Ayarı */
+      .print-cover { 
+          display: flex; 
+          flex-direction: column; 
+          justify-content: center; 
+          background-image: radial-gradient(#e0e7ff 1px, transparent 1px); 
+          background-size: 30px 30px; 
+      }
+
+      /* İçerik Sayfası Özel Ayarı */
+      .print-content-page { 
+          display: flex; 
+          flex-direction: column; 
+          padding: 10mm 15mm; /* İç boşluk */
+          /* Padding eklendiği için box-sizing çok önemli */
+          box-sizing: border-box; 
+      }
+
+      /* Son sayfadan sonra boş sayfa gelmesini engelle */
+      .print-content-page:last-child { 
+          page-break-after: auto !important; 
+          break-after: auto !important;
+          margin-bottom: 0 !important;
+      }
+
       .page-break-item { page-break-inside: avoid; }
   }
 </style>
