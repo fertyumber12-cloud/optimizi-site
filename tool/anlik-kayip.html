@@ -1537,41 +1537,118 @@
         }catch(e){ customAlert('Rapor hatası: ' + e.message, 'Hata'); console.error(e); }
     }
 
-    // KAYDET FONKSİYONU - Veritabanına kaydetme işlevi (başka bir sohbette detaylandırılacak)
-    function saveData() {
+    // KAYDET FONKSİYONU - Veritabanına kaydetme
+    async function saveData() {
         if(LIST.length === 0) {
             customAlert('Kayıt yapılacak veri bulunmuyor. Lütfen önce kaçak noktaları ekleyin.');
             return;
         }
-        // Bu fonksiyon başka bir sohbette Supabase ile entegre edilecek
-        customAlert('Kaydet özelliği aktif edilecek. Verileriniz veritabanına kaydedilecek.', 'Bilgi');
-        console.log('Kaydedilecek veri:', {
-            firmaBilgileri: {
-                hazirlayan: document.getElementById('pName').value,
-                muhendis: document.getElementById('pEng').value,
-                firma: document.getElementById('cName').value,
-                yetkili: document.getElementById('cEng').value
-            },
-            ortamVerileri: {
-                ortamSicaklik: document.getElementById('tAmb').value,
-                ruzgarHizi: document.getElementById('vWind').value,
-                verimlilik: document.getElementById('eff').value,
-                yakitTipi: document.getElementById('fuel').value,
-                birimFiyat: document.getElementById('price').value,
-                yillikSaat: document.getElementById('hours').value
-            },
-            kayipListesi: LIST,
-            toplamlar: {
-                toplamKayip: LIST.reduce((sum, i) => sum + i.moneyLoss, 0),
-                toplamEnerji: LIST.reduce((sum, i) => sum + i.rawKwhLoss, 0),
-                toplamCo2: LIST.reduce((sum, i) => sum + i.co2, 0)
-            }
+        
+        // Supabase client kontrolü
+        const activeSupabase = window.supabaseClient || window.supabase;
+        if(!activeSupabase) { customAlert('Veritabanı bağlantısı bulunamadı.', 'Hata'); return; }
+        
+        // Kullanıcı kontrolü
+        const { data: { session } } = await activeSupabase.auth.getSession();
+        if(!session) {
+            customAlert('Lütfen önce giriş yapın.', 'Hata');
+            setTimeout(() => { window.location.href = '/login'; }, 2000);
+            return;
+        }
+        
+        // Özet verileri hesapla
+        const reportCurr = document.getElementById('curr').value;
+        const reportRate = FX[reportCurr] || 1;
+        
+        let gLoss = 0, gEnergy = 0, gCo2 = 0;
+        LIST.forEach(i => {
+            gLoss += i.moneyLoss;
+            gEnergy += i.rawKwhLoss;
+            gCo2 += i.co2;
         });
+        
+        try {
+            const { data, error } = await activeSupabase
+                .from('calculations')
+                .insert({
+                    user_id: session.user.id,
+                    project_name: document.getElementById('pName').value || "İsimsiz Proje",
+                    client_name: document.getElementById('cName').value || "",
+                    client_contact: document.getElementById('cEng').value || "",
+                    provider_name: document.getElementById('pName').value || "",
+                    provider_engineer: document.getElementById('pEng').value || "",
+                    calculation_type: 'anlik-kayip',
+                    items: LIST,
+                    total_investment: 0,
+                    total_savings: 0,
+                    total_loss: gLoss,
+                    total_co2: gCo2,
+                    roi_months: 0,
+                    currency: reportCurr,
+                    ambient_temp: parseFloat(document.getElementById('tAmb').value),
+                    wind_speed: parseFloat(document.getElementById('vWind').value),
+                    fuel_type: document.getElementById('fuel').value,
+                    boiler_efficiency: parseFloat(document.getElementById('eff').value),
+                    energy_price: parseFloat(document.getElementById('price').value),
+                    annual_hours: parseInt(document.getElementById('hours').value)
+                })
+                .select();
+            
+            if(error) {
+                console.error('Kayıt hatası:', error);
+                customAlert('Kaydetme sırasında hata oluştu: ' + error.message, 'Hata');
+            } else {
+                const saveName = document.getElementById('cName').value || document.getElementById('pName').value || 'Proje';
+                customAlert(`"${saveName}" başarıyla veritabanına kaydedildi! Dashboard'dan görüntüleyebilirsiniz.`, 'Başarılı 🎉');
+            }
+        } catch(err) {
+            console.error('Beklenmeyen hata:', err);
+            customAlert('Bir hata oluştu: ' + err.message, 'Hata');
+        }
     }
+</script>
+<script>
+    window.addEventListener('DOMContentLoaded', async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const loadId = urlParams.get('load_id');
+        if (!loadId) return;
+
+        console.log('Anlık Kayıp proje yükleniyor ID:', loadId);
+        const activeSupabase = window.supabaseClient || window.supabase;
+        if (!activeSupabase) { console.error('Supabase bağlantısı bulunamadı!'); return; }
+
+        const { data, error } = await activeSupabase
+            .from('calculations')
+            .select('*')
+            .eq('id', loadId)
+            .single();
+
+        if (error) { console.error('Veri çekme hatası:', error); return; }
+
+        if (data) {
+            if(data.project_name) document.getElementById('pName').value = data.project_name;
+            if(data.client_name) document.getElementById('cName').value = data.client_name;
+            if(data.client_contact) document.getElementById('cEng').value = data.client_contact;
+            if(data.provider_engineer) document.getElementById('pEng').value = data.provider_engineer;
+            if(data.ambient_temp) document.getElementById('tAmb').value = data.ambient_temp;
+            if(data.wind_speed !== null && data.wind_speed !== undefined) document.getElementById('vWind').value = data.wind_speed;
+            if(data.boiler_efficiency) document.getElementById('eff').value = data.boiler_efficiency;
+            if(data.energy_price) document.getElementById('price').value = data.energy_price;
+            if(data.annual_hours) document.getElementById('hours').value = data.annual_hours;
+            
+            if(data.fuel_type) {
+                document.getElementById('fuel').value = data.fuel_type;
+                if(typeof toggleFuelMode === 'function') toggleFuelMode();
+            }
+
+            if (data.items && Array.isArray(data.items)) {
+                LIST = data.items;
+                if(typeof updateGlobalFinancials === 'function') updateGlobalFinancials();
+                if(typeof render === 'function') render();
+                console.log("Anlık Kayıp projesi başarıyla yüklendi:", data.project_name);
+            }
+        }
+    });
 </script>
 </body>
 </html>
-
-
-
-
