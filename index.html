@@ -22,6 +22,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <meta name="twitter:title" content="Optimizi.App | Enerji Verimliliği Hesaplama Merkezi">
 <meta name="twitter:description" content="Sanayi tesisleri için profesyonel hesaplama araçları. Kaçakları bulun, tasarrufu hesaplayın.">
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js"></script>
+
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -244,9 +247,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
         
         <div class="flex items-center gap-3">
-            <a href="/login.html" class="flex items-center gap-2 px-8 py-2.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-orange-500 hover:from-indigo-500 hover:to-orange-400 text-white rounded-full font-bold transition shadow-lg shadow-indigo-500/25 active:scale-95">
-                <i data-lucide="user" class="w-4 h-4"></i>
-                <span>Giriş Yap</span>
+            <a id="authBtn" href="login.html" class="flex items-center gap-2 px-8 py-2.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-orange-500 hover:from-indigo-500 hover:to-orange-400 text-white rounded-full font-bold transition shadow-lg shadow-indigo-500/25 active:scale-95">
+                <i id="authIcon" data-lucide="user" class="w-4 h-4"></i>
+                <span id="authText">Giriş Yap</span>
             </a>
         </div>
     </div>
@@ -427,6 +430,39 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         document.documentElement.classList.add('dark');
         if(typeof lucide !== 'undefined') { lucide.createIcons(); } else { setTimeout(() => { if(typeof lucide !== 'undefined') lucide.createIcons(); }, 500); }
         document.addEventListener('keydown', function(e) { if(e.key === 'Escape') { closeInfoModal(); } });
+        
+        // --- YENİ EKLENEN KISIM: Auth Kontrolü ---
+        setTimeout(checkUserSession, 100);
+    }
+
+    // --- YENİ FONKSİYON: Oturum Kontrolü ---
+    async function checkUserSession() {
+        if (!window.supabaseClient) {
+            console.log("Supabase Client henüz hazır değil.");
+            return;
+        }
+
+        const { data: { session } } = await window.supabaseClient.auth.getSession();
+
+        if (session) {
+            const btn = document.getElementById('authBtn');
+            const text = document.getElementById('authText');
+            const icon = document.getElementById('authIcon');
+
+            if (btn) {
+                btn.href = 'dashboard.html';
+                // Opsiyonel: Giriş yapıldığında butonun stilini değiştirebilirsin
+                // btn.classList.remove('bg-gradient-to-r', '...');
+                // btn.classList.add('bg-slate-800', '...');
+            }
+            
+            if (text) text.innerText = 'Panele Git';
+            
+            if (icon) {
+                icon.setAttribute('data-lucide', 'layout-dashboard');
+                lucide.createIcons(); // İkonu güncelle
+            }
+        }
     }
 </script>
 </body>
