@@ -1,0 +1,691 @@
+<!doctype html>
+<html lang="tr" class="dark">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Yeni Teklif Oluştur</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="auth.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
+  <style>body:not(.auth-checked){opacity:0;pointer-events:none}body.auth-checked{opacity:1;transition:opacity .3s ease}</style>
+  <script>
+    tailwind.config={darkMode:'class',theme:{fontFamily:{sans:['"Plus Jakarta Sans"','sans-serif']},extend:{colors:{slate:{850:'#151e2e',900:'#0f172a',950:'#020617'},primary:{500:'#6366f1',600:'#4f46e5'}}}}}
+  </script>
+  <style>
+    :root{--bg-grad:radial-gradient(ellipse at top,#f8fafc 0%,#e2e8f0 40%,#cbd5e1 100%);--glass-panel:rgba(255,255,255,.8);--glass-border:rgba(0,0,0,.05);--glass-card-bg:linear-gradient(145deg,rgba(255,255,255,.9) 0%,rgba(241,245,249,.95) 100%);--scroll-thumb:#cbd5e1;--sidebar-active-bg:rgba(99,102,241,.1);--sidebar-text:#64748b;--sidebar-text-hover:#0f172a}
+    .dark{--bg-grad:radial-gradient(ellipse at top,#1e1b4b 0%,#0f172a 40%,#020617 100%);--glass-panel:rgba(30,41,59,.4);--glass-border:rgba(255,255,255,.05);--glass-card-bg:linear-gradient(145deg,rgba(30,41,59,.6) 0%,rgba(15,23,42,.8) 100%);--scroll-thumb:#334155;--sidebar-active-bg:rgba(99,102,241,.2);--sidebar-text:#94a3b8;--sidebar-text-hover:#fff}
+    body{background:var(--bg-grad);background-attachment:fixed;color:#0f172a;overflow:hidden;transition:color .3s,background .3s}.dark body{color:#f1f5f9}
+    .glass-panel{background:var(--glass-panel);backdrop-filter:blur(12px);border:1px solid var(--glass-border);transition:background .3s,border-color .3s,width .3s}
+    .glass-card{background:var(--glass-card-bg);border:1px solid var(--glass-border);transition:all .3s}
+    ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--scroll-thumb);border-radius:3px}::-webkit-scrollbar-thumb:hover{background:#6366f1}
+    .sidebar-link{display:flex;align-items:center;gap:12px;padding:12px 16px;margin-bottom:4px;border-radius:12px;color:var(--sidebar-text);transition:all .2s;font-weight:500;font-size:.9rem;cursor:pointer;width:100%;text-align:left;white-space:nowrap;overflow:hidden}
+    .sidebar-link:hover,.sidebar-link.active{background:var(--sidebar-active-bg);color:var(--sidebar-text-hover)}.sidebar-link.active{border-left:3px solid #6366f1}
+    .sidebar-link i{width:20px;height:20px;min-width:20px}
+    .submenu{overflow:hidden;transition:max-height .3s ease-out;max-height:0}.submenu.open{max-height:800px}
+    .submenu-item{display:flex;align-items:center;justify-content:space-between;padding-right:12px;margin-bottom:2px;border-radius:8px;transition:background .2s}
+    .submenu-item:hover{background:rgba(0,0,0,.03)}.dark .submenu-item:hover{background:rgba(255,255,255,.03)}
+    .submenu-link{flex:1;display:flex;align-items:center;gap:10px;padding:8px 0 8px 48px;color:var(--sidebar-text);font-size:.85rem;transition:color .2s;text-decoration:none;position:relative;white-space:nowrap}
+    .submenu-link:before{content:'';position:absolute;left:30px;top:50%;width:4px;height:4px;border-radius:50%;background:var(--sidebar-text);transform:translateY(-50%);opacity:.5}
+    .submenu-link:hover{color:#6366f1}.submenu-link:hover:before{background:#6366f1;opacity:1}
+    .quick-action-btn{opacity:0;transform:translateX(-5px);transition:all .2s;padding:4px;border-radius:6px;color:var(--sidebar-text)}
+    .submenu-item:hover .quick-action-btn{opacity:1;transform:translateX(0)}.quick-action-btn:hover{background:#6366f1;color:#fff}
+    aside.collapsed{width:80px}aside.collapsed .sidebar-link{justify-content:center;padding:12px}
+    aside.collapsed .sidebar-link span,aside.collapsed .sidebar-link i.chevron,aside.collapsed .submenu,aside.collapsed .logo-text,aside.collapsed .sidebar-title,aside.collapsed .user-info{display:none!important}
+    aside.collapsed .sidebar-link{border-left:none}aside.collapsed .sidebar-link.active{background:var(--sidebar-active-bg);color:#6366f1}
+    .modal-enter{animation:slideInRight .3s ease-out forwards}@keyframes slideInRight{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+    .animate-pop{animation:popIn .3s cubic-bezier(.16,1,.3,1)}@keyframes popIn{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
+    .animate-bounce-in{animation:successBounce .5s cubic-bezier(.16,1,.3,1)}@keyframes successBounce{0%{transform:scale(.8);opacity:0}50%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+
+    /* FORM STYLES */
+    .form-section{border-radius:16px;overflow:hidden}
+    .form-section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:14px 20px;border-bottom:1px solid var(--glass-border)}
+    .form-row{display:flex;align-items:center;padding:8px 20px;border-bottom:1px solid rgba(0,0,0,.03);gap:8px;min-height:44px}
+    .dark .form-row{border-bottom-color:rgba(255,255,255,.03)}
+    .form-row:last-child{border-bottom:none}
+    .form-label{width:140px;min-width:140px;font-size:.8rem;font-weight:600;color:var(--sidebar-text)}
+    .form-label.required{color:#ef4444}
+    .form-input{flex:1;background:transparent;border:1px solid var(--glass-border);border-radius:8px;padding:7px 12px;font-size:.85rem;outline:none;transition:border-color .2s;color:inherit}
+    .form-input:focus{border-color:#6366f1}
+    .form-select{flex:1;background:transparent;border:1px solid var(--glass-border);border-radius:8px;padding:7px 12px;font-size:.85rem;outline:none;transition:border-color .2s;color:inherit;cursor:pointer}
+    .form-select:focus{border-color:#6366f1}
+    .dark .form-input,.dark .form-select{background:rgba(15,23,42,.3)}
+
+    /* PRODUCT TABLE */
+    .product-table{width:100%;border-collapse:collapse;font-size:.8rem}
+    .product-table thead th{background:rgba(99,102,241,.08);padding:10px 8px;font-weight:700;font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;color:var(--sidebar-text);text-align:left;white-space:nowrap;position:sticky;top:0;z-index:5}
+    .dark .product-table thead th{background:rgba(99,102,241,.15)}
+    .product-table tbody td{padding:6px 8px;border-bottom:1px solid var(--glass-border);vertical-align:middle}
+    .product-table tbody tr:hover{background:rgba(99,102,241,.03)}
+    .dark .product-table tbody tr:hover{background:rgba(255,255,255,.02)}
+    .product-table .row-input{width:100%;background:transparent;border:1px solid transparent;border-radius:6px;padding:5px 8px;font-size:.8rem;outline:none;transition:all .2s;color:inherit}
+    .product-table .row-input:hover{border-color:var(--glass-border)}
+    .product-table .row-input:focus{border-color:#6366f1;background:rgba(99,102,241,.03)}
+    .dark .product-table .row-input:focus{background:rgba(99,102,241,.08)}
+
+    /* TAB SYSTEM */
+    .ptab-btn{padding:10px 20px;font-size:.8rem;font-weight:700;border-radius:8px 8px 0 0;color:var(--sidebar-text);transition:all .2s;cursor:pointer;border:1px solid transparent;border-bottom:none}
+    .ptab-btn:hover{color:var(--sidebar-text-hover)}
+    .ptab-btn.active{color:#fff;background:#6366f1;border-color:#6366f1}
+    .ptab-content{display:none}.ptab-content.active{display:block}
+
+    /* AUTOCOMPLETE */
+    .ac-dropdown{position:absolute;top:100%;left:0;right:0;z-index:60;max-height:220px;overflow-y:auto;border-radius:0 0 12px 12px;box-shadow:0 10px 40px rgba(0,0,0,.15)}
+    .ac-item{padding:10px 16px;cursor:pointer;transition:background .1s;font-size:.85rem}
+    .ac-item:hover{background:rgba(99,102,241,.1)}
+
+    /* TOGGLE */
+    .opt-toggle{position:relative;width:36px;height:20px;border-radius:10px;background:#cbd5e1;cursor:pointer;transition:background .2s}
+    .opt-toggle.active{background:#6366f1}
+    .opt-toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+    .opt-toggle.active::after{transform:translateX(16px)}
+
+    /* TOTALS BAR */
+    .totals-bar{display:flex;justify-content:flex-end;align-items:center;gap:32px;padding:16px 24px;border-top:2px solid var(--glass-border)}
+    .total-item{text-align:right}
+    .total-item .label{font-size:.7rem;text-transform:uppercase;font-weight:700;color:var(--sidebar-text);letter-spacing:.04em}
+    .total-item .value{font-size:1.1rem;font-weight:800}
+
+    @media print{body{background:#fff!important;overflow:visible!important}aside,header,.no-print{display:none!important}}
+  </style>
+</head>
+<body class="flex h-screen w-full text-slate-800 dark:text-slate-100 transition-colors duration-300">
+  <div class="fixed inset-0 z-0 pointer-events-none opacity-50 dark:opacity-100 transition-opacity duration-500">
+    <div class="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-500/20 dark:bg-indigo-600/10 rounded-full blur-[100px]"></div>
+    <div class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-500/20 dark:bg-blue-600/10 rounded-full blur-[100px]"></div>
+  </div>
+
+  <!-- SIDEBAR -->
+    <aside id="mainSidebar"></aside>
+  <script src="sidebar.js"></script>
+
+  <!-- MAIN -->
+  <main class="flex-1 flex flex-col h-full relative z-10 overflow-hidden bg-slate-50/50 dark:bg-transparent transition-all duration-300">
+    <!-- Header -->
+    <header class="h-16 flex items-center justify-between px-6 border-b border-slate-200 dark:border-white/5 glass-panel shrink-0 no-print">
+      <div class="flex items-center gap-4">
+        <a href="teklif-yonetimi.html" class="p-2 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition" title="Geri"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
+        <div>
+          <h1 class="text-lg font-bold text-slate-800 dark:text-white">Yeni Teklif Oluştur</h1>
+          <p class="text-xs text-slate-500" id="proposalNoDisplay">Teklif No: ---</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <!-- Eylem Menüsü -->
+        <div class="relative" id="actionMenuWrap">
+          <button onclick="document.getElementById('actionDropdown').classList.toggle('hidden')" class="flex items-center gap-2 bg-orange-500 hover:bg-orange-400 text-white px-4 py-2 rounded-xl text-sm font-bold transition shadow-lg shadow-orange-500/20">
+            Eylem Menüsü <i data-lucide="chevron-down" class="w-4 h-4"></i>
+          </button>
+          <div id="actionDropdown" class="hidden absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden animate-pop">
+            <button onclick="saveProposal('taslak')" class="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition flex items-center gap-3"><i data-lucide="save" class="w-4 h-4 text-slate-400"></i> Taslak Kaydet</button>
+            <button onclick="saveProposal('beklemede')" class="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition flex items-center gap-3"><i data-lucide="send" class="w-4 h-4 text-indigo-500"></i> Teklifi Gönder</button>
+            <button onclick="convertToSale()" class="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition flex items-center gap-3 border-t border-slate-100 dark:border-slate-800"><i data-lucide="shopping-cart" class="w-4 h-4 text-green-500"></i> Satışa Çevir</button>
+            <button onclick="reviseProposal()" class="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition flex items-center gap-3"><i data-lucide="refresh-cw" class="w-4 h-4 text-amber-500"></i> Teklifi Revize Et</button>
+          </div>
+        </div>
+        <!-- Şablon -->
+        <div class="relative" id="templateMenuWrap">
+          <button onclick="document.getElementById('templateDropdown').classList.toggle('hidden')" class="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-xl text-sm font-bold hover:border-indigo-500 transition">
+            <i data-lucide="layout-template" class="w-4 h-4"></i> Şablon
+          </button>
+          <div id="templateDropdown" class="hidden absolute right-0 mt-2 w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden animate-pop p-4" id="templateDropdownPanel">
+            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Teklif Şablonları</h4>
+            <div id="templatesList" class="space-y-2 max-h-60 overflow-y-auto">
+              <p class="text-xs text-slate-400 text-center py-4">Yükleniyor...</p>
+            </div>
+          </div>
+        </div>
+        <button onclick="saveProposal('beklemede')" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-xl text-sm font-bold transition shadow-lg shadow-indigo-600/20">
+          <i data-lucide="check" class="w-4 h-4"></i> Kaydet
+        </button>
+      </div>
+    </header>
+
+    <!-- SCROLLABLE CONTENT -->
+    <div class="flex-1 overflow-y-auto p-6 md:p-8">
+
+      <!-- === ÜSTTE İKİ PANEL: TEKLİF BİLGİLERİ + GENEL BİLGİLER === -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+
+        <!-- SOL: TEKLİF BİLGİLERİ -->
+        <div class="glass-card form-section">
+          <div class="form-section-title text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-900/10 flex items-center gap-2">
+            <i data-lucide="file-text" class="w-4 h-4"></i> TEKLİF BİLGİLERİ
+          </div>
+          <div>
+            <div class="form-row">
+              <span class="form-label required">Müşteri Adı:</span>
+              <div class="flex-1 relative">
+                <input type="text" id="clientNameInput" class="form-input w-full" placeholder="Müşteri ara veya seç..." oninput="handleClientAC()" onblur="setTimeout(()=>document.getElementById('clientACDropdown').classList.add('hidden'),200)">
+                <div id="clientACDropdown" class="hidden ac-dropdown bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700"></div>
+                <input type="hidden" id="selectedClientId" value="">
+              </div>
+            </div>
+            <div class="form-row">
+              <span class="form-label">Konum Adı:</span>
+              <input type="text" id="locationName" class="form-input" placeholder="Şube / fabrika adı">
+            </div>
+            <div class="form-row">
+              <span class="form-label">Teklif No:</span>
+              <input type="text" id="proposalNo" class="form-input" readonly>
+            </div>
+            <div class="form-row">
+              <span class="form-label required">Teklif Konusu:</span>
+              <input type="text" id="proposalSubject" class="form-input" placeholder="Teklif konusu">
+            </div>
+            <div class="form-row">
+              <span class="form-label required">Teklif Tarihi:</span>
+              <input type="date" id="proposalDate" class="form-input">
+            </div>
+            <div class="form-row">
+              <span class="form-label required">Geçerlilik Tarihi:</span>
+              <input type="date" id="validityDate" class="form-input">
+            </div>
+            <div class="form-row">
+              <span class="form-label">Hatırlatma:</span>
+              <input type="date" id="reminderDate" class="form-input">
+            </div>
+            <div class="form-row">
+              <span class="form-label required">Teklif Durumu:</span>
+              <select id="proposalStatus" class="form-select">
+                <option value="taslak">Taslak</option>
+                <option value="beklemede" selected>Beklemede</option>
+                <option value="onaylandi">Onaylandı</option>
+                <option value="reddedildi">Reddedildi</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <span class="form-label">Onay Açıklaması:</span>
+              <textarea id="approvalNote" class="form-input" rows="2" placeholder="Yönetici onay notu..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- SAĞ: GENEL BİLGİLER -->
+        <div class="glass-card form-section">
+          <div class="form-section-title text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-900/10 flex items-center gap-2">
+            <i data-lucide="settings-2" class="w-4 h-4"></i> GENEL BİLGİLER
+          </div>
+          <div>
+            <div class="form-row">
+              <span class="form-label required">Ödeme Şekli:</span>
+              <select id="paymentMethod" class="form-select">
+                <option value="">Seçin...</option>
+                <option value="nakit">Nakit</option>
+                <option value="havale">Havale / EFT</option>
+                <option value="kredi_karti">Kredi Kartı</option>
+                <option value="cek">Çek</option>
+                <option value="vadeli">Vadeli</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <span class="form-label">Gerçekleşme %:</span>
+              <div class="flex items-center gap-2 flex-1">
+                <input type="range" id="realizationPercent" min="0" max="100" value="50" class="flex-1 accent-indigo-600" oninput="document.getElementById('realizationVal').textContent=this.value+'%'">
+                <span id="realizationVal" class="text-sm font-bold text-indigo-600 w-12 text-right">50%</span>
+              </div>
+            </div>
+            <div class="form-row">
+              <span class="form-label">Gerçekleşme Tarihi:</span>
+              <input type="date" id="realizationDate" class="form-input">
+            </div>
+            <div class="form-row">
+              <span class="form-label required">Teslimat Şekli:</span>
+              <select id="deliveryMethod" class="form-select">
+                <option value="">Seçin...</option>
+                <option value="fabrika_teslim">Fabrika Teslim</option>
+                <option value="saha_teslim">Saha Teslim</option>
+                <option value="montajli">Montajlı Teslim</option>
+                <option value="kargo">Kargo ile Gönderim</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <span class="form-label">Teslimat Tarihi:</span>
+              <input type="date" id="deliveryDate" class="form-input">
+            </div>
+            <div class="form-row">
+              <span class="form-label">Teslimat Süresi:</span>
+              <select id="deliveryTime" class="form-select">
+                <option value="">Seçin...</option>
+                <option value="1_hafta">1 Hafta</option>
+                <option value="2_hafta">2 Hafta</option>
+                <option value="1_ay">1 Ay</option>
+                <option value="2_ay">2 Ay</option>
+                <option value="3_ay">3 Ay</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <span class="form-label">Teklif Ekibi:</span>
+              <input type="text" id="proposalTeam" class="form-input" placeholder="Hazırlayan kişi / ekip">
+            </div>
+            <div class="form-row">
+              <span class="form-label">Teklif Açıklaması:</span>
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  <select id="savedDescriptions" class="form-select text-xs" onchange="if(this.value)document.getElementById('proposalDescription').value=this.value">
+                    <option value="">Hazır açıklama seç...</option>
+                  </select>
+                  <button onclick="saveCurrentDescription()" class="p-1.5 rounded-lg text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition shrink-0" title="Mevcut açıklamayı kaydet"><i data-lucide="bookmark-plus" class="w-4 h-4"></i></button>
+                </div>
+                <textarea id="proposalDescription" class="form-input w-full" rows="3" placeholder="Teklif açıklaması veya özel notlar..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- === ALTTA GENİŞ PANEL: ÜRÜN / HİZMET TABLASI === -->
+      <div class="glass-card form-section">
+        <!-- Tabs -->
+        <div class="flex items-center gap-1 px-4 pt-3 border-b border-slate-200 dark:border-slate-700 flex-wrap">
+          <button onclick="switchProductTab('products')" class="ptab-btn active" data-ptab="products">Ürünler</button>
+          <button onclick="switchProductTab('text1')" class="ptab-btn" data-ptab="text1">Metin 1</button>
+          <button onclick="switchProductTab('text2')" class="ptab-btn" data-ptab="text2">Metin 2</button>
+          <button onclick="switchProductTab('docs')" class="ptab-btn" data-ptab="docs">Dokümanlar</button>
+          <div class="flex-1"></div>
+          <!-- Para Birimi -->
+          <div class="flex items-center gap-2 pb-2">
+            <span class="text-xs font-bold text-slate-500">Belge Para Birimi:</span>
+            <select id="docCurrency" class="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-indigo-500" onchange="recalcAll()">
+              <option value="TRY">₺ TL</option>
+              <option value="USD">$ USD</option>
+              <option value="EUR">€ EUR</option>
+              <option value="GBP">£ GBP</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Ürünler Tab -->
+        <div id="ptab-products" class="ptab-content active">
+          <!-- Toolbar -->
+          <div class="flex items-center gap-2 p-4 flex-wrap">
+            <button onclick="addProductRow()" class="flex items-center gap-1.5 bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition shadow-sm"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Ürün Ekle</button>
+            <button onclick="deleteSelectedRows()" class="flex items-center gap-1.5 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition shadow-sm"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Seçili Sil</button>
+            <button onclick="bulkUpdateRows()" class="flex items-center gap-1.5 bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition shadow-sm"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Toplu Güncelle</button>
+            <div class="flex-1"></div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-slate-500">KDV dahil göster:</span>
+              <div id="kdvToggle" class="opt-toggle" onclick="this.classList.toggle('active');recalcAll()"></div>
+            </div>
+            <div class="flex items-center gap-2 ml-3">
+              <span class="text-xs text-slate-500">İskonto göster:</span>
+              <div id="discountToggle" class="opt-toggle active" onclick="this.classList.toggle('active');toggleDiscountCols()"></div>
+            </div>
+          </div>
+
+          <!-- Product Table -->
+          <div class="overflow-x-auto">
+            <table class="product-table" id="productTable">
+              <thead>
+                <tr>
+                  <th class="w-8 text-center"><input type="checkbox" id="selectAllRows" onchange="toggleAllRows(this.checked)" class="rounded"></th>
+                  <th class="w-10">#</th>
+                  <th class="w-12">Sıra</th>
+                  <th class="min-w-[200px]">Ürün Adı</th>
+                  <th class="min-w-[180px]">Açıklama</th>
+                  <th class="w-20">Miktar</th>
+                  <th class="w-20">Birim</th>
+                  <th class="w-28">Birim Fiyat</th>
+                  <th class="w-16 discount-col">İsk. %</th>
+                  <th class="w-24 discount-col">İsk. Tutar</th>
+                  <th class="w-28">Ara Toplam</th>
+                  <th class="w-16">KDV %</th>
+                  <th class="w-24">KDV Tutar</th>
+                  <th class="w-28">Toplam</th>
+                  <th class="w-12">Ops.</th>
+                  <th class="w-8"></th>
+                </tr>
+              </thead>
+              <tbody id="productTableBody">
+                <!-- Rows render here -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="p-4 text-center" id="emptyProductMsg">
+            <p class="text-slate-400 text-sm py-8">Henüz ürün eklenmedi. <button onclick="addProductRow()" class="text-indigo-600 hover:underline font-bold">İlk ürünü ekleyin</button></p>
+          </div>
+
+          <!-- TOTALS -->
+          <div class="totals-bar flex-wrap gap-4">
+            <div class="total-item">
+              <div class="label">Ara Toplam</div>
+              <div class="value text-slate-800 dark:text-white" id="totalSubtotal">0,00</div>
+            </div>
+            <div class="total-item discount-col">
+              <div class="label">Toplam İskonto</div>
+              <div class="value text-red-600 dark:text-red-400" id="totalDiscount">-0,00</div>
+            </div>
+            <div class="total-item">
+              <div class="label">KDV Toplam</div>
+              <div class="value text-amber-600 dark:text-amber-400" id="totalKdv">0,00</div>
+            </div>
+            <div class="total-item">
+              <div class="label">Genel Toplam</div>
+              <div class="value text-2xl text-indigo-600 dark:text-indigo-400" id="totalGrand">0,00</div>
+            </div>
+            <button onclick="recalcAll()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition shadow-lg shadow-indigo-600/20 shrink-0">Toplamı Hesapla</button>
+          </div>
+        </div>
+
+        <!-- Metin 1 Tab -->
+        <div id="ptab-text1" class="ptab-content p-6">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="font-bold text-slate-700 dark:text-slate-300 text-sm">Metin 1 — Teklif Üst Yazısı</h4>
+            <select id="savedText1" class="form-select text-xs w-64" onchange="if(this.value)document.getElementById('text1Content').value=this.value">
+              <option value="">Hazır metin seç...</option>
+            </select>
+          </div>
+          <textarea id="text1Content" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-sm focus:outline-none focus:border-indigo-500 min-h-[200px]" placeholder="Teklif üst yazısı, giriş metni..."></textarea>
+        </div>
+
+        <!-- Metin 2 Tab -->
+        <div id="ptab-text2" class="ptab-content p-6">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="font-bold text-slate-700 dark:text-slate-300 text-sm">Metin 2 — Teklif Alt Yazısı / Koşullar</h4>
+            <select id="savedText2" class="form-select text-xs w-64" onchange="if(this.value)document.getElementById('text2Content').value=this.value">
+              <option value="">Hazır metin seç...</option>
+            </select>
+          </div>
+          <textarea id="text2Content" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-sm focus:outline-none focus:border-indigo-500 min-h-[200px]" placeholder="Genel koşullar, ödeme şartları, garanti bilgileri..."></textarea>
+        </div>
+
+        <!-- Dokümanlar Tab -->
+        <div id="ptab-docs" class="ptab-content p-6">
+          <h4 class="font-bold text-slate-700 dark:text-slate-300 text-sm mb-3">Ekli Dokümanlar</h4>
+          <div class="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-8 text-center">
+            <i data-lucide="upload-cloud" class="w-10 h-10 mx-auto text-slate-400 mb-3"></i>
+            <p class="text-sm text-slate-500 mb-2">Teklife dosya eklemek için sürükleyip bırakın</p>
+            <p class="text-xs text-slate-400">PDF, Word, Excel, Resim (maks. 10MB)</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- NOTIFICATION MODAL -->
+  <div id="notifModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeNotification()"></div>
+    <div class="relative bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl shadow-2xl animate-pop border border-slate-200 dark:border-slate-800 overflow-hidden">
+      <div class="p-6 text-center">
+        <div id="notifIcon" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-in"></div>
+        <h3 id="notifTitle" class="text-xl font-bold text-slate-900 dark:text-white mb-2"></h3>
+        <p id="notifMsg" class="text-sm text-slate-500 dark:text-slate-400 mb-6"></p>
+        <button onclick="closeNotification()" class="w-full py-3 rounded-xl font-bold transition shadow-lg text-white bg-indigo-600 hover:bg-indigo-500">Tamam</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div id="settingsModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeSettings()"></div>
+    <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl modal-enter flex flex-col">
+      <div class="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800"><h2 class="text-xl font-bold text-slate-900 dark:text-white">Ayarlar</h2><button onclick="closeSettings()" class="text-slate-500 hover:text-red-500 transition"><i data-lucide="x" class="w-6 h-6"></i></button></div>
+      <div class="flex-1 overflow-y-auto p-6 space-y-8">
+        <section><div class="flex items-center gap-4 mb-4"><div class="w-16 h-16 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-2xl font-bold text-indigo-600" id="modalAvatar">U</div><div><p class="font-bold text-lg" id="modalName">...</p><p class="text-sm text-slate-500" id="modalEmail">...</p></div></div></section>
+        <section><div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 flex items-center justify-between"><div class="flex items-center gap-3"><i data-lucide="moon" class="w-5 h-5 text-indigo-600"></i><p class="text-sm font-bold">Karanlık Mod</p></div><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="themeToggle" class="sr-only peer" onchange="toggleTheme()"><div class="w-11 h-6 bg-slate-200 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div></label></div></section>
+        <section><button onclick="handleLogout()" class="w-full py-3 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 font-bold transition flex items-center justify-center gap-2"><i data-lucide="log-out" class="w-4 h-4"></i> Çıkış</button></section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentUser=null,isSidebarCollapsed=false,allClients=[],allTemplates=[],productRowId=0;
+
+    // === UTILITY ===
+    function escapeHtml(t){if(!t)return'';return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+    function formatNum(n){return parseFloat(n||0).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})}
+    function getCurrSymbol(){const c=document.getElementById('docCurrency').value;return{TRY:'₺',USD:'$',EUR:'€',GBP:'£'}[c]||'₺'}
+    function generateProposalNo(){const d=new Date();return'TKL-'+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+'-'+String(Math.floor(Math.random()*9000)+1000)}
+
+    // === UI ===
+    // toggleSidebar from sidebar.js
+    // toggleSubmenu from sidebar.jselse{m.classList.add('open');if(ic)ic.style.transform='rotate(180deg)'}}
+    function openSettings(){document.getElementById('settingsModal').classList.remove('hidden');lucide.createIcons()}
+    function closeSettings(){document.getElementById('settingsModal').classList.add('hidden')}
+    function closeNotification(){document.getElementById('notifModal').classList.add('hidden')}
+    function showNotification(title,msg,type='success'){
+      const m=document.getElementById('notifModal'),ic=document.getElementById('notifIcon');
+      document.getElementById('notifTitle').innerText=title;document.getElementById('notifMsg').innerText=msg;
+      ic.className='w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-in';
+      if(type==='success'){ic.classList.add('bg-green-100','text-green-600');ic.innerHTML='<i data-lucide="check" class="w-8 h-8"></i>'}
+      else if(type==='info'){ic.classList.add('bg-indigo-100','text-indigo-600');ic.innerHTML='<i data-lucide="info" class="w-8 h-8"></i>'}
+      else{ic.classList.add('bg-red-100','text-red-600');ic.innerHTML='<i data-lucide="alert-triangle" class="w-8 h-8"></i>'}
+      m.classList.remove('hidden');lucide.createIcons()
+    }
+    async function toggleTheme(){const d=document.getElementById('themeToggle').checked;if(d)document.documentElement.classList.add('dark');else document.documentElement.classList.remove('dark');if(currentUser)await supabaseClient.from('profiles').update({theme:d?'dark':'light'}).eq('id',currentUser.id)}
+    async function loadUserProfile(){if(!currentUser)return;let{data}=await supabaseClient.from('profiles').select('*').eq('id',currentUser.id).single();if(data&&data.theme==='dark'){document.documentElement.classList.add('dark');document.getElementById('themeToggle').checked=true}}
+    async function handleLogout(){const{error}=await supabaseClient.auth.signOut();if(!error)window.location.href='login.html'}
+
+    // Close dropdowns on outside click
+    document.addEventListener('click',function(e){
+      if(!document.getElementById('actionMenuWrap').contains(e.target))document.getElementById('actionDropdown').classList.add('hidden');
+      if(!document.getElementById('templateMenuWrap').contains(e.target))document.getElementById('templateDropdown').classList.add('hidden');
+    });
+
+    // === PRODUCT TABS ===
+    function switchProductTab(name){
+      document.querySelectorAll('.ptab-content').forEach(e=>e.classList.remove('active'));
+      document.querySelectorAll('.ptab-btn').forEach(e=>e.classList.remove('active'));
+      document.getElementById('ptab-'+name).classList.add('active');
+      document.querySelector('.ptab-btn[data-ptab="'+name+'"]').classList.add('active');
+    }
+
+    // === CLIENT AUTOCOMPLETE ===
+    function handleClientAC(){
+      const inp=document.getElementById('clientNameInput'),dd=document.getElementById('clientACDropdown'),v=inp.value.toLowerCase().trim();
+      document.getElementById('selectedClientId').value='';
+      if(v.length<1){dd.classList.add('hidden');return}
+      const m=allClients.filter(c=>(c.name||'').toLowerCase().includes(v));
+      if(!m.length){dd.classList.add('hidden');return}
+      dd.innerHTML=m.slice(0,6).map(c=>'<div class="ac-item" onclick="pickClient(\''+c.id+'\')"><div class="font-bold text-slate-800 dark:text-white">'+escapeHtml(c.name)+'</div><div class="text-xs text-slate-500">'+escapeHtml(c.contact_person||'')+' · '+escapeHtml(c.city||'')+'</div></div>').join('');
+      dd.classList.remove('hidden')
+    }
+    function pickClient(id){
+      const c=allClients.find(x=>x.id===id);if(!c)return;
+      document.getElementById('clientNameInput').value=c.name||'';
+      document.getElementById('selectedClientId').value=c.id;
+      document.getElementById('clientACDropdown').classList.add('hidden');
+    }
+
+    // === PRODUCT TABLE ===
+    function addProductRow(data){
+      productRowId++;const id=productRowId;
+      const d=data||{name:'',desc:'',qty:1,unit:'Adet',price:0,disc:0,kdv:20,optional:false};
+      document.getElementById('emptyProductMsg').style.display='none';
+      const tbody=document.getElementById('productTableBody');
+      const rowCount=tbody.querySelectorAll('tr').length+1;
+      const tr=document.createElement('tr');tr.id='prow'+id;tr.dataset.rowId=id;
+      tr.innerHTML=
+        '<td class="text-center"><input type="checkbox" class="row-check rounded" data-row="'+id+'"></td>'+
+        '<td class="text-center text-slate-400 text-xs">'+rowCount+'</td>'+
+        '<td><input type="number" class="row-input w-12 text-center" value="'+rowCount+'" id="pSort'+id+'"></td>'+
+        '<td><input type="text" class="row-input" placeholder="Ürün / Hizmet adı" value="'+escapeHtml(d.name)+'" id="pName'+id+'"></td>'+
+        '<td><input type="text" class="row-input" placeholder="Açıklama" value="'+escapeHtml(d.desc)+'" id="pDesc'+id+'"></td>'+
+        '<td><input type="number" class="row-input text-center" value="'+d.qty+'" min="0" step="any" onchange="calcRow('+id+')" id="pQty'+id+'"></td>'+
+        '<td><select class="row-input" id="pUnit'+id+'"><option>Adet</option><option>m</option><option>m²</option><option>m³</option><option>kg</option><option>ton</option><option>lt</option><option>takım</option><option>set</option></select></td>'+
+        '<td><input type="number" class="row-input text-right" value="'+d.price+'" min="0" step="any" onchange="calcRow('+id+')" id="pPrice'+id+'"></td>'+
+        '<td class="discount-col"><input type="number" class="row-input text-center" value="'+d.disc+'" min="0" max="100" step="any" onchange="calcRow('+id+')" id="pDisc'+id+'"></td>'+
+        '<td class="discount-col"><span class="text-xs text-red-500" id="pDiscAmt'+id+'">0,00</span></td>'+
+        '<td><span class="text-xs font-bold" id="pSubtotal'+id+'">0,00</span></td>'+
+        '<td><select class="row-input text-center" onchange="calcRow('+id+')" id="pKdv'+id+'"><option value="0">0</option><option value="1">1</option><option value="10">10</option><option value="20" selected>20</option></select></td>'+
+        '<td><span class="text-xs text-amber-600" id="pKdvAmt'+id+'">0,00</span></td>'+
+        '<td><span class="text-sm font-black text-indigo-600 dark:text-indigo-400" id="pTotal'+id+'">0,00</span></td>'+
+        '<td class="text-center"><div class="opt-toggle '+(d.optional?'active':'')+'" onclick="this.classList.toggle(\'active\')" title="Opsiyonel" id="pOpt'+id+'"></div></td>'+
+        '<td><button onclick="removeRow('+id+')" class="p-1 text-slate-400 hover:text-red-500 transition"><i data-lucide="x" class="w-3.5 h-3.5"></i></button></td>';
+      tbody.appendChild(tr);
+      // Set unit
+      if(d.unit)document.getElementById('pUnit'+id).value=d.unit;
+      if(d.kdv!==undefined)document.getElementById('pKdv'+id).value=d.kdv;
+      calcRow(id);lucide.createIcons()
+    }
+
+    function removeRow(id){
+      const el=document.getElementById('prow'+id);if(el)el.remove();
+      if(document.getElementById('productTableBody').querySelectorAll('tr').length===0)document.getElementById('emptyProductMsg').style.display='';
+      recalcAll()
+    }
+
+    function calcRow(id){
+      const qty=parseFloat(document.getElementById('pQty'+id)?.value)||0;
+      const price=parseFloat(document.getElementById('pPrice'+id)?.value)||0;
+      const disc=parseFloat(document.getElementById('pDisc'+id)?.value)||0;
+      const kdv=parseFloat(document.getElementById('pKdv'+id)?.value)||0;
+      const base=qty*price;
+      const discAmt=base*(disc/100);
+      const subtotal=base-discAmt;
+      const kdvAmt=subtotal*(kdv/100);
+      const total=subtotal+kdvAmt;
+      document.getElementById('pDiscAmt'+id).textContent=formatNum(discAmt);
+      document.getElementById('pSubtotal'+id).textContent=formatNum(subtotal);
+      document.getElementById('pKdvAmt'+id).textContent=formatNum(kdvAmt);
+      document.getElementById('pTotal'+id).textContent=formatNum(total);
+      recalcAll()
+    }
+
+    function recalcAll(){
+      let sub=0,disc=0,kdv=0,grand=0;
+      document.getElementById('productTableBody').querySelectorAll('tr').forEach(tr=>{
+        const id=tr.dataset.rowId;
+        const qty=parseFloat(document.getElementById('pQty'+id)?.value)||0;
+        const price=parseFloat(document.getElementById('pPrice'+id)?.value)||0;
+        const d=parseFloat(document.getElementById('pDisc'+id)?.value)||0;
+        const k=parseFloat(document.getElementById('pKdv'+id)?.value)||0;
+        const base=qty*price;const da=base*(d/100);const st=base-da;const ka=st*(k/100);
+        sub+=base;disc+=da;kdv+=ka;grand+=st+ka
+      });
+      const s=getCurrSymbol();
+      document.getElementById('totalSubtotal').textContent=formatNum(sub)+' '+s;
+      document.getElementById('totalDiscount').textContent='-'+formatNum(disc)+' '+s;
+      document.getElementById('totalKdv').textContent=formatNum(kdv)+' '+s;
+      document.getElementById('totalGrand').textContent=formatNum(grand)+' '+s;
+    }
+
+    function toggleAllRows(checked){document.querySelectorAll('.row-check').forEach(cb=>cb.checked=checked)}
+    function deleteSelectedRows(){
+      document.querySelectorAll('.row-check:checked').forEach(cb=>{const id=cb.dataset.row;removeRow(id)});
+      document.getElementById('selectAllRows').checked=false;recalcAll()
+    }
+    function bulkUpdateRows(){showNotification('Bilgi','Toplu güncelleme paneli yakında eklenecek.','info')}
+    function toggleDiscountCols(){
+      const show=document.getElementById('discountToggle').classList.contains('active');
+      document.querySelectorAll('.discount-col').forEach(el=>el.style.display=show?'':'none')
+    }
+
+    // === TEMPLATES ===
+    async function fetchTemplates(){
+      const{data}=await supabaseClient.from('proposal_templates').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
+      allTemplates=data||[];
+      const list=document.getElementById('templatesList');
+      if(!allTemplates.length){list.innerHTML='<p class="text-xs text-slate-400 text-center py-4">Şablon yok</p>';return}
+      list.innerHTML=allTemplates.map(t=>'<button onclick="applyTemplate(\''+t.id+'\')" class="w-full text-left p-3 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition flex items-center gap-3"><div class="p-1.5 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-purple-600"><i data-lucide="file-check" class="w-4 h-4"></i></div><div><div class="text-sm font-bold text-slate-800 dark:text-white">'+escapeHtml(t.name)+'</div><div class="text-xs text-slate-500">'+JSON.parse(t.items||'[]').length+' kalem</div></div></button>').join('');
+      lucide.createIcons()
+    }
+    function applyTemplate(tId){
+      const t=allTemplates.find(x=>x.id===tId);if(!t)return;
+      const items=JSON.parse(t.items||'[]');
+      document.getElementById('productTableBody').innerHTML='';productRowId=0;
+      items.forEach(it=>addProductRow({name:it.name||'',desc:'',qty:1,unit:it.unit||'Adet',price:it.price||0,disc:0,kdv:20,optional:false}));
+      if(t.notes)document.getElementById('text2Content').value=t.notes;
+      document.getElementById('templateDropdown').classList.add('hidden');
+      showNotification('Başarılı','Şablon yüklendi.');recalcAll()
+    }
+
+    // === SAVE ===
+    async function saveProposal(status){
+      const clientName=document.getElementById('clientNameInput').value.trim();
+      const subject=document.getElementById('proposalSubject').value.trim();
+      if(!clientName){showNotification('Uyarı','Müşteri adı zorunludur.','error');return}
+      if(!subject){showNotification('Uyarı','Teklif konusu zorunludur.','error');return}
+
+      const items=[];let total=0;
+      document.getElementById('productTableBody').querySelectorAll('tr').forEach(tr=>{
+        const id=tr.dataset.rowId;
+        const nm=document.getElementById('pName'+id)?.value?.trim()||'';
+        const desc=document.getElementById('pDesc'+id)?.value?.trim()||'';
+        const qty=parseFloat(document.getElementById('pQty'+id)?.value)||0;
+        const unit=document.getElementById('pUnit'+id)?.value||'Adet';
+        const price=parseFloat(document.getElementById('pPrice'+id)?.value)||0;
+        const disc=parseFloat(document.getElementById('pDisc'+id)?.value)||0;
+        const kdv=parseFloat(document.getElementById('pKdv'+id)?.value)||0;
+        const opt=document.getElementById('pOpt'+id)?.classList.contains('active')||false;
+        const base=qty*price;const da=base*(disc/100);const st=base-da;const ka=st*(kdv/100);
+        if(nm){items.push({name:nm,description:desc,qty,unit,price,discount:disc,kdv,optional:opt,subtotal:st,kdvAmount:ka,total:st+ka});total+=st+ka}
+      });
+
+      const pd={
+        user_id:currentUser.id,
+        client_id:document.getElementById('selectedClientId').value||null,
+        client_name:clientName,
+        subject:subject,
+        proposal_no:document.getElementById('proposalNo').value,
+        items:JSON.stringify(items),
+        total_amount:total,
+        currency:document.getElementById('docCurrency').value,
+        validity_days:Math.ceil((new Date(document.getElementById('validityDate').value)-new Date(document.getElementById('proposalDate').value))/(86400000))||30,
+        notes:JSON.stringify({
+          description:document.getElementById('proposalDescription').value,
+          text1:document.getElementById('text1Content').value,
+          text2:document.getElementById('text2Content').value,
+          payment:document.getElementById('paymentMethod').value,
+          delivery:document.getElementById('deliveryMethod').value,
+          deliveryDate:document.getElementById('deliveryDate').value,
+          deliveryTime:document.getElementById('deliveryTime').value,
+          team:document.getElementById('proposalTeam').value,
+          realization:document.getElementById('realizationPercent').value,
+          location:document.getElementById('locationName').value,
+          approvalNote:document.getElementById('approvalNote').value
+        }),
+        status:status||document.getElementById('proposalStatus').value
+      };
+
+      const{error}=await supabaseClient.from('proposals').insert([pd]);
+      if(error){console.error(error);showNotification('Hata','Teklif kaydedilemedi: '+error.message,'error');return}
+      showNotification('Başarılı',status==='taslak'?'Taslak kaydedildi.':'Teklif oluşturuldu.');
+      setTimeout(()=>window.location.href='teklif-yonetimi.html',1500)
+    }
+
+    function convertToSale(){showNotification('Bilgi','Satışa çevirme modülü yakında aktif olacak.','info')}
+    function reviseProposal(){showNotification('Bilgi','Revize modülü yakında aktif olacak.','info')}
+    function saveCurrentDescription(){showNotification('Bilgi','Açıklama kaydetme modülü yakında aktif olacak.','info')}
+
+    // === INIT ===
+    async function initPage(){
+      if(!window.currentUser){const{data:{session}}=await supabaseClient.auth.getSession();if(!session){window.location.href='login.html';return}currentUser=session.user}
+      else currentUser=window.currentUser;
+      const fn=currentUser.user_metadata?.full_name||currentUser.email.split('@')[0];
+      document.getElementById('sidebarUserName').textContent=fn;
+      document.getElementById('avatarInitial').textContent=fn.charAt(0).toUpperCase();
+      document.getElementById('modalName').textContent=fn;
+      document.getElementById('modalEmail').textContent=currentUser.email;
+      document.getElementById('modalAvatar').textContent=fn.charAt(0).toUpperCase();
+
+      // Set defaults
+      const pno=generateProposalNo();
+      document.getElementById('proposalNo').value=pno;
+      document.getElementById('proposalNoDisplay').textContent='Teklif No: '+pno;
+      const today=new Date().toISOString().split('T')[0];
+      document.getElementById('proposalDate').value=today;
+      const valid=new Date(Date.now()+30*86400000).toISOString().split('T')[0];
+      document.getElementById('validityDate').value=valid;
+
+      await loadUserProfile();
+
+      // Fetch clients
+      const{data:cd}=await supabaseClient.from('clients').select('*').eq('user_id',currentUser.id).order('name');
+      allClients=cd||[];
+
+      await fetchTemplates();
+
+      // Add first empty row
+      addProductRow();
+      recalcAll();
+    }
+
+    initPage();
+    lucide.createIcons();
+  </script>
+</body>
+</html>
