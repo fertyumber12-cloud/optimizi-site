@@ -653,9 +653,10 @@
       if(!window.currentUser){const{data:{session}}=await supabaseClient.auth.getSession();if(!session){window.location.href='login.html';return}currentUser=session.user}
       else currentUser=window.currentUser;
       const fn=currentUser.user_metadata?.full_name||currentUser.email.split('@')[0],fi=fn.split(' ')[0];
-      document.getElementById('sidebarUserName').textContent=fn;document.getElementById('avatarInitial').textContent=fi.charAt(0).toUpperCase();
-      document.getElementById('modalName').textContent=fn;document.getElementById('modalEmail').textContent=currentUser.email;
-      document.getElementById('modalAvatar').textContent=fi.charAt(0).toUpperCase();
+      if(typeof updateSidebarUser==='function')updateSidebarUser(fn);
+      const mn=document.getElementById('modalName');if(mn)mn.textContent=fn;
+      const me=document.getElementById('modalEmail');if(me)me.textContent=currentUser.email;
+      const ma=document.getElementById('modalAvatar');if(ma)ma.textContent=fi.charAt(0).toUpperCase();
       await loadUserProfile();await Promise.all([fetchClients(),fetchProposals(),fetchTemplates()])
     }
     initPage();lucide.createIcons();
