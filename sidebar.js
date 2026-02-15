@@ -3,7 +3,7 @@
 // Tüm sayfalar bu dosyayı kullanır
 // =============================================
 
-let isSidebarCollapsed = false;
+var isSidebarCollapsed = false;
 
 function renderSidebar() {
   const page = window.location.pathname.split('/').pop() || 'dashboard.html';
