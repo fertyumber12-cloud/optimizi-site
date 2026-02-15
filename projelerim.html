@@ -640,7 +640,7 @@
 
         currentUser = session.user;
         const fullName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
-        document.getElementById('sidebarUserName').textContent = fullName;
+        if (typeof updateSidebarUser === 'function') updateSidebarUser(fullName);
         document.getElementById('avatarInitial').textContent = fullName.charAt(0).toUpperCase();
         document.getElementById('modalName').textContent = fullName;
         document.getElementById('modalEmail').textContent = currentUser.email;
