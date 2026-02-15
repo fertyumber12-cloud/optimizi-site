@@ -12,6 +12,7 @@ function renderSidebar() {
 
   function isActive(p) { return page === p ? 'active' : ''; }
   function isActiveLink(p) { return page === p ? 'color:#6366f1;font-weight:700' : ''; }
+  const isTeklif = ['teklif-yonetimi.html','teklif-olustur.html','hizli-teklif.html','musteri-ekle.html'].includes(page);
 
   aside.className = 'w-64 h-full glass-panel flex flex-col z-20 hidden md:flex border-r border-slate-200 dark:border-slate-700/50 bg-white/50 dark:bg-slate-900/50 transition-all duration-300';
 
@@ -26,15 +27,15 @@ function renderSidebar() {
     <div class="flex-1 overflow-y-auto py-6 px-4 custom-scroll">
       <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2 sidebar-title">Genel</div>
       <a href="dashboard.html" class="sidebar-link ${isActive('dashboard.html')}"><i data-lucide="layout-dashboard"></i> <span>Proje Panel</span></a>
-      <a href="teklif-yonetimi.html" class="sidebar-link ${isActive('teklif-yonetimi.html')}"><i data-lucide="shopping-cart"></i> <span>Satış Teklif Panel</span></a>
+      <a href="teklif-yonetimi.html" class="sidebar-link ${isTeklif && page==='teklif-yonetimi.html'?'active':''}"><i data-lucide="shopping-cart"></i> <span>Satış Teklif Panel</span></a>
       <a href="projelerim.html" class="sidebar-link ${isActive('projelerim.html')}"><i data-lucide="folder-open"></i> <span>Projelerim</span></a>
 
       <div class="mt-6">
-        <button onclick="toggleSubmenu('offerMenu', this)" class="sidebar-link justify-between group ${['teklif-yonetimi.html','teklif-olustur.html','hizli-teklif.html','musteri-ekle.html'].includes(page)?'active':''}">
+        <button onclick="toggleSubmenu('offerMenu', this)" class="sidebar-link justify-between group ${isTeklif?'active':''}">
           <div class="flex items-center gap-3"><i data-lucide="file-text"></i> <span>Teklif Yönetimi</span></div>
-          <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300 text-slate-400 chevron" ${['teklif-yonetimi.html','teklif-olustur.html','hizli-teklif.html','musteri-ekle.html'].includes(page)?'style="transform:rotate(180deg)"':''}></i>
+          <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300 text-slate-400 chevron" ${isTeklif?'style="transform:rotate(180deg)"':''}></i>
         </button>
-        <div id="offerMenu" class="submenu ${['teklif-yonetimi.html','teklif-olustur.html','hizli-teklif.html','musteri-ekle.html'].includes(page)?'open':''}">
+        <div id="offerMenu" class="submenu ${isTeklif?'open':''}">
           <div class="submenu-item group/item"><a href="teklif-yonetimi.html" class="submenu-link" style="${isActiveLink('teklif-yonetimi.html')}">Teklif Paneli</a></div>
           <div class="submenu-item group/item"><a href="musteri-ekle.html" class="submenu-link" style="${isActiveLink('musteri-ekle.html')}">Müşteri Ekle</a><button onclick="window.location.href='musteri-ekle.html'" class="quick-action-btn" title="Yeni Müşteri"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button></div>
           <div class="submenu-item group/item"><a href="teklif-olustur.html" class="submenu-link" style="${isActiveLink('teklif-olustur.html')}">Teklif Oluştur</a><button onclick="window.location.href='teklif-olustur.html'" class="quick-action-btn" title="Yeni Teklif"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button></div>
@@ -48,7 +49,7 @@ function renderSidebar() {
           <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300 text-slate-400 chevron"></i>
         </button>
         <div id="salesMenu" class="submenu">
-          <div class="submenu-item group/item"><a href="#" onclick="showNotification('Bilgi', 'Satış listesi yakında.', 'info')" class="submenu-link">Satış Listesi</a><button onclick="if(typeof quickAction==='function')quickAction('sale')" class="quick-action-btn" title="Yeni Satış Gir"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button></div>
+          <div class="submenu-item group/item"><a href="#" onclick="if(typeof showNotification==='function')showNotification('Bilgi','Satış listesi yakında.','info')" class="submenu-link">Satış Listesi</a><button onclick="if(typeof quickAction==='function')quickAction('sale')" class="quick-action-btn" title="Yeni Satış Gir"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button></div>
         </div>
       </div>
 
@@ -58,8 +59,8 @@ function renderSidebar() {
           <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300 text-slate-400 chevron"></i>
         </button>
         <div id="prodMenu" class="submenu">
-          <div class="submenu-item group/item"><a href="#" onclick="showNotification('Bilgi', 'Üretim Takibi yakında.', 'info')" class="submenu-link">Üretim Takibi</a></div>
-          <div class="submenu-item group/item"><a href="#" onclick="showNotification('Bilgi', 'Üretim Raporları yakında.', 'info')" class="submenu-link">Üretim Raporları</a></div>
+          <div class="submenu-item group/item"><a href="#" onclick="if(typeof showNotification==='function')showNotification('Bilgi','Üretim Takibi yakında.','info')" class="submenu-link">Üretim Takibi</a></div>
+          <div class="submenu-item group/item"><a href="#" onclick="if(typeof showNotification==='function')showNotification('Bilgi','Üretim Raporları yakında.','info')" class="submenu-link">Üretim Raporları</a></div>
           <div class="submenu-item group/item"><a href="#" onclick="toggleSubmenu('stockSubMenu', this.parentElement); return false;" class="submenu-link justify-between">Stok Durumu <i data-lucide="chevron-down" class="w-3 h-3 opacity-50"></i></a></div>
           <div id="stockSubMenu" class="submenu pl-2 border-l border-slate-200 dark:border-slate-700 ml-4">
             <div class="submenu-item group/item"><a href="#" onclick="if(typeof quickAction==='function')quickAction('stockIn')" class="submenu-link text-[11px]">- Hammadde Girdisi</a></div>
@@ -99,12 +100,12 @@ function renderSidebar() {
       </div>
 
       <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2 mt-6 sidebar-title">Sistem</div>
-      <button onclick="openSettings()" class="sidebar-link"><i data-lucide="settings"></i> <span>Ayarlar</span></button>
+      <button onclick="if(typeof openSettings==='function')openSettings()" class="sidebar-link"><i data-lucide="settings"></i> <span>Ayarlar</span></button>
       <a href="iletisim.html" class="sidebar-link"><i data-lucide="life-buoy"></i> <span>Destek</span></a>
     </div>
 
     <div class="p-4 border-t border-slate-200 dark:border-white/5">
-      <div onclick="openSettings()" class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-200/50 dark:hover:bg-white/10 transition cursor-pointer group">
+      <div onclick="if(typeof openSettings==='function')openSettings()" class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-200/50 dark:hover:bg-white/10 transition cursor-pointer group">
         <div class="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:scale-105 transition shrink-0" id="avatarInitial">U</div>
         <div class="flex-1 min-w-0 user-info">
           <p class="text-sm font-bold text-slate-800 dark:text-white truncate" id="sidebarUserName">Yükleniyor...</p>
@@ -116,6 +117,15 @@ function renderSidebar() {
   `;
 
   lucide.createIcons();
+}
+
+// Sidebar kullanıcı bilgilerini güncelle - her sayfa initPage'den bunu çağırmalı
+function updateSidebarUser(fullName) {
+  const firstName = fullName.split(' ')[0];
+  const el1 = document.getElementById('sidebarUserName');
+  const el2 = document.getElementById('avatarInitial');
+  if (el1) el1.textContent = fullName;
+  if (el2) el2.textContent = firstName.charAt(0).toUpperCase();
 }
 
 // === SIDEBAR FUNCTIONS ===
@@ -137,7 +147,10 @@ function toggleSubmenu(id, btn) {
   }
 }
 
-// Auto-render on load
-document.addEventListener('DOMContentLoaded', function() {
+// Render hemen çalışsın - DOMContentLoaded beklemeden
+// Çünkü script body içinde aside'dan sonra yükleniyor
+if (document.getElementById('mainSidebar')) {
   renderSidebar();
-});
+} else {
+  document.addEventListener('DOMContentLoaded', renderSidebar);
+}
