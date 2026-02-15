@@ -690,6 +690,7 @@
         
         document.getElementById('sidebarUserName').textContent = fullName;
         document.getElementById('avatarInitial').textContent = firstName.charAt(0).toUpperCase();
+        if (typeof updateSidebarUser === 'function') updateSidebarUser(fullName);
         document.getElementById('headerGreeting').textContent = firstName;
         document.getElementById('modalName').textContent = fullName;
         document.getElementById('modalEmail').textContent = currentUser.email;
