@@ -237,7 +237,10 @@
                 // Başarılı
                 showNotification('success', 'Giriş Başarılı', 'Yönlendiriliyorsunuz...');
                 setTimeout(() => {
-                    window.location.href = 'dashboard.html';
+                    // Hafızada kaydedilmiş bir yönlendirme URL'si varsa oraya git, yoksa dashboard'a
+                    const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || 'dashboard.html';
+                    sessionStorage.removeItem('redirectAfterLogin'); // İşlem bitince hafızayı temizle
+                    window.location.href = redirectUrl;
                 }, 1000);
             }
         } catch (err) {
