@@ -23,13 +23,13 @@ let inactivityTimer = null;
 // ============================================
 // AUTHENTICATION CHECK
 // ============================================
-(async function checkAuthentication() {
-  // Login sayfasındaysa kontrol yapma
-  if (window.location.pathname.includes('login') || 
-      window.location.pathname.includes('index.html') ||
-      window.location.pathname === '/') {
-    return;
-  }
+// Supabase'in localStorage'ı okuması bazen zaman alır. Yeniden deneme döngüsü:
+    let retryCount = 0;
+    while (!session && !error && retryCount < 5) {
+      await new Promise(resolve => setTimeout(resolve, 300));
+      ({ data: { session }, error } = await supabaseClient.auth.getSession());
+      retryCount++;
+    }
 
   try {
     let { data: { session }, error } = await supabaseClient.auth.getSession();
@@ -281,14 +281,12 @@ window.addEventListener('focus', function() {
   checkAuthenticationSync();
 });
 
-async function checkAuthenticationSync() {
-  try {
-    let { data: { session }, error } = await supabaseClient.auth.getSession();
-    
-    // Sekme odaklandığında oturum hemen gelmezse kısa bir süre bekle
-    if (!session && !error) {
+// Supabase'in localStorage'ı okuması bazen zaman alır. Yeniden deneme döngüsü:
+    let retryCount = 0;
+    while (!session && !error && retryCount < 5) {
       await new Promise(resolve => setTimeout(resolve, 300));
       ({ data: { session }, error } = await supabaseClient.auth.getSession());
+      retryCount++;
     }
     
     if (!session) {
