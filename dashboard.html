@@ -790,16 +790,21 @@
     }
 
     // --- AUTH & DATA LOADING ---
-    async function initPage() {
-        // currentUser auth-guard.js tarafından zaten set ediliyor
-        // Ama yine de kontrol edelim
-        if (!window.currentUser) {
-            const { data: { session } } = await window.supabaseClient.auth.getSession();
-            if (!session) { window.location.href = 'login.html'; return; }
-            currentUser = session.user;
-        } else {
-            currentUser = window.currentUser;
+async function initPage() {
+        // Yarış durumunu (race condition) önlemek için auth.js'in kontrolü bitirmesini bekle
+        let waitCount = 0;
+        while (!window.currentUser && waitCount < 15) {
+            await new Promise(resolve => setTimeout(resolve, 200));
+            waitCount++;
         }
+
+        if (!window.currentUser) {
+            // Beklemeye rağmen auth.js işlemi bitirdiğinde hala kullanıcı yoksa, logine at
+            window.location.href = 'login.html'; 
+            return;
+        }
+        
+        currentUser = window.currentUser;
         
         const fullName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
         const firstName = fullName.split(' ')[0];
