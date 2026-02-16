@@ -4,13 +4,11 @@ const MAT_DATA={ rubber:{k:0.034}, aerogel:{k:0.019}, glasswool:{k:0.032}, pu:{k
 const VALVE_FACTORS={gate:1.2,globe:1.4,butterfly:0.6,ball:1.0,strainer:1.5,check:0.9,flange:0.4,elbow:0.3};
 
 export default function handler(req, res) {
-    // Güvenlik: Sadece POST istekleri
     if (req.method !== 'POST') {
         return res.status(200).json({ mesaj: "Chiller API Mutfak hazır!" });
     }
 
     try {
-        // UI'dan gelen kurye paketi (değerler)
         const {
             type, qty, tAmb, tProc, vWind, cop, hours, thk, matKey,
             vDN, valveType, pDN, pLen, surfaces, circles,
@@ -19,7 +17,6 @@ export default function handler(req, res) {
 
         let surfaceArea = 0, name = "", dPipe = 0, unitLabel = "Adet", multiplier = 1, totalSurfM2 = 0;
         
-        // 1. Yüzey Alanı Belirleme
         if(type === 'tank'){
             if (surfaces) surfaces.forEach(s => totalSurfM2 += (s.w * s.h) / 1000000);
             if (circles) circles.forEach(c => { const r = (c.d/2)/1000; totalSurfM2 += Math.PI * r * r; });
@@ -27,8 +24,7 @@ export default function handler(req, res) {
             if((!surfaces || surfaces.length === 0) && (!circles || circles.length === 0)) { 
                 multiplier = 1; name = "Düz Alan / Eşanjör"; unitLabel = "Set"; surfaceArea = 1; totalSurfM2 = 1; 
             } else { 
-                surfaceArea = totalSurfM2; 
-                name = "Düz Alan / Eşanjör"; unitLabel = "Set"; 
+                surfaceArea = totalSurfM2; name = "Düz Alan / Eşanjör"; unitLabel = "Set"; 
             }
             dPipe = 1.0; 
         } else {
@@ -39,10 +35,7 @@ export default function handler(req, res) {
             
             if(type === 'pipe'){
                 const len = parseFloat(pLen) || 1;
-                surfaceArea = perimeter * len; 
-                name = `Boru (DN ${dnKey})`; 
-                multiplier = len; 
-                unitLabel = "m";
+                surfaceArea = perimeter * len; name = `Boru (DN ${dnKey})`; multiplier = len; unitLabel = "m";
             } else {
                 name = `${valveTypeName} (DN ${dnKey})`;
                 let factor = VALVE_FACTORS[valveType] || 1;
@@ -50,7 +43,6 @@ export default function handler(req, res) {
             }
         }
         
-        // 2. Termodinamik Hesaplama
         const dT = Math.abs(tAmb - tProc);
         const U_bare = 25 + (2 * vWind); 
         const Q_watts_bare = U_bare * surfaceArea * dT * qty;
@@ -72,7 +64,6 @@ export default function handler(req, res) {
             }
         }
 
-        // 3. Finansal Metrikler
         const kwh_bare = (Q_watts_bare * hours / 1000) / cop;
         const kwh_ins = (Q_watts_ins * hours / 1000) / cop;
         const kwh_save = Math.max(0, kwh_bare - kwh_ins);
@@ -81,17 +72,10 @@ export default function handler(req, res) {
         let invTotal_tl = (type === 'pipe') ? invUnitTL * multiplier : invUnitTL * qty;
         let roiCalc = (money_save_tl > 0.01) ? (invTotal_tl / money_save_tl * 12) : 0;
 
-        // Hesaplanan sonuçları UI'a teslim et
         return res.status(200).json({
-            name,
-            unitLabel,
-            qty: (type==='pipe' ? multiplier : qty),
-            kwhBare: kwh_bare,
-            kwhIns: kwh_ins,
-            kwhSave: kwh_save,
-            invTL: invTotal_tl,
-            saveTL: money_save_tl,
-            roi: roiCalc
+            name, unitLabel, qty: (type==='pipe' ? multiplier : qty),
+            kwhBare: kwh_bare, kwhIns: kwh_ins, kwhSave: kwh_save,
+            invTL: invTotal_tl, saveTL: money_save_tl, roi: roiCalc
         });
     } catch (error) {
         return res.status(500).json({ hata: "Hesaplama Hatası: " + error.message });
