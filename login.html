@@ -8,7 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -112,7 +112,7 @@
 
                 <div class="flex items-center justify-between text-xs">
                     <label class="flex items-center gap-2 cursor-pointer text-slate-400 hover:text-white transition">
-                        <input type="checkbox" class="rounded border-white/10 bg-slate-800 text-indigo-600"> Beni Hatırla
+                        <input type="checkbox" id="rememberMe" class="rounded border-white/10 bg-slate-800 text-indigo-600"> Beni Hatırla
                     </label>
                     <a href="#" class="text-indigo-400 hover:text-indigo-300 transition font-semibold">Şifremi Unuttum?</a>
                 </div>
@@ -154,20 +154,25 @@
     const notifMessage = document.getElementById('notifMessage');
     const notifIcon = document.getElementById('notifIcon');
 
-    // 3. Bildirim Gösterme Fonksiyonu (Browser Alert Yerine)
+    // Sayfa yüklendiğinde hafızadaki maili kontrol et (Beni Hatırla İşlevi)
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedEmail = localStorage.getItem('rememberedEmail');
+        if (savedEmail) {
+            document.getElementById('emailInput').value = savedEmail;
+            document.getElementById('rememberMe').checked = true;
+        }
+    });
+
+    // 3. Bildirim Gösterme Fonksiyonu
     function showNotification(type, title, message) {
         notificationArea.classList.remove('hidden');
         
         if (type === 'error') {
-            // Hata Stili (Kırmızı)
             notificationContent.className = 'p-4 rounded-xl border flex items-start gap-3 bg-red-500/10 border-red-500/20 text-red-200';
             notifIcon.innerHTML = `<svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
-            
-            // Inputları salla
             document.getElementById('emailInput').classList.add('error-input');
             document.getElementById('passwordInput').classList.add('error-input');
         } else {
-            // Başarı Stili (Yeşil)
             notificationContent.className = 'p-4 rounded-xl border flex items-start gap-3 bg-green-500/10 border-green-500/20 text-green-200';
             notifIcon.innerHTML = `<svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
         }
@@ -207,13 +212,11 @@
         const email = document.getElementById('emailInput').value;
         const password = document.getElementById('passwordInput').value;
 
-        // Manuel Validasyon (Browser popup'ı çıkmasın diye)
         if (!email || !password) {
             showNotification('error', 'Eksik Bilgi', 'Lütfen e-posta ve şifrenizi giriniz.');
             return;
         }
 
-        // Yükleniyor durumu
         submitBtn.disabled = true;
         btnText.textContent = 'Giriş Yapılıyor...';
         btnSpinner.classList.remove('hidden');
@@ -223,7 +226,6 @@
             const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
             
             if (error) {
-                // Supabase Hata Kodlarını Yakala
                 console.log("Supabase Hatası:", error.message);
 
                 if (error.message.includes('Email not confirmed')) {
@@ -234,19 +236,25 @@
                     showNotification('error', 'Hata Oluştu', error.message);
                 }
             } else {
-                // Başarılı
+                // Beni Hatırla Seçimini Kaydet veya Sil
+                const rememberMeChecked = document.getElementById('rememberMe').checked;
+                if (rememberMeChecked) {
+                    localStorage.setItem('rememberedEmail', email);
+                } else {
+                    localStorage.removeItem('rememberedEmail');
+                }
+
+                // Başarılı Yönlendirme
                 showNotification('success', 'Giriş Başarılı', 'Yönlendiriliyorsunuz...');
                 setTimeout(() => {
-                    // Hafızada kaydedilmiş bir yönlendirme URL'si varsa oraya git, yoksa dashboard'a
                     const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || 'dashboard.html';
-                    sessionStorage.removeItem('redirectAfterLogin'); // İşlem bitince hafızayı temizle
+                    sessionStorage.removeItem('redirectAfterLogin');
                     window.location.href = redirectUrl;
                 }, 1000);
             }
         } catch (err) {
             showNotification('error', 'Sistem Hatası', 'Beklenmedik bir hata oluştu.');
         } finally {
-            // Yükleniyor durumunu kapat (Başarılıysa yönlendirme zaten çalışacak)
             if (!document.getElementById('notificationArea').innerHTML.includes('Giriş Başarılı')) {
                 submitBtn.disabled = false;
                 btnText.textContent = 'Giriş Yap';
@@ -256,7 +264,6 @@
         }
     });
 
-    // Yazmaya başlayınca hatayı gizle
     document.getElementById('emailInput').addEventListener('input', hideNotification);
     document.getElementById('passwordInput').addEventListener('input', hideNotification);
   </script>
