@@ -17,8 +17,8 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 // ============================================
 // INACTIVITY TIMEOUT SETTINGS
 // ============================================
-const INACTIVITY_TIMEOUT = 60 * 60 * 1000; // 1 saat (60 dakika * 60 saniye * 1000 ms)
-let inactivityInterval = null;
+const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 dakika
+let inactivityTimer = null;
 
 // ============================================
 // AUTHENTICATION CHECK
@@ -32,7 +32,13 @@ let inactivityInterval = null;
   }
 
   try {
-    const { data: { session }, error } = await supabaseClient.auth.getSession();
+    let { data: { session }, error } = await supabaseClient.auth.getSession();
+    
+    // İlk denemede session bulunamazsa kısa bir süre bekleyip tekrar dene
+    if (!session && !error) {
+      await new Promise(resolve => setTimeout(resolve, 300));
+      ({ data: { session }, error } = await supabaseClient.auth.getSession());
+    }
     
     if (error) {
       console.error('Auth check error:', error);
@@ -62,40 +68,23 @@ let inactivityInterval = null;
 })();
 
 // ============================================
-// INACTIVITY TIMER (LOCAL STORAGE SENKRONİZASYONLU)
+// INACTIVITY TIMER
 // ============================================
-function updateLastActivity() {
-  localStorage.setItem('lastActivityTime', Date.now());
-}
-
 function startInactivityTimer() {
-  console.log('🕐 İnaktivite kontrolü başlatıldı (1 Saat)');
+  console.log('🕐 İnaktivite timer başlatıldı (5 dakika)');
   
-  // Eğer daha önce kaydedilmiş bir aktivite zamanı yoksa şu anki zamanı ata
-  if (!localStorage.getItem('lastActivityTime')) {
-    updateLastActivity();
+  if (inactivityTimer) {
+    clearTimeout(inactivityTimer);
   }
   
-  if (inactivityInterval) {
-    clearInterval(inactivityInterval);
-  }
-  
-  // Saniyede bir yerine, her 30 saniyede bir kontrol et (Performans için)
-  inactivityInterval = setInterval(() => {
-    const lastActivity = parseInt(localStorage.getItem('lastActivityTime') || Date.now());
-    const timePassed = Date.now() - lastActivity;
-    
-    if (timePassed >= INACTIVITY_TIMEOUT) {
-      console.log('⏰ 1 saat hareketsizlik - Otomatik çıkış yapılıyor...');
-      clearInterval(inactivityInterval);
-      logoutDueToInactivity();
-    }
-  }, 30000); 
+  inactivityTimer = setTimeout(() => {
+    console.log('⏰ 5 dakika hareketsizlik - Otomatik çıkış yapılıyor...');
+    logoutDueToInactivity();
+  }, INACTIVITY_TIMEOUT);
 }
 
 function resetInactivityTimer() {
-  // Global olarak son aktivite zamanını güncelle (Tüm sekmeler bu güncellemeyi görecek)
-  updateLastActivity();
+  startInactivityTimer();
 }
 
 async function logoutDueToInactivity() {
@@ -108,7 +97,6 @@ async function logoutDueToInactivity() {
   }
   
   sessionStorage.removeItem('redirectAfterLogin');
-  localStorage.removeItem('lastActivityTime'); // Çıkışta temizle
   showInactivityPopup();
 }
 
@@ -116,9 +104,6 @@ async function logoutDueToInactivity() {
 // INACTIVITY POPUP
 // ============================================
 function showInactivityPopup() {
-  // Eğer zaten popup varsa bir daha ekleme
-  if(document.getElementById('inactivityPopup')) return;
-
   const popupHTML = `
     <div id="inactivityPopup" style="
       position: fixed;
@@ -176,7 +161,7 @@ function showInactivityPopup() {
           line-height: 1.6;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         ">
-          Hesabınız 1 saat boyunca hareketsiz kaldığı için güvenlik nedeniyle oturumunuz sonlandırıldı.
+          Hesabınız 5 dakika boyunca hareketsiz kaldığı için güvenlik nedeniyle oturumunuz sonlandırıldı.
         </p>
         
         <button id="inactivityPopupBtn" style="
@@ -234,15 +219,14 @@ function setupActivityListeners() {
   const activityEvents = [
     'click',
     'scroll',
-    'touchstart',
-    'keypress' // Klavye hareketini de ekledim
+    'touchstart'
   ];
   
   activityEvents.forEach(event => {
-    document.addEventListener(event, resetInactivityTimer, { passive: true });
+    document.addEventListener(event, resetInactivityTimer, true);
   });
   
-  console.log('👂 Aktivite dinleyicileri kuruldu (Sekmeler arası senkronize)');
+  console.log('👂 Aktivite dinleyicileri kuruldu (sadece click ve scroll)');
 }
 
 if (document.readyState === 'loading') {
@@ -255,8 +239,8 @@ if (document.readyState === 'loading') {
 // LOGIN REDIRECT
 // ============================================
 function redirectToLogin() {
-  if (inactivityInterval) {
-    clearInterval(inactivityInterval);
+  if (inactivityTimer) {
+    clearTimeout(inactivityTimer);
   }
   
   const currentPath = window.location.pathname;
@@ -269,8 +253,8 @@ function redirectToLogin() {
 // MANUAL LOGOUT
 // ============================================
 async function logout() {
-  if (inactivityInterval) {
-    clearInterval(inactivityInterval);
+  if (inactivityTimer) {
+    clearTimeout(inactivityTimer);
   }
   
   const { error } = await supabaseClient.auth.signOut();
@@ -280,7 +264,6 @@ async function logout() {
     alert('Çıkış yapılırken bir hata oluştu.');
   } else {
     console.log('✅ Çıkış yapıldı');
-    localStorage.removeItem('lastActivityTime'); // Manuel çıkışta temizle
     window.location.replace('/login');
   }
 }
@@ -321,4 +304,4 @@ window.logout = logout;
 window.supabaseClient = supabaseClient;
 window.currentUser = window.currentUser || null;
 
-console.log('🔐 Auth System aktif - İnaktivite süresi: 1 Saat');
+console.log('🔐 Auth System aktif - İnaktivite süresi: 5 dakika');
