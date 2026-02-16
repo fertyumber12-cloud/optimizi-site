@@ -748,11 +748,20 @@
         return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
-    async function initPage() {
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        if (!session) { window.location.href = 'login.html'; return; }
+   async function initPage() {
+        // Yarış durumunu önlemek için auth.js'in kontrolü bitirmesini bekle
+        let waitCount = 0;
+        while (!window.currentUser && waitCount < 15) {
+            await new Promise(resolve => setTimeout(resolve, 200));
+            waitCount++;
+        }
 
-        currentUser = session.user;
+        if (!window.currentUser) {
+            window.location.href = 'login.html'; 
+            return;
+        }
+
+        currentUser = window.currentUser;
         const fullName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
         document.getElementById('sidebarUserName').textContent = fullName;
         document.getElementById('avatarInitial').textContent = fullName.charAt(0).toUpperCase();
