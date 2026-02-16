@@ -26,15 +26,13 @@ function getSurfaceCoeff(std,vWind,Ts,Ta,D_out,isFlat){
 }
 
 export default function handler(req, res) {
-    if (req.method !== 'POST') {
-        return res.status(200).json({ mesaj: "Anlık Kayıp API Mutfak hazır!" });
-    }
+    if (req.method !== 'POST') return res.status(200).json({ mesaj: "Anlık Kayıp API Mutfak hazır!" });
 
     try {
         const {
             qty, type, tProc, tAmb, vWind, matKey, thk, useL2, matKey2, thk2,
             standard, pLen, eff, priceInReportCurr, hours, vDN, pDN, valveType,
-            fuelType, LHV_Val, LHV_Unit, currentSurfaces, valveTypeName
+            fuelType, LHV_Val, LHV_Unit, currentSurfaces, currentCircles, valveTypeName
         } = req.body;
 
         let multiplier=1; 
@@ -44,8 +42,16 @@ export default function handler(req, res) {
         let dPipe=0,D_ext=0,Name="",unitLabel="Adet";
 
         if(isFlat){
-            if(!currentSurfaces || currentSurfaces.length === 0) { multiplier = 1; Name = `Tank/Düz (Ölçüsüz)`; unitLabel = "Set"; } 
-            else { let totalArea = 0; currentSurfaces.forEach(s => { totalArea += (s.w * s.h) / 10000; }); multiplier = totalArea; Name = `Düz Yüzey`; unitLabel = "Set"; }
+            let totalSurfM2 = 0;
+            // mm cinsinden gelen veriyi m2'ye çevirme
+            if (currentSurfaces) currentSurfaces.forEach(s => totalSurfM2 += (s.w * s.h) / 1000000);
+            if (currentCircles) currentCircles.forEach(c => { const r = (c.d/2)/1000; totalSurfM2 += Math.PI * r * r; });
+
+            if((!currentSurfaces || currentSurfaces.length === 0) && (!currentCircles || currentCircles.length === 0)) { 
+                multiplier = 1; Name = `Tank/Düz (Ölçüsüz)`; unitLabel = "Set"; 
+            } else { 
+                multiplier = totalSurfM2; Name = `Düz Yüzey`; unitLabel = "Set"; 
+            }
             dPipe=1.0; D_ext=1.0; 
         } else {
             const dn=(type==='valve')?vDN:pDN;
