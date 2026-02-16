@@ -790,8 +790,8 @@
     }
 
     // --- AUTH & DATA LOADING ---
-async function initPage() {
-        // Yarış durumunu (race condition) önlemek için auth.js'in kontrolü bitirmesini bekle
+    async function initPage() {
+        // auth.js'in veriyi çekmesini sabırla bekle
         let waitCount = 0;
         while (!window.currentUser && waitCount < 15) {
             await new Promise(resolve => setTimeout(resolve, 200));
@@ -799,11 +799,10 @@ async function initPage() {
         }
 
         if (!window.currentUser) {
-            // Beklemeye rağmen auth.js işlemi bitirdiğinde hala kullanıcı yoksa, logine at
             window.location.href = 'login.html'; 
             return;
         }
-        
+
         currentUser = window.currentUser;
         
         const fullName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
