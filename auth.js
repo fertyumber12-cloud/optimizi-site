@@ -202,12 +202,12 @@ function showInactivityPopup() {
   document.body.insertAdjacentHTML('beforeend', popupHTML);
   
   document.getElementById('inactivityPopupBtn').addEventListener('click', function() {
-    window.location.replace('/login');
+    window.location.replace('/login.html');
   });
   
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
-      window.location.replace('/login');
+      window.location.replace('/login.html');
     }
   });
 }
@@ -246,7 +246,7 @@ function redirectToLogin() {
   const currentPath = window.location.pathname;
   sessionStorage.setItem('redirectAfterLogin', currentPath);
   
-  window.location.replace('/login');
+  window.location.replace('/login.html');
 }
 
 // ============================================
@@ -264,7 +264,7 @@ async function logout() {
     alert('Çıkış yapılırken bir hata oluştu.');
   } else {
     console.log('✅ Çıkış yapıldı');
-    window.location.replace('/login');
+    window.location.replace('/login.html');
   }
 }
 
@@ -283,7 +283,13 @@ window.addEventListener('focus', function() {
 
 async function checkAuthenticationSync() {
   try {
-    const { data: { session } } = await supabaseClient.auth.getSession();
+    let { data: { session }, error } = await supabaseClient.auth.getSession();
+    
+    // Sekme odaklandığında oturum hemen gelmezse kısa bir süre bekle
+    if (!session && !error) {
+      await new Promise(resolve => setTimeout(resolve, 300));
+      ({ data: { session }, error } = await supabaseClient.auth.getSession());
+    }
     
     if (!session) {
       console.log('❌ Oturum bulunamadı - yönlendiriliyor...');
