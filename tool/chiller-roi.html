@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" class="dark">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -7,40 +7,10 @@
 <meta name="description" content="Chiller ve soğutma hatları yalıtım karlılık analizi.">
 <link rel="icon" href="/favicon.png" type="image/png">
 
-      <style>
-      body {
-        opacity: 0;
-        visibility: hidden;
-      }
-
-  .dark {
-      --bg-color: #0f172a;
-      --glass-bg: rgba(30, 41, 59, 0.4);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      --input-bg: rgba(15, 23, 42, 0.6);
-      --input-border: rgba(255, 255, 255, 0.1);
-      --text-main: #f1f5f9;
-      --card-shadow: none;
-      --grid-color: rgba(6, 182, 212, 0.03);
-  }
-  
-  html:not(.dark) body {
-      background-image: radial-gradient(var(--grid-color) 1px, transparent 1px);
-      background-size: 24px 24px;
-  }
-
-  html.dark body {
-      background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%);
-      background-attachment: fixed;
-  }
-
-  html:not(.dark) .blob-bg { display: none; }
-      body.auth-checked {
-        opacity: 1;
-        visibility: visible;
-        transition: opacity 0.3s ease;
-      }
-    </style>
+<style>
+  body:not(.auth-checked) { opacity: 0; pointer-events: none; }
+  body.auth-checked { opacity: 1; transition: opacity 0.3s ease; }
+</style>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
@@ -69,6 +39,15 @@
   }
 </script>
 
+<script>
+    (function() {
+        const isDark = localStorage.getItem('darkMode');
+        if (isDark === 'false') {
+            document.documentElement.classList.remove('dark');
+        }
+    })();
+</script>
+
 <style>
   :root {
       --bg-color: #f8fafc;
@@ -81,6 +60,17 @@
       --grid-color: rgba(6, 182, 212, 0.05);
   }
 
+  .dark {
+      --bg-color: #0f172a;
+      --glass-bg: rgba(30, 41, 59, 0.4);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --input-bg: rgba(15, 23, 42, 0.6);
+      --input-border: rgba(255, 255, 255, 0.1);
+      --text-main: #f1f5f9;
+      --card-shadow: none;
+      --grid-color: rgba(255, 255, 255, 0.03);
+  }
+
   .bg-grid { 
       background-size: 40px 40px; 
       background-image: 
@@ -88,6 +78,13 @@
           linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px); 
       mask-image: radial-gradient(circle at center, black 70%, transparent 100%); 
       pointer-events: none; 
+  }
+
+  html:not(.dark) .blob-bg { display: none; }
+  
+  html.dark body {
+      background: radial-gradient(ellipse at top, #0f172a 0%, #082f49 40%, #020617 100%);
+      background-attachment: fixed;
   }
 
   body { 
@@ -131,7 +128,7 @@
   @media print {
     @page { margin: 0; size: A4; }
     html, body { width: 210mm; height: 297mm; margin: 0 !important; padding: 0 !important; background: white !important; color: black !important; overflow: visible !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    #app-layer, nav, .glass-card, button, input, select, .no-print, .bg-grid, .blob-bg { display: none !important; }
+    #app-layer, nav, .glass-card, button, input, select, .no-print, .bg-grid, .blob-bg, .popup-overlay { display: none !important; }
     #print-area { display: block !important; }
     .print-page { width: 210mm; height: 296mm; position: relative; page-break-after: always; overflow: hidden; background: white; }
     .print-page:last-child { page-break-after: auto; }
@@ -474,18 +471,11 @@
 <script>
     // ===================== DARK MODE =====================
     function toggleTheme() {
-        const html = document.documentElement;
-        if(html.classList.contains('dark')){
-            html.classList.remove('dark'); localStorage.setItem('theme', 'light');
-        } else {
-            html.classList.add('dark'); localStorage.setItem('theme', 'dark');
-        }
-    }
-    if(localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('darkMode', isDark);
     }
 
-    // ===================== DATA CONSTANTS (UNCHANGED) =====================
+    // ===================== DATA CONSTANTS =====================
     const PIPES={15:21.3,20:26.7,25:33.4,32:42.2,40:48.3,50:60.3,65:73.0,80:88.9,100:114.3,125:141.3,150:168.3,200:219.1,250:273.0,300:323.9,350:355.6,400:406.4,500:508.0};
     const MAT_DATA={ rubber:{k:0.034}, aerogel:{k:0.019}, glasswool:{k:0.032}, pu:{k:0.024}, bare:{k:25} };
     const VALVE_FACTORS={gate:1.2,globe:1.4,butterfly:0.6,ball:1.0,strainer:1.5,check:0.9,flange:0.4,elbow:0.3};
@@ -575,11 +565,10 @@
     function initApp(){ 
         fillDN('vDN'); fillDN('pDN'); fillValveList(); fillMatList(); setType('valve');
         getFxSafe();
-        if(localStorage.getItem('theme') === 'dark'){ document.documentElement.classList.add('dark'); }
         lucide.createIcons();
     }
 
-    // ===================== POPUP SYSTEM (NO ALERT/CONFIRM) =====================
+    // ===================== POPUP SYSTEM =====================
     function openPopup(id) {
         const popup = document.getElementById(id);
         popup.classList.remove('hidden'); popup.style.display = 'flex';
@@ -593,9 +582,9 @@
         inner.classList.add('scale-95','opacity-0'); inner.classList.remove('scale-100','opacity-100');
         setTimeout(() => { popup.classList.add('hidden'); popup.style.display = 'none'; }, 200);
     }
-    function showAlert(msg, title, iconName, iconColor) {
+    function showAlert(msg, title = 'Uyarı') {
         document.getElementById('customAlertMsg').innerText = msg;
-        document.getElementById('customAlertTitle').innerText = title || 'Uyarı';
+        document.getElementById('customAlertTitle').innerText = title;
         openPopup('customAlertPopup');
     }
     function showReportLangPopup() {
@@ -628,11 +617,9 @@
         
         if(LIST.length === 0) { showAlert("Kaydedilecek hesaplama bulunamadı."); return; }
         
-        // Supabase client kontrolü
         const activeSupabase = window.supabaseClient || window.supabase;
         if(!activeSupabase) { showAlert("Veritabanı bağlantısı bulunamadı.", "Hata"); return; }
         
-        // Kullanıcı kontrolü
         const { data: { session } } = await activeSupabase.auth.getSession();
         if(!session) {
             showAlert("Lütfen önce giriş yapın.", "Hata");
@@ -640,7 +627,6 @@
             return;
         }
         
-        // Özet verileri hesapla
         const reportCurr = document.getElementById('curr').value;
         let reportRate = FX[reportCurr];
         if(!reportRate || (reportCurr !== 'TL' && reportRate <= 1.1)) {
@@ -649,13 +635,10 @@
         
         let gInv = 0, gSave = 0, gCo2 = 0;
         LIST.forEach(item => {
-            const invDisp = item.invTL / reportRate;
-            const saveDisp = item.saveTL / reportRate;
-            gInv += invDisp;
-            gSave += saveDisp;
+            gInv += (item.invTL / reportRate);
+            gSave += (item.saveTL / reportRate);
             gCo2 += (item.kwhSave * 0.44 / 1000);
         });
-        
         const totalRoi = gSave > 0 ? (gInv / gSave * 12) : 0;
         
         try {
@@ -681,28 +664,20 @@
             };
 
             let data, error;
-            if (window.loadedCalcId) {
-                ({ data, error } = await activeSupabase.from('calculations').update(calcData).eq('id', window.loadedCalcId).select());
-            } else {
-                ({ data, error } = await activeSupabase.from('calculations').insert(calcData).select());
-            }
+            if (window.loadedCalcId) { ({ data, error } = await activeSupabase.from('calculations').update(calcData).eq('id', window.loadedCalcId).select()); } 
+            else { ({ data, error } = await activeSupabase.from('calculations').insert(calcData).select()); }
             
-            if(error) {
-                console.error('Kayıt hatası:', error);
-                showAlert("Kaydetme sırasında hata oluştu: " + error.message, "Hata");
-            } else {
+            if(error) { showAlert("Kaydetme sırasında hata oluştu: " + error.message, "Hata"); } 
+            else {
                 const isUpdate = !!window.loadedCalcId;
                 const saveName = document.getElementById('cName').value || document.getElementById('pName').value || 'Proje';
                 if (!isUpdate && data && data[0]) {
                     window.loadedCalcId = data[0].id;
                     window.history.replaceState({}, '', window.location.pathname + '?load_id=' + data[0].id);
                 }
-                showAlert(`"${saveName}" ${isUpdate ? 'güncellendi' : 'kaydedildi'}! Dashboard'dan görüntüleyebilirsiniz.`, "Başarılı 🎉");
+                showAlert(`"${saveName}" ${isUpdate ? 'güncellendi' : 'kaydedildi'}!`, "Başarılı 🎉");
             }
-        } catch(err) {
-            console.error('Beklenmeyen hata:', err);
-            showAlert("Bir hata oluştu: " + err.message, "Hata");
-        }
+        } catch(err) { showAlert("Bir hata oluştu: " + err.message, "Hata"); }
     }
 
     // ===================== DROPDOWNS =====================
@@ -737,45 +712,39 @@
         document.getElementById('qty').value = 1;
     }
 
-    // --- Rectangular surfaces (mm) ---
     function addSurface(){
         const w = parseFloat(document.getElementById('surfW').value); const h = parseFloat(document.getElementById('surfH').value);
-        if(!w || !h) return; currentSurfaces.push({w: w, h: h});
+        if(!w || !h) { showAlert("Lütfen En ve Boy değerlerini giriniz."); return; }
+        currentSurfaces.push({w: w, h: h});
         document.getElementById('surfW').value = ''; document.getElementById('surfH').value = ''; renderSurfacesAll();
     }
     function removeSurface(idx){ currentSurfaces.splice(idx,1); renderSurfacesAll(); }
     
-    // --- Circular surfaces (mm) ---
     function addCircle(){
         const d = parseFloat(document.getElementById('circD').value);
-        if(!d) return; currentCircles.push({d: d});
+        if(!d) { showAlert("Lütfen Çap değerini giriniz."); return; }
+        currentCircles.push({d: d});
         document.getElementById('circD').value = ''; renderSurfacesAll();
     }
     function removeCircle(idx){ currentCircles.splice(idx,1); renderSurfacesAll(); }
 
     function renderSurfacesAll(){
-        // Rectangles
-        const listEl = document.getElementById('surfaceList');
-        listEl.innerHTML = '';
+        const listEl = document.getElementById('surfaceList'); listEl.innerHTML = '';
         currentSurfaces.forEach((s, idx) => {
-            const m2 = (s.w * s.h) / 1000000; // mm² → m²
+            const m2 = (s.w * s.h) / 1000000;
             const div = document.createElement('div');
             div.className = "flex justify-between items-center bg-white dark:bg-slate-700 p-1.5 rounded border border-slate-200 dark:border-slate-600 text-[10px]";
             div.innerHTML = `<span class="dark:text-slate-300">${s.w}×${s.h} mm = ${m2.toFixed(4)} m²</span> <button onclick="removeSurface(${idx})" class="text-red-500 hover:text-red-700 cursor-pointer"><i data-lucide="x" class="w-3 h-3"></i></button>`;
             listEl.appendChild(div);
         });
-        // Circles
-        const circListEl = document.getElementById('circleList');
-        circListEl.innerHTML = '';
+        const circListEl = document.getElementById('circleList'); circListEl.innerHTML = '';
         currentCircles.forEach((c, idx) => {
-            const r = (c.d / 2) / 1000; // mm → m radius
-            const m2 = Math.PI * r * r;
+            const r = (c.d / 2) / 1000; const m2 = Math.PI * r * r;
             const div = document.createElement('div');
             div.className = "flex justify-between items-center bg-white dark:bg-slate-700 p-1.5 rounded border border-slate-200 dark:border-slate-600 text-[10px]";
             div.innerHTML = `<span class="dark:text-slate-300">⌀${c.d} mm = ${m2.toFixed(4)} m²</span> <button onclick="removeCircle(${idx})" class="text-red-500 hover:text-red-700 cursor-pointer"><i data-lucide="x" class="w-3 h-3"></i></button>`;
             circListEl.appendChild(div);
         });
-        // Total
         let totalM2 = 0;
         currentSurfaces.forEach(s => totalM2 += (s.w * s.h) / 1000000);
         currentCircles.forEach(c => { const r = (c.d/2)/1000; totalM2 += Math.PI * r * r; });
@@ -796,7 +765,7 @@
     }
     function fmt(n){ return n.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
-    // ===================== Kurye API Fonksiyonu =====================
+    // ===================== KURYE FONKSİYON (VERCEL API) =====================
     async function getCalculationResult(){
         const type = document.getElementById('type').value;
         const qty = parseFloat(document.getElementById('qty').value) || 1;
@@ -868,16 +837,9 @@
             return {
                 name: data.name, 
                 desc: matKey==='bare' ? I18N.tr.uninsulated : `${matName} (${thk}mm)`,
-                qty: qty, 
-                unit: data.unitLabel, 
-                kwhBare: data.kwhBare, 
-                kwhIns: data.kwhIns, 
-                kwhSave: data.kwhSave, 
-                invTL: data.invTL, 
-                saveTL: data.saveTL, 
-                roi: data.roi, 
-                img: currImg, 
-                raw: rawData
+                qty: qty, unit: data.unitLabel, kwhBare: data.kwhBare, kwhIns: data.kwhIns, 
+                kwhSave: data.kwhSave, invTL: data.invTL, saveTL: data.saveTL, 
+                roi: data.roi, img: currImg, raw: rawData
             };
         } catch(error) {
             console.error(error);
@@ -891,10 +853,8 @@
     async function calc(){
         const res = await getCalculationResult();
         if(res){
-            if(editingIndex !== null){
-                LIST[editingIndex] = res; editingIndex = null;
-                document.getElementById('btnAdd').classList.remove('hidden'); document.getElementById('btnUpdate').classList.add('hidden');
-            } else { LIST.push(res); }
+            if(editingIndex !== null){ LIST[editingIndex] = res; editingIndex = null; document.getElementById('btnAdd').classList.remove('hidden'); document.getElementById('btnUpdate').classList.add('hidden'); } 
+            else { LIST.push(res); }
             resetForm(); render();
         }
     }
@@ -909,15 +869,10 @@
         document.getElementById('hours').value = item.hours; document.getElementById('price').value = item.priceVal;
         document.getElementById('energyCurr').value = item.priceCurr; document.getElementById('inv').value = item.invUnit;
         document.getElementById('invCurr').value = item.invCurr; document.getElementById('thk').value = item.thk;
-        document.getElementById('matSelect').value = item.matKey;
-        document.getElementById('location').value = item.location || "";
+        document.getElementById('matSelect').value = item.matKey; document.getElementById('location').value = item.location || "";
         if(item.type==='valve'){ document.getElementById('valveType').value=item.valveType; document.getElementById('vDN').value=item.vDN; }
         else if(item.type==='pipe'){ document.getElementById('pDN').value=item.pDN; document.getElementById('pLen').value=item.pLen; }
-        else if(item.type==='tank'){ 
-            currentSurfaces = item.surfaces || []; 
-            currentCircles = item.circles || [];
-            renderSurfacesAll(); 
-        }
+        else if(item.type==='tank'){ currentSurfaces = item.surfaces || []; currentCircles = item.circles || []; renderSurfacesAll(); }
         if(LIST[idx].img) { currImg = LIST[idx].img; document.getElementById('prevImg').src = currImg; document.getElementById('prevImg').classList.remove('hidden'); }
         document.getElementById('btnAdd').classList.add('hidden'); document.getElementById('btnUpdate').classList.remove('hidden');
     }
@@ -994,7 +949,6 @@
             if(reportCurr === 'USD') reportRate = 34.50; else if(reportCurr === 'EUR') reportRate = 36.50; else reportRate = 1;
         }
 
-        // --- QR LOGIC (UNCHANGED) ---
         const isQr = document.getElementById('toggleQrInput').checked;
         let qrImageSrc = '';
         if(isQr){
@@ -1042,19 +996,15 @@
         
         let gInv=0, gSave=0, gCo2=0, gLossBare=0, gKwhSaveTotal=0;
         LIST.forEach(i => {
-            gInv += i.invTL / reportRate;
-            gSave += i.saveTL / reportRate;
-            gCo2 += (i.kwhSave * 0.44 / 1000);
-            gKwhSaveTotal += i.kwhSave;
+            gInv += i.invTL / reportRate; gSave += i.saveTL / reportRate;
+            gCo2 += (i.kwhSave * 0.44 / 1000); gKwhSaveTotal += i.kwhSave;
             const pRate = (i.raw.priceVal * (FX[i.raw.priceCurr]||1));
             gLossBare += (i.kwhBare * pRate) / reportRate;
         });
         const totalRoi = gSave > 0 ? (gInv/gSave*12) : 0;
 
-        const yearlyKwh = gKwhSaveTotal;
-        const monthlyKwh = yearlyKwh / 12;
-        const weeklyKwh = yearlyKwh / 52;
-        const dailyKwh = yearlyKwh / 365;
+        const yearlyKwh = gKwhSaveTotal; const monthlyKwh = yearlyKwh / 12;
+        const weeklyKwh = yearlyKwh / 52; const dailyKwh = yearlyKwh / 365;
         const pricePerKwh = parseFloat(document.getElementById('price').value) || 0;
         const pCurr = document.getElementById('energyCurr').value;
         let pRateForDisp = FX[pCurr] || 1;
@@ -1190,8 +1140,7 @@
                 const imgTag = i.img ? `<img src="${i.img}" style="width:32px;height:32px;object-fit:cover;border:1px solid #e2e8f0;">` : `-`;
                 const bgColor = subIndex % 2 === 0 ? 'background:#ffffff;' : 'background:#f0f9ff;';
                 
-                let dispName = i.name;
-                let dispDesc = i.desc;
+                let dispName = i.name; let dispDesc = i.desc;
                 if(REPORT_LANG === 'en') {
                     const raw = i.raw;
                     if(raw.type === 'valve') { dispName = `${I18N.en.valves[raw.valveType] || raw.valveType} (DN ${raw.vDN})`; } 
@@ -1309,7 +1258,6 @@
             <div style="position:absolute;bottom:20px;left:0;width:100%;text-align:center;font-size:7px;color:#cbd5e1;">Optimizi.App Engineering Tools</div>
         </div>`;
 
-        // ==================== ASSEMBLE & PRINT ====================
         printArea.innerHTML = coverPage + tablePages + summaryPage;
         setTimeout(()=>{ window.print(); }, 400);
     }
@@ -1321,33 +1269,24 @@
         window.loadedCalcId = loadId || null;
         if (!loadId) return;
 
-        console.log('Chiller ROI proje yükleniyor ID:', loadId);
         const activeSupabase = window.supabaseClient || window.supabase;
-        if (!activeSupabase) { console.error('Supabase bağlantısı bulunamadı!'); return; }
+        if (!activeSupabase) return;
 
-        const { data, error } = await activeSupabase
-            .from('calculations')
-            .select('*')
-            .eq('id', loadId)
-            .single();
+        const { data, error } = await activeSupabase.from('calculations').select('*').eq('id', loadId).single();
+        if (error || !data) return;
 
-        if (error) { console.error('Veri çekme hatası:', error); return; }
+        if(data.project_name) document.getElementById('pName').value = data.project_name;
+        if(data.client_name) document.getElementById('cName').value = data.client_name;
+        if(data.client_contact) document.getElementById('cEng').value = data.client_contact;
+        if(data.provider_engineer) document.getElementById('pEng').value = data.provider_engineer;
+        if(data.ambient_temp) document.getElementById('tAmb').value = data.ambient_temp;
+        if(data.wind_speed !== null && data.wind_speed !== undefined) document.getElementById('vWind').value = data.wind_speed;
+        if(data.energy_price) document.getElementById('price').value = data.energy_price;
+        if(data.annual_hours) document.getElementById('hours').value = data.annual_hours;
 
-        if (data) {
-            if(data.project_name) document.getElementById('pName').value = data.project_name;
-            if(data.client_name) document.getElementById('cName').value = data.client_name;
-            if(data.client_contact) document.getElementById('cEng').value = data.client_contact;
-            if(data.provider_engineer) document.getElementById('pEng').value = data.provider_engineer;
-            if(data.ambient_temp) document.getElementById('tAmb').value = data.ambient_temp;
-            if(data.wind_speed !== null && data.wind_speed !== undefined) document.getElementById('vWind').value = data.wind_speed;
-            if(data.energy_price) document.getElementById('price').value = data.energy_price;
-            if(data.annual_hours) document.getElementById('hours').value = data.annual_hours;
-
-            if (data.items && Array.isArray(data.items)) {
-                LIST = data.items;
-                if(typeof render === 'function') render();
-                console.log("Chiller ROI projesi başarıyla yüklendi:", data.project_name);
-            }
+        if (data.items && Array.isArray(data.items)) {
+            LIST = data.items;
+            if(typeof render === 'function') render();
         }
     });
 </script>
