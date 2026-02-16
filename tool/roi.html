@@ -2387,11 +2387,9 @@ async function saveCalculation() {
     
     const totalRoi = gSave > 0 ? (finalInv / gSave * 12) : 0;
     
-    // Veritabanına kaydet
+    // Veritabanına kaydet (mevcut proje varsa UPDATE, yoksa INSERT)
     try {
-        const { data, error } = await supabaseClient
-            .from('calculations')
-            .insert({
+        const calcData = {
                 user_id: session.user.id,
                 
                 // Proje bilgileri
@@ -2421,15 +2419,41 @@ async function saveCalculation() {
                 boiler_efficiency: parseFloat(document.getElementById('eff').value),
                 energy_price: parseFloat(document.getElementById('price').value),
                 annual_hours: parseInt(document.getElementById('hours').value)
-            })
-            .select();
+        };
+
+        let data, error;
+
+        if (window.loadedCalcId) {
+            // MEVCUT PROJEYİ GÜNCELLE
+            ({ data, error } = await supabaseClient
+                .from('calculations')
+                .update(calcData)
+                .eq('id', window.loadedCalcId)
+                .select());
+        } else {
+            // YENİ PROJE KAYDET
+            ({ data, error } = await supabaseClient
+                .from('calculations')
+                .insert(calcData)
+                .select());
+        }
         
         if(error) {
             console.error('Kayıt hatası:', error);
             showSavePopup("Hata", "Kaydetme sırasında hata oluştu: " + error.message);
         } else {
+            const isUpdate = !!window.loadedCalcId;
             const saveName = document.getElementById('cName').value || document.getElementById('pName').value || 'Proje';
-            showSavePopup("Başarılı! 🎉", `<strong>"${saveName}"</strong> başarıyla veritabanına kaydedildi!<br><br><span class="text-xs text-slate-500">Dashboard'dan görüntüleyebilirsiniz.</span>`);
+            
+            // Yeni kayıtsa artık loadedCalcId'yi set et ki sonraki kayıtlar update olsun
+            if (!isUpdate && data && data[0]) {
+                window.loadedCalcId = data[0].id;
+                // URL'yi güncelle (sayfa yenilenmeden)
+                const newUrl = window.location.pathname + '?load_id=' + data[0].id;
+                window.history.replaceState({}, '', newUrl);
+            }
+            
+            showSavePopup("Başarılı! 🎉", `<strong>"${saveName}"</strong> ${isUpdate ? 'güncellendi' : 'kaydedildi'}!<br><br><span class="text-xs text-slate-500">Dashboard'dan görüntüleyebilirsiniz.</span>`);
             
             // LocalStorage'a da yedek kaydet
             const saveKey = `optimizi_calc_${Date.now()}`;
@@ -2747,6 +2771,9 @@ async function saveCalculation() {
         const urlParams = new URLSearchParams(window.location.search);
         const loadId = urlParams.get('load_id');
 
+        // Global olarak yüklenen proje ID'sini sakla
+        window.loadedCalcId = loadId || null;
+
         if (!loadId) return;
 
         console.log('Proje yükleniyor ID:', loadId);
@@ -2812,10 +2839,3 @@ async function saveCalculation() {
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
