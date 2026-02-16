@@ -5,12 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Enerji Kayıp ve Kaçak Analizi</title>
  <style>
-  /* Auth kontrolü yapılana kadar sayfa gizli */
   body:not(.auth-checked) {
     opacity: 0;
     pointer-events: none;
   }
-  
   body.auth-checked {
     opacity: 1;
     transition: opacity 0.3s ease;
@@ -131,11 +129,17 @@
       pointer-events: none; 
   }
 
+  /* Popup animations */
+  .popup-overlay { transition: opacity 0.2s ease; }
+  .popup-content { transition: transform 0.2s ease, opacity 0.2s ease; }
+  .popup-show .popup-content { transform: scale(1); opacity: 1; }
+  .popup-hide .popup-content { transform: scale(0.95); opacity: 0; }
+
   /* --- PRINT STYLES --- */
   @media print {
     @page { margin: 0; size: A4; }
     html, body { width: 210mm; height: 297mm; margin: 0 !important; padding: 0 !important; background: white !important; color: black !important; overflow: visible !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    #app-layer, .bg-grid, .blob-bg, nav, .glass-card, button, input { display: none !important; }
+    #app-layer, .bg-grid, .blob-bg, nav, .glass-card, button, input, .popup-overlay { display: none !important; }
     #print-area { display: block !important; }
     .print-page { width: 210mm; height: 296mm; position: relative; page-break-after: always; overflow: hidden; background: white; }
     .print-page:last-child { page-break-after: auto; }
@@ -374,7 +378,7 @@
 
                         <div class="mt-3 text-right">
                             <label class="text-[9px] text-slate-500 mr-2 uppercase font-bold">Rapor Para Birimi:</label>
-                            <select id="curr" class="glass-input text-[10px] !w-20 inline-block !py-1 !h-7"><option value="TL" selected>₺ TL</option><option value="USD">$ USD</option><option value="EUR">€ EUR</option><option value="GBP">£ GBP</option></select>
+                            <select id="curr" class="glass-input text-[10px] !w-20 inline-block !py-1 !h-7" onchange="render()"><option value="TL" selected>₺ TL</option><option value="USD">$ USD</option><option value="EUR">€ EUR</option><option value="GBP">£ GBP</option></select>
                         </div>
                     </div>
 
@@ -390,7 +394,7 @@
                     <div class="p-4 border-b border-slate-200 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-slate-900/30">
                         <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2"><i data-lucide="list" class="w-4 h-4 text-red-500"></i> Kaçak Noktası Listesi</h3>
                         <div class="flex gap-2">
-                             <button onclick="clearAll()" class="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition cursor-pointer">Temizle</button>
+                             <button onclick="showClearPopup()" class="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition cursor-pointer">Temizle</button>
                         </div>
                     </div>
                     <div class="overflow-x-auto overflow-y-auto max-h-[500px] flex-1">
@@ -418,6 +422,74 @@
             </div>
         </div>
     </main>
+</div>
+
+<div id="reportLangPopup" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/50 backdrop-blur-sm popup-overlay">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 popup-content scale-95 opacity-0" id="reportLangPopupInner">
+        <div class="text-center mb-6">
+            <div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="languages" class="w-7 h-7 text-red-600 dark:text-red-500"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Rapor Dili Seçin</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Raporun tüm içeriği seçtiğiniz dilde oluşturulacaktır.</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <button onclick="generateReport('tr')" class="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-600 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition cursor-pointer group">
+                <span class="text-3xl">🇹🇷</span>
+                <span class="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-red-600 dark:group-hover:text-red-400">Türkçe</span>
+            </button>
+            <button onclick="generateReport('en')" class="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-600 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition cursor-pointer group">
+                <span class="text-3xl">🇬🇧</span>
+                <span class="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-red-600 dark:group-hover:text-red-400">English</span>
+            </button>
+        </div>
+        <button onclick="closePopup('reportLangPopup')" class="w-full text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition py-2 cursor-pointer">İptal</button>
+    </div>
+</div>
+
+<div id="deleteConfirmPopup" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/50 backdrop-blur-sm popup-overlay">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 popup-content scale-95 opacity-0" id="deleteConfirmInner">
+        <div class="text-center mb-6">
+            <div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="trash-2" class="w-7 h-7 text-red-600"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Silme Onayı</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2" id="deleteConfirmMsg">Bu kalemi silmek istediğinize emin misiniz?</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+            <button onclick="closePopup('deleteConfirmPopup')" class="py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer">İptal</button>
+            <button onclick="confirmDelete()" class="py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-sm transition cursor-pointer shadow-lg shadow-red-600/20">Sil</button>
+        </div>
+    </div>
+</div>
+
+<div id="clearConfirmPopup" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/50 backdrop-blur-sm popup-overlay">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 popup-content scale-95 opacity-0" id="clearConfirmInner">
+        <div class="text-center mb-6">
+            <div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="trash" class="w-7 h-7 text-red-600"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Listeyi Temizle</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">Tüm listeyi temizlemek istediğinize emin misiniz? Bu işlem geri alınamaz.</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+            <button onclick="closePopup('clearConfirmPopup')" class="py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer">İptal</button>
+            <button onclick="confirmClearAll()" class="py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-sm transition cursor-pointer shadow-lg shadow-red-600/20">Temizle</button>
+        </div>
+    </div>
+</div>
+
+<div id="customAlertPopup" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/50 backdrop-blur-sm popup-overlay">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 popup-content scale-95 opacity-0" id="customAlertInner">
+        <div class="text-center mb-6">
+            <div class="w-14 h-14 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="alert-triangle" class="w-7 h-7 text-amber-600"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100" id="customAlertTitle">Uyarı</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2" id="customAlertMsg">Mesaj</p>
+        </div>
+        <button onclick="closePopup('customAlertPopup')" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-white font-bold text-sm transition cursor-pointer shadow-lg shadow-amber-500/20">Tamam</button>
+    </div>
 </div>
 
 <div id="print-area">
@@ -563,101 +635,75 @@
     </div>
 </div>
 
-<div id="reportLangPopup" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/50 backdrop-blur-sm" style="display:none;">
-    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0" id="reportLangPopupInner">
-        <div class="text-center mb-6">
-            <div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
-                <i data-lucide="languages" class="w-7 h-7 text-red-600 dark:text-red-500"></i>
-            </div>
-            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Rapor Dili Seçin</h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Raporun tüm içeriği seçtiğiniz dilde oluşturulacaktır.</p>
-        </div>
-        <div class="grid grid-cols-2 gap-3 mb-4">
-            <button onclick="generateReport('tr')" class="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-600 hover:border-red-500 dark:hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition cursor-pointer group">
-                <span class="text-3xl">🇹🇷</span>
-                <span class="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-red-600 dark:group-hover:text-red-400">Türkçe</span>
-            </button>
-            <button onclick="generateReport('en')" class="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-600 hover:border-red-500 dark:hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition cursor-pointer group">
-                <span class="text-3xl">🇬🇧</span>
-                <span class="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-red-600 dark:group-hover:text-red-400">English</span>
-            </button>
-        </div>
-        <button onclick="closeReportLangPopup()" class="w-full text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition py-2 cursor-pointer">İptal</button>
-    </div>
-</div>
-
-<div id="deleteConfirmPopup" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/50 backdrop-blur-sm" style="display:none;">
-    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 transform transition-all" id="deleteConfirmInner">
-        <div class="text-center mb-6">
-            <div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
-                <i data-lucide="trash-2" class="w-7 h-7 text-red-600"></i>
-            </div>
-            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Silme Onayı</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2" id="deleteConfirmMsg">Bu kalemi silmek istediğinize emin misiniz?</p>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-            <button onclick="closeDeletePopup()" class="py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer">İptal</button>
-            <button onclick="confirmDelete()" class="py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-sm transition cursor-pointer shadow-lg shadow-red-600/20">Sil</button>
-        </div>
-    </div>
-</div>
-
-<div id="customAlertPopup" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/50 backdrop-blur-sm" style="display:none;">
-    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 transform transition-all" id="customAlertInner">
-        <div class="text-center mb-6">
-            <div class="w-14 h-14 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
-                <i data-lucide="alert-triangle" class="w-7 h-7 text-amber-600"></i>
-            </div>
-            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100" id="customAlertTitle">Uyarı</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2" id="customAlertMsg">Mesaj</p>
-        </div>
-        <button onclick="closeCustomAlert()" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-white font-bold text-sm transition cursor-pointer shadow-lg shadow-amber-500/20">Tamam</button>
-    </div>
-</div>
-
-<div id="customConfirmPopup" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/50 backdrop-blur-sm" style="display:none;">
-    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 transform transition-all" id="customConfirmInner">
-        <div class="text-center mb-6">
-            <div class="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
-                <i data-lucide="help-circle" class="w-7 h-7 text-blue-600"></i>
-            </div>
-            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100" id="customConfirmTitle">Onay</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2" id="customConfirmMsg">Mesaj</p>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-            <button onclick="closeCustomConfirm(false)" class="py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer">İptal</button>
-            <button onclick="closeCustomConfirm(true)" class="py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm transition cursor-pointer shadow-lg shadow-blue-600/20">Tamam</button>
-        </div>
-    </div>
-</div>
-
-<div id="qr-generator-dump"></div>
+<div id="qr-generator-dump" style="display:none;"></div>
 
 <script>
+    // ===================== POPUP SİSTEMİ =====================
+    function openPopup(id) {
+        const popup = document.getElementById(id);
+        popup.classList.remove('hidden'); popup.style.display = 'flex';
+        const inner = popup.querySelector('.popup-content');
+        if(inner) { setTimeout(() => { inner.classList.remove('scale-95','opacity-0'); inner.classList.add('scale-100','opacity-100'); }, 10); }
+        lucide.createIcons();
+    }
+    function closePopup(id) {
+        const popup = document.getElementById(id);
+        const inner = popup.querySelector('.popup-content');
+        if(inner) { inner.classList.add('scale-95','opacity-0'); inner.classList.remove('scale-100','opacity-100'); }
+        setTimeout(() => { popup.classList.add('hidden'); popup.style.display = 'none'; }, 200);
+    }
+    function showAlert(msg, title = 'Uyarı') {
+        document.getElementById('customAlertMsg').innerHTML = msg;
+        document.getElementById('customAlertTitle').innerText = title;
+        openPopup('customAlertPopup');
+    }
+    
+    // LISTE TEMIZLEME POPUP'I
+    function showClearPopup() {
+        if(LIST.length === 0) { showAlert("Liste zaten boş."); return; }
+        openPopup('clearConfirmPopup');
+    }
+    function confirmClearAll() {
+        LIST = []; editingIndex = null; resetForm();
+        let btnAdd = document.getElementById('btnAdd');
+        let btnUpdate = document.getElementById('btnUpdate');
+        if(btnAdd) btnAdd.classList.remove('hidden');
+        if(btnUpdate) btnUpdate.classList.add('hidden');
+        render(); closePopup('clearConfirmPopup');
+    }
+
+    // LISTEDEN SILME POPUP'I
+    let pendingDeleteIndex = null;
+    function del(i) {
+        pendingDeleteIndex = i;
+        openPopup('deleteConfirmPopup');
+    }
+    function confirmDelete() {
+        if (pendingDeleteIndex !== null) { LIST.splice(pendingDeleteIndex, 1); render(); }
+        closePopup('deleteConfirmPopup'); pendingDeleteIndex = null;
+    }
+
+    // RAPOR POPUP'I
+    function showReportLangPopup() {
+        if(LIST.length === 0) { showAlert('Rapor oluşturmak için en az bir kaçak noktası eklemelisiniz.'); return; }
+        openPopup('reportLangPopup');
+    }
+
     function toggleTheme() { document.documentElement.classList.toggle('dark'); }
-    function toggleL2() {
-        const box = document.getElementById('layer2Box');
-        if(document.getElementById('useL2').checked) box.classList.remove('hidden'); else box.classList.add('hidden');
-    }
-    function toggleFuelMode() {
-        const fuel = document.getElementById('fuel').value;
-        const box = document.getElementById('manualFuelBox');
-        if(fuel === 'manual') box.classList.remove('hidden'); else box.classList.add('hidden');
-    }
+    function toggleL2() { const box = document.getElementById('layer2Box'); if(document.getElementById('useL2').checked) box.classList.remove('hidden'); else box.classList.add('hidden'); }
+    function toggleFuelMode() { const fuel = document.getElementById('fuel').value; const box = document.getElementById('manualFuelBox'); if(fuel === 'manual') box.classList.remove('hidden'); else box.classList.add('hidden'); }
 
     function initApp(){ init(); }
     
     function setType(t){
         ['valve','pipe','tank'].forEach(x=>{document.getElementById('g-'+x).classList.add('hidden');});
-        document.getElementById('g-'+t).classList.remove('hidden');
-        document.getElementById('type').value=t;
+        document.getElementById('g-'+t).classList.remove('hidden'); document.getElementById('type').value=t;
         const buttons={valve:document.getElementById('btn-valve'),pipe:document.getElementById('btn-pipe'),tank:document.getElementById('btn-tank')};
         const activeClass="bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow";
         const inactiveClass="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
         Object.values(buttons).forEach(btn=>{btn.className="flex-1 py-1.5 text-xs font-medium rounded transition-all "+inactiveClass;});
         buttons[t].className="flex-1 py-1.5 text-xs font-medium rounded transition-all "+activeClass;
-        document.getElementById('qty').disabled = false;
-        document.getElementById('qty').value = 1;
+        document.getElementById('qty').disabled = false; document.getElementById('qty').value = 1;
     }
 
     const PIPES={15:21.3,20:26.7,25:33.4,32:42.2,40:48.3,50:60.3,65:73.0,80:88.9,100:114.3,125:141.3,150:168.3,200:219.1,250:273.0,300:323.9,350:355.6,400:406.4,500:508.0};
@@ -672,7 +718,7 @@
     function addSurface(){
         const w = parseFloat(document.getElementById('surfW').value);
         const h = parseFloat(document.getElementById('surfH').value);
-        if(!w || !h){ alert("Lütfen En ve Boy giriniz."); return; }
+        if(!w || !h){ showAlert("Lütfen En ve Boy değerlerini giriniz."); return; }
         currentSurfaces.push({w: w, h: h});
         document.getElementById('surfW').value = '';
         document.getElementById('surfH').value = '';
@@ -682,21 +728,17 @@
     function renderSurfaces(){
         const listEl = document.getElementById('surfaceList');
         const totalEl = document.getElementById('totalSurfArea');
-        listEl.innerHTML = '';
-        let totalAreaM2 = 0;
+        listEl.innerHTML = ''; let totalAreaM2 = 0;
         currentSurfaces.forEach((s, idx) => {
-            const m2 = (s.w * s.h) / 10000;
-            totalAreaM2 += m2;
+            const m2 = (s.w * s.h) / 10000; totalAreaM2 += m2;
             const div = document.createElement('div');
             div.className = "flex justify-between items-center bg-white dark:bg-white/10 p-1.5 rounded border border-slate-200 dark:border-white/5";
             div.innerHTML = `<span>${s.w} x ${s.h} cm</span> <button onclick="removeSurface(${idx})" class="text-red-500 hover:text-red-700"><i data-lucide="x" class="w-3 h-3"></i></button>`;
             listEl.appendChild(div);
         });
-        totalEl.innerText = totalAreaM2.toFixed(3);
-        lucide.createIcons();
+        totalEl.innerText = totalAreaM2.toFixed(3); lucide.createIcons();
     }
 
-    // KURYE FONKSİYON (Matematiği Vercel'e yollar)
     async function getCalculationResult(){
         const qty=parseFloat(document.getElementById('qty').value)||1;
         const type=document.getElementById('type').value;
@@ -759,50 +801,24 @@
             if(btnEl) btnEl.innerHTML = originalText;
             lucide.createIcons();
 
-            const inputs={
-                type,qty,pLen,location,
-                tProc,tAmb,matKey,thk,
-                useL2, matKey2, thk2,
-                vDN, pDN, valveType,
-                surfaces: savedSurfaces,
-                img:currImg,
-                energyCurr: energyCurrencyCode,
-                fuelType: fuelType,
-                fuelLhv: LHV_Val,
-                fuelUnit: LHV_Unit,
-                vWind: vWind 
-            };
+            const inputs={ type,qty,pLen,location, tProc,tAmb,matKey,thk, useL2, matKey2, thk2, vDN, pDN, valveType, surfaces: savedSurfaces, img:currImg, energyCurr: energyCurrencyCode, fuelType: fuelType, fuelLhv: LHV_Val, fuelUnit: LHV_Unit, vWind: vWind };
             
             return {
-                name: data.Name,
-                desc: `Ölçülen: ${tProc}°C`,
-                location: location,
-                qty: data.qty,
-                unit: data.unitLabel,
-                moneyLoss: data.moneyLostBare, 
-                potentialSave: data.potentialSaveMoney, 
-                fuelLost: data.fuelLostBare,
-                fuelUnit: LHV_Unit,
-                kwhBare: Math.round(data.energyLostBare_kWh).toLocaleString('tr-TR'), 
-                kwhIns: Math.round(data.energyLostIns_kWh).toLocaleString('tr-TR'),   
-                kwhSave: Math.round(data.potentialSaveKwh).toLocaleString('tr-TR'),   
-                rawKwhLoss: data.energyLostBare_kWh,
-                rawKwhIns: data.energyLostIns_kWh, 
-                co2: data.co2,
-                tSurf: typeof data.Ts === 'number' ? data.Ts.toFixed(1) : data.Ts,
-                img:currImg,
-                inputs
+                name: data.Name, desc: `Ölçülen: ${tProc}°C`, location: location, qty: data.qty, unit: data.unitLabel,
+                moneyLoss: data.moneyLostBare, potentialSave: data.potentialSaveMoney, fuelLost: data.fuelLostBare, fuelUnit: LHV_Unit,
+                kwhBare: Math.round(data.energyLostBare_kWh).toLocaleString('tr-TR'), kwhIns: Math.round(data.energyLostIns_kWh).toLocaleString('tr-TR'),   
+                kwhSave: Math.round(data.potentialSaveKwh).toLocaleString('tr-TR'), rawKwhLoss: data.energyLostBare_kWh, rawKwhIns: data.energyLostIns_kWh, 
+                co2: data.co2, tSurf: typeof data.Ts === 'number' ? data.Ts.toFixed(1) : data.Ts, img:currImg, inputs
             };
         } catch(error) {
             console.error(error);
             if(btnEl) btnEl.innerHTML = originalText;
             lucide.createIcons();
-            customAlert("Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol edin.");
+            showAlert("Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol edin.");
             return null;
         }
     }
 
-    // --- YENİ FONKSİYON: GLOBAL PARAMETRELERİ GÜNCELLE ---
     function updateGlobalFinancials(){
         const eff = (parseFloat(document.getElementById('eff').value)||85)/100;
         const priceRaw = parseFloat(document.getElementById('price').value)||0;
@@ -816,29 +832,23 @@
         const fuelType = document.getElementById('fuel').value;
         let LHV_Val = 8250; let LHV_Unit = "m3";
         if(fuelType === 'manual') { LHV_Val = parseFloat(document.getElementById('fuelLhv').value) || 0; LHV_Unit = document.getElementById('fuelUnit').value; } else { LHV_Val = FUELS[fuelType]; if(fuelType === 'gas') LHV_Unit = 'm3'; else if(fuelType === 'elec') LHV_Unit = 'kwh'; else LHV_Unit = 'kg'; }
-        
         const selectedCo2Factor = CO2_FACTORS[fuelType] || 0.3;
 
         LIST.forEach(item => {
             const energyLostBare_kWh = item.rawKwhLoss; 
             const fuelLostBare = (energyLostBare_kWh * 860) / (LHV_Val * eff);
             item.moneyLoss = fuelLostBare * priceInReportCurr;
-            
             const energyLostIns_kWh = item.rawKwhIns || 0;
             const fuelLostIns = (energyLostIns_kWh * 860) / (LHV_Val * eff);
             const moneyLostIns = fuelLostIns * priceInReportCurr;
             
             item.potentialSave = item.moneyLoss - moneyLostIns;
-            item.fuelLost = fuelLostBare;
-            item.fuelUnit = LHV_Unit;
+            item.fuelLost = fuelLostBare; item.fuelUnit = LHV_Unit;
             item.co2 = (energyLostBare_kWh / eff) * selectedCo2Factor / 1000;
             
-            item.inputs.fuelType = fuelType;
-            item.inputs.fuelLhv = LHV_Val;
-            item.inputs.fuelUnit = LHV_Unit;
-            item.inputs.energyCurr = energyCurrencyCode;
+            item.inputs.fuelType = fuelType; item.inputs.fuelLhv = LHV_Val;
+            item.inputs.fuelUnit = LHV_Unit; item.inputs.energyCurr = energyCurrencyCode;
         });
-
         render();
     }
 
@@ -853,33 +863,22 @@
     }
     
     async function finishUpdate(){
-        if(editingIndex!==null) {
-            const res = await getCalculationResult();
-            if(res) LIST[editingIndex] = res;
-        }
+        if(editingIndex!==null) { const res = await getCalculationResult(); if(res) LIST[editingIndex] = res; }
         editingIndex=null;
-        document.getElementById('btnAdd').classList.remove('hidden');
-        document.getElementById('btnUpdate').classList.add('hidden');
-        resetForm();
-        render();
+        document.getElementById('btnAdd').classList.remove('hidden'); document.getElementById('btnUpdate').classList.add('hidden');
+        resetForm(); render();
     }
     
-    let pendingDeleteIndex = null;
-
     function edit(i){
         editingIndex=i; const d=LIST[i].inputs;
         setType(d.type);
-        document.getElementById('tProc').value = d.tProc;
-        document.getElementById('matSelect').value = d.matKey;
-        document.getElementById('thk').value = d.thk;
-        document.getElementById('qty').value = d.qty;
-        document.getElementById('location').value = d.location || ""; 
+        document.getElementById('tProc').value = d.tProc; document.getElementById('matSelect').value = d.matKey;
+        document.getElementById('thk').value = d.thk; document.getElementById('qty').value = d.qty; document.getElementById('location').value = d.location || ""; 
         document.getElementById('useL2').checked = d.useL2 || false; toggleL2();
         if(d.useL2) { document.getElementById('matSelect2').value = d.matKey2; document.getElementById('thk2').value = d.thk2; }
         if(d.energyCurr) document.getElementById('energyCurr').value = d.energyCurr;
         document.getElementById('fuel').value = d.fuelType || 'gas'; toggleFuelMode();
         if(d.fuelType === 'manual') { document.getElementById('fuelLhv').value = d.fuelLhv; document.getElementById('fuelUnit').value = d.fuelUnit; }
-        
         document.getElementById('vWind').value = (d.vWind !== undefined) ? d.vWind : 0;
 
         if(d.img){ currImg=d.img; document.getElementById('prevImg').src=currImg; document.getElementById('prevImg').classList.remove('hidden'); }
@@ -889,134 +888,7 @@
         document.getElementById('btnAdd').classList.add('hidden'); document.getElementById('btnUpdate').classList.remove('hidden');
     }
 
-    function showDeletePopup(idx) {
-        pendingDeleteIndex = idx;
-        const popup = document.getElementById('deleteConfirmPopup');
-        const inner = document.getElementById('deleteConfirmInner');
-        popup.style.display = 'flex';
-        setTimeout(() => {
-            popup.classList.remove('hidden');
-            inner.style.transform = 'scale(1)';
-            inner.style.opacity = '1';
-        }, 10);
-        lucide.createIcons();
-    }
-
-    function closeDeletePopup() {
-        pendingDeleteIndex = null;
-        const popup = document.getElementById('deleteConfirmPopup');
-        const inner = document.getElementById('deleteConfirmInner');
-        inner.style.transform = 'scale(0.95)';
-        inner.style.opacity = '0';
-        setTimeout(() => {
-            popup.classList.add('hidden');
-            popup.style.display = 'none';
-        }, 200);
-    }
-
-    function confirmDelete() {
-        if (pendingDeleteIndex !== null) {
-            LIST.splice(pendingDeleteIndex, 1);
-            render();
-        }
-        closeDeletePopup();
-    }
-
-    function del(i){ showDeletePopup(i); }
     function resetForm(){ currImg=null; document.getElementById('prevImg').classList.add('hidden'); document.getElementById('location').value=''; document.getElementById('vWind').value=0; currentSurfaces = []; renderSurfaces(); } 
-    function clearAll(){
-        customConfirm("Tüm listeyi temizlemek istediğinize emin misiniz?", "Listeyi Temizle").then(res => {
-            if(res){ LIST=[]; render(); }
-        });
-    }
-    
-    // Custom Alert ve Confirm Fonksiyonları
-    function customAlert(message, title = 'Uyarı') {
-        document.getElementById('customAlertTitle').innerText = title;
-        document.getElementById('customAlertMsg').innerText = message;
-        const popup = document.getElementById('customAlertPopup');
-        const inner = document.getElementById('customAlertInner');
-        popup.style.display = 'flex';
-        setTimeout(() => {
-            popup.classList.remove('hidden');
-            inner.style.transform = 'scale(1)';
-            inner.style.opacity = '1';
-        }, 10);
-        lucide.createIcons();
-    }
-
-    function closeCustomAlert() {
-        const popup = document.getElementById('customAlertPopup');
-        const inner = document.getElementById('customAlertInner');
-        inner.style.transform = 'scale(0.95)';
-        inner.style.opacity = '0';
-        setTimeout(() => {
-            popup.classList.add('hidden');
-            popup.style.display = 'none';
-        }, 200);
-    }
-
-    let confirmCallback = null;
-    function customConfirm(message, title = 'Onay') {
-        return new Promise((resolve) => {
-            confirmCallback = resolve;
-            document.getElementById('customConfirmTitle').innerText = title;
-            document.getElementById('customConfirmMsg').innerText = message;
-            const popup = document.getElementById('customConfirmPopup');
-            const inner = document.getElementById('customConfirmInner');
-            popup.style.display = 'flex';
-            setTimeout(() => {
-                popup.classList.remove('hidden');
-                inner.style.transform = 'scale(1)';
-                inner.style.opacity = '1';
-            }, 10);
-            lucide.createIcons();
-        });
-    }
-
-    function closeCustomConfirm(result) {
-        const popup = document.getElementById('customConfirmPopup');
-        const inner = document.getElementById('customConfirmInner');
-        inner.style.transform = 'scale(0.95)';
-        inner.style.opacity = '0';
-        setTimeout(() => {
-            popup.classList.add('hidden');
-            popup.style.display = 'none';
-            if (confirmCallback) {
-                confirmCallback(result);
-                confirmCallback = null;
-            }
-        }, 200);
-    }
-    
-    
-    function exportCSV(){
-        if(LIST.length===0){customAlert("Liste boş!");return;}
-        let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
-        csvContent += "Type,Qty,PipeLen,Temp_Measured,Temp_Amb,RefMat,RefThk,Valve_DN,Pipe_DN,Valve_Type,Surfaces,Energy_Curr,Location,FuelType,FuelLHV,FuelUnit,Wind\n";
-        LIST.forEach(row => { const i = row.inputs; let surfStr = ""; if(i.surfaces && i.surfaces.length > 0){ surfStr = i.surfaces.map(s => `${s.w}x${s.h}`).join('|'); }
-            const r = [ i.type, i.qty, i.pLen, i.tProc, i.tAmb, i.matKey, i.thk, i.vDN, i.pDN, i.valveType, surfStr, i.energyCurr, `"${i.location}"`, i.fuelType, i.fuelLhv, i.fuelUnit, i.vWind ];
-            csvContent += r.join(",") + "\n"; });
-        const encodedUri = encodeURI(csvContent); const link = document.createElement("a"); link.setAttribute("href", encodedUri); link.setAttribute("download", "kayip_analizi.csv"); document.body.appendChild(link); link.click(); document.body.removeChild(link);
-    }
-
-    async function importCSV(input){
-        const file = input.files[0]; if(!file) return; const reader = new FileReader();
-        reader.onload = async function(e){ 
-            const text = e.target.result; const rows = text.split("\n");
-            for(let i=1; i<rows.length; i++){ const row = rows[i].trim(); if(row){ const cols = row.split(","); if(cols.length >= 8){ 
-                        document.getElementById('type').value = cols[0]; setType(cols[0]); 
-                        document.getElementById('qty').value = cols[1]; document.getElementById('pLen').value = cols[2]; document.getElementById('tProc').value = cols[3]; document.getElementById('tAmb').value = cols[4]; document.getElementById('matSelect').value = cols[5]; document.getElementById('thk').value = cols[6];
-                        if(cols[7]) document.getElementById('vDN').value = cols[7]; if(cols[8]) document.getElementById('pDN').value = cols[8]; if(cols[9]) document.getElementById('valveType').value = cols[9];
-                        if(cols[10] && cols[10].trim() !== ""){ const parts = cols[10].split('|'); currentSurfaces = parts.map(p => { const d = p.split('x'); return {w: parseFloat(d[0]), h: parseFloat(d[1])}; }); } else { currentSurfaces = []; } renderSurfaces();
-                        if(cols[11]) document.getElementById('energyCurr').value = cols[11]; if(cols[12]) document.getElementById('location').value = cols[12].replace(/"/g, "");
-                        if(cols[13]) { document.getElementById('fuel').value = cols[13]; toggleFuelMode(); } if(cols[14]) document.getElementById('fuelLhv').value = cols[14]; if(cols[15]) document.getElementById('fuelUnit').value = cols[15];
-                        if(cols[16]) document.getElementById('vWind').value = cols[16];
-                        const res = await getCalculationResult();
-                        if(res) LIST.push(res); 
-                        } } }
-            render(); resetForm(); customAlert(rows.length - 2 + " satır yüklendi!", "Başarılı"); }; reader.readAsText(file); input.value = ''; 
-    }
     
     async function quickUpdate(i, field, val) {
         const oldInputs = LIST[i].inputs;
@@ -1024,7 +896,6 @@
         document.getElementById('tProc').value = oldInputs.tProc; document.getElementById('tAmb').value = oldInputs.tAmb; document.getElementById('matSelect').value = oldInputs.matKey; document.getElementById('thk').value = oldInputs.thk; document.getElementById('calcStd').value = oldInputs.standard || 'iso'; document.getElementById('location').value = oldInputs.location || ""; 
         document.getElementById('vWind').value = (oldInputs.vWind !== undefined) ? oldInputs.vWind : 0;
         if(oldInputs.type==='pipe') { document.getElementById('pDN').value = oldInputs.pDN; document.getElementById('pLen').value = oldInputs.pLen; } else if(oldInputs.type==='valve'){ document.getElementById('vDN').value = oldInputs.vDN; document.getElementById('valveType').value = oldInputs.valveType; }
-        
         if(field === 'qty') document.getElementById('qty').value = val; else document.getElementById('qty').value = oldInputs.qty; 
         
         const res = await getCalculationResult();
@@ -1049,28 +920,14 @@
                 <td class="px-6 py-4">${imgTag}</td>
                 <td class="px-6 py-4 font-bold text-slate-800 dark:text-white">${i.name} ${locTag}</td>
                 <td class="px-6 py-4 text-center font-bold text-slate-600 dark:text-slate-300">${qtyInput} <span class="text-[9px] text-slate-400 block">${i.unit}</span></td>
-                
-                <td class="px-6 py-4 text-center">
-                    <div class="font-bold text-red-600">${i.kwhBare} kWh</div>
-                </td>
-                
-                <td class="px-6 py-4 text-center">
-                    <div class="font-bold text-orange-500 dark:text-orange-400">${i.kwhIns} kWh</div>
-                </td>
-                
-                <td class="px-6 py-4 text-center">
-                    <div class="font-bold text-emerald-600 dark:text-green-400">+${i.kwhSave} kWh</div>
-                </td>
-                
+                <td class="px-6 py-4 text-center"><div class="font-bold text-red-600">${i.kwhBare} kWh</div></td>
+                <td class="px-6 py-4 text-center"><div class="font-bold text-orange-500 dark:text-orange-400">${i.kwhIns} kWh</div></td>
+                <td class="px-6 py-4 text-center"><div class="font-bold text-emerald-600 dark:text-green-400">+${i.kwhSave} kWh</div></td>
                 <td class="px-6 py-4 text-right font-black text-red-600 dark:text-red-400">${currSym}${Math.round(i.moneyLoss).toLocaleString()}</td>
                 <td class="px-6 py-4 text-right">
                     <div class="flex items-center justify-end gap-1">
-                        <button onclick="edit(${x})" class="p-1.5 rounded-lg bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 transition" title="Düzenle">
-                            <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
-                        </button>
-                        <button onclick="del(${x})" class="p-1.5 rounded-lg bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 transition" title="Sil">
-                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                        </button>
+                        <button onclick="edit(${x})" class="p-1.5 rounded-lg bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 transition" title="Düzenle"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+                        <button onclick="del(${x})" class="p-1.5 rounded-lg bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 transition" title="Sil"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                     </div>
                 </td>
             </tr>`);
@@ -1083,152 +940,17 @@
         lucide.createIcons();
     }
 
-    // Rapor Dili Seçim Popup
-    function showReportLangPopup() {
-        if(LIST.length === 0) {
-            customAlert('Rapor oluşturmak için en az bir kaçak noktası eklemelisiniz.');
-            return;
-        }
-        const popup = document.getElementById('reportLangPopup');
-        const inner = document.getElementById('reportLangPopupInner');
-        popup.style.display = 'flex';
-        setTimeout(() => {
-            popup.classList.remove('hidden');
-            inner.style.transform = 'scale(1)';
-            inner.style.opacity = '1';
-        }, 10);
-        lucide.createIcons();
-    }
-
-    function closeReportLangPopup() {
-        const popup = document.getElementById('reportLangPopup');
-        const inner = document.getElementById('reportLangPopupInner');
-        inner.style.transform = 'scale(0.95)';
-        inner.style.opacity = '0';
-        setTimeout(() => {
-            popup.classList.add('hidden');
-            popup.style.display = 'none';
-        }, 200);
-    }
-
-    function generateReport(lang) {
-        closeReportLangPopup();
-        setTimeout(() => printRep(lang), 300);
-    }
+    const translations = {
+        tr: { clientLabel: 'Firma / Müşteri', providerLabel: 'Denetleyen / Hazırlayan', reportDateLabel: 'Rapor Tarihi', isoLabel: 'ISO 12241 Standartlarına Göre', mainTitle: 'TERMAL <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-600">KAYIP</span> ANALİZİ', introText: 'Tesisinizde gerçekleştirilen termal denetimler sonucunda; yalıtımsız ekipmanlardan kaynaklanan ısı kayıpları ve finansal maliyetler hesaplanmıştır. Aşağıdaki veriler mevcut durumun özetidir.', daily: 'GÜNLÜK', weekly: 'HAFTALIK', monthly: 'AYLIK', yearly: 'YILLIK', totalEnergyLabel: 'Toplam Enerji İsrafı', qrNote: 'Bu karekodu okutarak kayıp maliyetini canlı sayaç üzerinde anlık olarak takip edebilirsiniz.', reportTitle: 'TERMAL KAYIP ANALİZİ', reportSubtitle: 'KAYIP', isoStandard: 'ISO 12241 Standartlarına Göre', reportIntro: 'Tesisinizde gerçekleştirilen termal denetimler sonucunda; yalıtımsız ekipmanlardan kaynaklanan ısı kayıpları ve finansal maliyetler hesaplanmıştır. Aşağıdaki veriler mevcut durumun özetidir.', totalEnergyWaste: 'Toplam Enerji İsrafı', leakPoints: 'Tespit Edilen Kaçak Noktaları', image: 'Görsel', leakSource: 'Kaçak Kaynağı', temperature: 'Sıcaklık', quantity: 'Miktar', bareLoss: 'Çıplak<br>Kayıp (kWh)', insulatedLoss: 'Yalıtımlı<br>Kayıp (kWh)', saving: 'Kazanç<br>(kWh)', financialLoss: 'FİNANSAL KAYIP', page: 'Sayfa', managementSummary: 'Yönetici Özeti', totalFinancialLoss: 'TOPLAM FİNANSAL KAYIP', perYear: '/ Yıl', lossNote: 'Bu tutar, yalıtım yapılmadığı sürece her yıl işletme gideri olarak kaybedilmektedir.', energyWaste: 'ENERJİ İSRAFI', fuelWaste: 'YAKIT İSRAFI', unit: 'Birim', environmentalImpact: 'Çevresel Etki', carbonFootprint: 'KARBON AYAK İZİ', ton: 'Ton', carbonNote: 'Atmosfere salınan fazladan CO₂', fiveYearProjection: '5 Yıllık Kümülatif Zarar Projeksiyonu', atEndOfFiveYears: '5 YIL SONUNDA', totalLoss: 'TOPLAM ZARAR', year: 'Yıl', yearLoss: '. Yıl Zararı', cumulative: 'Kümülatif', total: 'TOPLAM', calculationNote: 'Hesaplamalar ISO 12241 mühendislik standartlarına göre, ölçülen yüzey sıcaklıkları baz alınarak yapılmıştır.', narrative: 'Bu analiz, <strong>{{temp}}°C</strong> ortam sıcaklığı, <strong>{{wind}} m/s</strong> rüzgar hızı ve <strong>%{{eff}}</strong> sistem verimliliği varsayımlarıyla hesaplanmıştır. Tesisin yıllık <strong>{{hours}} saat</strong> aktif çalıştığı öngörülmüştür.' },
+        en: { clientLabel: 'Client / Customer', providerLabel: 'Inspector / Prepared By', reportDateLabel: 'Report Date', isoLabel: 'According to ISO 12241 Standards', mainTitle: 'THERMAL <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-600">LOSS</span> ANALYSIS', introText: 'Following thermal inspections conducted at your facility, heat losses and financial costs from uninsulated equipment have been calculated. The data below summarizes the current situation.', daily: 'DAILY', weekly: 'WEEKLY', monthly: 'MONTHLY', yearly: 'YEARLY', totalEnergyLabel: 'Total Energy Waste', qrNote: 'Scan this QR code to track the loss cost in real-time on the live counter.', reportTitle: 'THERMAL LOSS ANALYSIS', reportSubtitle: 'LOSS', isoStandard: 'According to ISO 12241 Standards', reportIntro: 'Following thermal inspections conducted at your facility, heat losses and financial costs from uninsulated equipment have been calculated. The data below summarizes the current situation.', totalEnergyWaste: 'Total Energy Waste', leakPoints: 'Identified Leak Points', image: 'Image', leakSource: 'Leak Source', temperature: 'Temperature', quantity: 'Quantity', bareLoss: 'Bare<br>Loss (kWh)', insulatedLoss: 'Insulated<br>Loss (kWh)', saving: 'Savings<br>(kWh)', financialLoss: 'FINANCIAL LOSS', page: 'Page', managementSummary: 'Executive Summary', totalFinancialLoss: 'TOTAL FINANCIAL LOSS', perYear: '/ Year', lossNote: 'This amount is lost as operating expense every year as long as insulation is not installed.', energyWaste: 'ENERGY WASTE', fuelWaste: 'FUEL WASTE', unit: 'Unit', environmentalImpact: 'Environmental Impact', carbonFootprint: 'CARBON FOOTPRINT', ton: 'Tons', carbonNote: 'Additional CO₂ released into atmosphere', fiveYearProjection: '5-Year Cumulative Loss Projection', atEndOfFiveYears: 'AT END OF 5 YEARS', totalLoss: 'TOTAL LOSS', year: 'Year', yearLoss: ' Year Loss', cumulative: 'Cumulative', total: 'TOTAL', calculationNote: 'Calculations are based on ISO 12241 engineering standards and measured surface temperatures.', narrative: 'This analysis is calculated with assumptions of <strong>{{temp}}°C</strong> ambient temperature, <strong>{{wind}} m/s</strong> wind speed, and <strong>{{eff}}%</strong> system efficiency. The facility is projected to operate <strong>{{hours}} hours</strong> annually.' }
+    };
 
     let printTemplateCache = null;
-    
-    // Çeviri sistemi
-    const translations = {
-        tr: {
-            // Cover Page
-            clientLabel: 'Firma / Müşteri',
-            providerLabel: 'Denetleyen / Hazırlayan',
-            reportDateLabel: 'Rapor Tarihi',
-            isoLabel: 'ISO 12241 Standartlarına Göre',
-            mainTitle: 'TERMAL <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-600">KAYIP</span> ANALİZİ',
-            introText: 'Tesisinizde gerçekleştirilen termal denetimler sonucunda; yalıtımsız ekipmanlardan kaynaklanan ısı kayıpları ve finansal maliyetler hesaplanmıştır. Aşağıdaki veriler mevcut durumun özetidir.',
-            daily: 'GÜNLÜK',
-            weekly: 'HAFTALIK',
-            monthly: 'AYLIK',
-            yearly: 'YILLIK',
-            totalEnergyLabel: 'Toplam Enerji İsrafı',
-            qrNote: 'Bu karekodu okutarak kayıp maliyetini canlı sayaç üzerinde anlık olarak takip edebilirsiniz.',
-            // Table
-            reportTitle: 'TERMAL KAYIP ANALİZİ',
-            reportSubtitle: 'KAYIP',
-            isoStandard: 'ISO 12241 Standartlarına Göre',
-            reportIntro: 'Tesisinizde gerçekleştirilen termal denetimler sonucunda; yalıtımsız ekipmanlardan kaynaklanan ısı kayıpları ve finansal maliyetler hesaplanmıştır. Aşağıdaki veriler mevcut durumun özetidir.',
-            totalEnergyWaste: 'Toplam Enerji İsrafı',
-            leakPoints: 'Tespit Edilen Kaçak Noktaları',
-            image: 'Görsel',
-            leakSource: 'Kaçak Kaynağı',
-            temperature: 'Sıcaklık',
-            quantity: 'Miktar',
-            bareLoss: 'Çıplak<br>Kayıp (kWh)',
-            insulatedLoss: 'Yalıtımlı<br>Kayıp (kWh)',
-            saving: 'Kazanç<br>(kWh)',
-            financialLoss: 'FİNANSAL KAYIP',
-            page: 'Sayfa',
-            // Summary
-            managementSummary: 'Yönetici Özeti',
-            totalFinancialLoss: 'TOPLAM FİNANSAL KAYIP',
-            perYear: '/ Yıl',
-            lossNote: 'Bu tutar, yalıtım yapılmadığı sürece her yıl işletme gideri olarak kaybedilmektedir.',
-            energyWaste: 'ENERJİ İSRAFI',
-            fuelWaste: 'YAKIT İSRAFI',
-            unit: 'Birim',
-            environmentalImpact: 'Çevresel Etki',
-            carbonFootprint: 'KARBON AYAK İZİ',
-            ton: 'Ton',
-            carbonNote: 'Atmosfere salınan fazladan CO₂',
-            fiveYearProjection: '5 Yıllık Kümülatif Zarar Projeksiyonu',
-            atEndOfFiveYears: '5 YIL SONUNDA',
-            totalLoss: 'TOPLAM ZARAR',
-            year: 'Yıl',
-            yearLoss: '. Yıl Zararı',
-            cumulative: 'Kümülatif',
-            total: 'TOPLAM',
-            calculationNote: 'Hesaplamalar ISO 12241 mühendislik standartlarına göre, ölçülen yüzey sıcaklıkları baz alınarak yapılmıştır.',
-            narrative: 'Bu analiz, <strong>{{temp}}°C</strong> ortam sıcaklığı, <strong>{{wind}} m/s</strong> rüzgar hızı ve <strong>%{{eff}}</strong> sistem verimliliği varsayımlarıyla hesaplanmıştır. Tesisin yıllık <strong>{{hours}} saat</strong> aktif çalıştığı öngörülmüştür.'
-        },
-        en: {
-            // Cover Page
-            clientLabel: 'Client / Customer',
-            providerLabel: 'Inspector / Prepared By',
-            reportDateLabel: 'Report Date',
-            isoLabel: 'According to ISO 12241 Standards',
-            mainTitle: 'THERMAL <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-600">LOSS</span> ANALYSIS',
-            introText: 'Following thermal inspections conducted at your facility, heat losses and financial costs from uninsulated equipment have been calculated. The data below summarizes the current situation.',
-            daily: 'DAILY',
-            weekly: 'WEEKLY',
-            monthly: 'MONTHLY',
-            yearly: 'YEARLY',
-            totalEnergyLabel: 'Total Energy Waste',
-            qrNote: 'Scan this QR code to track the loss cost in real-time on the live counter.',
-            // Table
-            reportTitle: 'THERMAL LOSS ANALYSIS',
-            reportSubtitle: 'LOSS',
-            isoStandard: 'According to ISO 12241 Standards',
-            reportIntro: 'Following thermal inspections conducted at your facility, heat losses and financial costs from uninsulated equipment have been calculated. The data below summarizes the current situation.',
-            totalEnergyWaste: 'Total Energy Waste',
-            leakPoints: 'Identified Leak Points',
-            image: 'Image',
-            leakSource: 'Leak Source',
-            temperature: 'Temperature',
-            quantity: 'Quantity',
-            bareLoss: 'Bare<br>Loss (kWh)',
-            insulatedLoss: 'Insulated<br>Loss (kWh)',
-            saving: 'Savings<br>(kWh)',
-            financialLoss: 'FINANCIAL LOSS',
-            page: 'Page',
-            // Summary
-            managementSummary: 'Executive Summary',
-            totalFinancialLoss: 'TOTAL FINANCIAL LOSS',
-            perYear: '/ Year',
-            lossNote: 'This amount is lost as operating expense every year as long as insulation is not installed.',
-            energyWaste: 'ENERGY WASTE',
-            fuelWaste: 'FUEL WASTE',
-            unit: 'Unit',
-            environmentalImpact: 'Environmental Impact',
-            carbonFootprint: 'CARBON FOOTPRINT',
-            ton: 'Tons',
-            carbonNote: 'Additional CO₂ released into atmosphere',
-            fiveYearProjection: '5-Year Cumulative Loss Projection',
-            atEndOfFiveYears: 'AT END OF 5 YEARS',
-            totalLoss: 'TOTAL LOSS',
-            year: 'Year',
-            yearLoss: ' Year Loss',
-            cumulative: 'Cumulative',
-            total: 'TOTAL',
-            calculationNote: 'Calculations are based on ISO 12241 engineering standards and measured surface temperatures.',
-            narrative: 'This analysis is calculated with assumptions of <strong>{{temp}}°C</strong> ambient temperature, <strong>{{wind}} m/s</strong> wind speed, and <strong>{{eff}}%</strong> system efficiency. The facility is projected to operate <strong>{{hours}} hours</strong> annually.'
-        }
-    };
+    function generateReport(lang) { closePopup('reportLangPopup'); setTimeout(() => printRep(lang), 300); }
 
     function printRep(lang = 'tr'){
         try{
-            const t = translations[lang]; // Çeviri objesi
+            const t = translations[lang];
             const printArea = document.getElementById('print-area');
             if(!printTemplateCache){ printTemplateCache = printArea.innerHTML; }
             printArea.innerHTML = printTemplateCache;
@@ -1242,120 +964,58 @@
             LIST.forEach(i => { gLoss += i.moneyLoss; gEnergy += i.rawKwhLoss; gCo2 += i.co2; gFuelLost += i.fuelLost; lastFuelUnit = i.fuelUnit; });
 
             const qrContainer = document.getElementById('qr-generator-dump');
-            // QR containerı temizle ve görünür yap
-            qrContainer.innerHTML = '';
-            qrContainer.style.position = 'relative';
-            qrContainer.style.width = '200px';
-            qrContainer.style.height = '200px';
+            qrContainer.innerHTML = ''; qrContainer.style.position = 'relative'; qrContainer.style.width = '200px'; qrContainer.style.height = '200px';
             
-            // QR YÖNETİM İLE AYNI ŞEKİLDE
             const clientName = document.getElementById('cName').value || 'Müşteri';
             const serialNo = 'LOSS-' + Math.floor(Math.random() * 10000);
-            const totalVal = gLoss;  // Hesaplanan toplam kayıp (sayı olarak)
-            const uPrice = document.getElementById('price').value;  // String olarak bırak
-            const wHours = document.getElementById('hours').value;  // String olarak bırak
+            const totalVal = gLoss;
+            const uPrice = document.getElementById('price').value;
+            const wHours = document.getElementById('hours').value;
             const fuel = document.getElementById('fuel').value;
             
-            // Tarih formatı QR yönetim ile aynı
             const now = new Date();
-            const dateStr = now.toISOString().split('T')[0];  // YYYY-MM-DD
+            const dateStr = now.toISOString().split('T')[0];
             const hh = String(now.getHours()).padStart(2, '0');
             const min = String(now.getMinutes()).padStart(2, '0');
             const timeStr = `${hh}:${min}`;
-            const fullDateTime = `${dateStr}-${timeStr.replace(':', '-')}`; // YYYY-MM-DD-HH-MM
+            const fullDateTime = `${dateStr}-${timeStr.replace(':', '-')}`;
             
-            // Hesaplama QR yönetim ile aynı
             const secondsInWorkYear = wHours * 3600;
             const burnPerSecond = totalVal / secondsInWorkYear;
-
-            // URL oluşturma QR yönetim ile TAM AYNI
             const baseUrl = "https://optimizi.app/qrtakip.html";
             let trackUrl = `${baseUrl}?c=${encodeURIComponent(clientName)}&s=${encodeURIComponent(serialNo)}&v=${totalVal}&up=${uPrice}&wh=${wHours}&f=${fuel}&d=${fullDateTime}&bps=${burnPerSecond.toFixed(6)}`;
             
             if(fuel === 'manual'){
-                let cLabel = document.getElementById('fuelLabel').value || 'Özel Yakıt';
+                let cLabel = document.getElementById('fuelLabel') ? document.getElementById('fuelLabel').value : 'Özel Yakıt';
                 const cUnit = document.getElementById('fuelUnit').value || 'kg';
-                const cCo2 = document.getElementById('fuelCo2').value || '0.36';
+                const cCo2 = document.getElementById('fuelCo2') ? document.getElementById('fuelCo2').value : '0.36';
                 const cLhv = document.getElementById('fuelLhv').value;
                 if(cLhv) { cLabel += ` (${cLhv} kcal)`; }
                 trackUrl += `&fl=${encodeURIComponent(cLabel)}&fu=${encodeURIComponent(cUnit)}&fc=${encodeURIComponent(cCo2)}`;
             }
             
-            // DEBUG - Konsola yazdır
-            console.log('QR URL Parametreleri:', {
-                client: clientName,
-                serial: serialNo,
-                totalValue: totalVal,
-                unitPrice: uPrice,
-                workHours: wHours,
-                fuel: fuel,
-                date: fullDateTime,
-                burnPerSecond: burnPerSecond.toFixed(6),
-                url: trackUrl
-            });
-
-            new QRCode(qrContainer, { 
-                text: trackUrl, 
-                width: 200, 
-                height: 200, 
-                colorDark: "#0f172a", 
-                colorLight: "#ffffff", 
-                correctLevel: QRCode.CorrectLevel.H 
-            });
+            new QRCode(qrContainer, { text: trackUrl, width: 200, height: 200, colorDark: "#0f172a", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
             
             setTimeout(() => {
                 const canvas = qrContainer.querySelector("canvas");
                 if(canvas) {
-                    // Canvas'tan QR kodunu al
                     const qrDataUrl = canvas.toDataURL("image/png");
-                    
-                    // Yeni bir canvas oluştur (QR + Alev simgesi için)
                     const finalCanvas = document.createElement('canvas');
-                    finalCanvas.width = 200;
-                    finalCanvas.height = 200;
+                    finalCanvas.width = 200; finalCanvas.height = 200;
                     const ctx = finalCanvas.getContext('2d');
                     
-                    // QR kodunu çiz
                     const qrImg = new Image();
                     qrImg.onload = function() {
                         ctx.drawImage(qrImg, 0, 0, 200, 200);
-                        
-                        // Ortaya beyaz daire çiz
-                        ctx.fillStyle = '#ffffff';
-                        ctx.beginPath();
-                        ctx.arc(100, 100, 20, 0, 2 * Math.PI);
-                        ctx.fill();
-                        
-                        // Daire etrafına border
-                        ctx.strokeStyle = '#e2e8f0';
-                        ctx.lineWidth = 4;
-                        ctx.beginPath();
-                        ctx.arc(100, 100, 20, 0, 2 * Math.PI);
-                        ctx.stroke();
-                        
-                        // Alev simgesi SVG path'ini çiz
+                        ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(100, 100, 20, 0, 2 * Math.PI); ctx.fill();
+                        ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(100, 100, 20, 0, 2 * Math.PI); ctx.stroke();
                         const flamePath = new Path2D('M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z');
-                        
-                        // Alev simgesini ortala ve ölçeklendir
-                        ctx.save();
-                        ctx.translate(100, 100); // Merkeze taşı
-                        ctx.scale(1.2, 1.2); // Ölçeklendir
-                        ctx.translate(-12, -12); // SVG merkezini ayarla (24x24 icon için)
-                        
-                        // Alev dolgusunu çiz
-                        ctx.fillStyle = '#dc2626';
-                        ctx.fill(flamePath);
-                        
-                        // Alev konturunu çiz
-                        ctx.strokeStyle = '#dc2626';
-                        ctx.lineWidth = 1.5;
-                        ctx.stroke(flamePath);
-                        
+                        ctx.save(); ctx.translate(100, 100); ctx.scale(1.2, 1.2); ctx.translate(-12, -12); 
+                        ctx.fillStyle = '#dc2626'; ctx.fill(flamePath);
+                        ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 1.5; ctx.stroke(flamePath);
                         ctx.restore();
                         
-                        // Final görüntüyü rapor cover'a aktar
-                        const finalDataUrl = finalCanvas.toDataURL("image/png");
-                        document.getElementById('covQrCode').src = finalDataUrl;
+                        document.getElementById('covQrCode').src = finalCanvas.toDataURL("image/png");
                         document.getElementById('covQrCode').classList.remove('opacity-50');
                     };
                     qrImg.src = qrDataUrl;
@@ -1371,12 +1031,9 @@
             const summaryPage = document.getElementById('p-summary');
             
             if(tablePageTemplate) tablePageTemplate.remove();
-            
             summaryPage.classList.remove('hidden'); 
-            
             const totalPages = 1 + chunks.length + 1; 
 
-            // RAPOR TABLOSU: SÜTUNLAR REVIZE EDİLDİ
             const tableHeaderHTML = `
                 <th class="w-6">#</th>
                 <th class="w-20 text-center">${t.image}</th>
@@ -1390,14 +1047,9 @@
 
             chunks.forEach((chunk, index) => {
                 const newPage = tablePageTemplate ? tablePageTemplate.cloneNode(true) : document.createElement('div');
-                newPage.id = '';
-                newPage.classList.remove('hidden'); 
-                
+                newPage.id = ''; newPage.classList.remove('hidden'); 
                 const titleEl = newPage.querySelector('h2'); 
-                if(titleEl) {
-                    titleEl.innerText = t.leakPoints;
-                    if(index > 0) { titleEl.innerHTML += ` <span class="text-sm text-slate-400 font-normal">(${index+1})</span>`; }
-                }
+                if(titleEl) { titleEl.innerText = t.leakPoints; if(index > 0) { titleEl.innerHTML += ` <span class="text-sm text-slate-400 font-normal">(${index+1})</span>`; } }
                 
                 const dateEl = newPage.querySelector('#rDate'); if(dateEl) dateEl.innerText = d;
                 const theadTr = newPage.querySelector('thead tr'); if(theadTr) theadTr.innerHTML = tableHeaderHTML;
@@ -1417,11 +1069,9 @@
                             <td class="font-bold text-slate-800 border-b border-slate-100 text-[10px]">${i.name} ${locText}</td>
                             <td class="text-center border-b border-slate-100 font-bold text-red-600">${i.tSurf}°C</td>
                             <td class="text-center border-b border-slate-100 text-[10px]">${i.qty} ${i.unit}</td>
-                            
                             <td class="text-right font-mono text-[10px] text-red-500 border-b border-slate-100">${i.kwhBare}</td>
                             <td class="text-right font-mono text-[10px] text-orange-500 border-b border-slate-100">${i.kwhIns}</td>
                             <td class="text-right font-bold text-emerald-600 text-[10px] border-b border-slate-100">+${i.kwhSave}</td>
-                            
                             <td class="text-right font-bold text-red-600 text-[10px] border-b border-slate-100">${currSym}${Math.round(i.moneyLoss).toLocaleString()}</td>
                         </tr>`;
                     });
@@ -1429,7 +1079,6 @@
                 printArea.insertBefore(newPage, summaryPage);
             });
 
-            // COVER PAGE METINLER - DİLE GÖRE
             document.getElementById('covClientLabel').innerText = t.clientLabel;
             document.getElementById('covProvLabel').innerText = t.providerLabel;
             document.getElementById('covIsoLabel').innerText = t.isoLabel;
@@ -1446,25 +1095,14 @@
             document.getElementById('covProv').innerText = document.getElementById('pName').value || "TEDARİKÇİ";
             document.getElementById('covDate').innerText = d;
             
-            const lossYear = gLoss;
-            const lossMonth = gLoss / 12;
-            const lossWeek = gLoss / 52;
-            const lossDay = gLoss / 365;
-            
-            document.getElementById('covMoneyYear').innerText = currSym + Math.round(lossYear).toLocaleString();
-            document.getElementById('covMoneyMonth').innerText = currSym + Math.round(lossMonth).toLocaleString();
-            document.getElementById('covMoneyWeek').innerText = currSym + Math.round(lossWeek).toLocaleString();
-            document.getElementById('covMoneyDay').innerText = currSym + Math.round(lossDay).toLocaleString();
+            document.getElementById('covMoneyYear').innerText = currSym + Math.round(gLoss).toLocaleString();
+            document.getElementById('covMoneyMonth').innerText = currSym + Math.round(gLoss/12).toLocaleString();
+            document.getElementById('covMoneyWeek').innerText = currSym + Math.round(gLoss/52).toLocaleString();
+            document.getElementById('covMoneyDay').innerText = currSym + Math.round(gLoss/365).toLocaleString();
             document.getElementById('covKwhTotal').innerText = Math.round(gEnergy).toLocaleString();
 
-            const tAmb = document.getElementById('tAmb').value;
-            const vWind = document.getElementById('vWind').value;
-            const eff = document.getElementById('eff').value;
-            const narrative = t.narrative
-                .replace('{{temp}}', tAmb)
-                .replace('{{wind}}', vWind)
-                .replace('{{eff}}', eff)
-                .replace('{{hours}}', wHours);
+            const tAmb = document.getElementById('tAmb').value; const vWind = document.getElementById('vWind').value; const eff = document.getElementById('eff').value;
+            const narrative = t.narrative.replace('{{temp}}', tAmb).replace('{{wind}}', vWind).replace('{{eff}}', eff).replace('{{hours}}', wHours);
             document.getElementById('covNarrative').innerHTML = narrative;
 
             document.getElementById('sumLoss').innerText = currSym + Math.round(gLoss).toLocaleString();
@@ -1473,10 +1111,8 @@
             document.getElementById('sumEnergy').innerText = Math.round(gEnergy).toLocaleString() + ' kWh';
             document.getElementById('sumCo2').innerText = gCo2.toFixed(1);
 
-            // 5 Yıllık Projeksiyon Tablosu
             const projTable = document.getElementById('projTable');
             const totalProj = gLoss * 5;
-            
             projTable.innerHTML = `
                 <tr class="border-b border-slate-100">
                     <td class="p-2 text-left font-bold text-slate-700">Kayıp Devam Ederse</td>
@@ -1488,92 +1124,50 @@
                     <td class="p-2 text-red-700 font-black">${currSym}${Math.round(totalProj).toLocaleString()}</td>
                 </tr>
             `;
-            
-            // Kümülatif zarar kartı
             document.getElementById('sumCumulativeLoss').innerText = currSym + Math.round(totalProj).toLocaleString();
             document.getElementById('sumCumulativePercent').innerText = '500%';
 
             setTimeout(()=>{ lucide.createIcons(); window.print(); }, 250); 
-        }catch(e){ customAlert('Rapor hatası: ' + e.message, 'Hata'); console.error(e); }
+        }catch(e){ showAlert('Rapor hatası: ' + e.message, 'Hata'); console.error(e); }
     }
 
-    // KAYDET FONKSİYONU - Veritabanına kaydetme
     async function saveData() {
-        if(LIST.length === 0) {
-            customAlert('Kayıt yapılacak veri bulunmuyor. Lütfen önce kaçak noktaları ekleyin.');
-            return;
-        }
+        if(LIST.length === 0) { showAlert('Kayıt yapılacak veri bulunmuyor. Lütfen önce kaçak noktaları ekleyin.'); return; }
         
-        // Supabase client kontrolü
         const activeSupabase = window.supabaseClient || window.supabase;
-        if(!activeSupabase) { customAlert('Veritabanı bağlantısı bulunamadı.', 'Hata'); return; }
+        if(!activeSupabase) { showAlert('Veritabanı bağlantısı bulunamadı.', 'Hata'); return; }
         
-        // Kullanıcı kontrolü
         const { data: { session } } = await activeSupabase.auth.getSession();
-        if(!session) {
-            customAlert('Lütfen önce giriş yapın.', 'Hata');
-            setTimeout(() => { window.location.href = '/login'; }, 2000);
-            return;
-        }
+        if(!session) { showAlert('Lütfen önce giriş yapın.', 'Hata'); setTimeout(() => { window.location.href = '/login'; }, 2000); return; }
         
-        // Özet verileri hesapla
         const reportCurr = document.getElementById('curr').value;
-        const reportRate = FX[reportCurr] || 1;
-        
         let gLoss = 0, gEnergy = 0, gCo2 = 0;
-        LIST.forEach(i => {
-            gLoss += i.moneyLoss;
-            gEnergy += i.rawKwhLoss;
-            gCo2 += i.co2;
-        });
+        LIST.forEach(i => { gLoss += i.moneyLoss; gEnergy += i.rawKwhLoss; gCo2 += i.co2; });
         
         try {
             const calcData = {
-                    user_id: session.user.id,
-                    project_name: document.getElementById('pName').value || "İsimsiz Proje",
-                    client_name: document.getElementById('cName').value || "",
-                    client_contact: document.getElementById('cEng').value || "",
-                    provider_name: document.getElementById('pName').value || "",
-                    provider_engineer: document.getElementById('pEng').value || "",
-                    calculation_type: 'anlik-kayip',
-                    items: LIST,
-                    total_investment: 0,
-                    total_savings: 0,
-                    total_loss: gLoss,
-                    total_co2: gCo2,
-                    roi_months: 0,
-                    currency: reportCurr,
-                    ambient_temp: parseFloat(document.getElementById('tAmb').value),
-                    wind_speed: parseFloat(document.getElementById('vWind').value),
-                    fuel_type: document.getElementById('fuel').value,
-                    boiler_efficiency: parseFloat(document.getElementById('eff').value),
-                    energy_price: parseFloat(document.getElementById('price').value),
+                    user_id: session.user.id, project_name: document.getElementById('pName').value || "İsimsiz Proje",
+                    client_name: document.getElementById('cName').value || "", client_contact: document.getElementById('cEng').value || "",
+                    provider_name: document.getElementById('pName').value || "", provider_engineer: document.getElementById('pEng').value || "",
+                    calculation_type: 'anlik-kayip', items: LIST, total_investment: 0, total_savings: 0, total_loss: gLoss, total_co2: gCo2,
+                    roi_months: 0, currency: reportCurr, ambient_temp: parseFloat(document.getElementById('tAmb').value),
+                    wind_speed: parseFloat(document.getElementById('vWind').value), fuel_type: document.getElementById('fuel').value,
+                    boiler_efficiency: parseFloat(document.getElementById('eff').value), energy_price: parseFloat(document.getElementById('price').value),
                     annual_hours: parseInt(document.getElementById('hours').value)
             };
 
             let data, error;
-            if (window.loadedCalcId) {
-                ({ data, error } = await activeSupabase.from('calculations').update(calcData).eq('id', window.loadedCalcId).select());
-            } else {
-                ({ data, error } = await activeSupabase.from('calculations').insert(calcData).select());
-            }
+            if (window.loadedCalcId) { ({ data, error } = await activeSupabase.from('calculations').update(calcData).eq('id', window.loadedCalcId).select()); } 
+            else { ({ data, error } = await activeSupabase.from('calculations').insert(calcData).select()); }
             
-            if(error) {
-                console.error('Kayıt hatası:', error);
-                customAlert('Kaydetme sırasında hata oluştu: ' + error.message, 'Hata');
-            } else {
+            if(error) { showAlert('Kaydetme sırasında hata oluştu: ' + error.message, 'Hata'); } 
+            else {
                 const isUpdate = !!window.loadedCalcId;
                 const saveName = document.getElementById('cName').value || document.getElementById('pName').value || 'Proje';
-                if (!isUpdate && data && data[0]) {
-                    window.loadedCalcId = data[0].id;
-                    window.history.replaceState({}, '', window.location.pathname + '?load_id=' + data[0].id);
-                }
-                customAlert(`"${saveName}" ${isUpdate ? 'güncellendi' : 'kaydedildi'}! Dashboard'dan görüntüleyebilirsiniz.`, 'Başarılı 🎉');
+                if (!isUpdate && data && data[0]) { window.loadedCalcId = data[0].id; window.history.replaceState({}, '', window.location.pathname + '?load_id=' + data[0].id); }
+                showAlert(`"${saveName}" ${isUpdate ? 'güncellendi' : 'kaydedildi'}! Dashboard'dan görüntüleyebilirsiniz.`, 'Başarılı 🎉');
             }
-        } catch(err) {
-            console.error('Beklenmeyen hata:', err);
-            customAlert('Bir hata oluştu: ' + err.message, 'Hata');
-        }
+        } catch(err) { showAlert('Bir hata oluştu: ' + err.message, 'Hata'); }
     }
 </script>
 <script>
@@ -1583,40 +1177,28 @@
         window.loadedCalcId = loadId || null;
         if (!loadId) return;
 
-        console.log('Anlık Kayıp proje yükleniyor ID:', loadId);
         const activeSupabase = window.supabaseClient || window.supabase;
-        if (!activeSupabase) { console.error('Supabase bağlantısı bulunamadı!'); return; }
+        if (!activeSupabase) return;
 
-        const { data, error } = await activeSupabase
-            .from('calculations')
-            .select('*')
-            .eq('id', loadId)
-            .single();
+        const { data, error } = await activeSupabase.from('calculations').select('*').eq('id', loadId).single();
+        if (error || !data) return;
 
-        if (error) { console.error('Veri çekme hatası:', error); return; }
+        if(data.project_name) document.getElementById('pName').value = data.project_name;
+        if(data.client_name) document.getElementById('cName').value = data.client_name;
+        if(data.client_contact) document.getElementById('cEng').value = data.client_contact;
+        if(data.provider_engineer) document.getElementById('pEng').value = data.provider_engineer;
+        if(data.ambient_temp) document.getElementById('tAmb').value = data.ambient_temp;
+        if(data.wind_speed !== null && data.wind_speed !== undefined) document.getElementById('vWind').value = data.wind_speed;
+        if(data.boiler_efficiency) document.getElementById('eff').value = data.boiler_efficiency;
+        if(data.energy_price) document.getElementById('price').value = data.energy_price;
+        if(data.annual_hours) document.getElementById('hours').value = data.annual_hours;
+        
+        if(data.fuel_type) { document.getElementById('fuel').value = data.fuel_type; if(typeof toggleFuelMode === 'function') toggleFuelMode(); }
 
-        if (data) {
-            if(data.project_name) document.getElementById('pName').value = data.project_name;
-            if(data.client_name) document.getElementById('cName').value = data.client_name;
-            if(data.client_contact) document.getElementById('cEng').value = data.client_contact;
-            if(data.provider_engineer) document.getElementById('pEng').value = data.provider_engineer;
-            if(data.ambient_temp) document.getElementById('tAmb').value = data.ambient_temp;
-            if(data.wind_speed !== null && data.wind_speed !== undefined) document.getElementById('vWind').value = data.wind_speed;
-            if(data.boiler_efficiency) document.getElementById('eff').value = data.boiler_efficiency;
-            if(data.energy_price) document.getElementById('price').value = data.energy_price;
-            if(data.annual_hours) document.getElementById('hours').value = data.annual_hours;
-            
-            if(data.fuel_type) {
-                document.getElementById('fuel').value = data.fuel_type;
-                if(typeof toggleFuelMode === 'function') toggleFuelMode();
-            }
-
-            if (data.items && Array.isArray(data.items)) {
-                LIST = data.items;
-                if(typeof updateGlobalFinancials === 'function') updateGlobalFinancials();
-                if(typeof render === 'function') render();
-                console.log("Anlık Kayıp projesi başarıyla yüklendi:", data.project_name);
-            }
+        if (data.items && Array.isArray(data.items)) {
+            LIST = data.items;
+            if(typeof updateGlobalFinancials === 'function') updateGlobalFinancials();
+            if(typeof render === 'function') render();
         }
     });
 </script>
