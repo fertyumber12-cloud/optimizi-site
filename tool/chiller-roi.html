@@ -690,9 +690,7 @@
         const totalRoi = gSave > 0 ? (gInv / gSave * 12) : 0;
         
         try {
-            const { data, error } = await activeSupabase
-                .from('calculations')
-                .insert({
+            const calcData = {
                     user_id: session.user.id,
                     project_name: document.getElementById('pName').value || "İsimsiz Proje",
                     client_name: document.getElementById('cName').value || "",
@@ -711,15 +709,26 @@
                     wind_speed: parseFloat(document.getElementById('vWind').value),
                     energy_price: parseFloat(document.getElementById('price').value),
                     annual_hours: parseInt(document.getElementById('hours').value)
-                })
-                .select();
+            };
+
+            let data, error;
+            if (window.loadedCalcId) {
+                ({ data, error } = await activeSupabase.from('calculations').update(calcData).eq('id', window.loadedCalcId).select());
+            } else {
+                ({ data, error } = await activeSupabase.from('calculations').insert(calcData).select());
+            }
             
             if(error) {
                 console.error('Kayıt hatası:', error);
                 showAlert("Kaydetme sırasında hata oluştu: " + error.message, "Hata");
             } else {
+                const isUpdate = !!window.loadedCalcId;
                 const saveName = document.getElementById('cName').value || document.getElementById('pName').value || 'Proje';
-                showAlert(`"${saveName}" başarıyla veritabanına kaydedildi! Dashboard'dan görüntüleyebilirsiniz.`, "Başarılı 🎉");
+                if (!isUpdate && data && data[0]) {
+                    window.loadedCalcId = data[0].id;
+                    window.history.replaceState({}, '', window.location.pathname + '?load_id=' + data[0].id);
+                }
+                showAlert(`"${saveName}" ${isUpdate ? 'güncellendi' : 'kaydedildi'}! Dashboard'dan görüntüleyebilirsiniz.`, "Başarılı 🎉");
             }
         } catch(err) {
             console.error('Beklenmeyen hata:', err);
@@ -1359,6 +1368,7 @@
     window.addEventListener('DOMContentLoaded', async () => {
         const urlParams = new URLSearchParams(window.location.search);
         const loadId = urlParams.get('load_id');
+        window.loadedCalcId = loadId || null;
         if (!loadId) return;
 
         console.log('Chiller ROI proje yükleniyor ID:', loadId);
