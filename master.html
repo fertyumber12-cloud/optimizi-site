@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>INSJACK® Pro Pricing | Optimizi</title>
+<title>Optimizi.App Fiyat Teklif Aracı</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <style>
@@ -134,19 +134,37 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--bg-grad); co
 .toast { background:var(--bg-nav); border:1px solid var(--brd); padding:12px 16px; border-radius:10px; display:flex; align-items:center; gap:12px; font-size:.85rem; font-weight:600; box-shadow:0 10px 25px rgba(0,0,0,0.3); animation:slideIn 0.3s cubic-bezier(0.175,0.885,0.32,1.275) forwards; }
 @keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
 .toast.ok i { color:var(--gn); } .toast.er i { color:var(--rd); } .toast.in i { color:var(--cy); }
+
+.side-settings { position:fixed; top:0; right:-360px; width:360px; height:100vh; background:var(--bg-nav); border-left:1px solid var(--brd); backdrop-filter:blur(14px); z-index:60; transition:right .25s ease; padding:18px; overflow:auto; }
+.side-settings.show { right:0; }
+.collapsible .collapsible-body { display:none; }
+.collapsible.open .collapsible-body { display:block; }
+
+/* Minimal fallback utilities (if Tailwind CDN fails to load) */
+.flex{display:flex}.grid{display:grid}.hidden{display:none}.block{display:block}
+.items-center{align-items:center}.justify-between{justify-content:space-between}.justify-center{justify-content:center}
+.flex-col{flex-direction:column}.flex-1{flex:1}.flex-wrap{flex-wrap:wrap}.ml-auto{margin-left:auto}
+.gap-2{gap:.5rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}.gap-5{gap:1.25rem}.gap-6{gap:1.5rem}
+.mb-3{margin-bottom:.75rem}.mb-4{margin-bottom:1rem}.mb-5{margin-bottom:1.25rem}.mb-6{margin-bottom:1.5rem}.mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}.mt-6{margin-top:1.5rem}
+.p-4{padding:1rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-3{padding-left:.75rem;padding-right:.75rem}.px-4{padding-left:1rem;padding-right:1rem}.py-1\.5{padding-top:.375rem;padding-bottom:.375rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}
+.rounded-xl{border-radius:.75rem}.rounded-lg{border-radius:.5rem}.border{border-width:1px}.text-center{text-align:center}.text-left{text-align:left}
+.text-xs{font-size:.75rem}.text-sm{font-size:.875rem}.font-bold{font-weight:700}.font-semibold{font-weight:600}.font-extrabold{font-weight:800}
+.w-3{width:.75rem}.h-3{height:.75rem}.w-4{width:1rem}.h-4{height:1rem}.w-5{width:1.25rem}.h-5{height:1.25rem}.w-full{width:100%}
+.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.grid-cols-5{grid-template-columns:repeat(5,minmax(0,1fr))}
+@media (min-width:1024px){.lg\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.lg\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.lg\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.lg\:grid-cols-5{grid-template-columns:repeat(5,minmax(0,1fr))}.lg\:col-span-2{grid-column:span 2/span 2}.lg\:col-span-3{grid-column:span 3/span 3}}
 </style>
 </head>
 <body>
 
 <nav class="snav">
  <div class="logo">
-  <div class="ic"><i data-lucide="shield-check" class="text-white"></i></div>
-  <div><div class="text-sm font-extrabold tracking-tight">INSJACK</div><div class="text-[9px] text-indigo-400 font-bold uppercase tracking-widest">Optimizi Pro</div></div>
+  <div class="ic"><i data-lucide="orbit" class="text-white"></i></div>
+  <div><div class="text-sm font-extrabold tracking-tight">Optimizi.App</div><div class="text-[9px] text-indigo-400 font-bold uppercase tracking-widest">Fiyat Teklif Aracı</div></div>
  </div>
  <div class="links">
   <button class="slink on" onclick="go('pl',this)"><i data-lucide="file-spreadsheet"></i>Fiyat Listesi</button>
   <button class="slink" onclick="go('pd',this)"><i data-lucide="layout-grid"></i>Ürün Detay</button>
-  <button class="slink" onclick="go('ms',this)"><i data-lucide="pie-chart"></i>Master Özet</button>
+  <button class="slink" onclick="go('ms',this)"><i data-lucide="pie-chart"></i>Genel Özet</button>
   <button class="slink" onclick="go('pm',this)"><i data-lucide="users"></i>Personel Maliyetleri</button>
   <div class="px-4 py-3 mt-2 text-[9px] font-bold text-[var(--tx-mut)] uppercase tracking-widest">Veritabanı</div>
   <button class="slink" onclick="go('mf',this)"><i data-lucide="database"></i>Malzeme Fiyatları</button>
@@ -163,6 +181,8 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--bg-grad); co
   <div class="cd py-1.5 px-4 flex items-center gap-2" style="padding:6px 16px"><span class="text-[10px] text-[var(--tx-mut)] uppercase">Adam×Sa</span><span id="sH" class="text-amber-400 font-mono text-sm">0</span></div>
  </div>
  <div class="flex gap-3 items-center">
+  <button onclick="toggleSidebar()" class="bt bt4 px-2" title="Menü Aç/Kapat"><i data-lucide="panel-left-close" class="w-4 h-4"></i></button>
+  <button onclick="toggleSettingsDrawer()" class="bt bt4 px-2" title="Ayarlar"><i data-lucide="sliders-horizontal" class="w-4 h-4"></i></button>
   <button onclick="toggleTheme()" class="bt bt4 px-2" id="themeBtn" title="Tema Değiştir"><i data-lucide="sun" class="w-4 h-4"></i></button>
   <button onclick="saveData()" class="bt bt1"><i data-lucide="save" class="w-4 h-4"></i>Kaydet</button>
   <button onclick="optAlert('PDF Modülü entegrasyonu devam ediyor.')" class="bt bt4"><i data-lucide="file-down" class="w-4 h-4"></i>PDF İndir</button>
@@ -170,12 +190,8 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--bg-grad); co
 </div>
 
 <div id="p-pl" class="pane on">
-<div class="grid grid-cols-1 lg:grid-cols-4 gap-5" style="height:100%">
- <div class="cd overflow-y-auto" style="max-height:100%">
-  <div class="st c"><i data-lucide="settings-2" class="w-4 h-4"></i>Malzeme & Ayarlar</div>
-  <div id="plGlobal"></div>
- </div>
- <div class="lg:col-span-3 flex flex-col" style="min-height:0">
+<div class="grid grid-cols-1 gap-5" style="height:100%">
+ <div class="flex flex-col" style="min-height:0">
   <div class="flex items-center justify-between mb-4">
    <div class="tg" id="curToggle"></div>
    <div class="text-xs text-[var(--tx-mut)] font-semibold"><i data-lucide="info" class="w-3 h-3 inline relative -top-0.5"></i> Listede miktar değiştirmek için adete çift tıkla</div>
@@ -219,15 +235,21 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--bg-grad); co
   <button onclick="optConfirm('Tüm listeyi temizlemek istediğinize emin misiniz?', ()=>{IT=[];RN=1;recalcAll()})" class="bt bt2 px-3"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
  </div>
 </div>
-<div class="flex-1 overflow-auto rounded-xl border border-[var(--brd)] shadow-sm">
+<div class="collapsible open mb-4" id="pdMatSettingsWrap">
+ <button class="st c w-full justify-between" onclick="toggleCollapse('pdMatSettingsWrap')"><span class="flex items-center gap-2"><i data-lucide="settings-2" class="w-4 h-4"></i>Malzeme & Ayarlar</span><i data-lucide="chevron-down" class="w-4 h-4"></i></button>
+ <div class="collapsible-body cd"><div id="plGlobal"></div></div>
+</div>
+<div class="collapsible open flex-1" id="pdTableWrap">
+ <button class="st i w-full justify-between" onclick="toggleCollapse('pdTableWrap')"><span class="flex items-center gap-2"><i data-lucide="table" class="w-4 h-4"></i>Ürün Detay Tablosu</span><i data-lucide="chevron-down" class="w-4 h-4"></i></button>
+<div class="collapsible-body flex-1 overflow-auto rounded-xl border border-[var(--brd)] shadow-sm">
  <table class="ss" id="tPD"><thead><tr>
   <th>REF</th><th style="min-width:110px">Tip</th><th>Parça</th><th>DN</th><th>Cls</th><th style="width:55px">Adet</th><th style="width:55px" class="text-indigo-400">Zorluk</th>
   <th>Alt Kumaş</th><th>Üst Kumaş</th><th>Dolgu</th>
-  <th style="background:rgba(245,158,11,.1); color:var(--am)">İzol</th><th>F.Çap</th><th>S</th><th>T</th>
+  <th style="background:rgba(245,158,11,.1); color:var(--am)">İzol</th><th>F.Çap</th><th>Gelişim (S)</th><th>Boy (T)</th>
   <th style="background:rgba(6,182,212,.08); color:var(--cy)">Kumaş</th><th style="background:rgba(6,182,212,.08); color:var(--cy)">Dolgu</th><th style="background:rgba(6,182,212,.08); color:var(--cy)">Dikiş</th><th style="background:rgba(6,182,212,.08); color:var(--cy)">Boğma</th><th style="background:rgba(6,182,212,.08); color:var(--cy)">Cırt</th><th style="background:rgba(6,182,212,.08); color:var(--cy)">Agf</th><th style="background:rgba(6,182,212,.08); color:var(--cy)">Pul</th>
   <th style="background:rgba(99,102,241,.1)">Mlz</th><th style="background:rgba(99,102,241,.1)">İşç</th><th style="background:rgba(16,185,129,.1)">B.Mly</th><th style="background:rgba(16,185,129,.1)">B.Satış</th><th style="background:rgba(16,185,129,.15)">Toplam</th><th></th>
  </tr></thead><tbody id="pdBody"></tbody><tfoot id="pdFoot"></tfoot></table>
-</div>
+</div></div>
 </div>
 
 <div id="p-ms" class="pane">
@@ -239,16 +261,14 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--bg-grad); co
  <div class="cd kpi"><div class="v text-rose-400" id="kJ">0</div><div class="k">Ceket</div></div>
 </div>
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
- <div class="cd lg:col-span-2"><div class="flex items-center justify-between"><div class="st e"><i data-lucide="calculator" class="w-4 h-4"></i>Maliyet Kırılımı</div>
-  <div class="flex items-center gap-2"><span class="text-xs font-bold text-[var(--tx-mut)]">Satış Çarpanı:</span><input type="number" id="msMul" class="ps font-mono" style="width:70px;text-align:center" value="2.5" step=".1" onchange="P.mul=parseFloat(this.value)||2.5;recalcAll()"></div>
- </div><div class="rounded-xl overflow-hidden border border-[var(--brd)]"><table class="ss" id="tMC"></table></div></div>
+ <div class="cd"><div class="st e"><i data-lucide="calculator" class="w-4 h-4"></i>Maliyet Kırılımı</div><div class="rounded-xl overflow-hidden border border-[var(--brd)]"><table class="ss" id="tMC"></table></div></div>
+ <div class="cd"><div class="st c"><i data-lucide="package" class="w-4 h-4"></i>Malzeme Toplamları</div><div class="overflow-auto max-h-[40vh] rounded-xl border border-[var(--brd)]"><table class="ss" id="tMM"></table></div></div>
  <div class="cd"><div class="st a"><i data-lucide="briefcase" class="w-4 h-4"></i>Hizmet Bedelleri</div>
   <div class="space-y-2 mt-3" id="msServices"></div>
   <div class="mt-4 pt-4 border-t border-[var(--brd)] flex justify-between items-center"><span class="font-extrabold text-sm">Toplam Hizmet</span><span class="font-extrabold text-amber-400 font-mono text-lg" id="msSvcTotal">₺0</span></div>
  </div>
 </div>
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
- <div class="cd"><div class="st c"><i data-lucide="package" class="w-4 h-4"></i>Malzeme Toplamları</div><div class="overflow-auto max-h-[40vh] rounded-xl border border-[var(--brd)]"><table class="ss" id="tMM"></table></div></div>
+<div class="grid grid-cols-1 gap-6 mt-6">
  <div class="cd"><div class="st i"><i data-lucide="globe" class="w-4 h-4"></i>Döviz & Kâr Analizi</div><div class="rounded-xl overflow-hidden border border-[var(--brd)]"><table class="ss" id="tMS"></table></div>
   <div class="mt-4 grid grid-cols-3 gap-4">
    <div class="cd kpi" style="padding:16px"><div class="v text-[1.2rem] text-[var(--tx)]" id="msAH">0</div><div class="k">Adam×Saat</div></div>
@@ -310,7 +330,22 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--bg-grad); co
  <div class="cd"><div class="st a"><i data-lucide="circle-dot" class="w-4 h-4"></i>Agraf & Pul (Çap'a Göre)</div><div class="overflow-auto max-h-[35vh] rounded-lg border border-[var(--brd)]"><table class="ss" id="tAg"></table></div></div>
 </div>
 </div>
-</div><div class="opt-modal-bg" id="modalMat"><div class="opt-modal">
+</div>
+
+<aside class="side-settings" id="settingsDrawer">
+ <div class="st i"><i data-lucide="sliders-horizontal" class="w-4 h-4"></i>Sayfa Ayarları</div>
+ <div class="pr"><span class="l">Ürün Ön Eki</span><input id="brandPrefixInput" value="" onchange="P.brandPrefix=this.value;recalcAll()"><span class="u">metin</span></div>
+ <div class="pr"><span class="l">TCMB Kur Güncelle</span><button class="bt bt4" style="padding:6px 10px" onclick="fetchTCMBRates()">Güncelle</button><span class="u"></span></div>
+ <hr class="border-[var(--brd)] my-3">
+ <div class="text-xs font-bold text-[var(--tx-mut)] mb-2">Fiyat Listesi Sütunları</div>
+ <div id="plColSettings"></div>
+ <hr class="border-[var(--brd)] my-3">
+ <div class="text-xs font-bold text-[var(--tx-mut)] mb-2">Ürün Detay Sütunları</div>
+ <div id="pdColSettings"></div>
+ <button class="bt bt4 mt-3 w-full" onclick="resetUiLayout()"><i data-lucide="rotate-ccw" class="w-4 h-4"></i>Görünümü Sıfırla</button>
+</aside>
+
+<div class="opt-modal-bg" id="modalMat"><div class="opt-modal">
  <h3><i data-lucide="plus-circle" class="w-5 h-5 text-emerald-400"></i>Yeni Malzeme Ekle</h3>
  <label>Tür</label><select id="nmType" class="ps"><option>Kumaş</option><option>Dolgu</option><option>Yardımcı</option><option>Isıtıcı</option></select>
  <label>Alt Tip</label><input id="nmSub" class="ps" placeholder="örn: Cam Elyaf, Taş Yünü...">
@@ -385,9 +420,15 @@ const TT = {gate:'gate', globe:'globe', butterfly:'butterfly', yfilter:'butterfl
 const TP = {gate:['Gövde','Flanş'], globe:['Gövde','Flanş','Kapak'], butterfly:['Tek Parça'], yfilter:['Tek Parça'], basket:['Gövde','Flanş'], disco:['Tek Parça'], spring:['Gövde'], swing:['Tek Parça'], comp:['Tek Parça'], pipe:['Tek Parça'], flange:['Tek Parça'], manual_pad:['Yastık'], '3way':['Gövde','Flanş','Kapak'], 'ball_2':['Gövde','Flanş'], 'ball_3':['Gövde','Flanş'], 'trap':['Gövde','Flanş'], 'check_clv':['Gövde'], 'elbow':['Gövde']};
 
 // ====== STATE ======
-let P={usd:43.1, eur:50.3, hc:459.33, oh:.33, mul:2.5, pd:60, ir:.03, sr:.00948, fw:.1, iw:.1, sw:.3, fr:50, fl:50, sm:15, re:150, lbw:.01, lbx:.3, lby:.3, lbyf:.2, gFB:'1 Sİ - 0.5 mm - Gri', gFT:'1 Sİ - 0.5 mm - Gri', gFL:'TY-50mm', gST:'SS - 3', gDS:'CamElyf-4mm', gVL:'40 mm - Gri', gSP:'SS Z+A+P', gND:'SS Ç.Pul Set', gBK:'D-Toka', gLB:'30*60', gDF:1};
+let P={usd:43.1, eur:50.3, hc:459.33, oh:.33, mul:2.5, pd:60, ir:.03, sr:.00948, fw:.1, iw:.1, sw:.3, fr:50, fl:50, sm:15, re:150, lbw:.01, lbx:.3, lby:.3, lbyf:.2, gFB:'1 Sİ - 0.5 mm - Gri', gFT:'1 Sİ - 0.5 mm - Gri', gFL:'TY-50mm', gST:'SS - 3', gDS:'CamElyf-4mm', gVL:'40 mm - Gri', gSP:'SS Z+A+P', gND:'SS Ç.Pul Set', gBK:'D-Toka', gLB:'30*60', gDF:1, brandPrefix:''};
 let M=[], FD={}, BL={}, AP={}, TK={}, IT=[], RN=1, plQty={}, curShow={TL:true,USD:false,EUR:true};
 let SVC={cad:0, montaj:0, montajGun:0, montajGunMly:0, nakliye:0};
+
+let uiCfg={
+ plCols:[{k:'ref',l:'REF',w:70,v:true},{k:'dn',l:'DN',w:90,v:true},{k:'mh',l:'Mahal',w:120,v:true},{k:'ac',l:'Açıklama',w:260,v:true},{k:'qty',l:'Adet',w:80,v:true},{k:'unit',l:'Birim',w:70,v:true},{k:'btl',l:'B.TL',w:110,v:true},{k:'ttl',l:'T.TL',w:120,v:true},{k:'busd',l:'B.USD',w:110,v:true},{k:'tusd',l:'T.USD',w:120,v:true},{k:'beur',l:'B.EUR',w:110,v:true},{k:'teur',l:'T.EUR',w:120,v:true}],
+ pdCols:[...Array.from(document.querySelectorAll('#tPD thead th')).map((th,i)=>({i,l:th.textContent.trim(),w:parseInt(th.style.width)||110,v:true}))]
+};
+
 
 // ====== PERSONEL STATE (THE BRAIN) ======
 let PP={gun:22, servis:2750, yemek:220, kkd:31200, saat:9, fcRate:0.05, ekKat:0};
@@ -577,7 +618,7 @@ function rGlobal(){
   '<div class="grid grid-cols-2 gap-3">'+gs('Agraf','gSP',hlp.filter(m=>m.s==='Zımba Set'),P.gSP)+gs('Ç.Pul','gND',hlp.filter(m=>m.s==='Ç.Pul Set'),P.gND)+'</div>'+
   '<div class="grid grid-cols-2 gap-3">'+gs('Toka','gBK',hlp.filter(m=>m.s==='Toka'),P.gBK)+gs('Etiket','gLB',hlp.filter(m=>m.s==='Etiket'),P.gLB)+'</div>'+
   `<hr class="border-[var(--brd)] my-4"><div class="pr"><span class="l">Zorluk Katsayısı</span><input type="number" value="${P.gDF}" step=".1" min=".5" max="5" style="width:70px" onchange="P.gDF=parseFloat(this.value)||1;recalcAll()"><span class="u">x</span></div>
-   <div class="pr"><span class="l">Satış Çarpanı</span><input type="number" value="${P.mul}" step=".1" style="width:70px" onchange="P.mul=parseFloat(this.value)||2.5;document.getElementById('msMul').value=P.mul;recalcAll()"><span class="u">x</span></div>`;
+   `;
 }
 
 function rMas(){
@@ -587,7 +628,6 @@ function rMas(){
  document.getElementById('kC').textContent=ftl(tc); document.getElementById('kS').textContent=ftl(tS);
  document.getElementById('kP').textContent=ftl(pr); document.getElementById('kP').style.color=pr>=0?'var(--gn)':'var(--rd)';
  document.getElementById('kM').textContent='%'+fm(mg,1); document.getElementById('kJ').textContent=tJ;
- document.getElementById('msMul').value=P.mul;
  
  document.getElementById('msServices').innerHTML=
   `<div class="pr"><span class="l">CAD/CAM Hizmet</span><input type="number" value="${SVC.cad}" step="100" onchange="SVC.cad=parseFloat(this.value)||0;rMas()"><span class="u">₺</span></div>`+
@@ -598,7 +638,7 @@ function rMas(){
  document.getElementById('msSvcTotal').textContent=ftl(svcTotal);
  
  const mr=(l,d,v)=>`<tr><td class="lb text-left">${l}</td><td style="text-align:center;color:var(--tx-mut);font-size:.68rem">${d}</td><td class="c font-mono text-[var(--tx)]">${v}</td></tr>`;
- document.getElementById('tMC').innerHTML=`<tr><td class="hd" colspan="3">DOĞRUDAN</td></tr>${mr('Malzeme','',ftl(tM))}${mr('İşçilik',fm(P.hc)+' ₺/sa',ftl(tL))}<tr><td class="hd2 font-bold" colspan="2">DİREKT</td><td class="c font-bold font-mono text-cyan-400">${ftl(dir)}</td></tr><tr><td class="hd" colspan="3">DOLAYLI</td></tr>${mr('Overhead',fm(P.oh*100,0)+'%',ftl(ind))}<tr><td class="hd2 font-bold" colspan="2">HAM MALİYET</td><td class="c font-bold font-mono text-amber-400">${ftl(raw)}</td></tr>${mr('Damga V.',fm(P.sr*100,3)+'%',ftl(stmp))}${mr('Finansal',P.pd+'g',ftl(fin))}${mr('Hizmet Bedeli','',ftl(svcTotal))}<tr><td class="hd2 font-bold" colspan="2">TOPLAM MALİYET</td><td class="c font-bold font-mono text-emerald-400" style="font-size:1rem">${ftl(tc)}</td></tr><tr><td colspan="3" style="height:4px"></td></tr><tr><td class="hd" colspan="3">SATIŞ</td></tr>${mr('Çarpan',P.mul+'x',ftl(tS))}${mr('Kâr','',ftl(pr))}${mr('Marj','','%'+fm(mg,1))}`;
+ document.getElementById('tMC').innerHTML=`<tr><td class="hd" colspan="3">DOĞRUDAN</td></tr>${mr('Malzeme','',ftl(tM))}${mr('İşçilik',fm(P.hc)+' ₺/sa',ftl(tL))}<tr><td class="hd2 font-bold" colspan="2">DİREKT</td><td class="c font-bold font-mono text-cyan-400">${ftl(dir)}</td></tr><tr><td class="hd" colspan="3">DOLAYLI</td></tr>${mr('Overhead',fm(P.oh*100,0)+'%',ftl(ind))}<tr><td class="hd2 font-bold" colspan="2">HAM MALİYET</td><td class="c font-bold font-mono text-amber-400">${ftl(raw)}</td></tr>${mr('Damga V.',fm(P.sr*100,3)+'%',ftl(stmp))}${mr('Finansal',P.pd+'g',ftl(fin))}${mr('Hizmet Bedeli','',ftl(svcTotal))}<tr><td class="hd2 font-bold" colspan="2">TOPLAM MALİYET</td><td class="c font-bold font-mono text-emerald-400" style="font-size:1rem">${ftl(tc)}</td></tr><tr><td colspan="3" style="height:4px"></td></tr><tr><td class="hd" colspan="3">SATIŞ</td></tr><tr><td class='lb text-left'>Satış Çarpanı</td><td style='text-align:center'><input type='number' value='${P.mul}' step='.1' style='width:70px' onchange='P.mul=parseFloat(this.value)||2.5;recalcAll()'></td><td class='c font-mono text-[var(--tx)]'>${ftl(tS)}</td></tr>${mr('Kâr','',ftl(pr))}${mr('Marj','','%'+fm(mg,1))}`;
  
  let tots={fab:0,fil:0,sew:0,drw:0,vlc:0,ag:0,pl:0};
  IT.forEach(it=>it.parts.forEach(pt=>{const pc=pt.calc||{};tots.fab+=(pc.fab||0)*it.qt;tots.fil+=(pc.fil||0)*it.qt;tots.sew+=(pc.sew||0)*it.qt;tots.drw+=(pc.drw||0)*it.qt;tots.vlc+=(pc.vlc||0)*it.qt;tots.ag+=(pc.ag||0)*it.qt;tots.pl+=(pc.pl||0)*it.qt}));
@@ -634,27 +674,69 @@ function rMat(){const b=document.getElementById('mBody');b.innerHTML='';M.forEac
 
 // ====== FİYAT LİSTESİ ======
 function rPL(){
+ if(!uiCfg || !Array.isArray(uiCfg.plCols)) normalizeUiCfg();
  rGlobal();
  const ct=document.getElementById('curToggle'); ct.innerHTML=['TL','USD','EUR'].map(c=>`<button class="${curShow[c]?'on':''}" onclick="curShow['${c}']=!curShow['${c}'];rPL()">${c}</button>`).join('');
- const hd=document.getElementById('plHead'); let hh='<tr><th>REF</th><th>DN</th><th style="min-width:80px">Mahal</th><th style="min-width:200px">Açıklama</th><th>Adet</th><th>Birim</th>';
- if(curShow.TL)hh+='<th style="background:rgba(99,102,241,.1)">B.TL</th><th style="background:rgba(99,102,241,.13)">T.TL</th>';
- if(curShow.USD)hh+='<th style="background:rgba(16,185,129,.1)">B.USD</th><th style="background:rgba(16,185,129,.15)">T.USD</th>';
- if(curShow.EUR)hh+='<th style="background:rgba(6,182,212,.1)">B.EUR</th><th style="background:rgba(6,182,212,.15)">T.EUR</th>';
+ const hd=document.getElementById('plHead');
+ const col=Object.fromEntries(uiCfg.plCols.map(c=>[c.k,c]));
+ let hh='<tr>';
+ [['ref','REF'],['dn','DN'],['mh','Mahal'],['ac','Açıklama'],['qty','Adet'],['unit','Birim']].forEach(([k,l])=>{if(col[k]?.v)hh+=`<th style="min-width:${col[k].w}px">${l}</th>`});
+ if(curShow.TL&&col.btl?.v)hh+=`<th style="min-width:${col.btl.w}px;background:rgba(99,102,241,.1)">B.TL</th>`;
+ if(curShow.TL&&col.ttl?.v)hh+=`<th style="min-width:${col.ttl.w}px;background:rgba(99,102,241,.13)">T.TL</th>`;
+ if(curShow.USD&&col.busd?.v)hh+=`<th style="min-width:${col.busd.w}px;background:rgba(16,185,129,.1)">B.USD</th>`;
+ if(curShow.USD&&col.tusd?.v)hh+=`<th style="min-width:${col.tusd.w}px;background:rgba(16,185,129,.15)">T.USD</th>`;
+ if(curShow.EUR&&col.beur?.v)hh+=`<th style="min-width:${col.beur.w}px;background:rgba(6,182,212,.1)">B.EUR</th>`;
+ if(curShow.EUR&&col.teur?.v)hh+=`<th style="min-width:${col.teur.w}px;background:rgba(6,182,212,.15)">T.EUR</th>`;
  hh+='</tr>'; hd.innerHTML=hh;
  const b=document.getElementById('plBody'); b.innerHTML=''; let totTL=0;
  IT.forEach(it=>{const ic=it.calc, q=plQty[it.ref]||1, aq=it.qt*q, uTL=ic.us||0, tTL=uTL*aq; totTL+=tTL;
   const tr=document.createElement('tr');
-  let h=`<td class="lb font-bold text-indigo-400 text-center">${it.ref}</td><td class="text-center font-bold">DN${it.dn}</td><td><input value="${it.mh}" onchange="IT.find(x=>x.ref===${it.ref}).mh=this.value" placeholder="—"></td><td class="lb text-left">INSJACK® ${TN[it.ty]} DN${it.dn} Cl${it.cl}</td><td class="o text-center font-bold" ondblclick="openQtyModal(${it.ref})">${aq}</td><td class="text-center text-[var(--tx-mut)]">AD</td>`;
-  if(curShow.TL)h+=`<td class="c font-mono">${fm(uTL)}</td><td class="c font-mono font-bold text-indigo-400">${fm(tTL)}</td>`;
-  if(curShow.USD)h+=`<td class="c font-mono">${fm(uTL/P.usd)}</td><td class="c font-mono font-bold text-[var(--gn)]">${fm(tTL/P.usd)}</td>`;
-  if(curShow.EUR)h+=`<td class="c font-mono">${fm(uTL/P.eur)}</td><td class="c font-mono font-bold text-cyan-400">${fm(tTL/P.eur)}</td>`;
+  const col=Object.fromEntries(uiCfg.plCols.map(c=>[c.k,c]));
+  let h='';
+  if(col.ref?.v)h+=`<td class="lb font-bold text-indigo-400 text-center">${it.ref}</td>`;
+  if(col.dn?.v)h+=`<td class="text-center font-bold">DN${it.dn}</td>`;
+  if(col.mh?.v)h+=`<td><input value="${it.mh}" onchange="IT.find(x=>x.ref===${it.ref}).mh=this.value" placeholder="—"></td>`;
+  if(col.ac?.v)h+=`<td class="lb text-left">${(P.brandPrefix||'').trim()} ${TN[it.ty]} DN${it.dn} Cl${it.cl}</td>`;
+  if(col.qty?.v)h+=`<td class="o text-center font-bold" ondblclick="openQtyModal(${it.ref})">${aq}</td>`;
+  if(col.unit?.v)h+=`<td class="text-center text-[var(--tx-mut)]">AD</td>`;
+  if(curShow.TL&&col.btl?.v)h+=`<td class="c font-mono">${fm(uTL)}</td>`;
+  if(curShow.TL&&col.ttl?.v)h+=`<td class="c font-mono font-bold text-indigo-400">${fm(tTL)}</td>`;
+  if(curShow.USD&&col.busd?.v)h+=`<td class="c font-mono">${fm(uTL/P.usd)}</td>`;
+  if(curShow.USD&&col.tusd?.v)h+=`<td class="c font-mono font-bold text-[var(--gn)]">${fm(tTL/P.usd)}</td>`;
+  if(curShow.EUR&&col.beur?.v)h+=`<td class="c font-mono">${fm(uTL/P.eur)}</td>`;
+  if(curShow.EUR&&col.teur?.v)h+=`<td class="c font-mono font-bold text-cyan-400">${fm(tTL/P.eur)}</td>`;
   tr.innerHTML=h; b.appendChild(tr)
  });
- const ft=document.getElementById('plFoot'); let fh='<td colspan="6" class="lb text-right font-extrabold">TOPLAM</td>';
+ const ft=document.getElementById('plFoot');
+ const fixedCols=['ref','dn','mh','ac','qty','unit'].filter(k=>col[k]?.v).length;
+ let fh=`<td colspan="${Math.max(1,fixedCols)}" class="lb text-right font-extrabold">TOPLAM</td>`;
  if(curShow.TL)fh+=`<td class="c"></td><td class="c font-mono font-black text-[1rem] text-indigo-400">${ftl(totTL)}</td>`;
  if(curShow.USD)fh+=`<td class="c"></td><td class="c font-mono font-black text-[1rem] text-[var(--gn)]">${fus(totTL/P.usd)}</td>`;
  if(curShow.EUR)fh+=`<td class="c"></td><td class="c font-mono font-black text-[1rem] text-cyan-400">${feu(totTL/P.eur)}</td>`;
  ft.innerHTML=fh;
+}
+
+
+function toggleCollapse(id){document.getElementById(id).classList.toggle('open');lucide.createIcons()}
+function toggleSidebar(){const n=document.querySelector('.snav');const c=getComputedStyle(n).display!=='none';n.style.display=c?'none':'flex'}
+function toggleSettingsDrawer(){document.getElementById('settingsDrawer').classList.toggle('show')}
+function renderColSettings(){
+ document.getElementById('brandPrefixInput').value=P.brandPrefix||'';
+ document.getElementById('plColSettings').innerHTML=uiCfg.plCols.map((c,i)=>`<div class='pr'><span class='l'><input type='checkbox' ${c.v?'checked':''} onchange='uiCfg.plCols[${i}].v=this.checked;rPL();renderColSettings()'> ${c.l}</span><input type='number' value='${c.w}' onchange='uiCfg.plCols[${i}].w=parseInt(this.value)||100;rPL()'><span class='u'>px</span></div>`).join('');
+ document.getElementById('pdColSettings').innerHTML=uiCfg.pdCols.map((c,i)=>`<div class='pr'><span class='l'>${c.l}</span><input type='number' value='${c.w}' onchange='uiCfg.pdCols[${i}].w=parseInt(this.value)||100;applyPdCols()'><span class='u'>px</span></div>`).join('');
+}
+function applyPdCols(){document.querySelectorAll('#tPD tr').forEach(tr=>{[...tr.children].forEach((c,i)=>{const cfg=uiCfg.pdCols[i];if(!cfg)return;c.style.minWidth=cfg.w+'px';});});}
+async function fetchTCMBRates(){
+ try{const r=await fetch('https://open.er-api.com/v6/latest/TRY');const d=await r.json();if(!d.rates)throw new Error('Kur verisi yok');P.usd=1/d.rates.USD;P.eur=1/d.rates.EUR;rPar();recalcAll();toast('Kur TCMB referansına göre güncellendi');}
+ catch(e){toast('Kur güncellenemedi','er')}
+}
+function openMatModal(){document.getElementById('modalMat').classList.add('show')}
+function submitMat(){
+ const t=document.getElementById('nmType').value,s=document.getElementById('nmSub').value,n=document.getElementById('nmName').value,u=document.getElementById('nmUnit').value,p=parseFloat(document.getElementById('nmPrice').value)||0,c=document.getElementById('nmCur').value,k=parseFloat(document.getElementById('nmThick').value);
+ if(!n){toast('Malzeme adı girin','er');return}
+ M.push({t,s,n,u,p,c,k:isNaN(k)?null:k});
+ document.getElementById('modalMat').classList.remove('show');
+ rMat();rGlobal();recalcAll();toast('Malzeme eklendi');
 }
 
 // ====== INTERACTIONS & MODALS ======
@@ -674,7 +756,26 @@ function toast(m,t='ok'){const bx=document.getElementById('toastBox'), d=documen
 function openQtyModal(ref){qtyRef=ref;const it=IT.find(i=>i.ref===ref);if(!it)return;document.getElementById('qmCur').textContent=it.qt;document.getElementById('qmVal').value=plQty[ref]||1;document.getElementById('qtyModal').classList.add('show')}
 function submitQty(){if(qtyRef)plQty[qtyRef]=parseInt(document.getElementById('qmVal').value)||1;document.getElementById('qtyModal').classList.remove('show');rPL()}
 
-function saveData(){localStorage.setItem('insjack_pro_v2_1',JSON.stringify({P,M,IT,FD,BL,AP,TK,SVC,plQty,curShow,PERS,PP,RN}));toast('Sistem kaydedildi')}
+
+function normalizeUiCfg(){
+ const defPl=[{k:'ref',l:'REF',w:70,v:true},{k:'dn',l:'DN',w:90,v:true},{k:'mh',l:'Mahal',w:120,v:true},{k:'ac',l:'Açıklama',w:260,v:true},{k:'qty',l:'Adet',w:80,v:true},{k:'unit',l:'Birim',w:70,v:true},{k:'btl',l:'B.TL',w:110,v:true},{k:'ttl',l:'T.TL',w:120,v:true},{k:'busd',l:'B.USD',w:110,v:true},{k:'tusd',l:'T.USD',w:120,v:true},{k:'beur',l:'B.EUR',w:110,v:true},{k:'teur',l:'T.EUR',w:120,v:true}];
+ const currentPd=[...Array.from(document.querySelectorAll('#tPD thead th')).map((th,i)=>({i,l:th.textContent.trim(),w:parseInt(th.style.width)||110}))];
+ const mapPl=Object.fromEntries((uiCfg.plCols||[]).map(c=>[c.k,c]));
+ uiCfg.plCols=defPl.map(d=>({k:d.k,l:d.l,w:Math.max(60,parseInt((mapPl[d.k]||{}).w)||d.w),v:(mapPl[d.k]||{}).v!==false}));
+ const mapPd=Object.fromEntries((uiCfg.pdCols||[]).map(c=>[c.i,c]));
+ uiCfg.pdCols=currentPd.map(d=>({i:d.i,l:d.l,w:Math.max(70,parseInt((mapPd[d.i]||{}).w)||d.w),v:true}));
+}
+
+function resetUiLayout(){
+ uiCfg={plCols:[],pdCols:[]};
+ normalizeUiCfg();
+ applyPdCols();
+ rPL();
+ renderColSettings();
+ toast('Görünüm ayarları sıfırlandı','in');
+}
+
+function saveData(){localStorage.setItem('insjack_pro_v2_1',JSON.stringify({P,M,IT,FD,BL,AP,TK,SVC,plQty,curShow,PERS,PP,RN,uiCfg}));toast('Sistem kaydedildi')}
 
 // ====== INIT ======
 window.onload=()=>{
@@ -684,8 +785,9 @@ window.onload=()=>{
  FD={};for(const[dn,cls] of Object.entries(D.fd)){FD[parseInt(dn)]={};for(const[c,v] of Object.entries(cls))FD[parseInt(dn)][parseInt(c)]=v}
  BL={};for(const[ty,tbl] of Object.entries(D.bl)){BL[ty]={};for(const[dn,cls] of Object.entries(tbl)){BL[ty][parseInt(dn)]={};for(const[c,v] of Object.entries(cls))BL[ty][parseInt(dn)][parseInt(c)]=v}}
  AP=D.ap;
- try{const sv=JSON.parse(localStorage.getItem('insjack_pro_v2_1'));if(sv&&sv.IT){Object.assign(P,sv.P||{});M=sv.M||M;IT=sv.IT||[];FD=sv.FD||FD;BL=sv.BL||BL;AP=sv.AP||AP;TK=sv.TK||TK;SVC=sv.SVC||SVC;plQty=sv.plQty||{};curShow=sv.curShow||curShow;if(sv.PERS)PERS=sv.PERS;if(sv.PP)PP=sv.PP;RN=sv.RN||(Math.max(...IT.map(i=>i.ref),0)+1)}}catch(e){}
+ try{const sv=JSON.parse(localStorage.getItem('insjack_pro_v2_1'));if(sv&&sv.IT){Object.assign(P,sv.P||{});M=sv.M||M;IT=sv.IT||[];FD=sv.FD||FD;BL=sv.BL||BL;AP=sv.AP||AP;TK=sv.TK||TK;SVC=sv.SVC||SVC;plQty=sv.plQty||{};curShow=sv.curShow||curShow;if(sv.PERS)PERS=sv.PERS;if(sv.PP)PP=sv.PP;if(sv.uiCfg)uiCfg=sv.uiCfg;RN=sv.RN||(Math.max(...IT.map(i=>i.ref),0)+1)}}catch(e){}
+ normalizeUiCfg();
  rPers(); // HC (Saat ücreti) hesaplanıp P.hc'ye atanır
- rPar(); rMat(); rGlobal(); updDN(); recalcAll(); rVRef(); lucide.createIcons();
+ rPar(); rMat(); rGlobal(); updDN(); recalcAll(); rVRef(); applyPdCols(); renderColSettings(); lucide.createIcons();
 }
 </script></body></html>
