@@ -1,0 +1,75 @@
+{
+  "version": "2026-02",
+  "equipment_types": {
+    "globe_valve": {
+      "name": "Globe Vana",
+      "icon": "git-commit"
+    },
+    "gate_valve": {
+      "name": "Gate Vana",
+      "icon": "git-merge"
+    },
+    "check_valve": {
+      "name": "Çekvana",
+      "icon": "shield-check"
+    },
+    "butterfly_valve": {
+      "name": "Kelebek Vana",
+      "icon": "aperture"
+    },
+    "y_strainer": {
+      "name": "Pislik Tutucu (Y)",
+      "icon": "filter"
+    },
+    "ball_2way": {
+      "name": "2 Yollu Küresel Vana",
+      "icon": "circle-dot"
+    },
+    "ball_3way": {
+      "name": "3 Yollu Küresel Vana",
+      "icon": "circle-dot"
+    },
+    "3way_valve": {
+      "name": "3 Yollu Vana",
+      "icon": "git-branch"
+    },
+    "steam_trap": {
+      "name": "Kondenstop",
+      "icon": "droplets"
+    },
+    "piston_valve": {
+      "name": "Pistonlu Vana",
+      "icon": "git-commit"
+    },
+    "bellow_valve": {
+      "name": "Körüklü Vana",
+      "icon": "git-commit"
+    },
+    "flange": {
+      "name": "Flanş",
+      "icon": "disc"
+    },
+    "elbow": {
+      "name": "Dirsek",
+      "icon": "corner-down-right"
+    },
+    "flat_pad": {
+      "name": "Düz Yastık (Manuel)",
+      "icon": "box"
+    }
+  },
+  "brands": {
+    "generic": {
+      "name": "Genel / Varsayılan",
+      "file": "generic.json"
+    },
+    "ari-armaturen": {
+      "name": "ARI Armaturen",
+      "file": "ari-armaturen.json"
+    },
+    "ksb": {
+      "name": "KSB",
+      "file": "ksb.json"
+    }
+  }
+}

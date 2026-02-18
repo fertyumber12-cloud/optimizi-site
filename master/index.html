@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Ceket Üretim & Fiyatlandırma | Optimizi.App</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
+:root{--ac:#6366f1;--cy:#06b6d4;--gn:#10b981;--rd:#f43f5e;--am:#f59e0b}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Plus Jakarta Sans',sans-serif !important}
+.font-mono{font-family:'Plus Jakarta Sans',sans-serif !important;font-variant-numeric:tabular-nums;font-weight:600}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:rgba(148,163,184,.3);border-radius:4px}
+.custom-scroll::-webkit-scrollbar{width:4px}.custom-scroll::-webkit-scrollbar-thumb{background:rgba(148,163,184,.5);border-radius:4px}
+.ss{width:100%;border-collapse:separate;border-spacing:0;font-size:.76rem}
+.ss th{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:10px 12px;text-align:center;position:sticky;top:0;z-index:2;white-space:nowrap;transition:.3s;backdrop-filter:blur(8px)}
+.resizable-th{resize:horizontal;overflow:auto;min-width:100px}
+.ss td{padding:0;height:36px;min-width:50px;transition:.2s}
+.ss input,.ss select{width:100%;height:100%;border:none;background:transparent;font-family:inherit;font-size:.76rem;padding:4px 8px;outline:none;transition:.2s;font-weight:500}
+.ss input[type=number]{text-align:right;-moz-appearance:textfield}
+html:not(.dark) .ss th{background:rgba(241,245,249,.95);color:#6366f1;border-bottom:1px solid rgba(0,0,0,.1)}
+html.dark .ss th{background:rgba(15,23,42,.95);color:#818cf8;border-bottom:1px solid rgba(255,255,255,.05)}
+html:not(.dark) .ss td{border-bottom:1px solid rgba(0,0,0,.05);color:#0f172a}
+html.dark .ss td{border-bottom:1px solid rgba(255,255,255,.05);color:#f8fafc}
+html:not(.dark) .ss input,html:not(.dark) .ss select{color:#0f172a}html.dark .ss input,html.dark .ss select{color:#f8fafc}
+html:not(.dark) .ss tr:hover td{background:rgba(99,102,241,.05)}html.dark .ss tr:hover td{background:rgba(255,255,255,.05)}
+.ss .c{font-weight:600;text-align:right;padding:4px 10px}
+.ss .o{cursor:pointer}html:not(.dark) .ss .o{background:rgba(245,158,11,.1)!important;color:#d97706!important}html.dark .ss .o{background:rgba(245,158,11,.15)!important;color:#f59e0b!important}
+.ss .lb{padding:4px 10px;text-align:left}
+.bt{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:8px 16px;border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer;border:none;transition:.2s}
+.bt1{background:#6366f1;color:#fff;box-shadow:0 4px 15px rgba(99,102,241,.25)}.bt1:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.bt2{background:rgba(244,63,94,.15);color:#f43f5e}.bt2:hover{background:rgba(244,63,94,.25)}
+.bt3{background:rgba(16,185,129,.15);color:#10b981}.bt3:hover{background:rgba(16,185,129,.25)}
+.bt4{background:transparent;border:1px solid rgba(148,163,184,.3)}
+.ps{padding:6px 10px;border-radius:6px;font-size:.8rem;outline:none;width:100%;transition:.2s;font-weight:500}
+html:not(.dark) .ps{background:rgba(241,245,249,.8);border:1px solid rgba(0,0,0,.1);color:#0f172a}
+html.dark .ps{background:rgba(15,23,42,.6);border:1px solid rgba(255,255,255,.1);color:#f8fafc}
+.ps:focus{border-color:#6366f1}
+.tg{display:inline-flex;gap:2px;border-radius:8px;padding:3px}
+html:not(.dark) .tg{background:rgba(241,245,249,.8)}html.dark .tg{background:rgba(15,23,42,.6)}
+.tg button{padding:6px 14px;border-radius:6px;font-size:.75rem;font-weight:700;border:none;cursor:pointer;background:transparent;transition:.2s}
+html:not(.dark) .tg button{color:#64748b}html.dark .tg button{color:#94a3b8}
+.tg button.on{background:#6366f1;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.pane{display:none;flex:1;overflow:auto;padding:24px;position:relative;z-index:10}
+.pane.on{display:flex;flex-direction:column;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.opt-modal-bg{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s}
+.opt-modal-bg.show{opacity:1;pointer-events:auto}
+.opt-modal{border-radius:24px;padding:32px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px -12px rgba(0,0,0,.5);transform:scale(.95);transition:.2s}
+html:not(.dark) .opt-modal{background:#fff;border:1px solid rgba(0,0,0,.1);color:#0f172a}
+html.dark .opt-modal{background:#1e293b;border:1px solid rgba(255,255,255,.1);color:#f8fafc}
+.opt-modal-bg.show .opt-modal{transform:scale(1)}
+.wiz-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.wiz-card{border-radius:12px;padding:16px 8px;text-align:center;cursor:pointer;transition:.2s}
+html:not(.dark) .wiz-card{background:rgba(241,245,249,.8);border:1px solid rgba(0,0,0,.1)}
+html.dark .wiz-card{background:rgba(15,23,42,.6);border:1px solid rgba(255,255,255,.1)}
+.wiz-card:hover{border-color:#6366f1;background:rgba(99,102,241,.05);transform:translateY(-2px)}
+.toast-container{position:fixed;bottom:24px;right:24px;z-index:2000;display:flex;flex-direction:column;gap:10px}
+.toast{padding:12px 16px;border-radius:10px;display:flex;align-items:center;gap:12px;font-size:.85rem;font-weight:600;box-shadow:0 10px 25px rgba(0,0,0,.3);animation:slideIn .3s forwards}
+html:not(.dark) .toast{background:#fff;border:1px solid rgba(0,0,0,.1);color:#0f172a}
+html.dark .toast{background:#1e293b;border:1px solid rgba(255,255,255,.1);color:#f8fafc}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.custom-chk{display:flex;align-items:center;gap:8px;font-size:.8rem;font-weight:600;cursor:pointer;padding:6px}
+.custom-chk input{accent-color:var(--ac);width:16px;height:16px}
+</style>
+<script>(function(){const d=localStorage.getItem('insjack_theme');if(d==='light')document.documentElement.classList.remove('dark')})()</script>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 transition-colors duration-300">
+<div class="fixed inset-0 z-0 pointer-events-none opacity-50 dark:opacity-100 transition-opacity duration-500">
+    <div class="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-500/20 dark:bg-indigo-600/10 rounded-full blur-[100px]"></div>
+    <div class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-500/20 dark:bg-blue-600/10 rounded-full blur-[100px]"></div>
+</div>
+<div class="flex h-screen w-full overflow-hidden relative z-10">
+    <aside id="mainSidebar" class="w-64 shrink-0 h-full flex flex-col z-20 border-r border-slate-200 dark:border-slate-700/50 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl transition-all duration-300">
+        <div class="h-20 flex items-center justify-between px-6 border-b border-slate-200 dark:border-white/5 shrink-0">
+           <a href="../dashboard.html" class="flex items-center gap-2 overflow-hidden logo-text hover:opacity-80 transition-opacity duration-200 cursor-pointer">
+              <span class="text-lg font-bold text-slate-800 dark:text-white tracking-tight">Optimizi<span class="text-indigo-500 dark:text-indigo-400">.Ceket</span></span>
+           </a>
+           <button onclick="toggleSidebar()" class="text-slate-400 hover:text-indigo-600 transition"><i data-lucide="panel-left" class="w-5 h-5"></i></button>
+        </div>
+        <div class="flex-1 overflow-y-auto py-6 px-4 custom-scroll space-y-1">
+            <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2 sidebar-title">Modüller</div>
+            <a onclick="go('pl',this)" class="sidebar-link active flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors text-indigo-600 bg-indigo-50 dark:bg-indigo-500/10 dark:text-indigo-400"><i data-lucide="file-spreadsheet" class="w-5 h-5"></i><span class="sidebar-text">Fiyat Listesi</span></a>
+            <a onclick="go('pd',this)" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/50"><i data-lucide="layout-grid" class="w-5 h-5"></i><span class="sidebar-text">Ürün Detay</span></a>
+            <a onclick="go('ms',this)" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/50"><i data-lucide="pie-chart" class="w-5 h-5"></i><span class="sidebar-text">Genel Özet</span></a>
+            <a onclick="go('pm',this)" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/50 mb-4"><i data-lucide="users" class="w-5 h-5"></i><span class="sidebar-text">Personel Maliyetleri</span></a>
+            <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2 mt-6 sidebar-title">Veritabanı</div>
+            <a onclick="go('mf',this)" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/50"><i data-lucide="database" class="w-5 h-5"></i><span class="sidebar-text">Malzeme Fiyatları</span></a>
+            <a onclick="go('pr',this)" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/50"><i data-lucide="sliders-horizontal" class="w-5 h-5"></i><span class="sidebar-text">Parametreler</span></a>
+        </div>
+        <div class="p-4 border-t border-slate-200 dark:border-slate-700/50 shrink-0">
+            <a onclick="openRight()" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/50"><i data-lucide="settings" class="w-5 h-5"></i><span class="sidebar-text">Ticari Ayarlar</span></a>
+        </div>
+    </aside>
+    <div id="rsOverlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden transition-opacity" style="opacity:0" onclick="closeRight()"></div>
+    <div id="rightSidebar" class="fixed right-0 top-0 h-full w-80 bg-white dark:bg-slate-900 z-50 transform translate-x-full transition-transform duration-300 shadow-2xl border-l border-slate-200 dark:border-slate-700/50 p-6 flex flex-col">
+      <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-200 dark:border-slate-700">
+        <h2 class="font-bold text-lg flex items-center gap-2 text-slate-800 dark:text-white"><i data-lucide="settings-2" class="text-indigo-500"></i> Ticari Ayarlar</h2>
+        <button onclick="closeRight()" class="text-slate-400 hover:text-red-500 p-1 transition cursor-pointer"><i data-lucide="x"></i></button>
+      </div>
+      <div class="mb-4">
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">Ürün Kodu Ön Eki (Prefix)</label>
+        <input type="text" id="prefInput" class="ps" placeholder="Örn: INSJACK" onchange="updatePrefix(this.value)">
+        <p class="text-[10px] text-slate-400 mt-2 leading-relaxed">Kullanıcının tekelindedir.</p>
+      </div>
+      <div class="mt-8">
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">Döviz API Durumu (TCMB)</label>
+        <div id="apiStatusBadge" class="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-3 py-2 rounded font-bold text-xs flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4"></i> Senkronize Edildi</div>
+      </div>
+    </div>
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+        <div class="h-20 flex items-center justify-between px-6 border-b border-slate-200 dark:border-slate-700/50 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md shrink-0">
+         <div class="flex gap-4 text-xs font-bold items-center">
+          <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2 flex items-center gap-2 shadow-sm"><span class="text-[10px] text-slate-500 dark:text-slate-400 uppercase">Kalem</span><span id="sI" class="text-cyan-500 font-mono text-sm">0</span></div>
+          <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2 flex items-center gap-2 shadow-sm"><span class="text-[10px] text-slate-500 dark:text-slate-400 uppercase">Ceket</span><span id="sJ" class="text-indigo-500 font-mono text-sm">0</span></div>
+          <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2 flex items-center gap-2 shadow-sm"><span class="text-[10px] text-slate-500 dark:text-slate-400 uppercase">Adam×Sa</span><span id="sH" class="text-amber-500 font-mono text-sm">0</span></div>
+         </div>
+         <div class="flex gap-3 items-center">
+          <button onclick="toggleTheme()" class="bt bt4 px-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:text-indigo-500 dark:hover:text-indigo-400" id="themeBtn" title="Tema Değiştir"><i data-lucide="sun" class="w-4 h-4"></i></button>
+          <button onclick="saveData()" class="bt bt1 shadow-lg shadow-indigo-500/20"><i data-lucide="save" class="w-4 h-4"></i>Kaydet</button>
+          <button onclick="openPdfModal()" class="bt bt4 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:text-indigo-500 dark:hover:text-indigo-400"><i data-lucide="file-down" class="w-4 h-4 text-indigo-500"></i>PDF İndir</button>
+         </div>
+        </div>
+        <div id="p-pl" class="pane on">
+         <div class="flex flex-col h-full">
+          <div class="flex items-center justify-between mb-4 bg-white/80 dark:bg-slate-800/80 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm backdrop-blur-md">
+           <div class="tg" id="curToggle"></div>
+           <button onclick="openWizard()" class="bt bt1 px-6 shadow-lg shadow-indigo-500/30 text-sm py-2.5 ml-auto"><i data-lucide="wand-2" class="w-4 h-4"></i> Sihirbaz ile Ürün Ekle</button>
+          </div>
+          <div class="flex-1 overflow-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md shadow-sm">
+           <table class="ss" id="tPL"><thead id="plHead"></thead><tbody id="plBody"></tbody><tfoot><tr id="plFoot"></tr></tfoot></table>
+          </div>
+         </div>
+        </div>
+        <div id="p-pd" class="pane">
+         <details class="mb-6 border border-slate-200 dark:border-slate-700 rounded-xl bg-white/80 dark:bg-slate-800/80 overflow-hidden shadow-sm backdrop-blur-md" open>
+           <summary class="p-4 font-bold flex justify-between items-center text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 cursor-pointer"><div class="flex items-center gap-2"><i data-lucide="settings-2" class="text-cyan-500"></i> Genel Malzeme Seçimi (Tüm Liste İçin Geçerli)</div><i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i></summary>
+           <div class="p-6"><div id="plGlobal"></div></div>
+         </details>
+        <div class="flex items-center gap-3 mb-4 flex-wrap bg-white/80 dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm backdrop-blur-md">
+         <span class="text-sm font-bold text-indigo-500 flex items-center gap-2"><i data-lucide="list-checks" class="w-4 h-4"></i> Detaylı Hesaplama Tablosu</span>
+         <div class="ml-auto flex items-center gap-4">
+          <button onclick="openColVisModal()" class="bt bt4 px-3 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300"><i data-lucide="columns" class="w-4 h-4 text-cyan-500"></i> Sütunları Yönet</button>
+          <select id="pdCur" class="ps font-bold" style="width:80px" onchange="recalcAll()"><option value="TL">TL</option><option value="USD">USD</option><option value="EUR">EUR</option></select>
+          <button onclick="optConfirm('Tüm listeyi temizlemek istediğinize emin misiniz?',()=>{IT=[];RN=1;recalcAll()})" class="bt bt2 px-3"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+         </div>
+        </div>
+        <div class="flex-1 overflow-auto rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm bg-white/80 dark:bg-slate-800/80 backdrop-blur-md">
+         <table class="ss" id="tPD"><thead><tr>
+          <th class="resizable-th">REF</th><th class="resizable-th" style="min-width:110px">Tip</th><th class="resizable-th">Parça</th><th class="resizable-th">DN</th><th class="resizable-th">Cls</th><th class="resizable-th" style="width:55px">Adet</th><th class="resizable-th" style="width:55px">Zorluk</th>
+          <th class="resizable-th">Alt Kumaş</th><th class="resizable-th">Üst Kumaş</th><th class="resizable-th">Dolgu</th>
+          <th class="col-I resizable-th" style="color:var(--am)">İzol</th><th class="col-N resizable-th">F.Çap</th>
+          <th class="col-S resizable-th" title="S-Çevre(mm)">S(mm)</th><th class="col-T resizable-th" title="T-Boy(mm)">T(mm)</th>
+          <th class="col-kumas resizable-th" style="color:var(--cy)">Kumaş(m²)</th><th class="col-dolgu resizable-th" style="color:var(--cy)">Dolgu(m²)</th><th class="col-dikis resizable-th" style="color:var(--cy)">Dikiş(m)</th><th class="col-bogma resizable-th" style="color:var(--cy)">Boğma(m)</th><th class="col-cirt resizable-th" style="color:var(--cy)">Cırt(m)</th><th class="col-agraf resizable-th" style="color:var(--cy)">Agf(Ad)</th><th class="col-pul resizable-th" style="color:var(--cy)">Pul(Ad)</th>
+          <th class="col-mc resizable-th">Mlz Fyt</th><th class="col-lc resizable-th">İşç Fyt</th><th class="col-lh resizable-th">İşç Saat</th>
+          <th class="resizable-th">B.Mly</th><th class="resizable-th">B.Satış</th><th class="resizable-th text-green-500">Toplam</th><th></th>
+         </tr></thead><tbody id="pdBody"></tbody><tfoot id="pdFoot"></tfoot></table>
+        </div>
+        </div>
+        <div id="p-ms" class="pane">
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-5 mb-6">
+         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 border-b-4 border-b-cyan-500 p-4 text-center rounded-xl"><div class="text-xl font-bold text-cyan-500 font-mono" id="kC">₺0</div><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Toplam Maliyet</div></div>
+         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 border-b-4 border-b-emerald-500 p-4 text-center rounded-xl"><div class="text-xl font-bold text-emerald-500 font-mono" id="kS">₺0</div><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Satış Bedeli</div></div>
+         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 border-b-4 border-b-amber-500 p-4 text-center rounded-xl"><div class="text-xl font-bold text-amber-500 font-mono" id="kP">₺0</div><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Kâr</div></div>
+         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 border-b-4 border-b-indigo-500 p-4 text-center rounded-xl"><div class="text-xl font-bold text-indigo-500 font-mono" id="kM">%0</div><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Kâr Marjı</div></div>
+         <div class="cd bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/30 border-b-4 border-b-purple-500 p-4 text-center rounded-xl"><div class="flex items-center justify-center gap-2"><span class="text-lg font-bold text-slate-400">x</span><input type="number" id="msMul" class="font-mono text-xl font-bold text-purple-600 dark:text-purple-400 bg-transparent outline-none w-20 text-center border-b-2 border-purple-500/50 focus:border-purple-500" step="0.1" value="2.5" onchange="P.mul=parseFloat(this.value)||2.5;recalcAll()"></div><div class="text-[10px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-widest mt-1">Satış Çarpanı</div></div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+         <div class="cd flex flex-col bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 rounded-xl">
+          <div class="flex items-center justify-between mb-4 border-b border-slate-200 dark:border-slate-700 pb-3"><div class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2"><i data-lucide="calculator" class="w-4 h-4 text-emerald-500"></i>Maliyet Kırılımı</div><div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 px-2 py-1 rounded border border-slate-200 dark:border-slate-700"><span class="text-[10px] font-bold text-slate-500 uppercase">Overhead %</span><input type="number" id="msOh" class="ps !p-1 !w-12 text-center font-bold text-cyan-500" onchange="P.oh=parseFloat(this.value)/100||0;recalcAll()"></div></div>
+          <div class="flex-1 overflow-auto rounded-lg border border-slate-200 dark:border-slate-700"><table class="ss" id="tMC"></table></div>
+         </div>
+         <div class="cd flex flex-col bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 rounded-xl">
+          <div class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 mb-4 border-b border-slate-200 dark:border-slate-700 pb-3"><i data-lucide="package" class="w-4 h-4 text-cyan-500"></i>Malzeme Toplamları</div>
+          <div class="flex-1 overflow-auto rounded-lg border border-slate-200 dark:border-slate-700"><table class="ss" id="tMM"></table></div>
+         </div>
+         <div class="cd flex flex-col bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 rounded-xl">
+          <div class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 mb-4 border-b border-slate-200 dark:border-slate-700 pb-3"><i data-lucide="briefcase" class="w-4 h-4 text-amber-500"></i>Hizmet Bedelleri</div>
+          <div class="space-y-3 flex-1" id="msServices"></div>
+          <div class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900 p-3 rounded-lg"><span class="font-extrabold text-xs uppercase text-slate-500">Toplam Hizmet</span><span class="font-extrabold text-amber-500 font-mono text-lg" id="msSvcTotal">₺0</span></div>
+         </div>
+        </div>
+        <div class="cd mt-6 w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 rounded-xl">
+         <div class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 mb-4"><i data-lucide="globe" class="w-4 h-4 text-indigo-500"></i>Döviz & Kâr Analizi</div>
+         <div class="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700"><table class="ss" id="tMS"></table></div>
+         <div class="mt-4 grid grid-cols-3 gap-4">
+          <div class="bg-slate-50 dark:bg-slate-900 p-4 rounded-lg text-center border border-slate-200 dark:border-slate-700"><div class="text-xl text-slate-800 dark:text-white font-mono font-bold" id="msAH">0</div><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Adam×Saat (Toplam)</div></div>
+          <div class="bg-slate-50 dark:bg-slate-900 p-4 rounded-lg text-center border border-slate-200 dark:border-slate-700"><div class="text-xl text-slate-800 dark:text-white font-mono font-bold" id="msAD">0</div><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Adam Gün (Toplam)</div></div>
+          <div class="bg-slate-50 dark:bg-slate-900 p-4 rounded-lg text-center border border-slate-200 dark:border-slate-700"><div class="text-xl text-slate-800 dark:text-white font-mono font-bold" id="msJC">0</div><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Toplam Üretilecek Ceket</div></div>
+         </div>
+        </div>
+        </div>
+        <div id="p-mf" class="pane">
+        <div class="flex items-center justify-between mb-4 bg-white/80 dark:bg-slate-800/80 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm backdrop-blur-md">
+          <div class="tg" id="mfBtns"></div>
+          <button onclick="openMatModal()" class="bt bt3 px-6 shadow-lg"><i data-lucide="plus" class="w-4 h-4"></i>Yeni Malzeme Ekle</button>
+        </div>
+        <div class="flex-1 overflow-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md shadow-sm">
+            <table class="ss"><thead><tr><th>#</th><th>Tür</th><th>Alt Tip</th><th style="min-width:180px">Malzeme Cinsi</th><th>Birim</th><th>Fiyat</th><th>Döviz</th><th style="color:var(--gn)">TL Fiyat</th><th>Kalınlık(mm)</th><th></th></tr></thead><tbody id="mBody"></tbody></table>
+        </div>
+        </div>
+        <div id="p-pm" class="pane">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-5 mb-5">
+         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 text-center rounded-xl"><div class="text-xl font-bold text-cyan-500 font-mono" id="pmAvg">₺0</div><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Ort. Saat Maliyeti</div></div>
+         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 text-center rounded-xl"><div class="text-xl font-bold text-indigo-500 font-mono" id="pmCnt">0</div><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Personel Sayısı</div></div>
+         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 text-center rounded-xl"><div class="text-xl font-bold text-emerald-500 font-mono" id="pmTot">₺0</div><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Yıllık Toplam Maliyet</div></div>
+         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 text-center rounded-xl"><div class="text-xl font-bold text-amber-500 font-mono" id="pmDay">₺0</div><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Günlük Toplam</div></div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-5 mb-5">
+         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 rounded-xl">
+             <div class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 mb-4 border-b border-slate-200 dark:border-slate-700 pb-3"><i data-lucide="settings" class="w-4 h-4 text-amber-500"></i>Ortak Parametreler</div>
+             <div id="pmParams" class="space-y-2"></div>
+         </div>
+         <div class="lg:col-span-3 flex flex-col">
+          <div class="flex items-center justify-between mb-3 bg-white/80 dark:bg-slate-800/80 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm backdrop-blur-md">
+           <div class="text-xs text-slate-500 font-bold flex items-center gap-2"><i data-lucide="info" class="w-4 h-4 text-indigo-500"></i> Hesaplanan saat maliyeti sistemin ana işçilik gideri olarak kullanılır.</div>
+           <button onclick="openPersModal()" class="bt bt3"><i data-lucide="user-plus" class="w-4 h-4"></i>Personel Ekle</button>
+          </div>
+          <div class="flex-1 overflow-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md shadow-sm">
+            <table class="ss"><thead><tr><th>#</th><th>Görev</th><th style="min-width:140px">Ad Soyad</th><th>Aylık Net</th><th>Yıllık Brüt</th><th>Kıdem</th><th>İzin</th><th>Servis</th><th>Yemek</th><th>KKD</th><th style="color:var(--am)">Fazla Ç.</th><th style="color:var(--ac)">Yıllık Top.</th><th style="color:var(--gn)">Saat Mly</th><th></th></tr></thead><tbody id="pmBody"></tbody>
+          <tfoot><tr><td colspan="10" class="lb text-right font-extrabold">ORTALAMA / TOPLAM</td><td class="c font-mono text-amber-500" id="pmFcTot"></td><td class="c font-mono text-indigo-500 font-bold" id="pmNTot"></td><td class="c font-mono text-emerald-500 font-black text-[1rem]" id="pmOTot"></td><td></td></tr></tfoot></table></div>
+         </div>
+        </div>
+        </div>
+        <div id="p-pr" class="pane">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 rounded-xl"><div class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 mb-4 border-b border-slate-200 dark:border-slate-700 pb-3"><i data-lucide="coins" class="w-4 h-4 text-cyan-500"></i>Döviz & İşçilik</div><div id="pDov" class="space-y-2"></div></div>
+         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 rounded-xl"><div class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 mb-4 border-b border-slate-200 dark:border-slate-700 pb-3"><i data-lucide="ruler" class="w-4 h-4 text-amber-500"></i>Fire & Geometri</div><div id="pFir" class="space-y-2"></div></div>
+         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 rounded-xl"><div class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 mb-4 border-b border-slate-200 dark:border-slate-700 pb-3"><i data-lucide="hard-hat" class="w-4 h-4 text-emerald-500"></i>İşçilik Sabitleri</div><div id="pLab" class="space-y-2"></div></div>
+        </div>
+        <details class="mt-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 overflow-hidden shadow-sm cursor-pointer">
+         <summary class="p-4 font-bold flex justify-between items-center text-slate-800 dark:text-white bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700"><div class="flex items-center gap-2"><i data-lucide="circle" class="w-4 h-4 text-cyan-500"></i> Flanş Çap Tablosu</div><i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i></summary>
+         <div class="p-4"><div class="overflow-auto max-h-[42vh] rounded-lg border border-slate-200 dark:border-slate-700"><table class="ss" id="tFl"></table></div></div>
+        </details>
+        <details class="mt-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 overflow-hidden shadow-sm cursor-pointer">
+         <summary class="p-4 font-bold flex justify-between items-center text-slate-800 dark:text-white bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700"><div class="flex items-center gap-2"><i data-lucide="move-horizontal" class="w-4 h-4 text-cyan-500"></i> Gövde Uzunluk L1/L2</div><i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i></summary>
+         <div class="p-4"><div class="flex gap-2 mb-3"><button onclick="slt('gate')" class="bt bt4 on" id="bl-gate">Sürgülü (Gate)</button><button onclick="slt('globe')" class="bt bt4" id="bl-globe">Glob/Körüklü</button></div><div class="overflow-auto max-h-[42vh] rounded-lg border border-slate-200 dark:border-slate-700"><table class="ss" id="tLn"></table></div></div>
+        </details>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 rounded-xl"><div class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 mb-4 border-b border-slate-200 dark:border-slate-700 pb-3"><i data-lucide="gauge" class="w-4 h-4 text-cyan-500"></i>Vana Referans Ölçüleri (PDF Kaynak)</div>
+          <div class="flex gap-2 mb-3"><select id="vRefSel" class="ps bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700" style="width:220px" onchange="rVRef()"><option value="PV-16">Pistonlu Vana PN16</option><option value="GV-16K">Glob Vana PN16</option><option value="GV-25Z">Glob Vana PN25</option><option value="GV-40K">Glob Vana PN40</option><option value="MK-16">Körüklü Vana PN16</option><option value="MK-25">Körüklü Vana PN25</option><option value="MK-40">Körüklü Vana PN40</option><option value="GTK-18">Sürgülü Vana PN16</option><option value="ARI-3YOL">Üç Yollu Vana (ARI)</option><option value="PTY-30">Y Tipi Pislik Tutucu</option><option value="CLV-50">Çekvalf PN16</option><option value="KV-2P">İki Parça Küresel</option><option value="KV-3P">Üç Parça Küresel</option><option value="KLB">Kelebek Vana</option><option value="BT-16">Kondenstop</option><option value="FLANS">Flanş PN16</option></select></div>
+          <div class="overflow-auto max-h-[35vh] rounded-lg border border-slate-200 dark:border-slate-700"><table class="ss" id="tVRef"></table></div>
+         </div>
+         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 rounded-xl"><div class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 mb-4 border-b border-slate-200 dark:border-slate-700 pb-3"><i data-lucide="circle-dot" class="w-4 h-4 text-amber-500"></i>Agraf & Pul (Çap'a Göre)</div><div class="overflow-auto max-h-[35vh] rounded-lg border border-slate-200 dark:border-slate-700"><table class="ss" id="tAg"></table></div></div>
+        </div>
+        </div>
+    </main>
+</div>
+
+
+<div class="opt-modal-bg" id="wizardModal">
+    <div class="opt-modal" style="width:750px;padding:0;overflow:hidden;">
+        <div class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 p-6 flex justify-between items-center">
+            <div><h3 class="!mb-1 text-slate-800 dark:text-white"><i data-lucide="wand-2" class="w-5 h-5 text-indigo-500"></i> Yeni Ürün Sihirbazı</h3><p class="text-xs text-slate-500" id="wizSubtitle">1. Adım</p></div>
+            <button onclick="closePopup('wizardModal')" class="text-slate-400 hover:text-red-500 transition cursor-pointer"><i data-lucide="x"></i></button>
+        </div>
+        <div class="p-6 relative bg-white dark:bg-slate-900" id="wizBody" style="min-height:300px;max-height:60vh;overflow-y:auto"></div>
+        <div class="bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-700 p-4 flex justify-between items-center">
+            <button onclick="wizBack()" id="wizBtnBack" class="bt bt4 px-6 hidden"><i data-lucide="arrow-left" class="w-4 h-4"></i> Geri</button>
+            <div class="flex-1"></div>
+            <button onclick="wizAdd()" id="wizBtnAdd" class="bt bt1 px-8 hidden"><i data-lucide="plus" class="w-4 h-4"></i> Listeye Ekle</button>
+        </div>
+    </div>
+</div>
+<div class="opt-modal-bg" id="modalMat" onkeydown="if(event.key==='Enter')submitMat()"><div class="opt-modal">
+ <h3 class="text-slate-800 dark:text-white"><i data-lucide="plus-circle" class="w-5 h-5 text-emerald-500"></i>Yeni Malzeme Ekle</h3>
+ <label class="text-slate-500">Tür</label><select id="nmType" class="ps"><option>Kumaş</option><option>Dolgu</option><option>Yardımcı</option><option>Isıtıcı</option></select>
+ <label class="text-slate-500">Alt Tip</label><input id="nmSub" class="ps" placeholder="örn: Cam Elyaf, Taş Yünü...">
+ <label class="text-slate-500">Malzeme Cinsi</label><input id="nmName" class="ps" placeholder="örn: 1 Sİ - 0.5 mm - Gri">
+ <label class="text-slate-500">Birim</label><input id="nmUnit" class="ps" value="M²">
+ <div class="grid grid-cols-2 gap-3 mt-1"><div><label class="text-slate-500">Fiyat</label><input type="number" id="nmPrice" class="ps" step=".001" value="0"></div><div><label class="text-slate-500">Döviz</label><select id="nmCur" class="ps"><option>TL</option><option>USD</option><option>EUR</option></select></div></div>
+ <label class="text-slate-500">Kalınlık (mm)</label><input type="number" id="nmThick" class="ps" placeholder="opsiyonel">
+ <div class="flex gap-3 mt-6"><button onclick="submitMat()" class="bt bt1 flex-1 py-3">Kaydet</button><button onclick="closePopup('modalMat')" class="bt bt4 flex-1 py-3 cursor-pointer">İptal</button></div>
+</div></div>
+<div class="opt-modal-bg" id="qtyModal" onkeydown="if(event.key==='Enter')submitQty()"><div class="opt-modal" style="width:400px">
+ <h3 class="text-slate-800 dark:text-white"><i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500"></i>Adet Uyarısı</h3>
+ <p class="text-sm text-slate-500 mb-4">Fiyat Listesi × Ürün Detay adedi <strong class="text-amber-500">çarpılır</strong>.</p>
+ <p class="text-sm mb-4 font-bold text-slate-800 dark:text-white">Mevcut: <span id="qmCur" class="text-indigo-500 font-mono text-lg ml-2">1</span></p>
+ <label class="text-slate-500">Yeni Adet</label><input type="number" id="qmVal" class="ps font-mono text-lg" min="1" value="1">
+ <div class="flex gap-3 mt-6"><button onclick="submitQty()" class="bt bt1 flex-1 py-3">Uygula</button><button onclick="closePopup('qtyModal')" class="bt bt4 flex-1 py-3 cursor-pointer">İptal</button></div>
+</div></div>
+<div class="opt-modal-bg" id="persModal" onkeydown="if(event.key==='Enter')submitPers()"><div class="opt-modal">
+ <h3 class="text-slate-800 dark:text-white"><i data-lucide="user-plus" class="w-5 h-5 text-cyan-500"></i>Personel Ekle</h3>
+ <label class="text-slate-500">Görev</label><select id="npGorev" class="ps"><option>USTABAŞI</option><option>ORTACI</option><option selected>DİKİŞÇİ</option><option>DOLUMCU</option><option>KALİTE</option><option>DİĞER</option></select>
+ <label class="text-slate-500">Ad Soyad</label><input id="npAd" class="ps" placeholder="Ad Soyad">
+ <label class="text-slate-500">Aylık Net (₺)</label><input type="number" id="npNet" class="ps font-mono text-lg" step="100" value="48000">
+ <div class="grid grid-cols-2 gap-3 mt-1">
+  <div><label class="text-slate-500">Kıdem?</label><select id="npKidem" class="ps"><option value="1">Evet</option><option value="0">Hayır</option></select></div>
+  <div><label class="text-slate-500">Servis (₺/ay)</label><input type="number" id="npServis" class="ps font-mono" value="2750"></div>
+  <div><label class="text-slate-500">Gün (Ops.)</label><input type="number" id="npGun" class="ps font-mono" placeholder="Oto"></div>
+  <div><label class="text-slate-500">Saat (Ops.)</label><input type="number" id="npSaat" class="ps font-mono" placeholder="Oto"></div>
+ </div>
+ <div class="flex gap-3 mt-6"><button onclick="submitPers()" class="bt bt1 flex-1 py-3">Ekle</button><button onclick="closePopup('persModal')" class="bt bt4 flex-1 py-3 cursor-pointer">İptal</button></div>
+</div></div>
+<div class="opt-modal-bg" id="colVisModal"><div class="opt-modal" style="width:500px">
+ <h3 class="text-slate-800 dark:text-white"><i data-lucide="columns" class="w-5 h-5 text-cyan-500"></i>Sütunları Yönet</h3>
+ <div class="grid grid-cols-2 gap-4 mt-4">
+    <label class="custom-chk"><input type="checkbox" id="chk_kumas"> Kumaş (m²)</label>
+    <label class="custom-chk"><input type="checkbox" id="chk_dolgu"> Dolgu (m²)</label>
+    <label class="custom-chk"><input type="checkbox" id="chk_dikis"> Dikiş (m)</label>
+    <label class="custom-chk"><input type="checkbox" id="chk_bogma"> Boğma (m)</label>
+    <label class="custom-chk"><input type="checkbox" id="chk_cirt"> Cırt (m)</label>
+    <label class="custom-chk"><input type="checkbox" id="chk_agraf"> Agraf (Ad)</label>
+    <label class="custom-chk"><input type="checkbox" id="chk_pul"> Pul (Ad)</label>
+    <label class="custom-chk"><input type="checkbox" id="chk_S"> S-Çevre</label>
+    <label class="custom-chk"><input type="checkbox" id="chk_T"> T-Boy</label>
+    <label class="custom-chk"><input type="checkbox" id="chk_I"> İzolasyon</label>
+    <label class="custom-chk"><input type="checkbox" id="chk_N"> F.Çap</label>
+    <label class="custom-chk"><input type="checkbox" id="chk_mc"> Mlz Fiyatı</label>
+    <label class="custom-chk"><input type="checkbox" id="chk_lc"> İşç Fiyatı</label>
+    <label class="custom-chk"><input type="checkbox" id="chk_lh"> İşç Saati</label>
+ </div>
+ <div class="flex gap-3 mt-6"><button onclick="saveCols()" class="bt bt1 flex-1 py-3">Kaydet</button><button onclick="closePopup('colVisModal')" class="bt bt4 flex-1 py-3 cursor-pointer">İptal</button></div>
+</div></div>
+<div class="opt-modal-bg" id="pdfModal"><div class="opt-modal" style="width:800px;max-width:90vw;height:80vh;display:flex;flex-direction:column;">
+ <div class="flex justify-between items-center mb-4"><h3 class="text-slate-800 dark:text-white"><i data-lucide="file-text" class="text-indigo-500"></i> PDF Önizleme</h3><button onclick="closePopup('pdfModal')" class="text-slate-400 hover:text-red-500 cursor-pointer"><i data-lucide="x"></i></button></div>
+ <div class="flex-1 bg-white overflow-auto p-8 rounded text-gray-800 relative border border-slate-200" id="pdfContentToPrint">
+    <div class="text-center mb-8 border-b-2 border-gray-800 pb-4"><h1 class="text-3xl font-black tracking-widest text-gray-900">TEKLİF LİSTESİ</h1><p class="text-sm font-bold mt-2" id="pdfPrefixTitle"></p></div>
+    <table class="w-full text-left border-collapse text-sm"><thead><tr class="bg-gray-200 border-b-2 border-gray-800 text-gray-900"><th class="p-2">Kod</th><th class="p-2">Açıklama</th><th class="p-2 text-center">DN</th><th class="p-2 text-center">Miktar</th><th class="p-2 text-right">Birim Fiyat</th><th class="p-2 text-right">Toplam</th></tr></thead><tbody id="pdfTableBody"></tbody><tfoot id="pdfTableFoot"></tfoot></table>
+ </div>
+ <div class="mt-4 flex gap-4 justify-end"><button onclick="closePopup('pdfModal')" class="bt bt4 px-6 cursor-pointer">Vazgeç</button><button onclick="downloadPDF()" class="bt bt1 px-6"><i data-lucide="download"></i> İndir</button></div>
+</div></div>
+<div class="opt-modal-bg" id="optConfirmBg"><div class="opt-modal" style="width:400px">
+ <h3 class="text-slate-800 dark:text-white"><i data-lucide="alert-circle" class="text-amber-500"></i> Onay</h3>
+ <p class="text-sm text-slate-500 mb-6 mt-2" id="optConfirmMsg"></p>
+ <div class="flex gap-3"><button id="optConfirmYes" class="bt bt2 flex-1 py-3">Evet</button><button onclick="closePopup('optConfirmBg')" class="bt bt4 flex-1 py-3 cursor-pointer">İptal</button></div>
+</div></div>
+<div class="toast-container" id="toastBox"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
