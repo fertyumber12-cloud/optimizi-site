@@ -5,14 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Enerji Kayıp ve Kaçak Analizi</title>
  <style>
-  body:not(.auth-checked) {
-    opacity: 0;
-    pointer-events: none;
-  }
-  body.auth-checked {
-    opacity: 1;
-    transition: opacity 0.3s ease;
-  }
+  body:not(.auth-checked) { opacity: 0; pointer-events: none; }
+  body.auth-checked { opacity: 1; transition: opacity 0.3s ease; }
 </style>
 <meta name="description" content="İşletmenizdeki yalıtımsız yüzeylerden kaynaklanan yıllık finansal kaybı hesaplayın.">
 <script src="https://cdn.tailwindcss.com"></script>
@@ -42,99 +36,26 @@
 </script>
 
 <style>
-  :root {
-      --bg-color: #f1f5f9; 
-      --glass-bg: #ffffff;
-      --glass-border: rgba(148, 163, 184, 0.4);
-      --input-bg: #f8fafc;
-      --input-border: #cbd5e1;
-      --text-main: #0f172a; 
-      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      --grid-color: rgba(0, 0, 0, 0.05);
-  }
-
-  .dark {
-      --bg-color: #0f172a;
-      --glass-bg: rgba(30, 41, 59, 0.4);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      --input-bg: rgba(15, 23, 42, 0.6);
-      --input-border: rgba(255, 255, 255, 0.1);
-      --text-main: #f1f5f9;
-      --card-shadow: none;
-      --grid-color: rgba(255, 255, 255, 0.03);
-  }
-
-  .grid-input {
-      background: transparent;
-      border: 1px solid transparent;
-      border-radius: 4px;
-      padding: 4px;
-      width: 100%;
-      text-align: center;
-      transition: all 0.2s;
-      font-weight: bold;
-  }
+  :root { --bg-color: #f1f5f9; --glass-bg: #ffffff; --glass-border: rgba(148, 163, 184, 0.4); --input-bg: #f8fafc; --input-border: #cbd5e1; --text-main: #0f172a; --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); --grid-color: rgba(0, 0, 0, 0.05); }
+  .dark { --bg-color: #0f172a; --glass-bg: rgba(30, 41, 59, 0.4); --glass-border: rgba(255, 255, 255, 0.08); --input-bg: rgba(15, 23, 42, 0.6); --input-border: rgba(255, 255, 255, 0.1); --text-main: #f1f5f9; --card-shadow: none; --grid-color: rgba(255, 255, 255, 0.03); }
+  .grid-input { background: transparent; border: 1px solid transparent; border-radius: 4px; padding: 4px; width: 100%; text-align: center; transition: all 0.2s; font-weight: bold; }
   .grid-input:hover { border-color: #cbd5e1; background-color: rgba(255,255,255,0.1); }
   .grid-input:focus { border-color: #ef4444; background-color: rgba(255,255,255,0.2); outline: none; }
-
   html:not(.dark) .blob-bg { display: none; }
-  
-  html.dark body {
-      background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%);
-      background-attachment: fixed;
-  }
-
+  html.dark body { background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%); background-attachment: fixed; }
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: #64748b; }
-  
   html { scroll-behavior: smooth; }
-  
-  body { 
-      background-color: var(--bg-color); 
-      color: var(--text-main); 
-      overflow-x: hidden; 
-      transition: background-color 0.3s ease, color 0.3s ease;
-  }
-  
+  body { background-color: var(--bg-color); color: var(--text-main); overflow-x: hidden; transition: background-color 0.3s ease, color 0.3s ease; }
   .app-container { max-width: 1440px; margin: 0 auto; width: 100%; }
-
-  .glass-card { 
-      transition: all 0.3s ease; 
-      background-color: var(--glass-bg); 
-      backdrop-filter: blur(16px); 
-      border: 1px solid var(--glass-border); 
-      box-shadow: var(--card-shadow);
-  }
-  
-  .glass-input { 
-      transition: all 0.2s; 
-      border-radius: 0.5rem; 
-      padding: 0.6rem 0.75rem; 
-      width: 100%; 
-      background-color: var(--input-bg); 
-      border: 1px solid var(--input-border); 
-      color: var(--text-main); 
-  }
+  .glass-card { transition: all 0.3s ease; background-color: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); box-shadow: var(--card-shadow); }
+  .glass-input { transition: all 0.2s; border-radius: 0.5rem; padding: 0.6rem 0.75rem; width: 100%; background-color: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-main); }
   .glass-input:focus { outline: none; border-color: #ef4444; box-shadow: 0 0 0 2px rgba(239,68,68,0.1); }
-  
-  .bg-grid { 
-      background-size: 40px 40px; 
-      background-image: 
-          linear-gradient(to right, var(--grid-color) 1px, transparent 1px), 
-          linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px); 
-      mask-image: radial-gradient(circle at center, black 70%, transparent 100%); 
-      pointer-events: none; 
-  }
-
-  /* Popup animations */
+  .bg-grid { background-size: 40px 40px; background-image: linear-gradient(to right, var(--grid-color) 1px, transparent 1px), linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px); mask-image: radial-gradient(circle at center, black 70%, transparent 100%); pointer-events: none; }
   .popup-overlay { transition: opacity 0.2s ease; }
   .popup-content { transition: transform 0.2s ease, opacity 0.2s ease; }
-  .popup-show .popup-content { transform: scale(1); opacity: 1; }
-  .popup-hide .popup-content { transform: scale(0.95); opacity: 0; }
-
-  /* --- PRINT STYLES --- */
   @media print {
     @page { margin: 0; size: A4; }
     html, body { width: 210mm; height: 297mm; margin: 0 !important; padding: 0 !important; background: white !important; color: black !important; overflow: visible !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -142,7 +63,6 @@
     #print-area { display: block !important; }
     .print-page { width: 210mm; height: 296mm; position: relative; page-break-after: always; overflow: hidden; background: white; }
     .print-page:last-child { page-break-after: auto; }
-    
     .cover-bg { background-color: white !important; color: #1e293b !important; }
     .audit-table th { background-color: #fef2f2; color: #991b1b; font-weight: 700; text-transform: uppercase; font-size: 7px; padding: 4px; border-bottom: 2px solid #ef4444; }
     .audit-table td { border-bottom: 1px solid #e2e8f0; padding: 4px; font-size: 8px; color: #334155; vertical-align: middle; }
@@ -312,8 +232,8 @@
                         <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-white/5 mb-3">
                             <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-2 block font-bold">1. Seçenek: Dikdörtgen Yüzeyler (mm)</label>
                             <div class="flex gap-2 mb-2">
-                                <input type="number" id="surfW" class="glass-input text-xs" placeholder="Genişlik (mm)">
-                                <input type="number" id="surfH" class="glass-input text-xs" placeholder="Yükseklik (mm)">
+                                <input type="number" id="surfW" class="glass-input text-xs" placeholder="En (mm)">
+                                <input type="number" id="surfH" class="glass-input text-xs" placeholder="Boy (mm)">
                                 <button onclick="addSurface()" class="bg-red-500 hover:bg-red-600 text-white rounded-lg px-3 flex items-center justify-center transition"><i data-lucide="plus" class="w-4 h-4"></i></button>
                             </div>
                             <div id="surfaceList" class="space-y-1 mb-2 max-h-24 overflow-y-auto"></div>
@@ -408,7 +328,7 @@
                             <tr>
                             <th class="px-6 py-3">Görsel</th>
                             <th class="px-6 py-3">Bileşen</th>
-                            <th class="px-6 py-3 text-center">Adet</th>
+                            <th class="px-6 py-3 text-center">Miktar</th>
                             
                             <th class="px-6 py-3 text-center text-red-500">Çıplak Kayıp<br><span class="text-[9px]">(kWh/Yıl)</span></th>
                             <th class="px-6 py-3 text-center text-orange-500">Yalıtımlı Kayıp<br><span class="text-[9px]">(kWh/Yıl)</span></th>
@@ -643,6 +563,8 @@
 <div id="qr-generator-dump" style="display:none;"></div>
 
 <script>
+    let isCalculating = false;
+
     function openPopup(id) {
         const popup = document.getElementById(id);
         popup.classList.remove('hidden'); popup.style.display = 'flex';
@@ -804,12 +726,6 @@
             fuelType, LHV_Val, LHV_Unit, currentSurfaces: savedSurfaces, currentCircles: savedCircles, valveTypeName
         };
 
-        let btnEl = document.getElementById('btnAdd');
-        if(btnEl.classList.contains('hidden')) btnEl = document.getElementById('btnUpdate');
-        const originalText = btnEl ? btnEl.innerHTML : "Hesapla";
-        if(btnEl) btnEl.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> İşleniyor...';
-        lucide.createIcons();
-
         try {
             const response = await fetch('/api/anlik-kayip', {
                 method: 'POST',
@@ -819,8 +735,6 @@
 
             if (!response.ok) throw new Error("API Hatası");
             const data = await response.json(); 
-            if(btnEl) btnEl.innerHTML = originalText;
-            lucide.createIcons();
 
             const inputs={ type,qty,pLen,location, tProc,tAmb,matKey,thk, useL2, matKey2, thk2, vDN, pDN, valveType, surfaces: savedSurfaces, circles: savedCircles, img:currImg, energyCurr: energyCurrencyCode, fuelType: fuelType, fuelLhv: LHV_Val, fuelUnit: LHV_Unit, vWind: vWind };
             
@@ -829,15 +743,57 @@
                 moneyLoss: data.moneyLostBare, potentialSave: data.potentialSaveMoney, fuelLost: data.fuelLostBare, fuelUnit: LHV_Unit,
                 kwhBare: Math.round(data.energyLostBare_kWh).toLocaleString('tr-TR'), kwhIns: Math.round(data.energyLostIns_kWh).toLocaleString('tr-TR'),   
                 kwhSave: Math.round(data.potentialSaveKwh).toLocaleString('tr-TR'), rawKwhLoss: data.energyLostBare_kWh, rawKwhIns: data.energyLostIns_kWh, 
-                co2: data.co2, tSurf: typeof data.Ts === 'number' ? data.Ts.toFixed(1) : data.Ts, img:currImg, inputs
+                co2: data.co2, tSurf: typeof tProc === 'number' ? tProc.toFixed(1) : tProc, img:currImg, inputs
             };
         } catch(error) {
             console.error(error);
-            if(btnEl) btnEl.innerHTML = originalText;
-            lucide.createIcons();
             showAlert("Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol edin.");
             return null;
         }
+    }
+
+    async function calc(){
+        if(isCalculating) return; 
+        isCalculating = true;
+        
+        const btn = document.getElementById('btnAdd');
+        const originalHtml = '<i data-lucide="plus" class="w-4 h-4"></i> Hesapla & Listeye Ekle';
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> İşleniyor...';
+        btn.classList.add('opacity-70', 'cursor-not-allowed');
+        lucide.createIcons();
+
+        const res = await getCalculationResult();
+        if(res){ LIST.push(res); resetForm(); render(); }
+
+        btn.innerHTML = originalHtml;
+        btn.classList.remove('opacity-70', 'cursor-not-allowed');
+        isCalculating = false; 
+        lucide.createIcons();
+    }
+    
+    async function finishUpdate(){
+        if(isCalculating) return;
+        isCalculating = true;
+
+        const btn = document.getElementById('btnUpdate');
+        const originalHtml = '<i data-lucide="check" class="w-4 h-4"></i> Güncellemeyi Bitir';
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> İşleniyor...';
+        btn.classList.add('opacity-70', 'cursor-not-allowed');
+        lucide.createIcons();
+
+        if(editingIndex!==null) {
+            const res = await getCalculationResult();
+            if(res) LIST[editingIndex] = res;
+        }
+        editingIndex=null;
+        document.getElementById('btnAdd').classList.remove('hidden');
+        document.getElementById('btnUpdate').classList.add('hidden');
+        resetForm(); render();
+
+        btn.innerHTML = originalHtml;
+        btn.classList.remove('opacity-70', 'cursor-not-allowed');
+        isCalculating = false;
+        lucide.createIcons();
     }
 
     function updateGlobalFinancials(){
@@ -877,18 +833,6 @@
     function fillDN(id){const el=document.getElementById(id);el.innerHTML='';for(const[k,v]of Object.entries(PIPES)){let o=document.createElement('option');o.value=v;o.text=`DN ${k}`;el.add(o);}if(id==='vDN')el.value=60.3;if(id==='pDN')el.value=88.9;}
     function readImg(i){if(i.files&&i.files[0]){const r=new FileReader();r.onload=e=>{currImg=e.target.result;document.getElementById('prevImg').src=currImg;document.getElementById('prevImg').classList.remove('hidden');};r.readAsDataURL(i.files[0]);}}
     async function getFx(){try{const r=await fetch('https://api.frankfurter.app/latest?from=USD&to=TRY');const d=await r.json();FX.USD=d.rates.TRY;const r2=await fetch('https://api.frankfurter.app/latest?from=EUR&to=TRY');const d2=await r2.json();FX.EUR=d2.rates.TRY;const r3=await fetch('https://api.frankfurter.app/latest?from=GBP&to=TRY');const d3=await r3.json();FX.GBP=d3.rates.TRY;document.getElementById('fxVal').innerText=FX.USD.toFixed(2);}catch(e){}}
-    
-    async function calc(){
-        const res = await getCalculationResult();
-        if(res){ LIST.push(res); resetForm(); render(); }
-    }
-    
-    async function finishUpdate(){
-        if(editingIndex!==null) { const res = await getCalculationResult(); if(res) LIST[editingIndex] = res; }
-        editingIndex=null;
-        document.getElementById('btnAdd').classList.remove('hidden'); document.getElementById('btnUpdate').classList.add('hidden');
-        resetForm(); render();
-    }
     
     function edit(i){
         editingIndex=i; const d=LIST[i].inputs;
@@ -989,22 +933,29 @@
             
             const clientName = document.getElementById('cName').value || 'Müşteri';
             const serialNo = 'LOSS-' + Math.floor(Math.random() * 10000);
-            const totalVal = gLoss;
-            const uPrice = document.getElementById('price').value;
-            const wHours = document.getElementById('hours').value;
+            
+            const priceRaw = parseFloat(document.getElementById('price').value) || 0;
+            const energyCurr = document.getElementById('energyCurr').value;
+            const nativeRate = FX[energyCurr] || 1;
+            const nativePriceTL = priceRaw * nativeRate;
+            const totalValTL = gFuelLost * nativePriceTL; 
+
+            const wHours = parseFloat(document.getElementById('hours').value) || 8000;
             const fuel = document.getElementById('fuel').value;
             
             const now = new Date();
-            const dateStr = now.toISOString().split('T')[0];
+            now.setMinutes(now.getMinutes() - 2); 
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
             const hh = String(now.getHours()).padStart(2, '0');
-            const min = String(now.getMinutes()).padStart(2, '0');
-            const timeStr = `${hh}:${min}`;
-            const fullDateTime = `${dateStr}-${timeStr.replace(':', '-')}`;
+            const mins = String(now.getMinutes()).padStart(2, '0');
+            const fullDateTime = `${yyyy}-${mm}-${dd}-${hh}-${mins}`;
             
             const secondsInWorkYear = wHours * 3600;
-            const burnPerSecond = totalVal / secondsInWorkYear;
+            const burnPerSecond = secondsInWorkYear > 0 ? (totalValTL / secondsInWorkYear) : 0;
             const baseUrl = "https://optimizi.app/qrtakip.html";
-            let trackUrl = `${baseUrl}?c=${encodeURIComponent(clientName)}&s=${encodeURIComponent(serialNo)}&v=${totalVal}&up=${uPrice}&wh=${wHours}&f=${fuel}&d=${fullDateTime}&bps=${burnPerSecond.toFixed(6)}`;
+            let trackUrl = `${baseUrl}?c=${encodeURIComponent(clientName)}&s=${encodeURIComponent(serialNo)}&v=${totalValTL.toFixed(2)}&up=${nativePriceTL.toFixed(2)}&wh=${wHours}&f=${fuel}&d=${fullDateTime}&bps=${burnPerSecond.toFixed(6)}`;
             
             if(fuel === 'manual'){
                 let cLabel = document.getElementById('fuelLabel') ? document.getElementById('fuelLabel').value : 'Özel Yakıt';
