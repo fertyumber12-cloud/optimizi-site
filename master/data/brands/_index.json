@@ -70,6 +70,10 @@
     "ksb": {
       "name": "KSB",
       "file": "ksb.json"
+    },
+    "spirax-sarco": {
+      "name": "Spirax Sarco",
+      "file": "spirax-sarco.json"
     }
   }
 }
