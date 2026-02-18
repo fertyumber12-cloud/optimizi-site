@@ -36,21 +36,20 @@ export default function handler(req, res) {
         } = req.body;
 
         let multiplier=1; 
-        if(type==='pipe'){ multiplier = pLen * qty; }
-
         let isFlat=(type==='tank');
         let dPipe=0,D_ext=0,Name="",unitLabel="Adet";
+        let displayQty = qty;
 
         if(isFlat){
             let totalSurfM2 = 0;
-            // mm cinsinden gelen veriyi m2'ye çevirme
             if (currentSurfaces) currentSurfaces.forEach(s => totalSurfM2 += (s.w * s.h) / 1000000);
             if (currentCircles) currentCircles.forEach(c => { const r = (c.d/2)/1000; totalSurfM2 += Math.PI * r * r; });
 
             if((!currentSurfaces || currentSurfaces.length === 0) && (!currentCircles || currentCircles.length === 0)) { 
-                multiplier = 1; Name = `Tank/Düz (Ölçüsüz)`; unitLabel = "Set"; 
+                multiplier = 1; Name = `Düz Yüzey (Ölçüsüz)`; unitLabel = "Set"; displayQty = qty;
             } else { 
-                multiplier = totalSurfM2; Name = `Düz Yüzey`; unitLabel = "Set"; 
+                multiplier = totalSurfM2; Name = `Düz Yüzey`; unitLabel = "m²"; 
+                displayQty = Number((totalSurfM2 * qty).toFixed(4)); // M2'yi Qty olarak gönderiyoruz
             }
             dPipe=1.0; D_ext=1.0; 
         } else {
@@ -60,8 +59,11 @@ export default function handler(req, res) {
                 if(valveType === 'separator'){ const sepArea = SEPARATORS[Object.keys(PIPES).find(k=>PIPES[k]==mm)] || 0.5; multiplier = sepArea; Name=`Buhar Separatörü (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`; } 
                 else if(valveType === 'elbow') { multiplier = 2.36 * dPipe; Name=`Dirsek 90° (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`; } 
                 else { multiplier=1; Name=`${valveTypeName} (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`; }
-                unitLabel="Adet";
-            } else { Name=`Boru (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`; unitLabel="m"; }
+                unitLabel="Adet"; displayQty = qty;
+            } else { 
+                Name=`Boru (DN${Object.keys(PIPES).find(k=>PIPES[k]==mm)})`; 
+                unitLabel="m"; multiplier = pLen; displayQty = pLen * qty;
+            }
         }
         
         let h_bare=getSurfaceCoeff(standard,vWind,tProc,tAmb,dPipe,isFlat);
@@ -69,31 +71,62 @@ export default function handler(req, res) {
         let Q_bare_unit=h_bare*A_bare_unit*(tProc-tAmb);
         let Q_bare_total=0;
         
-        if(type==='valve'){ if(valveType==='separator'){ Q_bare_total = Q_bare_unit * (multiplier*3) * qty; } else if (valveType === 'elbow') { Q_bare_total = Q_bare_unit * multiplier * qty; } else { const factor=VALVE_FACTORS[valveType]||1.2; Q_bare_total=Q_bare_unit*factor*qty; } } else if(type==='pipe'){ Q_bare_total=Q_bare_unit*multiplier; } else { Q_bare_total=Q_bare_unit*multiplier*qty; }
+        if(type==='valve'){ 
+            if(valveType==='separator'){ Q_bare_total = Q_bare_unit * (multiplier*3) * qty; } 
+            else if (valveType === 'elbow') { Q_bare_total = Q_bare_unit * multiplier * qty; } 
+            else { const factor=VALVE_FACTORS[valveType]||1.2; Q_bare_total=Q_bare_unit*factor*qty; } 
+        } else if(type==='pipe'){ 
+            Q_bare_total=Q_bare_unit * multiplier * qty; 
+        } else { 
+            Q_bare_total=Q_bare_unit * multiplier * qty; 
+        }
 
         const thkM=thk/1000; const thkM2=thk2/1000;
         let minTs=tAmb,maxTs=tProc,Ts=(minTs+maxTs)/2;
+        let Q_unit = 0;
         
-        for(let i=0;i<50;i++){
-            const Tm=(tProc+Ts)/2; const k1=getK(matKey,Tm);
-            let R1 = 0, R2 = 0;
-            if(isFlat) { R1 = thkM / k1; if(useL2) { const Tm2 = (Tm + Ts)/2 - 10; const k2 = getK(matKey2, Tm2); R2 = thkM2 / k2; } } 
-            else { R1 = Math.log((dPipe + 2*thkM)/dPipe) / (2*Math.PI*k1); if(useL2) { const Tm2 = (Tm + Ts)/2 - 10; const k2 = getK(matKey2, Tm2); R2 = Math.log((dPipe + 2*thkM + 2*thkM2) / (dPipe + 2*thkM)) / (2*Math.PI*k2); } }
-            const R_total = R1 + R2; const Q_cond=(tProc-Ts)/R_total;
-            let D_out = isFlat ? 1.0 : dPipe + 2*(thkM + thkM2);
-            const h_total=getSurfaceCoeff(standard,vWind,Ts,tAmb,D_out,isFlat);
-            let A_surf=isFlat?1:2*Math.PI*(D_out/2);
-            const Q_conv=h_total*A_surf*(Ts-tAmb);
-            if(Q_cond>Q_conv)minTs=Ts;else maxTs=Ts;Ts=(minTs+maxTs)/2;
+        // 0 MM KALINLIK HATASI İÇİN GÜVENLİK KİLİDİ
+        if (thkM === 0 && (!useL2 || thkM2 === 0)) {
+            Ts = tProc;
+            Q_unit = Q_bare_unit;
+        } else {
+            for(let i=0;i<50;i++){
+                const Tm=(tProc+Ts)/2; const k1=getK(matKey,Tm);
+                let R1 = 0, R2 = 0;
+                if(isFlat) { R1 = thkM / k1; if(useL2) { const Tm2 = (Tm + Ts)/2 - 10; const k2 = getK(matKey2, Tm2); R2 = thkM2 / k2; } } 
+                else { R1 = Math.log((dPipe + 2*thkM)/dPipe) / (2*Math.PI*k1); if(useL2) { const Tm2 = (Tm + Ts)/2 - 10; const k2 = getK(matKey2, Tm2); R2 = Math.log((dPipe + 2*thkM + 2*thkM2) / (dPipe + 2*thkM)) / (2*Math.PI*k2); } }
+                const R_total = R1 + R2; 
+                
+                if(R_total === 0) { Ts = tProc; break; } // Sıfıra bölünme hatasını engelle
+                
+                const Q_cond=(tProc-Ts)/R_total;
+                let D_out = isFlat ? 1.0 : dPipe + 2*(thkM + thkM2);
+                const h_total=getSurfaceCoeff(standard,vWind,Ts,tAmb,D_out,isFlat);
+                let A_surf=isFlat?1:2*Math.PI*(D_out/2);
+                const Q_conv=h_total*A_surf*(Ts-tAmb);
+                if(Q_cond>Q_conv)minTs=Ts;else maxTs=Ts;Ts=(minTs+maxTs)/2;
+            }
+            let D_out_final = isFlat ? 1.0 : dPipe + 2*(thkM + thkM2);
+            const h_final=getSurfaceCoeff(standard,vWind,Ts,tAmb,D_out_final,isFlat);
+            let A_outer_unit=isFlat?1:Math.PI*D_out_final;
+            Q_unit=h_final*A_outer_unit*(Ts-tAmb); 
         }
         
-        let D_out_final = isFlat ? 1.0 : dPipe + 2*(thkM + thkM2);
-        const h_final=getSurfaceCoeff(standard,vWind,Ts,tAmb,D_out_final,isFlat);
-        let A_outer_unit=isFlat?1:Math.PI*D_out_final;
-        const Q_unit=h_final*A_outer_unit*(Ts-tAmb); 
-        
         let Q_ins_total=0;
-        if(type==='valve'){ if(valveType === 'separator'){ Q_ins_total = Q_unit * (multiplier*3) * qty; } else if(valveType === 'elbow') { Q_ins_total = Q_unit * multiplier * qty; } else { const factor=VALVE_FACTORS[valveType]||1.2; Q_ins_total=Q_unit*factor*qty; } } else if(type==='pipe'){ Q_ins_total=Q_unit*multiplier; } else { Q_ins_total=Q_unit*multiplier*qty; }
+        if(type==='valve'){ 
+            if(valveType === 'separator'){ Q_ins_total = Q_unit * (multiplier*3) * qty; } 
+            else if(valveType === 'elbow') { Q_ins_total = Q_unit * multiplier * qty; } 
+            else { const factor=VALVE_FACTORS[valveType]||1.2; Q_ins_total=Q_unit*factor*qty; } 
+        } else if(type==='pipe'){ 
+            Q_ins_total=Q_unit * multiplier * qty; 
+        } else { 
+            Q_ins_total=Q_unit * multiplier * qty; 
+        }
+
+        // KORUMA SİGORTASI: İzolasyonlu kayıp, çıplak kayıptan büyük olamaz
+        if (Q_ins_total > Q_bare_total) {
+            Q_ins_total = Q_bare_total;
+        }
 
         const energyLostBare_kWh = (Q_bare_total * hours) / 1000;
         const fuelLostBare = (energyLostBare_kWh * 860) / (LHV_Val * eff);
@@ -110,7 +143,7 @@ export default function handler(req, res) {
         const co2 = ((Q_bare_total*hours/1000) / eff) * selectedCo2Factor / 1000;
 
         return res.status(200).json({
-            Name, unitLabel, qty: (type==='pipe' ? multiplier : qty),
+            Name, unitLabel, qty: displayQty, // Güncellenmiş Qty
             moneyLostBare, potentialSaveMoney, fuelLostBare,
             energyLostBare_kWh, energyLostIns_kWh, potentialSaveKwh,
             co2, Ts
