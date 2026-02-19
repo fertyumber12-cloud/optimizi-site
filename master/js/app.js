@@ -1,6 +1,6 @@
 // ================================================================
 // CEKET FIYATLANDIRMA - APP.JS
-// Optimizi.App | v3.0 Modüler Mimari
+// Optimizi.App | v3.1 Kesin Matematik Motoru
 // ================================================================
 
 // ============ GLOBAL DATA (JSON'dan yüklenir) ============
@@ -35,9 +35,7 @@ async function loadAllData() {
         });
         await Promise.all(brandPromises);
         
-        // Geriye uyumluluk: eski global değişkenlere set et
         applyDataCompat();
-        
         console.log('✅ Veri yüklendi:', Object.keys(BRANDS).length, 'marka,', MATERIALS_DB.length, 'malzeme');
         return true;
     } catch(e) {
@@ -47,12 +45,12 @@ async function loadAllData() {
     }
 }
 
+// 🔥 404 HATASINI KÖKTEN ÇÖZEN GPS AYARI 🔥
 function getBasePath() {
     return '/master/';
 }
 
 function applyDataCompat() {
-    // Materials → M array (eski format)
     M = MATERIALS_DB.map(m => ({
         t: m.type, s: m.subtype, n: m.name,
         u: m.unit, p: m.price, c: m.currency,
@@ -60,7 +58,6 @@ function applyDataCompat() {
     }));
     M.forEach(m => { if (m.k) TK[m.n] = m.k; });
     
-    // Standards → FD, BL, AP
     FD = {};
     for (const [dn, cls] of Object.entries(STANDARDS.flange_diameters || {})) {
         FD[parseInt(dn)] = {};
@@ -81,20 +78,6 @@ function applyDataCompat() {
     }
     if (STANDARDS.hourly_cost) P.hc = STANDARDS.hourly_cost;
     
-    // Defaults
-    const d = STANDARDS.defaults || {};
-    P.oh   = d.overhead_pct      || 0.15;
-    P.mul  = d.sales_multiplier  || 2.5;
-    P.prefix = d.prefix          || 'INSJACK';
-    P.gDF  = d.difficulty        || 1.2;
-    P.lbx  = d.overlap_left      || 0.8;
-    P.lby  = d.overlap_right     || 1.0;
-    P.lbyf = d.overlap_flange    || 0.5;
-    P.lbw  = d.overlap_width     || 0.8;
-    P.ir   = d.insulation_waste_pct || 0.03;
-    P.pd   = d.padding_mm        || 60;
-    
-    // Tüm markalardan VALVE_DATA birleştir
     VALVE_DATA = {};
     for (const [brandKey, brandData] of Object.entries(BRANDS)) {
         for (const [vKey, vData] of Object.entries(brandData.valves || {})) {
@@ -106,7 +89,6 @@ function applyDataCompat() {
         }
     }
     
-    // DN>300 extrapolation
     DN_LIST.forEach(dn => {
         if (dn > 300) {
             const ratio = dn / 300;
@@ -132,14 +114,10 @@ function applyDataCompat() {
 
 // ============ THEME MANAGER ============
 let currentTheme = localStorage.getItem('insjack_theme') || 'dark';
-
 function toggleTheme() {
     currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    if (currentTheme === 'dark') {
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
+    if (currentTheme === 'dark') document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
     localStorage.setItem('insjack_theme', currentTheme);
     const btn = document.getElementById('themeBtn');
     if (btn) btn.innerHTML = `<i data-lucide="${currentTheme === 'dark' ? 'sun' : 'moon'}" class="w-4 h-4"></i>`;
@@ -150,33 +128,26 @@ function toggleTheme() {
 const DN_LIST = [15,20,25,32,40,50,65,80,100,125,150,200,250,300,350,400,450,500,600,700,800,900,1000];
 const DN_INCH  = {15:.5,20:.75,25:1,32:1.25,40:1.5,50:2,65:2.5,80:3,100:4,125:5,150:6,200:8,250:10,300:12,350:14,400:16,450:18,500:20,600:24,700:28,800:32,900:36,1000:40};
 const CLS = [150,300,400];
-
 const TN = {'PV-16':'Pistonlu Vana','GV-16K':'Glob Vana PN16','GV-25Z':'Glob Vana PN25','GV-40K':'Glob Vana PN40','MK-16':'Körüklü Vana PN16','MK-25':'Körüklü Vana PN25','MK-40':'Körüklü Vana PN40','GTK-18':'Sürgülü Vana','ARI-3YOL':'Üç Yollu Vana','PTY-30':'Pislik Tutucu','CLV-50':'Çekvalf','KV-2P':'İki Prç Küresel','KV-3P':'Üç Prç Küresel','KLB':'Kelebek Vana','BT-16':'Kondenstop','FLANS':'Flanş','pad':'Düz Yastık'};
 const TT  = {piston:'globe', globe:'globe', bellow:'globe', gate:'gate', '3way':'globe', yfilter:'globe', check_clv:'globe', ball_2:'gate', ball_3:'gate', butterfly:'gate', trap:'globe', flange:'gate', elbow:'gate'};
-const TP  = {piston:['Gövde','Flanş'], globe:['Gövde','Flanş','Kapak'], bellow:['Gövde','Flanş','Kapak'], gate:['Gövde','Flanş'], '3way':['Gövde','Flanş','Kapak'], yfilter:['Gövde'], check_clv:['Gövde'], ball_2:['Gövde','Flanş'], ball_3:['Gövde','Flanş'], butterfly:['Gövde','Flanş'], trap:['Gövde'], flange:['Flanş'], elbow:['Gövde']};
 
 // ============ GLOBAL STATE ============
-let P = {usd:32.1, eur:35.2, hc:250, oh:.15, mul:2.5, pd:60, ir:.03, sr:.00948, fw:.15, iw:.10, sw:.3, fr:50, fl:50, sm:15, re:150, lbw:.01, lbx:.3, lby:.3, lbyf:.2, gFB:'1 Sİ - 0.5 mm - Gri', gFT:'1 Sİ - 0.5 mm - Gri', gFL:'TY-50mm', gST:'SS - 3', gDS:'CamElyf-4mm', gVL:'40 mm - Gri', gSP:'SS Z+A+P', gND:'SS Ç.Pul Set', gBK:'D-Toka', gLB:'30*60', gDF:1, prefix:'INSJACK'};
+let P = {usd:32.1, eur:35.2, hc:250, oh:.15, mul:2.5, pd:60, ir:.03, sr:.00948, fw:.10, iw:.10, sw:.30, fr:50, fl:50, sm:15, re:150, lbw:0.2, lbx:0.4, lby:0.5, lbyf:0.3, gFB:'1 Sİ - 0.5 mm - Gri', gFT:'1 Sİ - 0.5 mm - Gri', gFL:'TY-50mm', gST:'SS - 3', gDS:'CamElyf-4mm', gVL:'40 mm - Gri', gSP:'SS Z+A+P', gND:'SS Ç.Pul Set', gBK:'D-Toka', gLB:'30*60', gDF:1.2, prefix:'INSJACK'};
 let M = [], FD = {}, BL = {}, AP = {}, TK = {}, IT = [], RN = 1, plQty = {}, curShow = {TL:true,USD:false,EUR:true};
 let colVis = {kumas:true, dolgu:true, dikis:true, bogma:true, cirt:true, agraf:true, pul:true, S:true, T:true, I:true, N:true, mc:true, lc:true, lh:false};
 let SVC = {cad:0, montajGun:0, montajGunMly:0, nakliye:0};
 let PP  = {gun:22, servis:2750, yemek:220, kkd:31200, saat:9, fcRate:0.05, ekKat:0};
-let PERS = [];
-let qtyRef = null;
+let PERS = []; let qtyRef = null;
 
 // ============ HELPERS ============
 const fm  = (v, d=2) => Number(v).toLocaleString('tr-TR', {minimumFractionDigits:d, maximumFractionDigits:d});
-const ftl = v => '₺' + fm(v);
-const feu = v => '€' + fm(v);
-const fus = v => '$' + fm(v);
-
+const ftl = v => '₺' + fm(v); const feu = v => '€' + fm(v); const fus = v => '$' + fm(v);
 function mn2(n)    { return M.find(m => m.n === n); }
 function mp(m)     { if (!m) return 0; return m.c === 'USD' ? m.p * P.usd : m.c === 'EUR' ? m.p * P.eur : m.p; }
 function tk2(n)    { return TK[n] || 20; }
 function gfd(dn,cl){ return (FD[dn] && FD[dn][cl]) || 0; }
 function gap(inch) { return AP[String(inch)] || {a:0, p:0}; }
 function curConv(tl, cur) { return cur === 'USD' ? tl / P.usd : cur === 'EUR' ? tl / P.eur : tl; }
-
 function gbl(ty, dn, cl) {
     const t = TT[ty];
     if (!t || !BL[t] || !BL[t][dn]) return {L1:0, L1p:0, L2:0};
@@ -186,7 +157,6 @@ function gbl(ty, dn, cl) {
     return BL[t][dn][c] || {L1:0, L1p:0, L2:0};
 }
 
-// ============ CURRENCY API ============
 async function fetchRates() {
     try {
         const res = await fetch('https://api.genelpara.com/embed/doviz.json');
@@ -196,100 +166,21 @@ async function fetchRates() {
             P.usd = parseFloat(data.USD.satis) || P.usd;
             const badge = document.getElementById('apiStatusBadge');
             if (badge) badge.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4"></i> Güncel: ${P.usd}₺ / ${P.eur}₺`;
-            lucide.createIcons();
-            recalcAll();
+            lucide.createIcons(); recalcAll();
         }
     } catch(err) {
         const badge = document.getElementById('apiStatusBadge');
-        if (badge) badge.innerHTML = `<i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400"></i> API Hatası (Varsayılan)`;
+        if (badge) badge.innerHTML = `<i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400"></i> API Hatası (Varsayılan Kur)`;
     }
 }
 
-// ============ PERSONEL ============
-function calcAllPers() {
-    let tN=0, tO=0, tM=0, cnt=PERS.length;
-    PERS.forEach(p => {
-        const E = p.net * 1.4 * 12, F = p.kidem ? E/12 : 0, G = p.kidem ? F/2 : 0;
-        const base = E + F + G + (p.servis||0)*12 + PP.yemek*PP.gun*12 + PP.kkd;
-        const Mc = base * PP.fcRate * 1.5, N = base + Mc, O = N/12/PP.gun/PP.saat/(1+PP.fcRate);
-        p._c = {E,F,G,M:Mc,N,O}; tN += N; tO += O; tM += Mc;
-    });
-    const avg = cnt > 0 ? tO/cnt*(1+PP.ekKat) : 0;
-    if (avg > 0) P.hc = avg;
-    return {tN, avg, cnt, tM};
-}
-
-function rPers() {
-    const res = calcAllPers();
-    document.getElementById('pmAvg').textContent = ftl(res.avg);
-    document.getElementById('pmCnt').textContent = res.cnt;
-    document.getElementById('pmTot').textContent = ftl(res.tN);
-    document.getElementById('pmDay').textContent = ftl(res.tN/12/PP.gun);
-    
-    document.getElementById('pmParams').innerHTML =
-        pi('Aylık Gün','gun',PP.gun,'',0) +
-        pi('Günlük Saat','saat',PP.saat,'',0) +
-        pi('Yemek','yemek',PP.yemek,'₺',0) +
-        pi('Yıllık KKD','kkd',PP.kkd,'₺',0) +
-        pi('Fazla Çal. %','fcRate',PP.fcRate*100,'%',1);
-    
-    // Param onChange handlers — bind to PP not P
-    document.querySelectorAll('#pmParams input').forEach(inp => {
-        inp.addEventListener('change', () => {
-            const k = inp.dataset.k || inp.getAttribute('data-k');
-            let v = parseFloat(inp.value) || 0;
-            if (k === 'fcRate') v /= 100;
-            PP[k] = v;
-            rPers(); recalcAll();
-        });
-    });
-
-    const b = document.getElementById('pmBody'); b.innerHTML = '';
-    PERS.forEach((p, i) => {
-        const c = p._c;
-        const tr = document.createElement('tr');
-        tr.innerHTML =
-            `<td class="lb text-center">${i+1}</td>` +
-            `<td>${p.g}</td><td>${p.a}</td><td class="c">${fm(p.net)}</td>` +
-            `<td class="c">${fm(c.E)}</td><td class="c">${fm(c.F)}</td><td class="c">${fm(c.G)}</td>` +
-            `<td class="c">${fm(p.servis||0)}</td><td class="c">${PP.yemek}</td><td class="c">${fm(PP.kkd,0)}</td>` +
-            `<td class="c text-amber-400 font-bold">${fm(c.M)}</td>` +
-            `<td class="c text-indigo-400 font-bold">${fm(c.N)}</td>` +
-            `<td class="c font-mono font-black text-[0.85rem] text-emerald-400">${fm(c.O)}</td>` +
-            `<td class="text-center"><button onclick="PERS.splice(${i},1);rPers();recalcAll()" class="text-red-400"><i data-lucide="x" class="w-4 h-4"></i></button></td>`;
-        b.appendChild(tr);
-    });
-
-    const ftCnt  = document.getElementById('pmFcTot');
-    const ftNTot = document.getElementById('pmNTot');
-    const ftOTot = document.getElementById('pmOTot');
-    if (ftCnt)  ftCnt.textContent  = fm(PERS.reduce((s,p)=>s+(p._c.M||0),0));
-    if (ftNTot) ftNTot.textContent = fm(PERS.reduce((s,p)=>s+(p._c.N||0),0));
-    if (ftOTot) ftOTot.textContent = fm(res.avg);
-
-    lucide.createIcons();
-}
-
-function openPersModal() { document.getElementById('persModal').classList.add('show'); }
-function submitPers() {
-    const g   = document.getElementById('npGorev').value;
-    const a   = document.getElementById('npAd').value;
-    const net = parseFloat(document.getElementById('npNet').value) || 0;
-    const kidem   = parseInt(document.getElementById('npKidem').value);
-    const servis  = parseFloat(document.getElementById('npServis').value) || 0;
-    if (!a) { toast('Ad girin', 'er'); return; }
-    PERS.push({g, a, net, kidem, servis});
-    document.getElementById('persModal').classList.remove('show');
-    rPers(); recalcAll(); toast(a + ' eklendi');
-}
-
-// ============ HESAPLAMA ============
+// ============ HESAPLAMA (EXCEL MANTIĞININ BİREBİR AYNISI) ============
 function calcItem(it) {
     const _vd = VALVE_DATA[it.vref || it.ty];
     const _dd = _vd && _vd.dims && _vd.dims[it.dn] ? _vd.dims[it.dn] : null;
     const gFM = mn2(P.gFL);
-    const I   = gFM ? tk2(gFM.n) : 20;
-    const N   = _dd ? _dd.D : gfd(it.dn, it.cl);
+    const I   = gFM ? tk2(gFM.n) : 20; // İzolasyon Kalınlığı (mm)
+    const N   = _dd ? _dd.D : gfd(it.dn, it.cl); // Flanş Dış Çapı (mm)
     const lens = gbl(it.ty, it.dn, it.cl);
     const inch = DN_INCH[it.dn] || 0;
     const apv  = gap(inch);
@@ -305,42 +196,52 @@ function calcItem(it) {
         const spP = mp(mn2(P.gSP)), ndP = mp(mn2(P.gND));
         let S, T;
 
+        const L = lens.L1 || 0;
+
+        // 1. BOY VE ÇEVRE (Excel S ve T formülleri)
         if (pt.nm === 'Gövde' || pt.nm === 'Tek Parça') {
-            const K = (lens.L1||0) + P.fr + P.fl;
-            S = it.qt===0 ? 0 : (((N + 2*localI) * Math.PI) + P.sm);
-            T = it.qt===0 ? 0 : (K + localI + P.sm);
+            const K = L + P.fr + P.fl; // Gerçek Boy (Vana Boyu + Sağ + Sol Flanş Payı)
+            S = it.qt === 0 ? 0 : (((N + 2 * localI) * Math.PI) + P.sm); // Çevre = (Dış Çap + 2*İzolasyon) * PI + Dikiş Payı
+            T = it.qt === 0 ? 0 : (K + localI + P.sm); // Boy
         } else if (pt.nm === 'Flanş') {
-            const fL = lens.L1p || lens.L2 || (lens.L1||0);
+            const fL = lens.L1p || lens.L2 || L;
             const K = fL - N/2;
-            S = it.qt===0 ? 0 : (((N + 2*localI) * Math.PI) + P.sm);
-            T = it.qt===0 ? 0 : (K + localI + P.sm);
+            S = it.qt === 0 ? 0 : (((N + 2 * localI) * Math.PI) + P.sm);
+            T = it.qt === 0 ? 0 : (K + localI + P.sm);
         } else if (pt.nm === 'Kapak') {
-            S = it.qt===0 ? 0 : ((N + 2*localI) + P.sm);
+            S = it.qt === 0 ? 0 : ((N + 2 * localI) + P.sm);
             T = S;
+        } else if (pt.nm === 'Yastık') {
+            S = it.padW || 0;
+            T = it.padH || 0;
         } else {
-            S = pt.ov.S || 0; T = pt.ov.T || 0;
+            S = pt.ov.S || 0; 
+            T = pt.ov.T || 0;
         }
 
         if (pt.ov.S != null) S = pt.ov.S;
         if (pt.ov.T != null) T = pt.ov.T;
 
-        if (it.qt===0 || !S || !T) {
+        if (it.qt === 0 || !S || !T) {
             pt.calc = {S:0,T:0,I:localI,N,fab:0,fil:0,sew:0,drw:0,vlc:0,ag:0,pl:0,mc:0,lc:0,lh:0};
             return;
         }
 
-        const fB2 = S*T*2*(1+P.fw)/1e6;
-        const fE  = 90*T*(1+P.fw)/1e6;
-        const fR  = (50*2*S)*(1+P.fw)/1e6;
-        let fab = pt.ov.fab != null ? pt.ov.fab : (fB2+fE+fR);
-        let fil = pt.ov.fil != null ? pt.ov.fil : ((S-P.sm)*(T-localI-P.sm)*(1+P.iw)/1e6);
-        let sew = pt.ov.sew != null ? pt.ov.sew : (((2*(S+T))+(2*S)+(7.5*T))*((1+P.sw)*2.4/1000));
-        let drw = pt.ov.drw != null ? pt.ov.drw : (((S+P.re)*2)/1000);
-        let vlc = pt.ov.vlc != null ? pt.ov.vlc : ((lens.L1||T)/1000);
-        let ag  = pt.ov.ag  != null ? pt.ov.ag  : apv.a;
-        let pl  = pt.ov.pl  != null ? pt.ov.pl  : apv.p;
-        let mc  = pt.ov.mc  != null ? pt.ov.mc  : ((fab/2*fbP)+(fab/2*ftP)+(fil*flP)+(sew*stP)+(drw*dsP)+(vlc*vlP)+(ag*spP)+(pl*ndP));
-        const lh = (pt.bw*sew + pt.bx*fil + pt.by) * it.df;
+        // 2. METRAJ VE FİRE HESAPLAMALARI (Excel Milyona Bölme Hilesi)
+        let fab = pt.ov.fab != null ? pt.ov.fab : ((S * T * 2 * (1 + P.fw)) / 1000000); // Kumaş (m2) - 2 Kat
+        let fil = pt.ov.fil != null ? pt.ov.fil : ((S * T * (1 + P.iw)) / 1000000);     // Dolgu (m2)
+        let sew = pt.ov.sew != null ? pt.ov.sew : ((((T * 2) + S) * (1 + P.sw)) / 1000); // Dikiş İpi (m)
+        let drw = pt.ov.drw != null ? pt.ov.drw : (((S + P.re) * 2) / 1000);            // Boğma İpi (m)
+        let vlc = pt.ov.vlc != null ? pt.ov.vlc : (T / 1000);                           // Cırt Bant (m)
+        let ag  = pt.ov.ag  != null ? pt.ov.ag  : apv.a;                                // Agraf Adet
+        let pl  = pt.ov.pl  != null ? pt.ov.pl  : apv.p;                                // Pul Adet
+
+        // 3. BİRİM MALZEME MALİYETİ
+        let mc  = pt.ov.mc  != null ? pt.ov.mc  : ((fab/2*fbP) + (fab/2*ftP) + (fil*flP) + (sew*stP) + (drw*dsP) + (vlc*vlP) + (ag*spP) + (pl*ndP));
+        
+        // 4. İŞÇİLİK MALİYETİ
+        const baseLabor = (pt.nm === 'Flanş' ? P.lbyf : P.lby);
+        const lh = ((fab/2 * P.lbx) + baseLabor) * it.df;
         let lc = pt.ov.lc != null ? pt.ov.lc : (lh * P.hc);
 
         pt.calc = {S,T,I:localI,N,fab,fil,sew,drw,vlc,ag,pl,mc,lc,lh};
@@ -358,40 +259,22 @@ function calcItem(it) {
 }
 
 function recalcAll() {
-    IT.forEach(calcItem);
-    rProd();
+    IT.forEach(calcItem); rProd();
     const ap2 = document.querySelector('.pane.on');
-    if (ap2) {
-        if (ap2.id === 'p-pl') rPL();
-        if (ap2.id === 'p-ms') rMas();
-        if (ap2.id === 'p-pr') rPar();
-    }
-    const tI = IT.length;
-    const tJ = IT.reduce((s,i) => s + i.qt, 0);
-    const tH = IT.reduce((s,i) => s + ((i.calc.tLH||0) * i.qt), 0);
-    document.getElementById('sI').textContent = tI;
-    document.getElementById('sJ').textContent = tJ;
-    document.getElementById('sH').textContent = fm(tH, 1);
+    if (ap2) { if (ap2.id === 'p-pl') rPL(); if (ap2.id === 'p-ms') rMas(); if (ap2.id === 'p-pr') rPar(); }
+    const tI = IT.length; const tJ = IT.reduce((s,i) => s + i.qt, 0); const tH = IT.reduce((s,i) => s + ((i.calc.tLH||0) * i.qt), 0);
+    document.getElementById('sI').textContent = tI; document.getElementById('sJ').textContent = tJ; document.getElementById('sH').textContent = fm(tH, 1);
 }
 
-// ============ COLUMN VISIBILITY ============
+// ============ UI FONKSİYONLARI ============
 function applyColVis() {
-    const map = {
-        kumas:'col-kumas', dolgu:'col-dolgu', dikis:'col-dikis',
-        bogma:'col-bogma', cirt:'col-cirt', agraf:'col-agraf',
-        pul:'col-pul', S:'col-S', T:'col-T', I:'col-I', N:'col-N',
-        mc:'col-mc', lc:'col-lc', lh:'col-lh'
-    };
+    const map = {kumas:'col-kumas', dolgu:'col-dolgu', dikis:'col-dikis', bogma:'col-bogma', cirt:'col-cirt', agraf:'col-agraf', pul:'col-pul', S:'col-S', T:'col-T', I:'col-I', N:'col-N', mc:'col-mc', lc:'col-lc', lh:'col-lh'};
     for (const [k, cls] of Object.entries(map)) {
-        document.querySelectorAll('.' + cls).forEach(el => {
-            el.style.display = colVis[k] ? '' : 'none';
-        });
+        document.querySelectorAll('.' + cls).forEach(el => { el.style.display = colVis[k] ? '' : 'none'; });
     }
 }
-
 function toggleCols() { applyColVis(); }
 
-// ============ ÜRÜN DETAY ============
 function rProd() {
     const b = document.getElementById('pdBody'); b.innerHTML = '';
     const cur = document.getElementById('pdCur').value;
@@ -442,8 +325,7 @@ function rProd() {
                 h += `<td class="c font-mono text-emerald-400 font-black text-[1rem]" rowspan="${np}">${fm(curConv(ic.tS||0,cur))}</td>`;
                 h += `<td style="text-align:center" rowspan="${np}"><button onclick="optConfirm('Sil?',()=>{IT.splice(${ii},1);recalcAll()})" class="bt bt2 px-2 py-1"><i data-lucide="x" class="w-3 h-3"></i></button></td>`;
             }
-            tr.innerHTML = h;
-            b.appendChild(tr);
+            tr.innerHTML = h; b.appendChild(tr);
         });
     });
 
@@ -451,8 +333,7 @@ function rProd() {
     document.getElementById('pdFoot').innerHTML = IT.length
         ? `<tr><td colspan="22" class="lb" style="text-align:right;font-weight:900">TOPLAM SATIŞ BEDELİ: </td><td class="c font-mono text-emerald-400 font-black text-[1.1rem]" colspan="3">${cur} ${fm(curConv(tS,cur))}</td></tr>`
         : '';
-    applyColVis();
-    lucide.createIcons();
+    applyColVis(); lucide.createIcons();
 }
 
 function ovr(ii, pi, k, td) {
@@ -463,14 +344,13 @@ function ovr(ii, pi, k, td) {
     td.textContent = ''; td.appendChild(inp); inp.focus(); inp.select();
     function ok() {
         const nv = parseFloat(inp.value);
-        if (!isNaN(nv) && nv !== cv) { pt.ov[k] = nv; toast(k + ' override edildi', 'in'); }
+        if (!isNaN(nv) && nv !== cv) { pt.ov[k] = nv; toast(k + ' güncellendi', 'in'); }
         recalcAll();
     }
     inp.onblur = ok;
     inp.onkeydown = e => { if (e.key==='Enter') ok(); if (e.key==='Escape') { delete pt.ov[k]; recalcAll(); } };
 }
 
-// ============ GLOBAL MALZEME SEÇİMİ ============
 function rGlobal() {
     const fab = M.filter(m => m.t === 'Kumaş');
     const fil = M.filter(m => m.t === 'Dolgu');
@@ -496,7 +376,6 @@ function rGlobal() {
         `</div>`;
 }
 
-// ============ GENEL ÖZET ============
 function rMas() {
     const tM   = IT.reduce((s,i) => s+(i.calc.tMA||0), 0);
     const tL   = IT.reduce((s,i) => s+(i.calc.tLA||0), 0);
@@ -526,8 +405,7 @@ function rMas() {
         `<div class="pr"><span class="l">Nakliye</span><input type="number" value="${SVC.nakliye}" step="100" onchange="SVC.nakliye=parseFloat(this.value)||0;rMas()"><span class="u">₺</span></div>`;
     document.getElementById('msSvcTotal').textContent = ftl(svcTotal);
 
-    const mr = (l,d,v) =>
-        `<tr><td class="lb text-left">${l}</td><td style="text-align:center;font-size:.68rem;opacity:.7">${d}</td><td class="c font-mono">${v}</td></tr>`;
+    const mr = (l,d,v) => `<tr><td class="lb text-left">${l}</td><td style="text-align:center;font-size:.68rem;opacity:.7">${d}</td><td class="c font-mono">${v}</td></tr>`;
     document.getElementById('tMC').innerHTML =
         `<tr><td colspan="3" class="lb font-bold text-xs uppercase opacity-60">DOĞRUDAN</td></tr>` +
         mr('Malzeme','',ftl(tM)) + mr('İşçilik (Oto)',fm(P.hc)+' ₺/sa',ftl(tL)) +
@@ -546,8 +424,7 @@ function rMas() {
         tots.sew += (pc.sew||0)*it.qt; tots.drw += (pc.drw||0)*it.qt;
         tots.vlc += (pc.vlc||0)*it.qt; tots.ag  += (pc.ag||0)*it.qt; tots.pl += (pc.pl||0)*it.qt;
     }));
-    const mm = (l,q,u) =>
-        `<tr><td class="lb">${l}</td><td class="c font-mono text-cyan-400">${fm(q,2)} ${u}</td></tr>`;
+    const mm = (l,q,u) => `<tr><td class="lb">${l}</td><td class="c font-mono text-cyan-400">${fm(q,2)} ${u}</td></tr>`;
     document.getElementById('tMM').innerHTML =
         `<thead><tr><th>Kategori</th><th class="text-right">Toplam İhtiyaç</th></tr></thead><tbody>` +
         mm('Kumaş Toplam',tots.fab/2,'M²') + mm('Dolgu Toplam',tots.fil,'M²') +
@@ -568,7 +445,6 @@ function rMas() {
     document.getElementById('msJC').textContent = tJ;
 }
 
-// ============ PARAMETRELER ============
 function rPar() {
     document.getElementById('pDov').innerHTML =
         pi('USD/TL','usd',P.usd,'',2) + pi('EUR/TL','eur',P.eur,'',2) + '<hr class="my-2 opacity-20">' +
@@ -582,23 +458,12 @@ function rPar() {
     rFT(); rLT('gate'); rAT();
 }
 
-function pi(lb, k, v, u='', d=2) {
-    return `<div class="pr"><span class="l">${lb}</span><input type="number" value="${v}" step="${d>0?Math.pow(10,-d):1}" data-k="${k}" class="font-mono" onchange="up(this)"><span class="u">${u}</span></div>`;
-}
-function up(el) {
-    const k = el.dataset.k;
-    let v = parseFloat(el.value) || 0;
-    if (['oh','fw','iw','sw','ir','sr'].includes(k)) v /= 100;
-    P[k] = v;
-    recalcAll();
-}
+function pi(lb, k, v, u='', d=2) { return `<div class="pr"><span class="l">${lb}</span><input type="number" value="${v}" step="${d>0?Math.pow(10,-d):1}" data-k="${k}" class="font-mono" onchange="up(this)"><span class="u">${u}</span></div>`; }
+function up(el) { const k = el.dataset.k; let v = parseFloat(el.value) || 0; if (['oh','fw','iw','sw','ir','sr'].includes(k)) v /= 100; P[k] = v; recalcAll(); }
 
 function rFT() {
-    const t = document.getElementById('tFl');
-    if (!t) return;
-    let h = '<thead><tr><th>DN</th>';
-    CLS.forEach(c => h += `<th>${c}</th>`);
-    h += '</tr></thead><tbody>';
+    const t = document.getElementById('tFl'); if (!t) return;
+    let h = '<thead><tr><th>DN</th>'; CLS.forEach(c => h += `<th>${c}</th>`); h += '</tr></thead><tbody>';
     DN_LIST.forEach(dn => {
         h += `<tr><td class="lb text-indigo-400 font-bold">DN${dn}</td>`;
         CLS.forEach(cl => { const v = (FD[dn]&&FD[dn][cl])||''; h += `<td class="c font-mono text-cyan-400">${v||'—'}</td>`; });
@@ -609,33 +474,21 @@ function rFT() {
 
 function rLT(ty) {
     const t = document.getElementById('tLn'), d = BL[ty]||{};
-    let h = '<thead><tr><th>DN</th>';
-    CLS.forEach(c => h += `<th colspan="3">${c}</th>`);
-    h += "</tr><tr><th></th>";
-    CLS.forEach(() => h += "<th class='text-amber-400'>L1</th><th class='text-cyan-400'>L1'</th><th class='text-emerald-400'>L2</th>");
+    let h = '<thead><tr><th>DN</th>'; CLS.forEach(c => h += `<th colspan="3">${c}</th>`);
+    h += "</tr><tr><th></th>"; CLS.forEach(() => h += "<th class='text-amber-400'>L1</th><th class='text-cyan-400'>L1'</th><th class='text-emerald-400'>L2</th>");
     h += '</tr></thead><tbody>';
     DN_LIST.forEach(dn => {
         h += `<tr><td class="lb text-indigo-400 font-bold">DN${dn}</td>`;
-        CLS.forEach(cl => {
-            const e = (d[dn]&&d[dn][cl])||{};
-            ['L1','L1p','L2'].forEach(k => { h += `<td class="c font-mono">${e[k]||'—'}</td>`; });
-        });
+        CLS.forEach(cl => { const e = (d[dn]&&d[dn][cl])||{}; ['L1','L1p','L2'].forEach(k => { h += `<td class="c font-mono">${e[k]||'—'}</td>`; }); });
         h += '</tr>';
     });
     t.innerHTML = h + '</tbody>';
 }
 
-function slt(ty) {
-    ['gate','globe'].forEach(t => {
-        const b = document.getElementById('bl-'+t);
-        if (b) b.className = t===ty ? 'bt bt4 on' : 'bt bt4';
-    });
-    rLT(ty);
-}
+function slt(ty) { ['gate','globe'].forEach(t => { const b = document.getElementById('bl-'+t); if (b) b.className = t===ty ? 'bt bt4 on' : 'bt bt4'; }); rLT(ty); }
 
 function rAT() {
-    const t = document.getElementById('tAg');
-    if (!t) return;
+    const t = document.getElementById('tAg'); if (!t) return;
     const ks = Object.keys(AP).sort((a,b) => parseFloat(a)-parseFloat(b));
     let h = '<thead><tr><th>Çap"</th><th>Agraf</th><th>Pul</th></tr></thead><tbody>';
     ks.forEach(k => { const d = AP[k]; h += `<tr><td class="lb text-indigo-400 font-bold">${k}"</td><td class="c">${d.a}</td><td class="c">${d.p}</td></tr>`; });
@@ -643,12 +496,9 @@ function rAT() {
 }
 
 function rVRef() {
-    const sel = document.getElementById('vRefSel');
-    if (!sel) return;
-    const vd = VALVE_DATA[sel.value];
-    if (!vd) return;
-    const dims = vd.dims;
-    const dns  = Object.keys(dims).map(Number).sort((a,b)=>a-b);
+    const sel = document.getElementById('vRefSel'); if (!sel) return;
+    const vd = VALVE_DATA[sel.value]; if (!vd) return;
+    const dims = vd.dims; const dns = Object.keys(dims).map(Number).sort((a,b)=>a-b);
     let h = '<thead><tr><th>DN</th><th>D (Flanş Çap)</th><th>L (Gövde Boy)</th><th>H (Yükseklik)</th><th>Dk (Kapak Çap)</th></tr></thead><tbody>';
     dns.forEach(dn => {
         const d = dims[dn];
@@ -657,7 +507,6 @@ function rVRef() {
     document.getElementById('tVRef').innerHTML = h + '</tbody>';
 }
 
-// ============ MALZEMELEr ============
 let mfl = 'all';
 function rMat() {
     const b = document.getElementById('mBody'); b.innerHTML = '';
@@ -678,8 +527,7 @@ function rMat() {
         b.appendChild(tr);
     });
     const mfBtns = document.getElementById('mfBtns');
-    if (mfBtns) mfBtns.innerHTML = ['all','Kumaş','Dolgu','Yardımcı','Isıtıcı'].map(t =>
-        `<button class="${mfl===t?'on':''}" onclick="mfl='${t}';rMat()">${t==='all'?'Tümü':t}</button>`).join('');
+    if (mfBtns) mfBtns.innerHTML = ['all','Kumaş','Dolgu','Yardımcı','Isıtıcı'].map(t => `<button class="${mfl===t?'on':''}" onclick="mfl='${t}';rMat()">${t==='all'?'Tümü':t}</button>`).join('');
     lucide.createIcons();
 }
 
@@ -690,19 +538,13 @@ function submitMat() {
     const p = parseFloat(document.getElementById('nmPrice').value)||0, c = document.getElementById('nmCur').value;
     const k = parseFloat(document.getElementById('nmThick').value) || null;
     if (!n) { toast('Lütfen malzeme cinsi girin.', 'er'); return; }
-    M.push({t,s,n,u,p,c,k});
-    if (k) TK[n] = k;
-    rMat(); rGlobal(); recalcAll();
-    document.getElementById('modalMat').classList.remove('show');
-    toast('Yeni malzeme sisteme eklendi', 'in');
+    M.push({t,s,n,u,p,c,k}); if (k) TK[n] = k;
+    rMat(); rGlobal(); recalcAll(); document.getElementById('modalMat').classList.remove('show'); toast('Yeni malzeme eklendi', 'in');
 }
 
-// ============ FİYAT LİSTESİ ============
 function rPL() {
     const ct = document.getElementById('curToggle');
-    if (ct) ct.innerHTML = ['TL','USD','EUR'].map(c =>
-        `<button class="${curShow[c]?'on':''}" onclick="curShow['${c}']=!curShow['${c}'];rPL()">${c}</button>`).join('');
-
+    if (ct) ct.innerHTML = ['TL','USD','EUR'].map(c => `<button class="${curShow[c]?'on':''}" onclick="curShow['${c}']=!curShow['${c}'];rPL()">${c}</button>`).join('');
     const hd = document.getElementById('plHead');
     let hh = '<tr><th class="resizable-th">REF KODU</th><th class="resizable-th">DN</th><th class="resizable-th" style="min-width:150px">Mahal/Not</th><th class="resizable-th" style="min-width:250px">Ekipman Tanımı</th><th class="resizable-th">Adet</th>';
     if (curShow.TL)  hh += '<th class="resizable-th" style="background:rgba(99,102,241,.1)">Birim TL</th><th class="resizable-th" style="background:rgba(99,102,241,.13)">Toplam TL</th>';
@@ -710,16 +552,11 @@ function rPL() {
     if (curShow.EUR) hh += '<th class="resizable-th" style="background:rgba(6,182,212,.1)">Birim EUR</th><th class="resizable-th" style="background:rgba(6,182,212,.15)">Toplam EUR</th>';
     hh += '</tr>'; hd.innerHTML = hh;
 
-    const b = document.getElementById('plBody'); b.innerHTML = '';
-    let totTL = 0;
+    const b = document.getElementById('plBody'); b.innerHTML = ''; let totTL = 0;
     IT.forEach(it => {
-        const ic = it.calc, q = plQty[it.ref]||1, aq = it.qt*q;
-        const uTL = ic.us||0, tTL = uTL*aq;
-        totTL += tTL;
-        const pref = P.prefix ? `${P.prefix}-` : '';
-        const tr = document.createElement('tr');
-        let h = `<td class="lb font-bold text-indigo-400 text-center">${pref}${it.ref}</td>`;
-        h += `<td class="text-center font-bold">${it.ty==='pad'?'—':'DN'+it.dn}</td>`;
+        const ic = it.calc, q = plQty[it.ref]||1, aq = it.qt*q; const uTL = ic.us||0, tTL = uTL*aq; totTL += tTL;
+        const pref = P.prefix ? `${P.prefix}-` : ''; const tr = document.createElement('tr');
+        let h = `<td class="lb font-bold text-indigo-400 text-center">${pref}${it.ref}</td><td class="text-center font-bold">${it.ty==='pad'?'—':'DN'+it.dn}</td>`;
         h += `<td><input value="${it.mh||''}" onchange="IT.find(x=>x.ref===${it.ref}).mh=this.value" placeholder="Mahal..."></td>`;
         h += `<td class="lb text-left">${it.label||(it.ty==='pad'?'Düz Yastık':(TN[it.ty]||it.ty)+' Ceketi - DN'+it.dn+' PN'+it.cl)}</td>`;
         h += `<td class="o text-center font-bold" ondblclick="openQtyModal(${it.ref})" title="Değiştirmek için çift tıkla">${aq}</td>`;
@@ -737,188 +574,78 @@ function rPL() {
     ft.innerHTML = fh;
 }
 
-// ============ NAVİGASYON ============
 function go(id, el) {
     document.querySelectorAll('.pane').forEach(p => p.classList.remove('on'));
-    document.querySelectorAll('.sidebar-link').forEach(s => {
-        s.classList.remove('text-indigo-600','bg-indigo-50','dark:bg-indigo-500/10','dark:text-indigo-400');
-        s.classList.add('text-slate-600','dark:text-slate-400');
-    });
-    const pane = document.getElementById('p-'+id);
-    if (pane) pane.classList.add('on');
-    if (el) {
-        el.classList.remove('text-slate-600','dark:text-slate-400');
-        el.classList.add('text-indigo-600','bg-indigo-50','dark:bg-indigo-500/10','dark:text-indigo-400');
-    }
-    if (id==='pl') rPL();
-    if (id==='pd') { rGlobal(); rProd(); }
-    if (id==='ms') rMas();
-    if (id==='pm') rPers();
-    if (id==='mf') rMat();
-    if (id==='pr') { rPar(); rVRef(); }
+    document.querySelectorAll('.sidebar-link').forEach(s => { s.classList.remove('text-indigo-600','bg-indigo-50','dark:bg-indigo-500/10','dark:text-indigo-400'); s.classList.add('text-slate-600','dark:text-slate-400'); });
+    const pane = document.getElementById('p-'+id); if (pane) pane.classList.add('on');
+    if (el) { el.classList.remove('text-slate-600','dark:text-slate-400'); el.classList.add('text-indigo-600','bg-indigo-50','dark:bg-indigo-500/10','dark:text-indigo-400'); }
+    if (id==='pl') rPL(); if (id==='pd') { rGlobal(); rProd(); } if (id==='ms') rMas();
+    if (id==='pm') rPers(); if (id==='mf') rMat(); if (id==='pr') { rPar(); rVRef(); }
     lucide.createIcons();
 }
 
-// ============ SİDEBAR & MODAL ============
 function toggleSidebar() {
-    const n = document.getElementById('mainSidebar');
-    const closed = n.style.width === '72px';
-    if (closed) {
-        n.style.width = '256px'; n.style.minWidth = '256px';
-        n.querySelectorAll('.sidebar-text,.sidebar-title').forEach(e => e.style.display = '');
-        const lt = n.querySelector('.logo-text'); if (lt) lt.style.display = '';
-    } else {
-        n.style.width = '72px'; n.style.minWidth = '72px';
-        n.querySelectorAll('.sidebar-text,.sidebar-title').forEach(e => e.style.display = 'none');
-        const lt = n.querySelector('.logo-text'); if (lt) lt.style.display = 'none';
-    }
+    const n = document.getElementById('mainSidebar'); const closed = n.style.width === '72px';
+    if (closed) { n.style.width = '256px'; n.style.minWidth = '256px'; n.querySelectorAll('.sidebar-text,.sidebar-title').forEach(e => e.style.display = ''); const lt = n.querySelector('.logo-text'); if (lt) lt.style.display = ''; } 
+    else { n.style.width = '72px'; n.style.minWidth = '72px'; n.querySelectorAll('.sidebar-text,.sidebar-title').forEach(e => e.style.display = 'none'); const lt = n.querySelector('.logo-text'); if (lt) lt.style.display = 'none'; }
 }
-
-function openRight() {
-    document.getElementById('rightSidebar').style.transform = 'translateX(0)';
-    const o = document.getElementById('rsOverlay');
-    o.classList.remove('hidden'); o.style.opacity = '0';
-    setTimeout(() => { o.style.opacity = '1'; }, 10);
-    lucide.createIcons();
-}
-function closeRight() {
-    document.getElementById('rightSidebar').style.transform = 'translateX(100%)';
-    const o = document.getElementById('rsOverlay');
-    o.style.opacity = '0'; setTimeout(() => o.classList.add('hidden'), 300);
-}
+function openRight() { document.getElementById('rightSidebar').style.transform = 'translateX(0)'; const o = document.getElementById('rsOverlay'); o.classList.remove('hidden'); o.style.opacity = '0'; setTimeout(() => { o.style.opacity = '1'; }, 10); lucide.createIcons(); }
+function closeRight() { document.getElementById('rightSidebar').style.transform = 'translateX(100%)'; const o = document.getElementById('rsOverlay'); o.style.opacity = '0'; setTimeout(() => o.classList.add('hidden'), 300); }
 function openPopup(id)  { document.getElementById(id).classList.add('show'); lucide.createIcons(); }
 function closePopup(id) { document.getElementById(id).classList.remove('show'); }
 
-// ============ SÜTUN YÖNETİMİ ============
-function openColVisModal() {
-    Object.keys(colVis).forEach(k => {
-        const c = document.getElementById('chk_'+k);
-        if (c) c.checked = colVis[k];
-    });
-    openPopup('colVisModal');
-}
-function saveCols() {
-    Object.keys(colVis).forEach(k => {
-        const c = document.getElementById('chk_'+k);
-        if (c) colVis[k] = c.checked;
-    });
-    applyColVis();
-    closePopup('colVisModal');
-    toast('Sütun ayarları kaydedildi');
-}
+function openColVisModal() { Object.keys(colVis).forEach(k => { const c = document.getElementById('chk_'+k); if (c) c.checked = colVis[k]; }); openPopup('colVisModal'); }
+function saveCols() { Object.keys(colVis).forEach(k => { const c = document.getElementById('chk_'+k); if (c) colVis[k] = c.checked; }); applyColVis(); closePopup('colVisModal'); toast('Sütun ayarları kaydedildi'); }
 
-// ============ ADET MODAL ============
-function openQtyModal(ref) {
-    qtyRef = ref;
-    const it = IT.find(i => i.ref === ref);
-    if (!it) return;
-    document.getElementById('qmCur').textContent = it.qt;
-    document.getElementById('qmVal').value = plQty[ref] || 1;
-    document.getElementById('qtyModal').classList.add('show');
-}
-function submitQty() {
-    if (qtyRef) plQty[qtyRef] = parseInt(document.getElementById('qmVal').value) || 1;
-    document.getElementById('qtyModal').classList.remove('show');
-    rPL();
-}
+function openQtyModal(ref) { qtyRef = ref; const it = IT.find(i => i.ref === ref); if (!it) return; document.getElementById('qmCur').textContent = it.qt; document.getElementById('qmVal').value = plQty[ref] || 1; document.getElementById('qtyModal').classList.add('show'); }
+function submitQty() { if (qtyRef) plQty[qtyRef] = parseInt(document.getElementById('qmVal').value) || 1; document.getElementById('qtyModal').classList.remove('show'); rPL(); }
 
-// ============ PDF ============
 function openPdfModal() {
     document.getElementById('pdfPrefixTitle').textContent = `Proje: ${P.prefix||'Genel'} İzolasyon Ceketleri`;
-    const tbody = document.getElementById('pdfTableBody');
-    const tfoot = document.getElementById('pdfTableFoot');
+    const tbody = document.getElementById('pdfTableBody'); const tfoot = document.getElementById('pdfTableFoot');
     tbody.innerHTML = ''; let total = 0;
-    if (IT.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center p-4">Listede ürün bulunmamaktadır.</td></tr>';
-    } else {
+    if (IT.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="text-center p-4">Listede ürün bulunmamaktadır.</td></tr>'; } 
+    else {
         IT.forEach(it => {
-            const aq = it.qt * (plQty[it.ref]||1);
-            const uPrice = it.calc.us||0, tPrice = uPrice*aq;
-            total += tPrice;
+            const aq = it.qt * (plQty[it.ref]||1); const uPrice = it.calc.us||0, tPrice = uPrice*aq; total += tPrice;
             const pref = P.prefix ? `${P.prefix}-` : '';
-            tbody.innerHTML += `<tr class="border-b border-gray-300">
-                <td class="p-2 font-bold">${pref}${it.ref}</td>
-                <td class="p-2">${TN[it.ty]||it.ty} Ceketi</td>
-                <td class="p-2 text-center">${it.ty==='pad'?'—':'DN'+it.dn}</td>
-                <td class="p-2 text-center font-bold">${aq}</td>
-                <td class="p-2 text-right">₺ ${fm(uPrice)}</td>
-                <td class="p-2 text-right font-bold text-indigo-700">₺ ${fm(tPrice)}</td>
-            </tr>`;
+            tbody.innerHTML += `<tr class="border-b border-gray-300"><td class="p-2 font-bold">${pref}${it.ref}</td><td class="p-2">${TN[it.ty]||it.ty} Ceketi</td><td class="p-2 text-center">${it.ty==='pad'?'—':'DN'+it.dn}</td><td class="p-2 text-center font-bold">${aq}</td><td class="p-2 text-right">₺ ${fm(uPrice)}</td><td class="p-2 text-right font-bold text-indigo-700">₺ ${fm(tPrice)}</td></tr>`;
         });
     }
-    tfoot.innerHTML = `<tr class="bg-gray-100 border-t-2 border-gray-800 font-bold text-lg">
-        <td colspan="5" class="p-4 text-right">TOPLAM TUTAR (TL):</td>
-        <td class="p-4 text-right text-indigo-800">₺ ${fm(total)}</td>
-    </tr>`;
+    tfoot.innerHTML = `<tr class="bg-gray-100 border-t-2 border-gray-800 font-bold text-lg"><td colspan="5" class="p-4 text-right">TOPLAM TUTAR (TL):</td><td class="p-4 text-right text-indigo-800">₺ ${fm(total)}</td></tr>`;
     document.getElementById('pdfModal').classList.add('show');
 }
 function downloadPDF() {
     const element = document.getElementById('pdfContentToPrint');
-    const opt = {
-        margin: 10, filename: `Fiyat_Teklifi_${P.prefix||'Liste'}.pdf`,
-        image: { type:'jpeg', quality:.98 },
-        html2canvas: { scale:2 },
-        jsPDF: { unit:'mm', format:'a4', orientation:'portrait' }
-    };
-    toast('PDF Hazırlanıyor...', 'in');
-    html2pdf().set(opt).from(element).save().then(() => {
-        document.getElementById('pdfModal').classList.remove('show');
-        toast('PDF Başarıyla İndirildi');
-    });
+    const opt = { margin: 10, filename: `Fiyat_Teklifi_${P.prefix||'Liste'}.pdf`, image: { type:'jpeg', quality:.98 }, html2canvas: { scale:2 }, jsPDF: { unit:'mm', format:'a4', orientation:'portrait' } };
+    toast('PDF Hazırlanıyor...', 'in'); html2pdf().set(opt).from(element).save().then(() => { document.getElementById('pdfModal').classList.remove('show'); toast('PDF Başarıyla İndirildi'); });
 }
 
-// ============ TOAST & CONFIRM ============
 function toast(m, t='ok') {
-    const bx = document.getElementById('toastBox');
-    const d  = document.createElement('div');
-    d.className = `toast ${t}`;
+    const bx = document.getElementById('toastBox'); const d = document.createElement('div'); d.className = `toast ${t}`;
     d.innerHTML = `<i data-lucide="${t==='ok'?'check-circle':t==='er'?'alert-octagon':'info'}"></i><span>${m}</span>`;
-    bx.appendChild(d); lucide.createIcons();
-    setTimeout(() => { d.style.opacity='0'; d.style.transform='translateX(100%)'; setTimeout(()=>d.remove(),300); }, 3000);
+    bx.appendChild(d); lucide.createIcons(); setTimeout(() => { d.style.opacity='0'; d.style.transform='translateX(100%)'; setTimeout(()=>d.remove(),300); }, 3000);
 }
-function optConfirm(m, cb) {
-    document.getElementById('optConfirmMsg').textContent = m;
-    document.getElementById('optConfirmBg').classList.add('show');
-    document.getElementById('optConfirmYes').onclick = () => { cb(); document.getElementById('optConfirmBg').classList.remove('show'); };
-}
+function optConfirm(m, cb) { document.getElementById('optConfirmMsg').textContent = m; document.getElementById('optConfirmBg').classList.add('show'); document.getElementById('optConfirmYes').onclick = () => { cb(); document.getElementById('optConfirmBg').classList.remove('show'); }; }
 
-// ============ KAYDET ============
-function saveData() {
-    localStorage.setItem('insjack_pro_v3', JSON.stringify({P,M,IT,FD,BL,AP,TK,SVC,plQty,curShow,PERS,PP,RN,colVis}));
-    toast('Sistem kaydedildi');
-}
-
+function saveData() { localStorage.setItem('insjack_pro_v3', JSON.stringify({P,M,IT,FD,BL,AP,TK,SVC,plQty,curShow,PERS,PP,RN,colVis})); toast('Sistem kaydedildi'); }
 function updatePrefix(val) { P.prefix = val; rPL(); rProd(); toast('Ön ek güncellendi'); }
 
-// ============ WİZARD ============
+// ============ SİHİRBAZ ============
 let wizStep=1, wizCat=null, wizBrand=null, wizModel=null;
-
-function openWizard() {
-    wizStep=1; wizCat=null; wizBrand=null; wizModel=null;
-    renderWizStep();
-    openPopup('wizardModal');
-}
+function openWizard() { wizStep=1; wizCat=null; wizBrand=null; wizModel=null; renderWizStep(); openPopup('wizardModal'); }
 
 function renderWizStep() {
-    const body = document.getElementById('wizBody');
-    const sub  = document.getElementById('wizSubtitle');
-    const back = document.getElementById('wizBtnBack');
-    const add  = document.getElementById('wizBtnAdd');
-    back.style.display = wizStep > 1 ? 'flex' : 'none';
-    add.style.display  = 'none';
+    const body = document.getElementById('wizBody'), sub = document.getElementById('wizSubtitle'), back = document.getElementById('wizBtnBack'), add = document.getElementById('wizBtnAdd');
+    back.style.display = wizStep > 1 ? 'flex' : 'none'; add.style.display = 'none';
 
     if (wizStep === 1) {
         sub.textContent = '1. Adım: Ceketlenecek ekipmanın türünü seçin.';
         let h = '<div class="wiz-grid" style="grid-template-columns:repeat(4,1fr)">';
         for (const [key, eq] of Object.entries(BRAND_INDEX.equipment_types || {})) {
-            h += `<div class="wiz-card" onclick="wizPickCat('${key}')">
-                <i data-lucide="${eq.icon||'box'}" class="w-6 h-6 mx-auto mb-2"></i>
-                <div class="text-xs font-bold">${eq.name}</div>
-            </div>`;
+            h += `<div class="wiz-card" onclick="wizPickCat('${key}')"><i data-lucide="${eq.icon||'box'}" class="w-6 h-6 mx-auto mb-2"></i><div class="text-xs font-bold">${eq.name}</div></div>`;
         }
-        h += '</div>';
-        body.innerHTML = h;
-
+        body.innerHTML = h + '</div>';
     } else if (wizStep === 2) {
         if (wizCat === 'flat_pad' || wizCat === 'elbow') { wizStep=3; renderWizStep(); return; }
         const eqName = (BRAND_INDEX.equipment_types||{})[wizCat]?.name || wizCat;
@@ -929,83 +656,29 @@ function renderWizStep() {
             if (models.length) availBrands.push({ key:bKey, name:bData.brand, count:models.length });
         }
         if (!availBrands.length) {
-            body.innerHTML = `<div class="text-center py-12">
-                <i data-lucide="alert-triangle" class="w-12 h-12 mx-auto mb-4 text-amber-500"></i>
-                <p class="font-bold text-amber-500 text-lg">Bu ekipman türü için henüz marka tanımlı değil.</p>
-                <p class="text-sm text-slate-500 mt-2">data/brands/ klasörüne yeni marka JSON dosyası ekleyebilirsiniz.</p>
-            </div>`;
+            body.innerHTML = `<div class="text-center py-12"><i data-lucide="alert-triangle" class="w-12 h-12 mx-auto mb-4 text-amber-500"></i><p class="font-bold text-amber-500 text-lg">Bu ekipman türü için henüz marka tanımlı değil.</p></div>`;
             lucide.createIcons(); return;
         }
         let h = '<div class="wiz-grid">';
-        for (const b of availBrands) {
-            h += `<div class="wiz-card" onclick="wizPickBrand('${b.key}')">
-                <i data-lucide="factory" class="w-6 h-6 mx-auto mb-2 text-indigo-500"></i>
-                <div class="text-sm font-bold">${b.name}</div>
-                <div class="text-[10px] text-slate-500 mt-1">${b.count} model</div>
-            </div>`;
-        }
-        h += '</div>'; body.innerHTML = h;
-
+        for (const b of availBrands) h += `<div class="wiz-card" onclick="wizPickBrand('${b.key}')"><i data-lucide="factory" class="w-6 h-6 mx-auto mb-2 text-indigo-500"></i><div class="text-sm font-bold">${b.name}</div><div class="text-[10px] text-slate-500 mt-1">${b.count} model</div></div>`;
+        body.innerHTML = h + '</div>';
     } else if (wizStep === 3) {
         add.style.display = 'flex';
         const isPad = wizCat === 'flat_pad';
-
         if (isPad) {
             sub.textContent = '3. Adım: Yastık ölçüleri ve malzeme seçimi';
-            body.innerHTML = `
-            <div class="grid grid-cols-2 gap-4 mb-4">
-                <div><label class="text-xs font-bold text-slate-500 uppercase block mb-1">En (mm)</label><input type="number" id="wPadW" class="ps font-mono" value="500"></div>
-                <div><label class="text-xs font-bold text-slate-500 uppercase block mb-1">Boy (mm)</label><input type="number" id="wPadH" class="ps font-mono" value="300"></div>
-                <div><label class="text-xs font-bold text-slate-500 uppercase block mb-1">Adet</label><input type="number" id="wPadQty" class="ps font-mono" value="1" min="1"></div>
-                <div><label class="text-xs font-bold text-slate-500 uppercase block mb-1">Parça Sayısı</label><input type="number" id="wPadDiv" class="ps font-mono" value="1" min="1" oninput="wizCalcPadPreview()"></div>
-            </div>
-            <div id="wizPadPreview" class="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg text-xs border border-slate-200 dark:border-slate-700 mb-4"></div>
-            <div class="border-t border-slate-200 dark:border-slate-700 pt-4">${wizMaterialHTML()}</div>`;
+            body.innerHTML = `<div class="grid grid-cols-2 gap-4 mb-4"><div><label class="text-xs font-bold text-slate-500 uppercase block mb-1">En (mm)</label><input type="number" id="wPadW" class="ps font-mono" value="500"></div><div><label class="text-xs font-bold text-slate-500 uppercase block mb-1">Boy (mm)</label><input type="number" id="wPadH" class="ps font-mono" value="300"></div><div><label class="text-xs font-bold text-slate-500 uppercase block mb-1">Adet</label><input type="number" id="wPadQty" class="ps font-mono" value="1" min="1"></div><div><label class="text-xs font-bold text-slate-500 uppercase block mb-1">Parça Sayısı</label><input type="number" id="wPadDiv" class="ps font-mono" value="1" min="1" oninput="wizCalcPadPreview()"></div></div><div id="wizPadPreview" class="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg text-xs border border-slate-200 dark:border-slate-700 mb-4"></div><div class="border-t border-slate-200 dark:border-slate-700 pt-4">${wizMaterialHTML()}</div>`;
             setTimeout(() => wizCalcPadPreview(), 50);
-
         } else {
             const models = [];
             if (wizBrand && BRANDS[wizBrand]) {
-                for (const [vk, vd] of Object.entries(BRANDS[wizBrand].valves||{})) {
-                    if (vd.equipment_type === wizCat) models.push({ key:vk, desc:vd.desc });
-                }
+                for (const [vk, vd] of Object.entries(BRANDS[wizBrand].valves||{})) { if (vd.equipment_type === wizCat) models.push({ key:vk, desc:vd.desc }); }
             }
-            if (!models.length) {
-                body.innerHTML = `<div class="text-center py-8"><i data-lucide="alert-triangle" class="w-8 h-8 mx-auto mb-2 text-amber-500"></i><p class="font-bold text-amber-500">Bu markaya ait veri bulunamadı!</p></div>`;
-                add.style.display = 'none'; lucide.createIcons(); return;
-            }
+            if (!models.length) { body.innerHTML = `<div class="text-center py-8"><i data-lucide="alert-triangle" class="w-8 h-8 mx-auto mb-2 text-amber-500"></i><p class="font-bold text-amber-500">Veri bulunamadı!</p></div>`; add.style.display = 'none'; lucide.createIcons(); return; }
             const brandName = BRANDS[wizBrand]?.brand || '';
             sub.textContent = '3. Adım: ' + brandName + ' — Ölçü ve malzeme seçimi';
             const modelOpts = models.map(m => `<option value="${m.key}">${m.desc}</option>`).join('');
-            body.innerHTML = `
-            <div class="grid grid-cols-3 gap-4 mb-4">
-                <div><label class="text-xs font-bold text-slate-500 uppercase block mb-1">Model</label>
-                    <select id="wModel" class="ps font-bold text-indigo-600 dark:text-indigo-400" onchange="wizUpdDN()">${modelOpts}</select></div>
-                <div><label class="text-xs font-bold text-cyan-600 uppercase block mb-1">DN Ebatı</label>
-                    <select id="wDN" class="ps font-mono font-bold text-cyan-600 dark:text-cyan-400" onchange="wizFillDims()"><option value="">Seçiniz</option></select></div>
-                <div><label class="text-xs font-bold text-slate-500 uppercase block mb-1">Basınç Sınıfı</label>
-                    <select id="wCls" class="ps"><option value="150">PN16 / Cl150</option><option value="300">PN25 / Cl300</option><option value="400">PN40 / Cl400</option></select></div>
-            </div>
-            <div class="grid grid-cols-4 gap-4 mb-4">
-                <div><label class="text-xs font-bold text-slate-500 uppercase block mb-1">Adet</label>
-                    <input type="number" id="wQty" class="ps font-mono font-bold text-lg" value="1" min="1"></div>
-                <div><label class="text-xs font-bold text-slate-500 uppercase block mb-1">Zorluk</label>
-                    <input type="number" id="wDF" class="ps font-mono" value="${P.gDF}" step="0.1"></div>
-                <div><label class="text-xs font-bold text-slate-500 uppercase block mb-1">Sol Bindirme</label>
-                    <input type="number" id="wBX" class="ps font-mono" value="${P.lbx}" step="0.1"></div>
-                <div><label class="text-xs font-bold text-slate-500 uppercase block mb-1">Sağ Bindirme</label>
-                    <input type="number" id="wBY" class="ps font-mono" value="${P.lby}" step="0.1"></div>
-            </div>
-            <div class="p-4 bg-cyan-50 dark:bg-cyan-500/10 rounded-xl mb-4 border border-cyan-200 dark:border-cyan-500/20">
-                <div class="text-xs font-bold text-cyan-600 dark:text-cyan-400 mb-3 flex items-center gap-2"><i data-lucide="ruler" class="w-4 h-4"></i> Veritabanından Çekilen Ölçüler</div>
-                <div class="grid grid-cols-4 gap-3">
-                    <div><label class="text-[10px] text-slate-500 block mb-1">Flanş Çapı D (mm)</label><input type="number" id="wDimD" class="ps font-mono" oninput="wizRecalcCirc()"></div>
-                    <div><label class="text-[10px] text-slate-500 block mb-1">2 Flanş Arası L (mm)</label><input type="number" id="wDimL" class="ps font-mono"></div>
-                    <div><label class="text-[10px] text-slate-500 block mb-1">Vana Yüksekliği H (mm)</label><input type="number" id="wDimH" class="ps font-mono"></div>
-                    <div><label class="text-[10px] text-slate-500 block mb-1">Çevre π×D (mm)</label><input type="number" id="wDimC" class="ps font-mono" readonly></div>
-                </div>
-            </div>
-            <div class="border-t border-slate-200 dark:border-slate-700 pt-4">${wizMaterialHTML()}</div>`;
+            body.innerHTML = `<div class="grid grid-cols-3 gap-4 mb-4"><div><label class="text-xs font-bold text-slate-500 uppercase block mb-1">Model</label><select id="wModel" class="ps font-bold text-indigo-600 dark:text-indigo-400" onchange="wizUpdDN()">${modelOpts}</select></div><div><label class="text-xs font-bold text-cyan-600 uppercase block mb-1">DN Ebatı</label><select id="wDN" class="ps font-mono font-bold text-cyan-600 dark:text-cyan-400" onchange="wizFillDims()"><option value="">Seçiniz</option></select></div><div><label class="text-xs font-bold text-slate-500 uppercase block mb-1">Basınç Sınıfı</label><select id="wCls" class="ps"><option value="150">PN16 / Cl150</option><option value="300">PN25 / Cl300</option><option value="400">PN40 / Cl400</option></select></div></div><div class="grid grid-cols-4 gap-4 mb-4"><div><label class="text-xs font-bold text-slate-500 uppercase block mb-1">Adet</label><input type="number" id="wQty" class="ps font-mono font-bold text-lg" value="1" min="1"></div><div><label class="text-xs font-bold text-slate-500 uppercase block mb-1">Zorluk</label><input type="number" id="wDF" class="ps font-mono" value="${P.gDF}" step="0.1"></div><div><label class="text-xs font-bold text-slate-500 uppercase block mb-1">Sol Bindirme</label><input type="number" id="wBX" class="ps font-mono" value="${P.lbx}" step="0.1"></div><div><label class="text-xs font-bold text-slate-500 uppercase block mb-1">Sağ Bindirme</label><input type="number" id="wBY" class="ps font-mono" value="${P.lby}" step="0.1"></div></div><div class="p-4 bg-cyan-50 dark:bg-cyan-500/10 rounded-xl mb-4 border border-cyan-200 dark:border-cyan-500/20"><div class="text-xs font-bold text-cyan-600 dark:text-cyan-400 mb-3 flex items-center gap-2"><i data-lucide="ruler" class="w-4 h-4"></i> Veritabanından Çekilen Ölçüler</div><div class="grid grid-cols-4 gap-3"><div><label class="text-[10px] text-slate-500 block mb-1">Flanş Çapı D (mm)</label><input type="number" id="wDimD" class="ps font-mono" oninput="wizRecalcCirc()"></div><div><label class="text-[10px] text-slate-500 block mb-1">2 Flanş Arası L (mm)</label><input type="number" id="wDimL" class="ps font-mono"></div><div><label class="text-[10px] text-slate-500 block mb-1">Vana Yüksekliği H (mm)</label><input type="number" id="wDimH" class="ps font-mono"></div><div><label class="text-[10px] text-slate-500 block mb-1">Çevre π×D (mm)</label><input type="number" id="wDimC" class="ps font-mono" readonly></div></div></div><div class="border-t border-slate-200 dark:border-slate-700 pt-4">${wizMaterialHTML()}</div>`;
             setTimeout(() => { wizUpdDN(); lucide.createIcons(); }, 50);
         }
     }
@@ -1013,136 +686,62 @@ function renderWizStep() {
 }
 
 function wizMaterialHTML() {
-    const fabrics = M.filter(m => m.t === 'Kumaş');
-    const fills   = M.filter(m => m.t === 'Dolgu');
+    const fabrics = M.filter(m => m.t === 'Kumaş'), fills = M.filter(m => m.t === 'Dolgu');
     const fabOpts = fabrics.map((m,i) => `<option value="${i}">${m.s} - ${m.n}</option>`).join('') || '<option>Tanımlı değil</option>';
     const filOpts = fills.map((m,i) => `<option value="${i}">${m.s} - ${m.n}</option>`).join('') || '<option>Tanımlı değil</option>';
-    return `<div class="text-xs font-bold text-slate-500 uppercase mb-3">Malzeme Seçimi</div>
-    <div class="grid grid-cols-3 gap-4">
-        <div><label class="text-[10px] text-slate-500 block mb-1">Alt Kumaş</label><select id="wMatBot" class="ps">${fabOpts}</select></div>
-        <div><label class="text-[10px] text-slate-500 block mb-1">Üst Kumaş</label><select id="wMatTop" class="ps">${fabOpts}</select></div>
-        <div><label class="text-[10px] text-slate-500 block mb-1">Dolgu</label><select id="wMatFill" class="ps">${filOpts}</select></div>
-    </div>`;
+    return `<div class="text-xs font-bold text-slate-500 uppercase mb-3">Malzeme Seçimi</div><div class="grid grid-cols-3 gap-4"><div><label class="text-[10px] text-slate-500 block mb-1">Alt Kumaş</label><select id="wMatBot" class="ps">${fabOpts}</select></div><div><label class="text-[10px] text-slate-500 block mb-1">Üst Kumaş</label><select id="wMatTop" class="ps">${fabOpts}</select></div><div><label class="text-[10px] text-slate-500 block mb-1">Dolgu</label><select id="wMatFill" class="ps">${filOpts}</select></div></div>`;
 }
 
 function wizPickCat(cat)   { wizCat=cat; wizStep=2; renderWizStep(); }
-function wizPickBrand(brand) {
-    const bData = BRANDS[brand];
-    if (!bData) { toast('Marka verisi bulunamadı!','er'); return; }
-    const models = Object.entries(bData.valves||{}).filter(([k,v]) => v.equipment_type===wizCat);
-    if (!models.length) { toast('Bu markaya ait veri bulunamadı!','er'); return; }
-    wizBrand=brand; wizStep=3; renderWizStep();
-}
-function wizBack() {
-    if (wizStep>1) {
-        wizStep--;
-        if (wizStep===2 && (wizCat==='flat_pad'||wizCat==='elbow')) wizStep=1;
-        renderWizStep();
-    }
-}
+function wizPickBrand(brand) { wizBrand=brand; wizStep=3; renderWizStep(); }
+function wizBack() { if (wizStep>1) { wizStep--; if (wizStep===2 && (wizCat==='flat_pad'||wizCat==='elbow')) wizStep=1; renderWizStep(); } }
 function wizUpdDN() {
     const sel = document.getElementById('wModel'); if (!sel) return;
-    const ty  = sel.value;
-    const vd  = VALVE_DATA[ty];
-    const s   = document.getElementById('wDN');
+    const ty  = sel.value, vd = VALVE_DATA[ty], s = document.getElementById('wDN');
     s.innerHTML = '<option value="">Seçiniz</option>';
-    if (vd && vd.dims) {
-        Object.keys(vd.dims).map(Number).sort((a,b)=>a-b).forEach(dn => {
-            s.innerHTML += `<option value="${dn}">DN${dn}</option>`;
-        });
-    } else {
-        DN_LIST.forEach(dn => { s.innerHTML += `<option value="${dn}">DN${dn}</option>`; });
-    }
-    const dfEl = document.getElementById('wDF');
-    if (dfEl && vd && vd.difficulty) dfEl.value = vd.difficulty;
+    if (vd && vd.dims) { Object.keys(vd.dims).map(Number).sort((a,b)=>a-b).forEach(dn => { s.innerHTML += `<option value="${dn}">DN${dn}</option>`; }); } 
+    else { DN_LIST.forEach(dn => { s.innerHTML += `<option value="${dn}">DN${dn}</option>`; }); }
+    const dfEl = document.getElementById('wDF'); if (dfEl && vd && vd.difficulty) dfEl.value = vd.difficulty;
     wizFillDims();
 }
 function wizFillDims() {
-    const ty = document.getElementById('wModel')?.value;
-    const dn = document.getElementById('wDN')?.value;
-    if (!ty||!dn) { clearDims(); return; }
-    const vd   = VALVE_DATA[ty];
-    const dims = vd && vd.dims && vd.dims[dn] ? vd.dims[dn] : {};
-    const dEl = document.getElementById('wDimD');
-    const lEl = document.getElementById('wDimL');
-    const hEl = document.getElementById('wDimH');
-    const cEl = document.getElementById('wDimC');
-    if (dEl) dEl.value = dims.D||'';
-    if (lEl) lEl.value = dims.L||'';
-    if (hEl) hEl.value = dims.H||'';
-    if (cEl && dims.D) cEl.value = Math.round(Math.PI*dims.D); else if(cEl) cEl.value='';
+    const ty = document.getElementById('wModel')?.value, dn = document.getElementById('wDN')?.value;
+    if (!ty||!dn) { ['wDimD','wDimL','wDimH','wDimC'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; }); return; }
+    const vd = VALVE_DATA[ty], dims = vd && vd.dims && vd.dims[dn] ? vd.dims[dn] : {};
+    if (document.getElementById('wDimD')) document.getElementById('wDimD').value = dims.D||'';
+    if (document.getElementById('wDimL')) document.getElementById('wDimL').value = dims.L||'';
+    if (document.getElementById('wDimH')) document.getElementById('wDimH').value = dims.H||'';
+    if (document.getElementById('wDimC') && dims.D) document.getElementById('wDimC').value = Math.round(Math.PI*dims.D);
 }
-function clearDims() {
-    ['wDimD','wDimL','wDimH','wDimC'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
-}
-function wizRecalcCirc() {
-    const d = parseFloat(document.getElementById('wDimD')?.value)||0;
-    const c = document.getElementById('wDimC');
-    if (c) c.value = d ? Math.round(Math.PI*d) : '';
-}
+function wizRecalcCirc() { const d = parseFloat(document.getElementById('wDimD')?.value)||0; if (document.getElementById('wDimC')) document.getElementById('wDimC').value = d ? Math.round(Math.PI*d) : ''; }
 function wizCalcPadPreview() {
-    const w   = parseFloat(document.getElementById('wPadW')?.value)||500;
-    const h   = parseFloat(document.getElementById('wPadH')?.value)||300;
-    const div = parseInt(document.getElementById('wPadDiv')?.value)||1;
-    const pieceW = Math.round(w/div);
-    const area   = (w*h)/1e6;
-    const sewExtra = (div-1)*((w+h)*2/1000)*0.15;
-    const labMul   = 1+(div-1)*0.3;
+    const w = parseFloat(document.getElementById('wPadW')?.value)||500, h = parseFloat(document.getElementById('wPadH')?.value)||300, div = parseInt(document.getElementById('wPadDiv')?.value)||1;
+    const pieceW = Math.round(w/div), area = (w*h)/1e6, sewExtra = (div-1)*((w+h)*2/1000)*0.15, labMul = 1+(div-1)*0.3;
     const el = document.getElementById('wizPadPreview');
-    if (el) el.innerHTML = `<div class="grid grid-cols-5 gap-3 text-center">
-        <div><div class="font-mono font-bold text-indigo-500 text-lg">${div}</div><div class="text-[10px] text-slate-500">Parça Sayısı</div></div>
-        <div><div class="font-mono font-bold">${pieceW}×${h}</div><div class="text-[10px] text-slate-500">Parça Ölçüsü (mm)</div></div>
-        <div><div class="font-mono font-bold text-cyan-500">${area.toFixed(3)}</div><div class="text-[10px] text-slate-500">Toplam Alan (m²)</div></div>
-        <div><div class="font-mono font-bold text-amber-500">+${sewExtra.toFixed(2)}m</div><div class="text-[10px] text-slate-500">Ekstra Dikiş</div></div>
-        <div><div class="font-mono font-bold text-emerald-500">×${labMul.toFixed(1)}</div><div class="text-[10px] text-slate-500">İşçilik Çarpanı</div></div>
-    </div>`;
+    if (el) el.innerHTML = `<div class="grid grid-cols-5 gap-3 text-center"><div><div class="font-mono font-bold text-indigo-500 text-lg">${div}</div><div class="text-[10px] text-slate-500">Parça Sayısı</div></div><div><div class="font-mono font-bold">${pieceW}×${h}</div><div class="text-[10px] text-slate-500">Parça Ölçüsü (mm)</div></div><div><div class="font-mono font-bold text-cyan-500">${area.toFixed(3)}</div><div class="text-[10px] text-slate-500">Toplam Alan (m²)</div></div><div><div class="font-mono font-bold text-amber-500">+${sewExtra.toFixed(2)}m</div><div class="text-[10px] text-slate-500">Ekstra Dikiş</div></div><div><div class="font-mono font-bold text-emerald-500">×${labMul.toFixed(1)}</div><div class="text-[10px] text-slate-500">İşçilik Çarpanı</div></div></div>`;
 }
 
 function wizAdd() {
     if (wizCat === 'flat_pad') {
-        const qt  = parseInt(document.getElementById('wPadQty')?.value)||1;
-        const w   = parseFloat(document.getElementById('wPadW')?.value)||500;
-        const h   = parseFloat(document.getElementById('wPadH')?.value)||300;
-        const div = parseInt(document.getElementById('wPadDiv')?.value)||1;
+        const qt = parseInt(document.getElementById('wPadQty')?.value)||1, w = parseFloat(document.getElementById('wPadW')?.value)||500, h = parseFloat(document.getElementById('wPadH')?.value)||300, div = parseInt(document.getElementById('wPadDiv')?.value)||1;
         const labMul = 1+(div-1)*0.3;
-        IT.push({
-            ref:RN++, ty:'pad', vref:'pad', dn:0, cl:0, qt,
-            df: P.gDF*labMul,
-            parts:[{nm:'Yastık',ov:{},bw:P.lbw,bx:P.lbx,by:P.lby,calc:{},matOv:{}}],
-            mh:'', label:`Düz Yastık (${w}×${h}mm, ${div} prç)`, calc:{},
-            padW:w, padH:h, padDiv:div
-        });
+        IT.push({ ref:RN++, ty:'pad', vref:'pad', dn:0, cl:0, qt, df: P.gDF*labMul, parts:[{nm:'Yastık',ov:{},bw:P.lbw,bx:P.lbx,by:P.lby,calc:{},matOv:{}}], mh:'', label:`Düz Yastık (${w}×${h}mm, ${div} prç)`, calc:{}, padW:w, padH:h, padDiv:div });
         recalcAll(); toast('Düz yastık eklendi'); closePopup('wizardModal'); return;
     }
-
-    const ty = document.getElementById('wModel')?.value;
-    const dn = parseInt(document.getElementById('wDN')?.value);
-    const cl = parseInt(document.getElementById('wCls')?.value)||150;
-    const qt = parseInt(document.getElementById('wQty')?.value)||1;
-    const df = parseFloat(document.getElementById('wDF')?.value)||P.gDF;
-    const bx = parseFloat(document.getElementById('wBX')?.value)||P.lbx;
-    const by = parseFloat(document.getElementById('wBY')?.value)||P.lby;
+    const ty = document.getElementById('wModel')?.value, dn = parseInt(document.getElementById('wDN')?.value), cl = parseInt(document.getElementById('wCls')?.value)||150, qt = parseInt(document.getElementById('wQty')?.value)||1, df = parseFloat(document.getElementById('wDF')?.value)||P.gDF, bx = parseFloat(document.getElementById('wBX')?.value)||P.lbx, by = parseFloat(document.getElementById('wBY')?.value)||P.lby;
     if (!dn) { toast('DN ölçüsü seçmelisiniz!','er'); return; }
-    const vd = VALVE_DATA[ty];
-    if (!vd) { toast('Model verisi bulunamadı!','er'); return; }
+    const vd = VALVE_DATA[ty]; if (!vd) { toast('Model verisi bulunamadı!','er'); return; }
     const pn = vd.parts || ['Tek Parça'];
     const parts = pn.map((nm, i) => ({ nm, ov:{}, bw:P.lbw, bx, by:i===0?by:P.lbyf, calc:{}, matOv:{} }));
-    const ovD = parseFloat(document.getElementById('wDimD')?.value)||undefined;
-    const ovL = parseFloat(document.getElementById('wDimL')?.value)||undefined;
-    const ovH = parseFloat(document.getElementById('wDimH')?.value)||undefined;
+    const ovD = parseFloat(document.getElementById('wDimD')?.value)||undefined, ovL = parseFloat(document.getElementById('wDimL')?.value)||undefined, ovH = parseFloat(document.getElementById('wDimH')?.value)||undefined;
     const brandName = BRANDS[wizBrand]?.brand||'';
     IT.push({ ref:RN++, ty, vref:ty, dn, cl, qt, df, parts, mh:'', calc:{}, ovD, ovL, ovH, _brand:wizBrand, _brandName:brandName });
-    recalcAll();
-    toast((vd.desc||ty) + ' DN'+dn+' eklendi (' + brandName + ')');
-    closePopup('wizardModal');
+    recalcAll(); toast((vd.desc||ty) + ' DN'+dn+' eklendi (' + brandName + ')'); closePopup('wizardModal');
 }
 
-// ============ INIT ============
+// ============ BAŞLATMA ============
 window.addEventListener('load', async () => {
-    // 1. JSON verilerini yükle
     await loadAllData();
-
-    // 2. localStorage'dan kayıtlı verileri yükle
     try {
         const sv = JSON.parse(localStorage.getItem('insjack_pro_v3'));
         if (sv && sv.IT) {
@@ -1152,45 +751,21 @@ window.addEventListener('load', async () => {
             if (sv.FD && Object.keys(sv.FD).length) FD = sv.FD;
             if (sv.BL && Object.keys(sv.BL).length) BL = sv.BL;
             if (sv.AP && Object.keys(sv.AP).length) AP = sv.AP;
-            if (sv.TK) TK = sv.TK;
-            if (sv.SVC) SVC = sv.SVC;
-            plQty  = sv.plQty  || {};
-            curShow = sv.curShow || curShow;
-            if (sv.PERS) PERS = sv.PERS;
-            if (sv.PP)   PP   = sv.PP;
+            if (sv.TK) TK = sv.TK; if (sv.SVC) SVC = sv.SVC;
+            plQty = sv.plQty || {}; curShow = sv.curShow || curShow;
+            if (sv.PERS) PERS = sv.PERS; if (sv.PP) PP = sv.PP;
             RN = sv.RN || (Math.max(...IT.map(i=>i.ref), 0)+1);
             if (sv.colVis) colVis = sv.colVis;
         }
-    } catch(e) { console.warn('localStorage yüklenemedi:', e); }
+    } catch(e) { console.warn('Hafıza okunurken hata:', e); }
 
-    // 3. Tema
-    if (currentTheme === 'light') {
-        document.documentElement.classList.remove('dark');
-    } else {
-        document.documentElement.classList.add('dark');
-    }
     const btn = document.getElementById('themeBtn');
     if (btn) btn.innerHTML = `<i data-lucide="${currentTheme==='dark'?'sun':'moon'}" class="w-4 h-4"></i>`;
 
-    // 4. Checkbox sync
-    Object.keys(colVis).forEach(k => {
-        const c = document.getElementById('chk_'+k);
-        if (c) c.checked = colVis[k];
-    });
+    Object.keys(colVis).forEach(k => { const c = document.getElementById('chk_'+k); if (c) c.checked = colVis[k]; });
+    const pi2 = document.getElementById('prefInput'); if (pi2) pi2.value = P.prefix || '';
 
-    // 5. Prefix
-    const pi2 = document.getElementById('prefInput');
-    if (pi2) pi2.value = P.prefix || '';
-
-    // 6. Render
-    fetchRates();
-    rPers();
-    rPar();
-    rMat();
-    rGlobal();
-    recalcAll();
-    rVRef();
-
+    fetchRates(); rPers(); rPar(); rMat(); rGlobal(); recalcAll(); rVRef();
     lucide.createIcons();
-    console.log('✅ Uygulama başlatıldı');
+    console.log('✅ Uygulama başlatıldı, formüller Excel ile senkronize edildi.');
 });
