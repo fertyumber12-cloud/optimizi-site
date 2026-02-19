@@ -101,13 +101,19 @@
         if (!session) {
             window.location.replace('../login.html');
         } else {
-            const loader = document.getElementById('masterAuthLoader');
-            if (loader) {
-                loader.style.opacity = '0';
-                setTimeout(() => {
-                    loader.style.visibility = 'hidden';
-                    loader.remove();
-                }, 500);
+            // YARIŞ DURUMU ÇÖZÜMÜ: Önce sayfanın fiziksel olarak çizilmesini bekle, sonra perdeyi kaldır.
+            const removeLoader = () => {
+                const loader = document.getElementById('masterAuthLoader');
+                if (loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(() => loader.remove(), 500);
+                }
+            };
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', removeLoader);
+            } else {
+                removeLoader();
             }
         }
     });
