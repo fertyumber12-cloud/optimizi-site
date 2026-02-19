@@ -92,17 +92,15 @@
         if(d === 'light') document.documentElement.classList.remove('dark');
     })();
 
-    // 2. MASTER SAYFASI ÖZEL GÜVENLİK KALKANI (auth.js'den bağımsız)
+    // 2. MASTER SAYFASI ÖZEL GÜVENLİK KALKANI
     const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
     const masterSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Oturum var mı diye kontrol et
     masterSupabase.auth.getSession().then(({ data: { session } }) => {
         if (!session) {
-            window.location.replace('../login.html'); // Giriş yoksa logine at
+            window.location.replace('../login.html');
         } else {
-            // Giriş varsa yükleme ekranını kaldır ve sistemi serbest bırak
             const loader = document.getElementById('masterAuthLoader');
             if (loader) {
                 loader.style.opacity = '0';
@@ -114,7 +112,6 @@
         }
     });
 
-    // Oturum sekme açıkken düşerse anında dışarı at
     masterSupabase.auth.onAuthStateChange((event, session) => {
         if (!session) window.location.replace('../login.html');
     });
@@ -156,6 +153,7 @@
             <a onclick="openRight()" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/50"><i data-lucide="settings" class="w-5 h-5"></i><span class="sidebar-text">Ticari Ayarlar</span></a>
         </div>
     </aside>
+
     <div id="rsOverlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden transition-opacity" style="opacity:0" onclick="closeRight()"></div>
     <div id="rightSidebar" class="fixed right-0 top-0 h-full w-80 bg-white dark:bg-slate-900 z-50 transform translate-x-full transition-transform duration-300 shadow-2xl border-l border-slate-200 dark:border-slate-700/50 p-6 flex flex-col">
       <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-200 dark:border-slate-700">
@@ -172,6 +170,7 @@
         <div id="apiStatusBadge" class="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-3 py-2 rounded font-bold text-xs flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4"></i> Senkronize Edildi</div>
       </div>
     </div>
+
     <main class="flex-1 flex flex-col h-full overflow-hidden relative">
         <div class="h-20 flex items-center justify-between px-6 border-b border-slate-200 dark:border-slate-700/50 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md shrink-0">
          <div class="flex gap-4 text-xs font-bold items-center">
@@ -185,6 +184,7 @@
           <button onclick="openPdfModal()" class="bt bt4 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:text-indigo-500 dark:hover:text-indigo-400"><i data-lucide="file-down" class="w-4 h-4 text-indigo-500"></i>PDF İndir</button>
          </div>
         </div>
+
         <div id="p-pl" class="pane on">
          <div class="flex flex-col h-full">
           <div class="flex items-center justify-between mb-4 bg-white/80 dark:bg-slate-800/80 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm backdrop-blur-md">
@@ -196,6 +196,7 @@
           </div>
          </div>
         </div>
+
         <div id="p-pd" class="pane">
          <details class="mb-6 border border-slate-200 dark:border-slate-700 rounded-xl bg-white/80 dark:bg-slate-800/80 overflow-hidden shadow-sm backdrop-blur-md" open>
            <summary class="p-4 font-bold flex justify-between items-center text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 cursor-pointer"><div class="flex items-center gap-2"><i data-lucide="settings-2" class="text-cyan-500"></i> Genel Malzeme Seçimi (Tüm Liste İçin Geçerli)</div><i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i></summary>
@@ -221,6 +222,7 @@
          </tr></thead><tbody id="pdBody"></tbody><tfoot id="pdFoot"></tfoot></table>
         </div>
         </div>
+
         <div id="p-ms" class="pane">
         <div class="grid grid-cols-2 lg:grid-cols-5 gap-5 mb-6">
          <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 border-b-4 border-b-cyan-500 p-4 text-center rounded-xl"><div class="text-xl font-bold text-cyan-500 font-mono" id="kC">₺0</div><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Toplam Maliyet</div></div>
@@ -254,6 +256,7 @@
          </div>
         </div>
         </div>
+
         <div id="p-mf" class="pane">
         <div class="flex items-center justify-between mb-4 bg-white/80 dark:bg-slate-800/80 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm backdrop-blur-md">
           <div class="tg" id="mfBtns"></div>
@@ -263,6 +266,7 @@
             <table class="ss"><thead><tr><th>#</th><th>Tür</th><th>Alt Tip</th><th style="min-width:180px">Malzeme Cinsi</th><th>Birim</th><th>Fiyat</th><th>Döviz</th><th style="color:var(--gn)">TL Fiyat</th><th>Kalınlık(mm)</th><th></th></tr></thead><tbody id="mBody"></tbody></table>
         </div>
         </div>
+
         <div id="p-pm" class="pane">
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-5 mb-5">
          <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 text-center rounded-xl"><div class="text-xl font-bold text-cyan-500 font-mono" id="pmAvg">₺0</div><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Ort. Saat Maliyeti</div></div>
@@ -286,6 +290,7 @@
          </div>
         </div>
         </div>
+
         <div id="p-pr" class="pane">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
          <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 rounded-xl"><div class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 mb-4 border-b border-slate-200 dark:border-slate-700 pb-3"><i data-lucide="coins" class="w-4 h-4 text-cyan-500"></i>Döviz & İşçilik</div><div id="pDov" class="space-y-2"></div></div>
@@ -411,6 +416,27 @@
 </div>
 
 <div class="toast-container" id="toastBox"></div>
+
+<script>
+    try {
+        let sv = JSON.parse(localStorage.getItem('insjack_pro_v3'));
+        if (sv && sv.IT) {
+            let corrupt = false;
+            sv.IT.forEach(it => {
+                if (!it.parts) corrupt = true;
+                else it.parts.forEach(pt => {
+                    if (!pt.matOv || !pt.ov || !pt.calc) corrupt = true;
+                });
+            });
+            if (corrupt) {
+                console.warn("Eski veya uyumsuz veri tespit edildi, motoru kurtarmak için hafıza temizleniyor...");
+                localStorage.removeItem('insjack_pro_v3');
+            }
+        }
+    } catch(e) {
+        localStorage.removeItem('insjack_pro_v3');
+    }
+</script>
 
 <script src="js/app.js"></script>
 </body>
