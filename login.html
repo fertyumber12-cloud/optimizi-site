@@ -130,7 +130,7 @@
         </div>
         
         <p class="text-[9px] text-slate-600 uppercase tracking-[0.2em] font-bold text-center mt-6">
-            &copy; 2025 OPTİMİZİ INC • TÜM HAKLARI SAKLIDIR.
+            &copy; 2026 OPTİMİZİ INC • TÜM HAKLARI SAKLIDIR.
         </p>
     </div>
   </div>
@@ -140,6 +140,17 @@
     const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ==============================================================================
+    // 🔥 NÜKLEER ÇÖZÜM: SUPABASE NATIVE DEDEKTÖRÜ 🔥
+    // Timeout, bekletme veya manuel yönlendirmeleri tamamen sildik. 
+    // Supabase "oturum açıldı" dediği an, sistem sorgusuz sualsiz dashboard'a fırlatır!
+    // ==============================================================================
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (session) {
+            window.location.replace('dashboard.html');
+        }
+    });
 
     // 2. UI Elementleri
     const loginForm = document.getElementById('loginForm');
@@ -226,8 +237,6 @@
             const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
             
             if (error) {
-                console.log("Supabase Hatası:", error.message);
-
                 if (error.message.includes('Email not confirmed')) {
                     showNotification('error', 'E-posta Doğrulanmadı', 'Giriş yapabilmek için lütfen mail adresinize gelen linke tıklayarak hesabınızı doğrulayın.');
                 } else if (error.message.includes('Invalid login credentials')) {
@@ -235,8 +244,16 @@
                 } else {
                     showNotification('error', 'Hata Oluştu', error.message);
                 }
+                
+                // Hata durumunda butonu eski haline getiriyoruz
+                submitBtn.disabled = false;
+                btnText.textContent = 'Giriş Yap';
+                btnSpinner.classList.add('hidden');
+                btnIcon.classList.remove('hidden');
             } else {
-                // Beni Hatırla Seçimini Kaydet veya Sil
+                // Başarılı giriş: Sadece "Beni Hatırla" tercihini kaydet.
+                // YÖNLENDİRME (window.location.href) KESİNLİKLE YAPILMIYOR!
+                // Supabase onAuthStateChange dedektörü anında bizi dashboard'a atacak.
                 const rememberMeChecked = document.getElementById('rememberMe').checked;
                 if (rememberMeChecked) {
                     localStorage.setItem('rememberedEmail', email);
@@ -244,23 +261,14 @@
                     localStorage.removeItem('rememberedEmail');
                 }
 
-                // Başarılı Yönlendirme
-                showNotification('success', 'Giriş Başarılı', 'Yönlendiriliyorsunuz...');
-                setTimeout(() => {
-                    const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || 'dashboard.html';
-                    sessionStorage.removeItem('redirectAfterLogin');
-                    window.location.href = redirectUrl;
-                }, 1000);
+                showNotification('success', 'Giriş Başarılı', 'Panele aktarılıyorsunuz...');
             }
         } catch (err) {
             showNotification('error', 'Sistem Hatası', 'Beklenmedik bir hata oluştu.');
-        } finally {
-            if (!document.getElementById('notificationArea').innerHTML.includes('Giriş Başarılı')) {
-                submitBtn.disabled = false;
-                btnText.textContent = 'Giriş Yap';
-                btnSpinner.classList.add('hidden');
-                btnIcon.classList.remove('hidden');
-            }
+            submitBtn.disabled = false;
+            btnText.textContent = 'Giriş Yap';
+            btnSpinner.classList.add('hidden');
+            btnIcon.classList.remove('hidden');
         }
     });
 
