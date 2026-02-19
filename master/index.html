@@ -91,36 +91,6 @@
         const d = localStorage.getItem('insjack_theme');
         if(d === 'light') document.documentElement.classList.remove('dark');
     })();
-
-    // 2. MASTER SAYFASI ÖZEL GÜVENLİK KALKANI
-    const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
-    const masterSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    masterSupabase.auth.getSession().then(({ data: { session } }) => {
-        if (!session) {
-            window.location.replace('../login.html');
-        } else {
-            // YARIŞ DURUMU ÇÖZÜMÜ: Önce sayfanın fiziksel olarak çizilmesini bekle, sonra perdeyi kaldır.
-            const removeLoader = () => {
-                const loader = document.getElementById('masterAuthLoader');
-                if (loader) {
-                    loader.style.opacity = '0';
-                    setTimeout(() => loader.remove(), 500);
-                }
-            };
-            
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', removeLoader);
-            } else {
-                removeLoader();
-            }
-        }
-    });
-
-    masterSupabase.auth.onAuthStateChange((event, session) => {
-        if (!session) window.location.replace('../login.html');
-    });
 </script>
 </head>
 
@@ -423,7 +393,9 @@
 
 <div class="toast-container" id="toastBox"></div>
 
+
 <script>
+    // 1. ZEHİRLİ VERİ TEMİZLEYİCİ (Sorunu Kökten Çözen Yer)
     try {
         let sv = JSON.parse(localStorage.getItem('insjack_pro_v3'));
         if (sv && sv.IT) {
@@ -442,6 +414,39 @@
     } catch(e) {
         localStorage.removeItem('insjack_pro_v3');
     }
+
+    // 2. GÜVENLİK VE YÜKLEME EKRANI KALDIRICI (Yarış Sorunu Çözüldü)
+    const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
+    const masterSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const removeAuthLoader = () => {
+        const loader = document.getElementById('masterAuthLoader');
+        if (loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => loader.remove(), 500);
+        }
+    };
+
+    masterSupabase.auth.getSession().then(({ data: { session } }) => {
+        if (!session) {
+            window.location.replace('../login.html');
+        } else {
+            removeAuthLoader(); // Oturum varsa kaldır
+        }
+    }).catch(() => {
+        removeAuthLoader(); // Hata olsa bile kaldır ki içeride hapis kalma
+    });
+
+    masterSupabase.auth.onAuthStateChange((event, session) => {
+        if (!session) window.location.replace('../login.html');
+    });
+
+    // 3. GÜVENLİK SİGORTASI (Zaman Ayarlı Bomba)
+    // Eğer internetin zayıfsa veya Supabase yanıt vermezse, en fazla 2.5 saniye sonra o perde YIRTILIP atılır.
+    setTimeout(() => {
+        removeAuthLoader();
+    }, 2500);
 </script>
 
 <script src="js/app.js"></script>
