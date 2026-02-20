@@ -1,4 +1,17 @@
 // ============================================
+// GÖRÜNMEZ GÜVENLİK STİLİ (Ctrl+U'dan Gizlendi)
+// ============================================
+(function injectSecurityStyle() {
+    const style = document.createElement('style');
+    style.innerHTML = `
+        body:not(.auth-checked) { opacity: 0 !important; pointer-events: none !important; }
+        body.auth-checked { opacity: 1 !important; transition: opacity 0.3s ease !important; }
+    `;
+    // Stili sayfanın en üstüne gizlice ekle
+    document.head.appendChild(style);
+})();
+
+// ============================================
 // CENTRAL AUTHENTICATION SYSTEM
 // ============================================
 const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
