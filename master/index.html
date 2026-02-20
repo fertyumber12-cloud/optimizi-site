@@ -1,417 +1,1020 @@
 <!DOCTYPE html>
-<html lang="tr" class="dark">
+<html lang="tr">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Ceket Üretim & Fiyatlandırma</title>
-
-<script>
-    // 1. TEMA
-    (function(){
-        if(localStorage.getItem('insjack_theme') === 'light') {
-            document.documentElement.classList.remove('dark');
-        }
-    })();
-
-    // 2. IŞIK HIZINDA GÜVENLİK KONTROLÜ (Bekletme ekranı yok, anında şutlar)
-    try {
-        const sessionData = localStorage.getItem('sb-gktvludkrsxnpigydqml-auth-token');
-        if (!sessionData) {
-            window.location.replace('../login.html');
-        }
-    } catch(e) {}
-
-    // 3. ZEHİRLİ VERİ TEMİZLEYİCİ (Uygulamanın çökmesini engeller)
-    try {
-        let sv = JSON.parse(localStorage.getItem('insjack_pro_v3'));
-        if (sv && sv.IT) {
-            let corrupt = false;
-            sv.IT.forEach(it => {
-                if (!it.parts) corrupt = true;
-                else it.parts.forEach(pt => {
-                    if (!pt.matOv || !pt.ov || !pt.calc) corrupt = true;
-                });
-            });
-            if (corrupt) {
-                localStorage.removeItem('insjack_pro_v3');
-                console.log("Bozuk veri temizlendi.");
-            }
-        }
-    } catch(e) {
-        localStorage.removeItem('insjack_pro_v3');
-    }
-</script>
-
+<title>Optimizi | Fiyat Teklif Aracı</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+    /* DARK THEME */
+    --bg-main: #020617;
+    --bg-pane: #0f172a;
+    --bg-card: #1e293b;
+    --bg-inp: rgba(0, 0, 0, 0.4);
+    --bg-th: #0f172a;
     
-    /* ORİJİNAL STİLLER */
-    :root{--ac:#6366f1;--cy:#06b6d4;--gn:#10b981;--rd:#f43f5e;--am:#f59e0b}
-    *{margin:0;padding:0;box-sizing:border-box;font-family:'Plus Jakarta Sans',sans-serif !important}
-    .font-mono{font-family:'Plus Jakarta Sans',sans-serif !important;font-variant-numeric:tabular-nums;font-weight:600}
-    ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:rgba(148,163,184,.3);border-radius:4px}
-    .custom-scroll::-webkit-scrollbar{width:4px}.custom-scroll::-webkit-scrollbar-thumb{background:rgba(148,163,184,.5);border-radius:4px}
-    .ss{width:100%;border-collapse:separate;border-spacing:0;font-size:.76rem}
-    .ss th{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:10px 12px;text-align:center;position:sticky;top:0;z-index:2;white-space:nowrap;transition:.3s;backdrop-filter:blur(8px)}
-    .resizable-th{resize:horizontal;overflow:auto;min-width:100px}
-    .ss td{padding:0;height:36px;min-width:50px;transition:.2s}
-    .ss input,.ss select{width:100%;height:100%;border:none;background:transparent;font-family:inherit;font-size:.76rem;padding:4px 8px;outline:none;transition:.2s;font-weight:500}
-    .ss input[type=number]{text-align:right;-moz-appearance:textfield}
-    html:not(.dark) .ss th{background:rgba(241,245,249,.95);color:#6366f1;border-bottom:1px solid rgba(0,0,0,.1)}
-    html.dark .ss th{background:rgba(15,23,42,.95);color:#818cf8;border-bottom:1px solid rgba(255,255,255,.05)}
-    html:not(.dark) .ss td{border-bottom:1px solid rgba(0,0,0,.05);color:#0f172a}
-    html.dark .ss td{border-bottom:1px solid rgba(255,255,255,.05);color:#f8fafc}
-    html:not(.dark) .ss input,html:not(.dark) .ss select{color:#0f172a}html.dark .ss input,html.dark .ss select{color:#f8fafc}
-    html:not(.dark) .ss tr:hover td{background:rgba(99,102,241,.05)}html.dark .ss tr:hover td{background:rgba(255,255,255,.05)}
-    .ss .c{font-weight:600;text-align:right;padding:4px 10px}
-    .ss .o{cursor:pointer}html:not(.dark) .ss .o{background:rgba(245,158,11,.1)!important;color:#d97706!important}html.dark .ss .o{background:rgba(245,158,11,.15)!important;color:#f59e0b!important}
-    .ss .lb{padding:4px 10px;text-align:left}
-    .bt{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:8px 16px;border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer;border:none;transition:.2s}
-    .bt1{background:#6366f1;color:#fff;box-shadow:0 4px 15px rgba(99,102,241,.25)}.bt1:hover{filter:brightness(1.1);transform:translateY(-1px)}
-    .bt2{background:rgba(244,63,94,.15);color:#f43f5e}.bt2:hover{background:rgba(244,63,94,.25)}
-    .bt3{background:rgba(16,185,129,.15);color:#10b981}.bt3:hover{background:rgba(16,185,129,.25)}
-    .bt4{background:transparent;border:1px solid rgba(148,163,184,.3)}
-    .ps{padding:6px 10px;border-radius:6px;font-size:.8rem;outline:none;width:100%;transition:.2s;font-weight:500}
-    html:not(.dark) .ps{background:rgba(241,245,249,.8);border:1px solid rgba(0,0,0,.1);color:#0f172a}
-    html.dark .ps{background:rgba(15,23,42,.6);border:1px solid rgba(255,255,255,.1);color:#f8fafc}
-    .ps:focus{border-color:#6366f1}
-    .tg{display:inline-flex;gap:2px;border-radius:8px;padding:3px}
-    html:not(.dark) .tg{background:rgba(241,245,249,.8)}html.dark .tg{background:rgba(15,23,42,.6)}
-    .tg button{padding:6px 14px;border-radius:6px;font-size:.75rem;font-weight:700;border:none;cursor:pointer;background:transparent;transition:.2s}
-    html:not(.dark) .tg button{color:#64748b}html.dark .tg button{color:#94a3b8}
-    .tg button.on{background:#6366f1;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.2)}
-    .pane{display:none;flex:1;overflow:auto;padding:24px;position:relative;z-index:10}
-    .pane.on{display:flex;flex-direction:column;animation:fadeIn .3s ease}
-    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-    .opt-modal-bg{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s}
-    .opt-modal-bg.show{opacity:1;pointer-events:auto}
-    .opt-modal{border-radius:24px;padding:32px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px -12px rgba(0,0,0,.5);transform:scale(.95);transition:.2s}
-    html:not(.dark) .opt-modal{background:#fff;border:1px solid rgba(0,0,0,.1);color:#0f172a}
-    html.dark .opt-modal{background:#1e293b;border:1px solid rgba(255,255,255,.1);color:#f8fafc}
-    .opt-modal-bg.show .opt-modal{transform:scale(1)}
-    .wiz-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-    .wiz-card{border-radius:12px;padding:16px 8px;text-align:center;cursor:pointer;transition:.2s}
-    html:not(.dark) .wiz-card{background:rgba(241,245,249,.8);border:1px solid rgba(0,0,0,.1)}
-    html.dark .wiz-card{background:rgba(15,23,42,.6);border:1px solid rgba(255,255,255,.1)}
-    .wiz-card:hover{border-color:#6366f1;background:rgba(99,102,241,.05);transform:translateY(-2px)}
-    .toast-container{position:fixed;bottom:24px;right:24px;z-index:2000;display:flex;flex-direction:column;gap:10px}
-    .toast{padding:12px 16px;border-radius:10px;display:flex;align-items:center;gap:12px;font-size:.85rem;font-weight:600;box-shadow:0 10px 25px rgba(0,0,0,.3);animation:slideIn .3s forwards}
-    html:not(.dark) .toast{background:#fff;border:1px solid rgba(0,0,0,.1);color:#0f172a}
-    html.dark .toast{background:#1e293b;border:1px solid rgba(255,255,255,.1);color:#f8fafc}
-    @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
-    .custom-chk{display:flex;align-items:center;gap:8px;font-size:.8rem;font-weight:600;cursor:pointer;padding:6px}
-    .custom-chk input{accent-color:var(--ac);width:16px;height:16px}
+    --brd: #334155;
+    --brd-td: #1e293b;
+    
+    --tx-main: #f8fafc;
+    --tx-mut: #94a3b8;
+    
+    --ac: #818cf8; /* Light Indigo */
+    --cy: #22d3ee; /* Light Cyan */
+    --gn: #34d399; /* Light Emerald */
+    --rd: #fb7185; /* Light Rose */
+    --am: #fbbf24; /* Light Amber */
+    
+    --sW: 260px;
+}
+
+[data-theme="light"] {
+    /* LIGHT THEME */
+    --bg-main: #f1f5f9;
+    --bg-pane: #ffffff;
+    --bg-card: #ffffff;
+    --bg-inp: #f8fafc;
+    --bg-th: #f1f5f9;
+    
+    --brd: #cbd5e1;
+    --brd-td: #e2e8f0;
+    
+    --tx-main: #0f172a;
+    --tx-mut: #64748b;
+    
+    --ac: #4f46e5; /* Dark Indigo */
+    --cy: #0891b2; /* Dark Cyan */
+    --gn: #059669; /* Dark Emerald */
+    --rd: #e11d48; /* Dark Rose */
+    --am: #d97706; /* Dark Amber */
+}
+
+/* EVERYTHING IS PLUS JAKARTA SANS */
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Plus Jakarta Sans', sans-serif !important; }
+body { background:var(--bg-main); color:var(--tx-main); height:100vh; overflow:hidden; display:flex; transition: 0.3s; }
+
+::-webkit-scrollbar { width:6px; height:6px; }
+::-webkit-scrollbar-thumb { background:var(--brd); border-radius:4px; }
+
+/* SIDEBAR */
+.snav { width:var(--sW); min-width:var(--sW); height:100vh; background:var(--bg-pane); border-right:1px solid var(--brd); display:flex; flex-direction:column; z-index:20; transition:0.3s; }
+.snav.collapsed { width:70px; min-width:70px; }
+.snav.collapsed .nav-label, .snav.collapsed .logo-texts, .snav.collapsed .nav-group-title { display: none; }
+.snav .logo { padding:24px 20px; display:flex; align-items:center; justify-content:center; border-bottom:1px solid var(--brd); position:relative; }
+.snav .links { flex:1; padding:16px; display:flex; flex-direction:column; gap:4px; overflow-y:auto; }
+.slink { display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:10px; cursor:pointer; font-size:.85rem; font-weight:700; color:var(--tx-mut); transition:.2s; border:1px solid transparent; width:100%; text-align:left; }
+.snav.collapsed .slink { padding:12px; justify-content:center; }
+.slink:hover { color:var(--tx-main); background:var(--bg-card); }
+.slink.on { background:rgba(99,102,241,.1); color:var(--ac); border-color:rgba(99,102,241,.2); }
+
+/* RIGHT SIDEBAR (Ayarlar) */
+.rsnav { position: fixed; right: 0; top: 0; bottom: 0; width: 340px; background: var(--bg-pane); border-left: 1px solid var(--brd); transform: translateX(100%); transition: transform 0.3s ease; z-index: 50; padding: 24px; box-shadow: -10px 0 30px rgba(0,0,0,0.3); }
+.rsnav.open { transform: translateX(0); }
+
+/* MAIN */
+.mn { flex:1; display:flex; flex-direction:column; overflow:hidden; position:relative; background:var(--bg-main); }
+.tbar { height:64px; display:flex; align-items:center; justify-content:space-between; padding:0 24px; border-bottom:1px solid var(--brd); background:var(--bg-pane); flex-shrink:0; z-index:10; }
+.pane { display:none; flex:1; overflow:auto; padding:24px; }
+.pane.on { display:flex; flex-direction:column; animation:fadeIn 0.3s ease; }
+@keyframes fadeIn { from{opacity:0; transform:translateY(5px)} to{opacity:1; transform:translateY(0)} }
+
+/* SPREADSHEET (TABLES) */
+.ss-con { flex:1; overflow:auto; border-radius:12px; border:1px solid var(--brd); background:var(--bg-pane); }
+.ss { width:100%; border-collapse:separate; border-spacing:0; font-size:.76rem; }
+.ss th { background:var(--bg-th); color:var(--ac); font-size:.65rem; font-weight:800; text-transform:uppercase; letter-spacing:.5px; text-align:center; border-bottom:1px solid var(--brd); border-right:1px solid var(--brd-td); position:sticky; top:0; z-index:2; white-space:nowrap; }
+.ss th .resizer { resize:horizontal; overflow:hidden; min-width:40px; display:inline-flex; align-items:center; justify-content:center; padding:10px; width:100%; }
+.ss td { padding:0; border-bottom:1px solid var(--brd-td); border-right:1px solid var(--brd-td); height:36px; white-space:nowrap; transition:0.2s; }
+.ss tr:hover td { background:var(--bg-inp); }
+.ss input, .ss select { width:100%; height:100%; border:none; background:transparent; color:var(--tx-main); font-size:.76rem; padding:4px 8px; outline:none; font-weight:600; }
+.ss select option { background: var(--bg-pane); color: var(--tx-main); }
+.ss input:focus, .ss select:focus { background:rgba(99,102,241,.1); box-shadow:inset 0 0 0 1px var(--ac); }
+.ss input[type=number] { text-align:right; }
+.ss .c { font-weight:700; text-align:right; padding:4px 10px; }
+.ss .lb { font-weight:800; padding:4px 12px; color:var(--tx-mut); }
+.col-hidden { display:none !important; }
+
+/* UI ELEMENTS */
+.cd { background:var(--bg-card); border:1px solid var(--brd); border-radius:12px; padding:16px; transition:0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+.st { display:flex; align-items:center; gap:8px; padding:8px 12px; border-radius:8px; font-weight:800; font-size:.85rem; margin-bottom:12px; }
+.st.i { background:rgba(99,102,241,.1); color:var(--ac); } .st.c { background:rgba(6,182,212,.1); color:var(--cy); } .st.a { background:rgba(245,158,11,.1); color:var(--am); } .st.e { background:rgba(16,185,129,.1); color:var(--gn); }
+.kpi { text-align:center; padding:20px; display:flex; flex-direction:column; justify-content:center; border:1px solid var(--brd); border-radius:12px; background:var(--bg-card); }
+.kpi .v { font-size:1.6rem; font-weight:800; letter-spacing:-0.5px; } .kpi .k { font-size:.65rem; font-weight:800; color:var(--tx-mut); text-transform:uppercase; letter-spacing:1px; margin-top:6px; }
+
+.bt { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:8px 16px; border-radius:8px; font-weight:800; font-size:.8rem; cursor:pointer; border:none; transition:.2s; }
+.bt1 { background:var(--ac); color:#fff; box-shadow:0 4px 12px rgba(99,102,241,.3); } .bt1:hover { filter:brightness(1.1); transform:translateY(-1px); }
+.bt2 { background:rgba(244,63,94,.1); color:var(--rd); border:1px solid rgba(244,63,94,.2); } .bt2:hover { background:rgba(244,63,94,.2); }
+.bt3 { background:rgba(16,185,129,.1); color:var(--gn); border:1px solid rgba(16,185,129,.2); } .bt3:hover { background:rgba(16,185,129,.2); }
+.bt4 { background:var(--bg-card); color:var(--tx-main); border:1px solid var(--brd); } .bt4:hover { border-color:var(--ac); color:var(--ac); }
+.bt4.on { background:var(--ac); color:#fff; border-color:var(--ac); }
+
+.pr { display:flex; align-items:center; padding:4px 0; }
+.pr .l { flex:1; font-size:.8rem; font-weight:700; color:var(--tx-mut); padding-left:4px; }
+.pr input, .pr select { width:100px; background:var(--bg-inp); border:1px solid var(--brd); padding:6px 10px; border-radius:6px; color:var(--tx-main); text-align:right; outline:none; transition:.2s; font-weight:700;}
+.pr input:focus { border-color:var(--ac); } .pr input:disabled { opacity: 0.5; cursor: not-allowed; }
+.pr .u { font-size:.7rem; color:var(--tx-mut); width:35px; text-align:left; padding-left:8px; font-weight:700;}
+.ps { background:var(--bg-inp); border:1px solid var(--brd); padding:6px 10px; border-radius:6px; color:var(--tx-main); font-size:.8rem; outline:none; width:100%; transition:.2s; font-weight:700;}
+.ps:focus { border-color:var(--ac); }
+
+.tg { display:inline-flex; gap:2px; background:var(--bg-inp); border-radius:8px; padding:4px; border:1px solid var(--brd); }
+.tg button { padding:6px 14px; border-radius:6px; font-size:.75rem; font-weight:800; border:none; cursor:pointer; color:var(--tx-mut); background:transparent; transition:0.2s; }
+.tg button.on { background:var(--ac); color:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.2); }
+
+/* CUSTOM MODALS */
+.opt-modal-bg { position:fixed; inset:0; z-index:1000; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:0.2s; }
+.opt-modal-bg.show { opacity:1; pointer-events:auto; }
+.opt-modal { background:var(--bg-pane); border:1px solid var(--brd); border-radius:16px; padding:28px; width:480px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); transform:scale(0.95); transition:0.2s; color:var(--tx-main); }
+.opt-modal-bg.show .opt-modal { transform:scale(1); }
+.opt-modal h3 { font-size:1.2rem; font-weight:900; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.opt-modal label { display:block; font-size:.75rem; font-weight:800; color:var(--tx-mut); text-transform:uppercase; margin:12px 0 4px; }
+
+/* TOASTS */
+.toast-container { position:fixed; bottom:24px; right:24px; z-index:2000; display:flex; flex-direction:column; gap:10px; }
+.toast { background:var(--bg-card); color:var(--tx-main); border:1px solid var(--brd); padding:12px 16px; border-radius:10px; display:flex; align-items:center; gap:12px; font-size:.85rem; font-weight:700; box-shadow:0 10px 25px rgba(0,0,0,0.2); animation:slideIn 0.3s cubic-bezier(0.175,0.885,0.32,1.275) forwards; }
+@keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+.toast.ok i { color:var(--gn); } .toast.er i { color:var(--rd); } .toast.in i { color:var(--cy); }
+
+/* CEKET HESAPLAMA SPECIFIC */
+#p-ch { padding: 0 !important; overflow: hidden !important; position: absolute !important; inset: 64px 0 0 0 !important; height: auto !important; flex: unset !important; z-index: 5; background:var(--bg-main); }
 </style>
 </head>
+<body>
 
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 transition-colors duration-300">
+<nav class="snav" id="sidebar">
+ <div class="logo">
+  <div class="logo-texts w-full text-center">
+   <div class="text-2xl font-black tracking-tighter text-[var(--tx-main)]">Optimizi.App</div>
+   <div class="text-[9px] text-[var(--cy)] font-bold uppercase tracking-widest mt-1">Fiyat Teklif Aracı</div>
+  </div>
+  <button onclick="toggleSidebar()" class="absolute -right-3 top-6 bg-[var(--ac)] rounded-full p-1 shadow-lg text-white"><i data-lucide="chevron-left" class="w-3 h-3" id="collapseIcon"></i></button>
+ </div>
+ <div class="links">
+  <button class="slink on" onclick="go('pd',this)" title="Ürün Detay"><i data-lucide="layout-grid"></i><span class="nav-label">Ürün Detay</span></button>
+  <button class="slink" onclick="go('pl',this)" title="Fiyat Listesi"><i data-lucide="file-spreadsheet"></i><span class="nav-label">Fiyat Listesi</span></button>
+  <button class="slink" onclick="go('ms',this)" title="Genel Özet"><i data-lucide="pie-chart"></i><span class="nav-label">Genel Özet</span></button>
+  <button class="slink" onclick="go('pm',this)" title="Personel Maliyetleri"><i data-lucide="users"></i><span class="nav-label">Personel Maliyeti</span></button>
+  <div class="px-4 py-3 mt-2 text-[9px] font-bold text-[var(--tx-mut)] uppercase tracking-widest nav-group-title">Hesaplama & Ar-Ge</div>
+  <button class="slink" onclick="go('ch',this)" title="Ceket Hesaplama Motoru"><i data-lucide="calculator"></i><span class="nav-label">Ceket Kalıp & Ölçü</span></button>
+  <div class="px-4 py-3 mt-2 text-[9px] font-bold text-[var(--tx-mut)] uppercase tracking-widest nav-group-title">Veritabanı</div>
+  <button class="slink" onclick="go('mf',this)" title="Malzeme Fiyatları"><i data-lucide="database"></i><span class="nav-label">Malzeme Fiyatları</span></button>
+  <button class="slink" onclick="go('pr',this)" title="Parametreler"><i data-lucide="sliders-horizontal"></i><span class="nav-label">Parametreler</span></button>
+ </div>
+ <div class="p-3 border-t border-[var(--brd)] text-center">
+    <button class="bt bt4 w-full justify-center text-xs" onclick="document.getElementById('rightSidebar').classList.add('open')"><i data-lucide="settings"></i> <span class="nav-label">Ayarlar</span></button>
+ </div>
+</nav>
 
-<div class="fixed inset-0 z-0 pointer-events-none opacity-50 dark:opacity-100 transition-opacity duration-500">
-    <div class="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-500/20 dark:bg-indigo-600/10 rounded-full blur-[100px]"></div>
-    <div class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-500/20 dark:bg-blue-600/10 rounded-full blur-[100px]"></div>
+<div class="rsnav" id="rightSidebar">
+  <div class="flex items-center justify-between mb-6 border-b border-[var(--brd)] pb-4">
+    <h2 class="font-bold text-lg flex items-center gap-2 text-[var(--tx-main)]"><i data-lucide="settings-2" class="text-[var(--cy)]"></i> Genel Ayarlar</h2>
+    <button onclick="document.getElementById('rightSidebar').classList.remove('open')" class="text-[var(--rd)] hover:text-white"><i data-lucide="x"></i></button>
+  </div>
+  <div class="mb-4">
+    <label class="block text-xs font-bold text-[var(--tx-mut)] uppercase mb-2">Ürün Kodu Ön Eki (Prefix)</label>
+    <input type="text" id="prefInput" class="ps font-bold text-[var(--tx-main)]" placeholder="Örn: INSJACK" onchange="updatePrefix(this.value)">
+    <p class="text-[10px] text-[var(--tx-mut)] mt-2 leading-relaxed">Varsayılan olarak eklenen bu ibareyi silebilir veya dilediğiniz gibi değiştirebilirsiniz.</p>
+  </div>
+  <div class="mt-8">
+    <label class="block text-xs font-bold text-[var(--tx-mut)] uppercase mb-2">Döviz API Durumu</label>
+    <div id="apiStatusBadge" class="bg-[rgba(16,185,129,0.1)] border border-[var(--gn)] text-[var(--gn)] px-3 py-2 rounded-lg font-bold text-xs flex items-center gap-2">
+      <i data-lucide="refresh-cw" class="w-4 h-4 animate-spin"></i> Yükleniyor...
+    </div>
+  </div>
 </div>
 
-<div class="flex h-screen w-full overflow-hidden relative z-10">
-    <aside id="mainSidebar" class="w-64 shrink-0 h-full flex flex-col z-20 border-r border-slate-200 dark:border-slate-700/50 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl transition-all duration-300">
-        <div class="h-20 flex items-center justify-between px-6 border-b border-slate-200 dark:border-white/5 shrink-0">
-           <a href="../dashboard.html" class="flex items-center gap-2 overflow-hidden logo-text hover:opacity-80 transition-opacity duration-200 cursor-pointer">
-              <span class="text-lg font-bold text-slate-800 dark:text-white tracking-tight">Optimizi<span class="text-indigo-500 dark:text-indigo-400">.Ceket</span></span>
-           </a>
-           <button onclick="toggleSidebar()" class="text-slate-400 hover:text-indigo-600 transition"><i data-lucide="panel-left" class="w-5 h-5"></i></button>
-        </div>
-        <div class="flex-1 overflow-y-auto py-6 px-4 custom-scroll space-y-1">
-            <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2 sidebar-title">Modüller</div>
-            <a onclick="go('pl',this)" class="sidebar-link active flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors text-indigo-600 bg-indigo-50 dark:bg-indigo-500/10 dark:text-indigo-400"><i data-lucide="file-spreadsheet" class="w-5 h-5"></i><span class="sidebar-text">Fiyat Listesi</span></a>
-            <a onclick="go('pd',this)" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/50"><i data-lucide="layout-grid" class="w-5 h-5"></i><span class="sidebar-text">Ürün Detay</span></a>
-            <a onclick="go('ms',this)" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/50"><i data-lucide="pie-chart" class="w-5 h-5"></i><span class="sidebar-text">Genel Özet</span></a>
-            <a onclick="go('pm',this)" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/50 mb-4"><i data-lucide="users" class="w-5 h-5"></i><span class="sidebar-text">Personel Maliyetleri</span></a>
-            <div class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-4 mb-2 mt-6 sidebar-title">Veritabanı</div>
-            <a onclick="go('mf',this)" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/50"><i data-lucide="database" class="w-5 h-5"></i><span class="sidebar-text">Malzeme Fiyatları</span></a>
-            <a onclick="go('pr',this)" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/50"><i data-lucide="sliders-horizontal" class="w-5 h-5"></i><span class="sidebar-text">Parametreler</span></a>
-        </div>
-        <div class="p-4 border-t border-slate-200 dark:border-slate-700/50 shrink-0">
-            <a onclick="openRight()" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/50"><i data-lucide="settings" class="w-5 h-5"></i><span class="sidebar-text">Ticari Ayarlar</span></a>
-        </div>
-    </aside>
+<div class="mn">
+<div class="tbar">
+ <div class="flex gap-4 text-xs font-bold items-center">
+  <div class="cd py-1.5 px-4 flex items-center gap-2"><span class="text-[10px] text-[var(--tx-mut)] uppercase">Kalem</span><span id="sI" class="text-[var(--cy)] font-bold text-sm">0</span></div>
+  <div class="cd py-1.5 px-4 flex items-center gap-2"><span class="text-[10px] text-[var(--tx-mut)] uppercase">Ceket</span><span id="sJ" class="text-[var(--ac)] font-bold text-sm">0</span></div>
+ </div>
+ <div class="flex gap-3 items-center">
+  <button onclick="toggleTheme()" class="bt bt4 px-2" id="themeBtn" title="Tema Değiştir"><i data-lucide="sun" class="w-4 h-4"></i></button>
+  <button onclick="saveData()" class="bt bt1"><i data-lucide="save" class="w-4 h-4"></i>Kaydet</button>
+  <button onclick="openPdfModal()" class="bt bt4"><i data-lucide="file-down" class="w-4 h-4"></i>PDF İndir</button>
+ </div>
+</div>
 
-    <div id="rsOverlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden transition-opacity" style="opacity:0" onclick="closeRight()"></div>
-    <div id="rightSidebar" class="fixed right-0 top-0 h-full w-80 bg-white dark:bg-slate-900 z-50 transform translate-x-full transition-transform duration-300 shadow-2xl border-l border-slate-200 dark:border-slate-700/50 p-6 flex flex-col">
-      <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-200 dark:border-slate-700">
-        <h2 class="font-bold text-lg flex items-center gap-2 text-slate-800 dark:text-white"><i data-lucide="settings-2" class="text-indigo-500"></i> Ticari Ayarlar</h2>
-        <button onclick="closeRight()" class="text-slate-400 hover:text-red-500 p-1 transition cursor-pointer"><i data-lucide="x"></i></button>
+<div id="p-pd" class="pane on">
+ <div class="flex items-center gap-3 mb-4 flex-wrap bg-[var(--bg-card)] p-4 rounded-xl border border-[var(--brd)] shadow-sm">
+  <select id="aType" class="ps" style="width:170px" onchange="updDN()">
+   <option value="">Ekipman Tipi...</option>
+   <option value="gate">Gate Vana</option>
+   <option value="globe">Globe Vana</option>
+   <option value="butterfly">Kelebek Vana</option>
+   <option value="yfilter">Pislik Tutucu</option>
+   <option value="check_clv">Çekvalf (CLV-50)</option>
+   <option value="ball_2">2 Prç Küresel</option>
+   <option value="ball_3">3 Prç Küresel</option>
+   <option value="3way">Üç Yollu Vana</option>
+   <option value="trap">Kondenstop</option>
+   <option value="elbow">Dirsek (90°)</option>
+   <option value="flange">Flanş</option>
+   <option value="manual_pad">Manuel Yastık</option>
+  </select>
+  <select id="aDN" class="ps" style="width:90px"><option value="">DN</option></select>
+  <select id="aCls" class="ps" style="width:100px"><option value="150">PN16/150</option><option value="300">PN25/300</option><option value="400">PN40/400</option><option value="600">600</option></select>
+  <input type="number" id="aQty" class="ps font-bold" style="width:70px;text-align:center" value="1" min="1" title="Adet">
+  <button onclick="addItem()" class="bt bt1 px-4"><i data-lucide="plus" class="w-4 h-4"></i>Ekle</button>
+  
+  <div class="ml-auto flex items-center gap-3">
+   <button onclick="document.getElementById('colModal').classList.add('show')" class="bt bt4 px-3 text-xs shadow-sm"><i data-lucide="columns" class="w-4 h-4 text-[var(--cy)]"></i> Sütun Ayarları</button>
+   <button onclick="openGlobalMatModal()" class="bt bt4 px-3 text-xs shadow-sm"><i data-lucide="layers" class="w-4 h-4 text-[var(--am)]"></i> Toplu Malzeme</button>
+   <div class="h-6 w-px bg-[var(--brd)] mx-1"></div>
+   <span class="text-xs font-bold text-[var(--tx-mut)] uppercase">Para Birimi:</span>
+   <select id="pdCur" class="ps font-bold" style="width:80px" onchange="recalcAll()"><option value="TL">TL</option><option value="USD">USD</option><option value="EUR">EUR</option></select>
+   <button onclick="optConfirm('Listeyi temizlemek istediğinize emin misiniz?', ()=>{IT=[];RN=1;recalcAll()})" class="bt bt2 px-3" title="Listeyi Temizle"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+  </div>
+ </div>
+
+ <div class="ss-con" style="height:65vh">
+  <table class="ss" id="tPD">
+   <thead>
+    <tr>
+     <th data-col="ref"><div class="resizer">REF</div></th>
+     <th data-col="tip"><div class="resizer">Tip</div></th>
+     <th data-col="parca"><div class="resizer">Parça</div></th>
+     <th data-col="dn"><div class="resizer">DN</div></th>
+     <th data-col="cls"><div class="resizer">Cls</div></th>
+     <th data-col="adet"><div class="resizer">Adet</div></th>
+     <th data-col="zorluk" class="text-[var(--ac)]"><div class="resizer">Zorluk</div></th>
+     <th data-col="altk"><div class="resizer">Alt Kumaş</div></th>
+     <th data-col="ustk"><div class="resizer">Üst Kumaş</div></th>
+     <th data-col="dolgu"><div class="resizer">Dolgu</div></th>
+     <th data-col="izol" style="color:var(--am)"><div class="resizer">İzolasyon</div></th>
+     <th data-col="fcap"><div class="resizer">F.Çap</div></th>
+     <th data-col="s"><div class="resizer">S (Çevre)</div></th>
+     <th data-col="t"><div class="resizer">T (Boy)</div></th>
+     <th data-col="mkumas" style="color:var(--cy)"><div class="resizer">Kumaş M²</div></th>
+     <th data-col="mdolgu" style="color:var(--cy)"><div class="resizer">Dolgu M²</div></th>
+     <th data-col="mdikis" style="color:var(--cy)"><div class="resizer">Dikiş İpi</div></th>
+     <th data-col="mbogma" style="color:var(--cy)"><div class="resizer">Boğma İpi</div></th>
+     <th data-col="mcirt" style="color:var(--cy)"><div class="resizer">Cırt Bant</div></th>
+     <th data-col="magraf" style="color:var(--cy)"><div class="resizer">Agraf</div></th>
+     <th data-col="mpul" style="color:var(--cy)"><div class="resizer">Pul</div></th>
+     <th data-col="mlz" style="color:var(--ac)"><div class="resizer">Mlz Mly</div></th>
+     <th data-col="isc" style="color:var(--ac)"><div class="resizer">İşç Mly</div></th>
+     <th data-col="bmly" style="color:var(--gn)"><div class="resizer">B.Mly</div></th>
+     <th data-col="bsat" style="color:var(--gn)"><div class="resizer">B.Satış</div></th>
+     <th data-col="toplam" style="color:var(--gn)"><div class="resizer">Toplam</div></th>
+     <th data-col="sil"></th>
+    </tr>
+   </thead>
+   <tbody id="pdBody"></tbody><tfoot id="pdFoot"></tfoot>
+  </table>
+ </div>
+</div>
+
+<div id="p-pl" class="pane">
+ <div class="flex items-center justify-between mb-4">
+  <h2 class="text-xl font-bold flex items-center gap-2"><i data-lucide="file-spreadsheet" class="text-[var(--ac)]"></i> Müşteri Fiyat Listesi</h2>
+  <div class="tg" id="curToggle"></div>
+ </div>
+ <div class="ss-con" style="height:75vh">
+  <table class="ss" id="tPL"><thead id="plHead"></thead><tbody id="plBody"></tbody><tfoot><tr id="plFoot"></tr></tfoot></table>
+ </div>
+</div>
+
+<div id="p-ms" class="pane">
+<div class="grid grid-cols-2 lg:grid-cols-5 gap-5 mb-6">
+ <div class="kpi"><div class="v text-[var(--cy)]" id="kC">₺0</div><div class="k">Toplam Maliyet</div></div>
+ <div class="kpi"><div class="v text-[var(--gn)]" id="kS">₺0</div><div class="k">Satış Bedeli</div></div>
+ <div class="kpi"><div class="v text-[var(--am)]" id="kP">₺0</div><div class="k">Kâr</div></div>
+ <div class="kpi"><div class="v text-[var(--ac)]" id="kM">%0</div><div class="k">Kâr Marjı</div></div>
+ <div class="kpi"><div class="v text-[var(--rd)]" id="kJ">0</div><div class="k">Ceket</div></div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+ <div class="cd flex flex-col">
+  <div class="st e"><i data-lucide="calculator" class="w-4 h-4"></i>Maliyet Kırılımı</div>
+  <div class="rounded-xl overflow-hidden border border-[var(--brd)] flex-1 bg-[var(--bg-pane)]"><table class="ss" id="tMC" style="height:100%"></table></div>
+ </div>
+ <div class="cd flex flex-col">
+  <div class="st c"><i data-lucide="package" class="w-4 h-4"></i>Malzeme Toplamları</div>
+  <div class="rounded-xl overflow-hidden border border-[var(--brd)] flex-1 overflow-y-auto bg-[var(--bg-pane)]"><table class="ss" id="tMM" style="height:100%"></table></div>
+ </div>
+ <div class="cd flex flex-col">
+  <div class="st a"><i data-lucide="briefcase" class="w-4 h-4"></i>Hizmet Bedelleri</div>
+  <div class="space-y-3 mt-2 flex-1" id="msServices"></div>
+  <div class="mt-4 pt-4 border-t border-[var(--brd)] flex justify-between items-center"><span class="font-extrabold text-sm text-[var(--tx-main)]">Toplam Hizmet</span><span class="font-extrabold text-[var(--am)] font-bold text-lg" id="msSvcTotal">₺0</span></div>
+ </div>
+</div>
+
+<div class="cd w-full">
+ <div class="st i"><i data-lucide="globe" class="w-4 h-4"></i>Döviz & Kâr Analizi</div>
+ <div class="rounded-xl overflow-hidden border border-[var(--brd)] mb-4 bg-[var(--bg-pane)]"><table class="ss" id="tMS"></table></div>
+ <div class="grid grid-cols-3 gap-4">
+  <div class="bg-[var(--bg-inp)] rounded-lg kpi" style="padding:16px; border:none"><div class="v text-[1.2rem] text-[var(--tx-main)] font-mono" id="msAH">0</div><div class="k">Adam×Saat</div></div>
+  <div class="bg-[var(--bg-inp)] rounded-lg kpi" style="padding:16px; border:none"><div class="v text-[1.2rem] text-[var(--tx-main)] font-mono" id="msAD">0</div><div class="k">Adam Gün</div></div>
+  <div class="bg-[var(--bg-inp)] rounded-lg kpi" style="padding:16px; border:none"><div class="v text-[1.2rem] text-[var(--tx-main)] font-mono" id="msJC">0</div><div class="k">Ceket</div></div>
+ </div>
+</div>
+</div>
+
+<div id="p-mf" class="pane">
+<div class="flex items-center justify-between mb-4"><div class="tg" id="mfBtns"></div><button onclick="openMatModal()" class="bt bt3"><i data-lucide="plus" class="w-4 h-4"></i>Yeni Malzeme</button></div>
+<div class="ss-con" style="height:75vh"><table class="ss"><thead><tr><th>#</th><th>Tür</th><th>Alt Tip</th><th style="min-width:180px">Malzeme Cinsi</th><th>Birim</th><th>Fiyat</th><th>Döviz</th><th style="color:var(--gn)">TL Fiyat</th><th>Kalınlık</th><th></th></tr></thead><tbody id="mBody"></tbody></table></div>
+</div>
+
+<div id="p-pm" class="pane">
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-5 mb-5">
+ <div class="kpi"><div class="v text-[var(--cy)]" id="pmAvg">₺0</div><div class="k">Ort. Saat Maliyeti</div></div>
+ <div class="kpi"><div class="v text-[var(--ac)]" id="pmCnt">0</div><div class="k">Personel Sayısı</div></div>
+ <div class="kpi"><div class="v text-[var(--gn)]" id="pmTot">₺0</div><div class="k">Yıllık Toplam Maliyet</div></div>
+ <div class="kpi"><div class="v text-[var(--am)]" id="pmDay">₺0</div><div class="k">Günlük Toplam</div></div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-5 mb-5">
+ <div class="cd"><div class="st a"><i data-lucide="settings" class="w-4 h-4"></i>Ortak Parametreler</div><div id="pmParams"></div></div>
+ <div class="lg:col-span-3 flex flex-col">
+  <div class="flex items-center justify-between mb-3"><div class="text-xs text-[var(--tx-mut)] font-bold"><i data-lucide="info" class="w-3 h-3 inline relative -top-0.5"></i> Hesaplanan saat maliyeti sistemin ana işçilik gideri olarak otomatik senkronize edilir.</div><button onclick="openPersModal()" class="bt bt3"><i data-lucide="user-plus" class="w-4 h-4"></i>Personel Ekle</button></div>
+  <div class="ss-con" style="height:55vh"><table class="ss"><thead><tr><th>#</th><th>Görev</th><th style="min-width:140px">Ad Soyad</th><th>Aylık Net</th><th style="color:var(--cy)">Yıllık Brüt</th><th style="color:var(--cy)">Kıdem</th><th style="color:var(--cy)">İzin</th><th>Servis</th><th>Yemek</th><th>KKD</th><th style="color:var(--am)">Fazla Ç.</th><th style="color:var(--ac)">Yıllık Top.</th><th style="color:var(--gn)">Saat Mly</th><th></th></tr></thead><tbody id="pmBody"></tbody><tfoot><tr><td colspan="10" class="lb text-right font-extrabold text-[var(--tx-main)]">ORTALAMA / TOPLAM</td><td class="c font-bold text-[var(--am)] font-mono" id="pmFcTot"></td><td class="c text-[var(--ac)] font-bold font-mono" id="pmNTot"></td><td class="c font-bold text-[var(--gn)] text-[1rem] font-mono" id="pmOTot"></td><td></td></tr></tfoot></table></div>
+ </div>
+</div>
+</div>
+
+<div id="p-pr" class="pane">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+ <div class="cd"><div class="st c"><i data-lucide="coins" class="w-4 h-4"></i>Döviz & İşçilik</div><div id="pDov" class="space-y-1"></div></div>
+ <div class="cd"><div class="st a"><i data-lucide="ruler" class="w-4 h-4"></i>Fire & Geometri</div><div id="pFir" class="space-y-1"></div></div>
+ <div class="cd"><div class="st e"><i data-lucide="hard-hat" class="w-4 h-4"></i>İşçilik Sabitleri</div><div id="pLab" class="space-y-1"></div></div>
+</div>
+
+<div class="bg-[rgba(99,102,241,0.1)] border border-[rgba(99,102,241,0.2)] p-4 rounded-xl mt-6">
+  <h3 class="font-bold text-[var(--ac)] flex items-center gap-2 mb-2"><i data-lucide="cpu" class="w-4 h-4"></i> Yapay Zeka Extrapolasyon Aktif</h3>
+  <p class="text-xs text-[var(--tx-mut)]">Eksik (büyük) çaplar DN15-1000 bandında tam kapsayıcılık sağlamak adına otomatik olarak hesaplanarak dolduruldu.</p>
+</div>
+
+<div class="cd mt-4"><div class="st i"><i data-lucide="circle" class="w-4 h-4"></i>Flanş Çap Tablosu (mm) [Dolduruldu]</div><div class="overflow-auto max-h-[42vh] rounded-lg border border-[var(--brd)] bg-[var(--bg-pane)]"><table class="ss" id="tFl"></table></div></div>
+<div class="cd mt-6"><div class="st c"><i data-lucide="move-horizontal" class="w-4 h-4"></i>Gövde Uzunluk (L1 / L2) [Dolduruldu]</div>
+ <div class="flex gap-2 mb-3"><button onclick="slt('gate')" class="bt bt4 on" id="bl-gate">Gate</button><button onclick="slt('globe')" class="bt bt4" id="bl-globe">Globe</button><button onclick="slt('butterfly')" class="bt bt4" id="bl-butterfly">Kelebek</button></div>
+ <div class="overflow-auto max-h-[42vh] rounded-lg border border-[var(--brd)] bg-[var(--bg-pane)]"><table class="ss" id="tLn"></table></div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+ <div class="cd"><div class="st c"><i data-lucide="gauge" class="w-4 h-4"></i>Vana Referans Ölçüleri (PDF)</div>
+  <div class="flex gap-2 mb-3"><select id="vRefSel" class="ps font-bold" style="width:260px" onchange="rVRef()"><option value="PV-16">Pistonlu Vana PN16</option><option value="GV-16K">Glob Vana PN16 (Pik Döküm)</option><option value="GV-25Z">Glob Vana PN25 (Sfero Döküm)</option><option value="GV-40K">Glob Vana PN40 (Çelik Döküm)</option><option value="MK-16">Körüklü Vana PN16 (Pik Döküm)</option><option value="MK-25">Körüklü Vana PN25 (Sfero Döküm)</option><option value="MK-40">Körüklü Vana PN40 (Çelik Döküm)</option><option value="GTK-18">Sürgülü Vana PN16 (GGG-50)</option></select></div>
+  <div class="overflow-auto max-h-[35vh] rounded-lg border border-[var(--brd)] bg-[var(--bg-pane)]"><table class="ss" id="tVRef"></table></div>
+ </div>
+ <div class="cd"><div class="st a"><i data-lucide="circle-dot" class="w-4 h-4"></i>Agraf & Pul (Tümü Extrapolated)</div><div class="overflow-auto max-h-[35vh] rounded-lg border border-[var(--brd)] bg-[var(--bg-pane)]"><table class="ss" id="tAg"></table></div></div>
+</div>
+</div>
+
+<div id="p-ch" class="pane" style="padding:0; position:absolute; inset:64px 0 0 0;">
+  <div style="flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:var(--bg-pane);border-bottom:1px solid var(--brd);gap:12px;flex-wrap:wrap;">
+    <div style="display:flex;gap:3px;background:var(--bg-inp);border-radius:8px;padding:3px;border:1px solid var(--brd)">
+      <button id="chTabV" onclick="chMode('vana')" style="padding:8px 20px;border-radius:6px;font-size:.8rem;font-weight:800;border:none;cursor:pointer;background:var(--ac);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.2);transition:.2s;">⊙ Vana Ceketi</button>
+      <button id="chTabP" onclick="chMode('pad')"  style="padding:8px 20px;border-radius:6px;font-size:.8rem;font-weight:800;border:none;cursor:pointer;background:transparent;color:var(--tx-mut);transition:.2s;">▭ Düz Yastık</button>
+    </div>
+    <div id="chSecDB" style="display:flex;align-items:center;gap:8px">
+      <span style="font-size:.7rem;color:var(--tx-mut);font-weight:800;text-transform:uppercase;">Veritabanı:</span>
+      <select id="chVT" class="ps" style="width:185px;font-size:.8rem" onchange="chUpdDN()"><option value="">— Vana Tipi —</option></select>
+      <select id="chVDN" class="ps" style="width:90px;font-size:.8rem" onchange="chAutoFill()"><option value="">— DN —</option></select>
+      <div id="chFillOk" style="font-size:.7rem;color:var(--gn);font-weight:800;display:none"><i data-lucide="check" class="inline w-3 h-3"></i> Dolduruldu</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span style="font-size:.7rem;color:var(--tx-mut);font-weight:800;text-transform:uppercase;">Adet:</span>
+      <input type="number" id="chVQ" value="1" min="1" class="ps font-mono" style="width:60px;font-size:.85rem;text-align:center">
+    </div>
+    <div style="display:flex;gap:8px;margin-left:auto">
+      <button onclick="chHesapla()" class="bt bt1" style="padding:10px 24px;font-size:.85rem;"><i data-lucide="calculator" class="w-4 h-4"></i> Hesapla</button>
+      <button onclick="chGonderFiyatListesi()" id="chGonderBtn" class="bt bt3" style="padding:10px 24px;font-size:.85rem;opacity:.4;cursor:not-allowed" disabled><i data-lucide="send" class="w-4 h-4"></i> Listeye Ekle</button>
+    </div>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:290px 300px 1fr;overflow:hidden;height:100%;background:var(--bg-main);">
+    <div style="overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;border-right:1px solid var(--brd);background:var(--bg-pane);">
+      <div id="chSecVD" class="cd" style="padding:0; overflow:hidden;">
+        <div style="padding:10px 16px;font-size:.65rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--ac);background:rgba(99,102,241,.1);border-bottom:1px solid var(--brd)">📐 Vana Boyutları</div>
+        <div style="padding:12px 16px;display:flex;flex-direction:column;gap:4px">
+          <div class="pr"><span class="l">D — Flanş Çapı</span><input type="number" id="chD" value="185" min="10" oninput="chLive()"><span class="u">mm</span></div>
+          <div class="pr"><span class="l">L — Flanş Arası</span><input type="number" id="chL" value="290" min="10" oninput="chLive()"><span class="u">mm</span></div>
+          <div class="pr"><span class="l">H — Yükseklik</span><input type="number" id="chH" value="200" min="0" oninput="chLive()"><span class="u">mm</span></div>
+          <div class="pr"><span class="l" style="font-size:.71rem">Boyun Çapı <small style="color:var(--tx-mut)">(0=D×0.5)</small></span><input type="number" id="chDB" value="0" min="0" oninput="chLive()"><span class="u">mm</span></div>
+        </div>
       </div>
-      <div class="mb-4">
-        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">Ürün Kodu Ön Eki (Prefix)</label>
-        <input type="text" id="prefInput" class="ps" placeholder="Örn: INSJACK" onchange="updatePrefix(this.value)">
-        <p class="text-[10px] text-slate-400 mt-2 leading-relaxed">Kullanıcının tekelindedir.</p>
+      <div id="chSecPD" class="cd" style="padding:0; overflow:hidden; display:none;">
+        <div style="padding:10px 16px;font-size:.65rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--am);background:rgba(245,158,11,.1);border-bottom:1px solid var(--brd)">📐 Yastık Boyutları</div>
+        <div style="padding:12px 16px;display:flex;flex-direction:column;gap:6px">
+          <div class="pr"><span class="l">W — Genişlik</span><input type="number" id="chPW" value="500" min="10" oninput="chLive()"><span class="u">mm</span></div>
+          <div class="pr"><span class="l">H — Yükseklik</span><input type="number" id="chPH" value="400" min="10" oninput="chLive()"><span class="u">mm</span></div>
+          <div class="pr"><span class="l">Adet</span><input type="number" id="chPQ" value="1" min="1"><span class="u">ad</span></div>
+          <div style="padding:8px 0 4px">
+            <div style="font-size:.7rem;color:var(--tx-mut);font-weight:800;margin-bottom:6px">Kenar Tipi</div>
+            <div style="display:flex;gap:4px;background:var(--bg-inp);border-radius:8px;padding:4px; border:1px solid var(--brd);">
+              <button id="chBKS" onclick="chSetK('kenarsiz')" style="flex:1;padding:8px 0;border-radius:6px;font-size:.75rem;font-weight:800;border:none;cursor:pointer;background:var(--ac);color:#fff;transition:.2s">▭ Kenarsız</button>
+              <button id="chBKL" onclick="chSetK('kenarli')"  style="flex:1;padding:8px 0;border-radius:6px;font-size:.75rem;font-weight:800;border:none;cursor:pointer;background:transparent;color:var(--tx-mut);transition:.2s">⊡ Kenarlı</button>
+            </div>
+            <div id="chKD" style="font-size:.65rem;color:var(--tx-mut);margin-top:6px;font-weight:600;">Dolgu iki kumaş arasına, kenarlar açık/bantlı</div>
+          </div>
+        </div>
       </div>
-      <div class="mt-8">
-        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">Döviz API Durumu (TCMB)</label>
-        <div id="apiStatusBadge" class="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-3 py-2 rounded font-bold text-xs flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4"></i> Senkronize Edildi</div>
+      <div class="cd" style="padding:0; overflow:hidden;">
+        <div style="padding:10px 16px;font-size:.65rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--cy);background:rgba(6,182,212,.1);border-bottom:1px solid var(--brd)">🔩 İzolasyon & Paylar</div>
+        <div style="padding:12px 16px;display:flex;flex-direction:column;gap:4px">
+          <div class="pr"><span class="l">Kalınlık (I)</span><input type="number" id="chI" value="50" min="0" oninput="chLive()"><span class="u">mm</span></div>
+          <div id="chPayV">
+            <div class="pr"><span class="l">Cırt Payı</span><input type="number" id="chPC" value="50" min="0"><span class="u">mm</span></div>
+            <div class="pr"><span class="l">Yan Pay (tek)</span><input type="number" id="chPY" value="50" min="0"><span class="u">mm</span></div>
+            <div class="pr"><span class="l">Boğma Fazlalık</span><input type="number" id="chPR" value="150" min="0"><span class="u">mm</span></div>
+          </div>
+          <div id="chPayP" style="display:none"><div class="pr"><span class="l">Dikiş Payı</span><input type="number" id="chPSM" value="15" min="0"><span class="u">mm</span></div></div>
+        </div>
+      </div>
+      <div class="cd" style="padding:0; overflow:hidden;">
+        <div style="padding:10px 16px;font-size:.65rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--rd);background:rgba(244,63,94,.1);border-bottom:1px solid var(--brd)">💼 İşçilik & Satış</div>
+        <div style="padding:12px 16px;display:flex;flex-direction:column;gap:4px">
+          <div class="pr"><span class="l">Süre (sa/m²)</span><input type="number" id="chLBX" value="0.30" step="0.01" min="0" class="font-mono"><span class="u">sa</span></div>
+          <div class="pr"><span class="l">Saat Ücreti</span><input type="number" id="chHC" value="250" min="0" class="font-mono" disabled title="Parametrelerden Çekilir"><span class="u">₺</span></div>
+          <div class="pr"><span class="l">Satış Çarpanı</span><input type="number" id="chMUL" value="2.5" step="0.1" min="1" class="font-mono" disabled title="Parametrelerden Çekilir"><span class="u">×</span></div>
+          <div id="chDFSec">
+            <div style="font-size:.7rem;color:var(--tx-mut);margin:10px 0 6px;font-weight:800;">Zorluk Çarpanı (df)</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px">
+              <button class="bt bt4" data-df="1.0" onclick="chSetDf(this)" style="font-size:.65rem;padding:6px 2px;">Küresel<br><span style="color:var(--gn)">×1.0</span></button>
+              <button class="bt bt4 on" data-df="1.2" onclick="chSetDf(this)" style="font-size:.65rem;padding:6px 2px;">Glob<br><span>×1.2</span></button>
+              <button class="bt bt4" data-df="1.3" onclick="chSetDf(this)" style="font-size:.65rem;padding:6px 2px;">Körüklü<br><span>×1.3</span></button>
+              <button class="bt bt4" data-df="1.5" onclick="chSetDf(this)" style="font-size:.65rem;padding:6px 2px;">Pislik<br><span style="color:var(--am)">×1.5</span></button>
+              <button class="bt bt4" data-df="1.8" onclick="chSetDf(this)" style="font-size:.65rem;padding:6px 2px;">3 Yollu<br><span style="color:var(--am)">×1.8</span></button>
+              <button class="bt bt4" data-df="2.0" onclick="chSetDf(this)" style="font-size:.65rem;padding:6px 2px;">Özel<br><span style="color:var(--rd)">×2.0</span></button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-
-    <main class="flex-1 flex flex-col h-full overflow-hidden relative">
-        <div class="h-20 flex items-center justify-between px-6 border-b border-slate-200 dark:border-slate-700/50 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md shrink-0">
-         <div class="flex gap-4 text-xs font-bold items-center">
-          <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2 flex items-center gap-2 shadow-sm"><span class="text-[10px] text-slate-500 dark:text-slate-400 uppercase">Kalem</span><span id="sI" class="text-cyan-500 font-mono text-sm">0</span></div>
-          <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2 flex items-center gap-2 shadow-sm"><span class="text-[10px] text-slate-500 dark:text-slate-400 uppercase">Ceket</span><span id="sJ" class="text-indigo-500 font-mono text-sm">0</span></div>
-          <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2 flex items-center gap-2 shadow-sm"><span class="text-[10px] text-slate-500 dark:text-slate-400 uppercase">Adam×Sa</span><span id="sH" class="text-amber-500 font-mono text-sm">0</span></div>
-         </div>
-         <div class="flex gap-3 items-center">
-          <button onclick="toggleTheme()" class="bt bt4 px-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:text-indigo-500 dark:hover:text-indigo-400" id="themeBtn" title="Tema Değiştir"><i data-lucide="sun" class="w-4 h-4"></i></button>
-          <button onclick="saveData()" class="bt bt1 shadow-lg shadow-indigo-500/20"><i data-lucide="save" class="w-4 h-4"></i>Kaydet</button>
-          <button onclick="openPdfModal()" class="bt bt4 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:text-indigo-500 dark:hover:text-indigo-400"><i data-lucide="file-down" class="w-4 h-4 text-indigo-500"></i>PDF İndir</button>
-         </div>
+    <div style="overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;border-right:1px solid var(--brd);background:var(--bg-main);">
+      <div class="cd" style="padding:0; overflow:hidden;">
+        <div style="padding:10px 16px;font-size:.65rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--gn);background:rgba(16,185,129,.1);border-bottom:1px solid var(--brd);display:flex;justify-content:space-between;align-items:center">
+          <span>🧵 Reçete (Veritabanı)</span><button onclick="chRefreshMats()" style="color:var(--tx-main);background:none;border:none;cursor:pointer;"><i data-lucide="refresh-cw" class="w-3 h-3"></i></button>
         </div>
-
-        <div id="p-pl" class="pane on">
-         <div class="flex flex-col h-full">
-          <div class="flex items-center justify-between mb-4 bg-white/80 dark:bg-slate-800/80 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm backdrop-blur-md">
-           <div class="tg" id="curToggle"></div>
-           <button onclick="openWizard()" class="bt bt1 px-6 shadow-lg shadow-indigo-500/30 text-sm py-2.5 ml-auto"><i data-lucide="wand-2" class="w-4 h-4"></i> Sihirbaz ile Ürün Ekle</button>
+        <div style="padding:12px 16px;display:flex;flex-direction:column;gap:4px">
+          <div class="pr"><span class="l">Alt Kumaş</span><select id="chMFB" class="ps font-bold" style="width:140px;font-size:.7rem"></select></div>
+          <div class="pr"><span class="l">Üst Kumaş</span><select id="chMFT" class="ps font-bold" style="width:140px;font-size:.7rem"></select></div>
+          <div class="pr"><span class="l">Dolgu</span><select id="chMFL" class="ps font-bold" style="width:140px;font-size:.7rem"></select></div>
+          <div id="chRowCirt" class="pr"><span class="l">Cırt Bant</span><select id="chMVL" class="ps font-bold" style="width:140px;font-size:.7rem"></select></div>
+          <div id="chRowBogma" class="pr"><span class="l">Boğma İpi</span><select id="chMDS" class="ps font-bold" style="width:140px;font-size:.7rem"></select></div>
+          <div class="pr"><span class="l">Dikiş İpi</span><select id="chMST" class="ps font-bold" style="width:140px;font-size:.7rem"></select></div>
+          <div class="pr"><span class="l">Agraf</span><select id="chMSP" class="ps font-bold" style="width:140px;font-size:.7rem"></select></div>
+          <div class="pr"><span class="l">Pul</span><select id="chMND" class="ps font-bold" style="width:140px;font-size:.7rem"></select></div>
+          <div class="pr"><span class="l">Toka</span><select id="chMBK" class="ps font-bold" style="width:140px;font-size:.7rem"></select></div>
+        </div>
+      </div>
+      <div class="cd" style="padding:0; overflow:hidden;">
+        <div style="padding:10px 16px;font-size:.65rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--tx-mut);background:var(--bg-inp);border-bottom:1px solid var(--brd)">◎ Kalıp Önizleme</div>
+        <div style="padding:16px;display:flex;flex-direction:column;align-items:center;gap:12px">
+          <svg id="chSVG" width="240" height="190" viewBox="0 0 240 190"></svg>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%">
+            <div style="background:var(--bg-inp);border:1px solid var(--brd);border-radius:8px;padding:8px;text-align:center"><div id="chGA" style="font-size:.9rem;font-weight:900;color:var(--cy)">—</div><div style="font-size:.6rem;font-weight:700;color:var(--tx-mut);text-transform:uppercase;">Alan (m²)</div></div>
+            <div style="background:var(--bg-inp);border:1px solid var(--brd);border-radius:8px;padding:8px;text-align:center"><div id="chGS1" style="font-size:.9rem;font-weight:900;color:var(--ac)">—</div><div style="font-size:.6rem;font-weight:700;color:var(--tx-mut);text-transform:uppercase;">S₁ Eni</div></div>
+            <div style="background:var(--bg-inp);border:1px solid var(--brd);border-radius:8px;padding:8px;text-align:center"><div id="chGT1" style="font-size:.9rem;font-weight:900;color:var(--ac)">—</div><div style="font-size:.6rem;font-weight:700;color:var(--tx-mut);text-transform:uppercase;">T₁ Boyu</div></div>
+            <div style="background:var(--bg-inp);border:1px solid var(--brd);border-radius:8px;padding:8px;text-align:center"><div id="chGS2" style="font-size:.9rem;font-weight:900;color:var(--am)">—</div><div id="chGS2L" style="font-size:.6rem;font-weight:700;color:var(--tx-mut);text-transform:uppercase;">S₂ Eni</div></div>
           </div>
-          <div class="flex-1 overflow-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md shadow-sm">
-           <table class="ss" id="tPL"><thead id="plHead"></thead><tbody id="plBody"></tbody><tfoot><tr id="plFoot"></tr></tfoot></table>
-          </div>
-         </div>
+          <div id="chFBox" style="width:100%;padding:10px;background:var(--bg-inp);border:1px solid var(--brd);border-radius:8px;font-size:.65rem;color:var(--tx-mut);line-height:1.6;font-weight:700;">Hesaplama Bekleniyor...</div>
         </div>
-
-        <div id="p-pd" class="pane">
-         <details class="mb-6 border border-slate-200 dark:border-slate-700 rounded-xl bg-white/80 dark:bg-slate-800/80 overflow-hidden shadow-sm backdrop-blur-md" open>
-           <summary class="p-4 font-bold flex justify-between items-center text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 cursor-pointer"><div class="flex items-center gap-2"><i data-lucide="settings-2" class="text-cyan-500"></i> Genel Malzeme Seçimi (Tüm Liste İçin Geçerli)</div><i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i></summary>
-           <div class="p-6"><div id="plGlobal"></div></div>
-         </details>
-        <div class="flex items-center gap-3 mb-4 flex-wrap bg-white/80 dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm backdrop-blur-md">
-         <span class="text-sm font-bold text-indigo-500 flex items-center gap-2"><i data-lucide="list-checks" class="w-4 h-4"></i> Detaylı Hesaplama Tablosu</span>
-         <div class="ml-auto flex items-center gap-4">
-          <button onclick="openColVisModal()" class="bt bt4 px-3 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300"><i data-lucide="columns" class="w-4 h-4 text-cyan-500"></i> Sütunları Yönet</button>
-          <select id="pdCur" class="ps font-bold" style="width:80px" onchange="recalcAll()"><option value="TL">TL</option><option value="USD">USD</option><option value="EUR">EUR</option></select>
-          <button onclick="optConfirm('Tüm listeyi temizlemek istediğinize emin misiniz?',()=>{IT=[];RN=1;recalcAll()})" class="bt bt2 px-3"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-         </div>
-        </div>
-        <div class="flex-1 overflow-auto rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm bg-white/80 dark:bg-slate-800/80 backdrop-blur-md">
-         <table class="ss" id="tPD"><thead><tr>
-          <th class="resizable-th">REF</th><th class="resizable-th" style="min-width:110px">Tip</th><th class="resizable-th">Parça</th><th class="resizable-th">DN</th><th class="resizable-th">Cls</th><th class="resizable-th" style="width:55px">Adet</th><th class="resizable-th" style="width:55px">Zorluk</th>
-          <th class="resizable-th">Alt Kumaş</th><th class="resizable-th">Üst Kumaş</th><th class="resizable-th">Dolgu</th>
-          <th class="col-I resizable-th" style="color:var(--am)">İzol</th><th class="col-N resizable-th">F.Çap</th>
-          <th class="col-S resizable-th" title="S-Çevre(mm)">S(mm)</th><th class="col-T resizable-th" title="T-Boy(mm)">T(mm)</th>
-          <th class="col-kumas resizable-th" style="color:var(--cy)">Kumaş(m²)</th><th class="col-dolgu resizable-th" style="color:var(--cy)">Dolgu(m²)</th><th class="col-dikis resizable-th" style="color:var(--cy)">Dikiş(m)</th><th class="col-bogma resizable-th" style="color:var(--cy)">Boğma(m)</th><th class="col-cirt resizable-th" style="color:var(--cy)">Cırt(m)</th><th class="col-agraf resizable-th" style="color:var(--cy)">Agf(Ad)</th><th class="col-pul resizable-th" style="color:var(--cy)">Pul(Ad)</th>
-          <th class="col-mc resizable-th">Mlz Fyt</th><th class="col-lc resizable-th">İşç Fyt</th><th class="col-lh resizable-th">İşç Saat</th>
-          <th class="resizable-th">B.Mly</th><th class="resizable-th">B.Satış</th><th class="resizable-th text-green-500">Toplam</th><th></th>
-         </tr></thead><tbody id="pdBody"></tbody><tfoot id="pdFoot"></tfoot></table>
-        </div>
-        </div>
-
-        <div id="p-ms" class="pane">
-        <div class="grid grid-cols-2 lg:grid-cols-5 gap-5 mb-6">
-         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 border-b-4 border-b-cyan-500 p-4 text-center rounded-xl"><div class="text-xl font-bold text-cyan-500 font-mono" id="kC">₺0</div><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Toplam Maliyet</div></div>
-         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 border-b-4 border-b-emerald-500 p-4 text-center rounded-xl"><div class="text-xl font-bold text-emerald-500 font-mono" id="kS">₺0</div><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Satış Bedeli</div></div>
-         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 border-b-4 border-b-amber-500 p-4 text-center rounded-xl"><div class="text-xl font-bold text-amber-500 font-mono" id="kP">₺0</div><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Kâr</div></div>
-         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 border-b-4 border-b-indigo-500 p-4 text-center rounded-xl"><div class="text-xl font-bold text-indigo-500 font-mono" id="kM">%0</div><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Kâr Marjı</div></div>
-         <div class="cd bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/30 border-b-4 border-b-purple-500 p-4 text-center rounded-xl"><div class="flex items-center justify-center gap-2"><span class="text-lg font-bold text-slate-400">x</span><input type="number" id="msMul" class="font-mono text-xl font-bold text-purple-600 dark:text-purple-400 bg-transparent outline-none w-20 text-center border-b-2 border-purple-500/50 focus:border-purple-500" step="0.1" value="2.5" onchange="P.mul=parseFloat(this.value)||2.5;recalcAll()"></div><div class="text-[10px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-widest mt-1">Satış Çarpanı</div></div>
-        </div>
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-         <div class="cd flex flex-col bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 rounded-xl">
-          <div class="flex items-center justify-between mb-4 border-b border-slate-200 dark:border-slate-700 pb-3"><div class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2"><i data-lucide="calculator" class="w-4 h-4 text-emerald-500"></i>Maliyet Kırılımı</div><div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 px-2 py-1 rounded border border-slate-200 dark:border-slate-700"><span class="text-[10px] font-bold text-slate-500 uppercase">Overhead %</span><input type="number" id="msOh" class="ps !p-1 !w-12 text-center font-bold text-cyan-500" onchange="P.oh=parseFloat(this.value)/100||0;recalcAll()"></div></div>
-          <div class="flex-1 overflow-auto rounded-lg border border-slate-200 dark:border-slate-700"><table class="ss" id="tMC"></table></div>
-         </div>
-         <div class="cd flex flex-col bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 rounded-xl">
-          <div class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 mb-4 border-b border-slate-200 dark:border-slate-700 pb-3"><i data-lucide="package" class="w-4 h-4 text-cyan-500"></i>Malzeme Toplamları</div>
-          <div class="flex-1 overflow-auto rounded-lg border border-slate-200 dark:border-slate-700"><table class="ss" id="tMM"></table></div>
-         </div>
-         <div class="cd flex flex-col bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 rounded-xl">
-          <div class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 mb-4 border-b border-slate-200 dark:border-slate-700 pb-3"><i data-lucide="briefcase" class="w-4 h-4 text-amber-500"></i>Hizmet Bedelleri</div>
-          <div class="space-y-3 flex-1" id="msServices"></div>
-          <div class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900 p-3 rounded-lg"><span class="font-extrabold text-xs uppercase text-slate-500">Toplam Hizmet</span><span class="font-extrabold text-amber-500 font-mono text-lg" id="msSvcTotal">₺0</span></div>
-         </div>
-        </div>
-        <div class="cd mt-6 w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 rounded-xl">
-         <div class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 mb-4"><i data-lucide="globe" class="w-4 h-4 text-indigo-500"></i>Döviz & Kâr Analizi</div>
-         <div class="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700"><table class="ss" id="tMS"></table></div>
-         <div class="mt-4 grid grid-cols-3 gap-4">
-          <div class="bg-slate-50 dark:bg-slate-900 p-4 rounded-lg text-center border border-slate-200 dark:border-slate-700"><div class="text-xl text-slate-800 dark:text-white font-mono font-bold" id="msAH">0</div><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Adam×Saat (Toplam)</div></div>
-          <div class="bg-slate-50 dark:bg-slate-900 p-4 rounded-lg text-center border border-slate-200 dark:border-slate-700"><div class="text-xl text-slate-800 dark:text-white font-mono font-bold" id="msAD">0</div><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Adam Gün (Toplam)</div></div>
-          <div class="bg-slate-50 dark:bg-slate-900 p-4 rounded-lg text-center border border-slate-200 dark:border-slate-700"><div class="text-xl text-slate-800 dark:text-white font-mono font-bold" id="msJC">0</div><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Toplam Üretilecek Ceket</div></div>
-         </div>
-        </div>
-        </div>
-
-        <div id="p-mf" class="pane">
-        <div class="flex items-center justify-between mb-4 bg-white/80 dark:bg-slate-800/80 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm backdrop-blur-md">
-          <div class="tg" id="mfBtns"></div>
-          <button onclick="openMatModal()" class="bt bt3 px-6 shadow-lg"><i data-lucide="plus" class="w-4 h-4"></i>Yeni Malzeme Ekle</button>
-        </div>
-        <div class="flex-1 overflow-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md shadow-sm">
-            <table class="ss"><thead><tr><th>#</th><th>Tür</th><th>Alt Tip</th><th style="min-width:180px">Malzeme Cinsi</th><th>Birim</th><th>Fiyat</th><th>Döviz</th><th style="color:var(--gn)">TL Fiyat</th><th>Kalınlık(mm)</th><th></th></tr></thead><tbody id="mBody"></tbody></table>
-        </div>
-        </div>
-
-        <div id="p-pm" class="pane">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-5 mb-5">
-         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 text-center rounded-xl"><div class="text-xl font-bold text-cyan-500 font-mono" id="pmAvg">₺0</div><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Ort. Saat Maliyeti</div></div>
-         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 text-center rounded-xl"><div class="text-xl font-bold text-indigo-500 font-mono" id="pmCnt">0</div><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Personel Sayısı</div></div>
-         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 text-center rounded-xl"><div class="text-xl font-bold text-emerald-500 font-mono" id="pmTot">₺0</div><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Yıllık Toplam Maliyet</div></div>
-         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 text-center rounded-xl"><div class="text-xl font-bold text-amber-500 font-mono" id="pmDay">₺0</div><div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Günlük Toplam</div></div>
-        </div>
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-5 mb-5">
-         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 rounded-xl">
-             <div class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 mb-4 border-b border-slate-200 dark:border-slate-700 pb-3"><i data-lucide="settings" class="w-4 h-4 text-amber-500"></i>Ortak Parametreler</div>
-             <div id="pmParams" class="space-y-2"></div>
-         </div>
-         <div class="lg:col-span-3 flex flex-col">
-          <div class="flex items-center justify-between mb-3 bg-white/80 dark:bg-slate-800/80 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm backdrop-blur-md">
-           <div class="text-xs text-slate-500 font-bold flex items-center gap-2"><i data-lucide="info" class="w-4 h-4 text-indigo-500"></i> Hesaplanan saat maliyeti sistemin ana işçilik gideri olarak kullanılır.</div>
-           <button onclick="openPersModal()" class="bt bt3"><i data-lucide="user-plus" class="w-4 h-4"></i>Personel Ekle</button>
-          </div>
-          <div class="flex-1 overflow-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md shadow-sm">
-            <table class="ss"><thead><tr><th>#</th><th>Görev</th><th style="min-width:140px">Ad Soyad</th><th>Aylık Net</th><th>Yıllık Brüt</th><th>Kıdem</th><th>İzin</th><th>Servis</th><th>Yemek</th><th>KKD</th><th style="color:var(--am)">Fazla Ç.</th><th style="color:var(--ac)">Yıllık Top.</th><th style="color:var(--gn)">Saat Mly</th><th></th></tr></thead><tbody id="pmBody"></tbody>
-          <tfoot><tr><td colspan="10" class="lb text-right font-extrabold">ORTALAMA / TOPLAM</td><td class="c font-mono text-amber-500" id="pmFcTot"></td><td class="c font-mono text-indigo-500 font-bold" id="pmNTot"></td><td class="c font-mono text-emerald-500 font-black text-[1rem]" id="pmOTot"></td><td></td></tr></tfoot></table></div>
-         </div>
-        </div>
-        </div>
-
-        <div id="p-pr" class="pane">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 rounded-xl"><div class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 mb-4 border-b border-slate-200 dark:border-slate-700 pb-3"><i data-lucide="coins" class="w-4 h-4 text-cyan-500"></i>Döviz & İşçilik</div><div id="pDov" class="space-y-2"></div></div>
-         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 rounded-xl"><div class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 mb-4 border-b border-slate-200 dark:border-slate-700 pb-3"><i data-lucide="ruler" class="w-4 h-4 text-amber-500"></i>Fire & Geometri</div><div id="pFir" class="space-y-2"></div></div>
-         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 rounded-xl"><div class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 mb-4 border-b border-slate-200 dark:border-slate-700 pb-3"><i data-lucide="hard-hat" class="w-4 h-4 text-emerald-500"></i>İşçilik Sabitleri</div><div id="pLab" class="space-y-2"></div></div>
-        </div>
-        <details class="mt-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 overflow-hidden shadow-sm cursor-pointer">
-         <summary class="p-4 font-bold flex justify-between items-center text-slate-800 dark:text-white bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700"><div class="flex items-center gap-2"><i data-lucide="circle" class="w-4 h-4 text-cyan-500"></i> Flanş Çap Tablosu</div><i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i></summary>
-         <div class="p-4"><div class="overflow-auto max-h-[42vh] rounded-lg border border-slate-200 dark:border-slate-700"><table class="ss" id="tFl"></table></div></div>
-        </details>
-        <details class="mt-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 overflow-hidden shadow-sm cursor-pointer">
-         <summary class="p-4 font-bold flex justify-between items-center text-slate-800 dark:text-white bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700"><div class="flex items-center gap-2"><i data-lucide="move-horizontal" class="w-4 h-4 text-cyan-500"></i> Gövde Uzunluk L1/L2</div><i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i></summary>
-         <div class="p-4"><div class="flex gap-2 mb-3"><button onclick="slt('gate')" class="bt bt4 on" id="bl-gate">Sürgülü (Gate)</button><button onclick="slt('globe')" class="bt bt4" id="bl-globe">Glob/Körüklü</button></div><div class="overflow-auto max-h-[42vh] rounded-lg border border-slate-200 dark:border-slate-700"><table class="ss" id="tLn"></table></div></div>
-        </details>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 rounded-xl"><div class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 mb-4 border-b border-slate-200 dark:border-slate-700 pb-3"><i data-lucide="gauge" class="w-4 h-4 text-cyan-500"></i>Vana Referans Ölçüleri (PDF Kaynak)</div>
-          <div class="flex gap-2 mb-3"><select id="vRefSel" class="ps bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700" style="width:220px" onchange="rVRef()"><option value="PV-16">Pistonlu Vana PN16</option><option value="GV-16K">Glob Vana PN16</option><option value="GV-25Z">Glob Vana PN25</option><option value="GV-40K">Glob Vana PN40</option><option value="MK-16">Körüklü Vana PN16</option><option value="MK-25">Körüklü Vana PN25</option><option value="MK-40">Körüklü Vana PN40</option><option value="GTK-18">Sürgülü Vana PN16</option><option value="ARI-3YOL">Üç Yollu Vana (ARI)</option><option value="PTY-30">Y Tipi Pislik Tutucu</option><option value="CLV-50">Çekvalf PN16</option><option value="KV-2P">İki Parça Küresel</option><option value="KV-3P">Üç Parça Küresel</option><option value="KLB">Kelebek Vana</option><option value="BT-16">Kondenstop</option><option value="FLANS">Flanş PN16</option></select></div>
-          <div class="overflow-auto max-h-[35vh] rounded-lg border border-slate-200 dark:border-slate-700"><table class="ss" id="tVRef"></table></div>
-         </div>
-         <div class="cd bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 rounded-xl"><div class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 mb-4 border-b border-slate-200 dark:border-slate-700 pb-3"><i data-lucide="circle-dot" class="w-4 h-4 text-amber-500"></i>Agraf & Pul (Çap'a Göre)</div><div class="overflow-auto max-h-[35vh] rounded-lg border border-slate-200 dark:border-slate-700"><table class="ss" id="tAg"></table></div></div>
-        </div>
-        </div>
-    </main>
-</div>
-
-<div class="opt-modal-bg" id="wizardModal">
-    <div class="opt-modal" style="width:750px;padding:0;overflow:hidden;">
-        <div class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 p-6 flex justify-between items-center">
-            <div><h3 class="!mb-1 text-slate-800 dark:text-white"><i data-lucide="wand-2" class="w-5 h-5 text-indigo-500"></i> Yeni Ürün Sihirbazı</h3><p class="text-xs text-slate-500" id="wizSubtitle">1. Adım</p></div>
-            <button onclick="closePopup('wizardModal')" class="text-slate-400 hover:text-red-500 transition cursor-pointer"><i data-lucide="x"></i></button>
-        </div>
-        <div class="p-6 relative bg-white dark:bg-slate-900" id="wizBody" style="min-height:300px;max-height:60vh;overflow-y:auto"></div>
-        <div class="bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-700 p-4 flex justify-between items-center">
-            <button onclick="wizBack()" id="wizBtnBack" class="bt bt4 px-6 hidden"><i data-lucide="arrow-left" class="w-4 h-4"></i> Geri</button>
-            <div class="flex-1"></div>
-            <button onclick="wizAdd()" id="wizBtnAdd" class="bt bt1 px-8 hidden"><i data-lucide="plus" class="w-4 h-4"></i> Listeye Ekle</button>
-        </div>
+      </div>
     </div>
-</div>
-
-<div class="opt-modal-bg" id="modalMat" onkeydown="if(event.key==='Enter')submitMat()">
-    <div class="opt-modal">
-        <h3 class="text-slate-800 dark:text-white mb-4"><i data-lucide="plus-circle" class="w-5 h-5 text-emerald-500"></i> Yeni Malzeme Ekle</h3>
-        <label class="text-slate-500">Tür</label><select id="nmType" class="ps mb-2"><option>Kumaş</option><option>Dolgu</option><option>Yardımcı</option><option>Isıtıcı</option></select>
-        <label class="text-slate-500">Alt Tip</label><input id="nmSub" class="ps mb-2" placeholder="örn: Cam Elyaf, Taş Yünü...">
-        <label class="text-slate-500">Malzeme Cinsi</label><input id="nmName" class="ps mb-2" placeholder="örn: 1 Sİ - 0.5 mm - Gri">
-        <label class="text-slate-500">Birim</label><input id="nmUnit" class="ps mb-2" value="M²">
-        <div class="grid grid-cols-2 gap-3 mb-2">
-            <div><label class="text-slate-500">Fiyat</label><input type="number" id="nmPrice" class="ps" step=".001" value="0"></div>
-            <div><label class="text-slate-500">Döviz</label><select id="nmCur" class="ps"><option>TL</option><option>USD</option><option>EUR</option></select></div>
-        </div>
-        <label class="text-slate-500">Kalınlık (mm)</label><input type="number" id="nmThick" class="ps" placeholder="opsiyonel">
-        <div class="flex gap-3 mt-6"><button onclick="submitMat()" class="bt bt1 flex-1 py-3">Kaydet</button><button onclick="closePopup('modalMat')" class="bt bt4 flex-1 py-3 cursor-pointer">İptal</button></div>
+    <div style="overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:16px;background:var(--bg-pane);">
+      <div id="chResults">
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:100px 40px;text-align:center;color:var(--tx-mut)"><i data-lucide="calculator" style="width:64px;height:64px;opacity:0.2"></i><div><p style="font-size:1.1rem;font-weight:800;color:var(--tx-main);margin-bottom:8px">Sonuçlar Burada Görünecek</p><p style="font-size:.85rem;max-width:300px;line-height:1.6">Sol panelden parametreleri girin, veritabanından vana seçin ve <strong style="color:var(--ac)">Hesapla</strong> butonuna tıklayın.</p></div></div>
+      </div>
     </div>
+  </div>
 </div>
+</div><div class="opt-modal-bg" id="colModal"><div class="opt-modal" style="width:380px;">
+ <div class="flex items-center justify-between mb-4 border-b border-[var(--brd)] pb-3">
+  <h3><i data-lucide="columns" class="w-5 h-5 text-[var(--cy)]"></i> Sütun Ayarları</h3>
+  <button onclick="document.getElementById('colModal').classList.remove('show')" class="text-[var(--tx-mut)] hover:text-[var(--tx-main)]"><i data-lucide="x"></i></button>
+ </div>
+ <div id="colToggles" class="space-y-3 text-sm grid grid-cols-2 text-[var(--tx-main)] font-bold"></div>
+ <div class="mt-6 pt-4 border-t border-[var(--brd)]"><button onclick="document.getElementById('colModal').classList.remove('show')" class="bt bt1 w-full py-3">Uygula ve Kapat</button></div>
+</div></div>
 
-<div class="opt-modal-bg" id="qtyModal" onkeydown="if(event.key==='Enter')submitQty()">
-    <div class="opt-modal" style="width:400px">
-        <h3 class="text-slate-800 dark:text-white mb-2"><i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500"></i> Adet Uyarısı</h3>
-        <p class="text-sm text-slate-500 mb-4">Fiyat Listesi × Ürün Detay adedi <strong class="text-amber-500">çarpılır</strong>.</p>
-        <p class="text-sm mb-4 font-bold text-slate-800 dark:text-white">Mevcut: <span id="qmCur" class="text-indigo-500 font-mono text-lg ml-2">1</span></p>
-        <label class="text-slate-500">Yeni Adet</label><input type="number" id="qmVal" class="ps font-mono text-lg" min="1" value="1">
-        <div class="flex gap-3 mt-6"><button onclick="submitQty()" class="bt bt1 flex-1 py-3">Uygula</button><button onclick="closePopup('qtyModal')" class="bt bt4 flex-1 py-3 cursor-pointer">İptal</button></div>
-    </div>
-</div>
+<div class="opt-modal-bg" id="globalMatModal"><div class="opt-modal" style="width:500px;">
+ <div class="flex items-center justify-between mb-4 border-b border-[var(--brd)] pb-3">
+  <h3><i data-lucide="layers" class="w-5 h-5 text-[var(--am)]"></i> Toplu Malzeme Ata</h3>
+  <button onclick="document.getElementById('globalMatModal').classList.remove('show')" class="text-[var(--tx-mut)] hover:text-[var(--tx-main)]"><i data-lucide="x"></i></button>
+ </div>
+ <p class="text-xs text-[var(--tx-mut)] mb-4 font-bold">Buradan seçeceğiniz malzemeler, Ürün Detay listesindeki "Global" olarak ayarlanmış tüm parçalara aynı anda uygulanır.</p>
+ <div class="grid grid-cols-2 gap-4" id="globalMatContent"></div>
+ <div class="mt-6 pt-4 border-t border-[var(--brd)]"><button onclick="document.getElementById('globalMatModal').classList.remove('show')" class="bt bt1 w-full py-3">Tamam</button></div>
+</div></div>
 
-<div class="opt-modal-bg" id="persModal" onkeydown="if(event.key==='Enter')submitPers()">
-    <div class="opt-modal">
-        <h3 class="text-slate-800 dark:text-white mb-4"><i data-lucide="user-plus" class="w-5 h-5 text-cyan-500"></i> Personel Ekle</h3>
-        <label class="text-slate-500">Görev</label><select id="npGorev" class="ps mb-2"><option>USTABAŞI</option><option>ORTACI</option><option selected>DİKİŞÇİ</option><option>DOLUMCU</option><option>KALİTE</option><option>DİĞER</option></select>
-        <label class="text-slate-500">Ad Soyad</label><input id="npAd" class="ps mb-2" placeholder="Ad Soyad">
-        <label class="text-slate-500">Aylık Net (₺)</label><input type="number" id="npNet" class="ps font-mono text-lg mb-2" step="100" value="48000">
-        <div class="grid grid-cols-2 gap-3 mb-2">
-            <div><label class="text-slate-500">Kıdem?</label><select id="npKidem" class="ps"><option value="1">Evet</option><option value="0">Hayır</option></select></div>
-            <div><label class="text-slate-500">Servis (₺/ay)</label><input type="number" id="npServis" class="ps font-mono" value="2750"></div>
-            <div><label class="text-slate-500">Gün (Ops.)</label><input type="number" id="npGun" class="ps font-mono" placeholder="Oto"></div>
-            <div><label class="text-slate-500">Saat (Ops.)</label><input type="number" id="npSaat" class="ps font-mono" placeholder="Oto"></div>
-        </div>
-        <div class="flex gap-3 mt-6"><button onclick="submitPers()" class="bt bt1 flex-1 py-3">Ekle</button><button onclick="closePopup('persModal')" class="bt bt4 flex-1 py-3 cursor-pointer">İptal</button></div>
-    </div>
-</div>
+<div class="opt-modal-bg" id="printModal"><div class="opt-modal" style="width:800px; max-width:90vw; border-radius:8px; padding:20px;">
+ <div class="flex items-center justify-between mb-4 border-b border-[var(--brd)] pb-3">
+  <h3><i data-lucide="printer" class="w-5 h-5 text-[var(--cy)]"></i> Teklif Önizleme</h3>
+  <button onclick="document.getElementById('printModal').classList.remove('show')" class="text-[var(--tx-mut)]"><i data-lucide="x"></i></button>
+ </div>
+ <div id="printArea" style="background:#fff; color:#000; padding:32px; border-radius:4px; min-height:400px; text-align:left;"></div>
+ <div class="flex gap-3 mt-6"><button onclick="window.print()" class="bt bt1 flex-1 py-3 text-lg"><i data-lucide="printer"></i> PDF Yazdır / Kaydet</button></div>
+</div></div>
 
-<div class="opt-modal-bg" id="colVisModal">
-    <div class="opt-modal" style="width:500px">
-        <h3 class="text-slate-800 dark:text-white mb-2"><i data-lucide="columns" class="w-5 h-5 text-cyan-500"></i> Sütunları Yönet</h3>
-        <div class="grid grid-cols-2 gap-4 mt-4">
-            <label class="custom-chk"><input type="checkbox" id="chk_kumas"> Kumaş (m²)</label>
-            <label class="custom-chk"><input type="checkbox" id="chk_dolgu"> Dolgu (m²)</label>
-            <label class="custom-chk"><input type="checkbox" id="chk_dikis"> Dikiş (m)</label>
-            <label class="custom-chk"><input type="checkbox" id="chk_bogma"> Boğma (m)</label>
-            <label class="custom-chk"><input type="checkbox" id="chk_cirt"> Cırt (m)</label>
-            <label class="custom-chk"><input type="checkbox" id="chk_agraf"> Agraf (Ad)</label>
-            <label class="custom-chk"><input type="checkbox" id="chk_pul"> Pul (Ad)</label>
-            <label class="custom-chk"><input type="checkbox" id="chk_S"> S-Çevre</label>
-            <label class="custom-chk"><input type="checkbox" id="chk_T"> T-Boy</label>
-            <label class="custom-chk"><input type="checkbox" id="chk_I"> İzolasyon</label>
-            <label class="custom-chk"><input type="checkbox" id="chk_N"> F.Çap</label>
-            <label class="custom-chk"><input type="checkbox" id="chk_mc"> Mlz Fiyatı</label>
-            <label class="custom-chk"><input type="checkbox" id="chk_lc"> İşç Fiyatı</label>
-            <label class="custom-chk"><input type="checkbox" id="chk_lh"> İşç Saati</label>
-        </div>
-        <div class="flex gap-3 mt-6"><button onclick="saveCols()" class="bt bt1 flex-1 py-3">Kaydet</button><button onclick="closePopup('colVisModal')" class="bt bt4 flex-1 py-3 cursor-pointer">İptal</button></div>
-    </div>
-</div>
+<div class="opt-modal-bg" id="modalMat"><div class="opt-modal">
+ <h3><i data-lucide="plus-circle" class="w-5 h-5 text-[var(--gn)]"></i>Yeni Malzeme Ekle</h3>
+ <label>Tür</label><select id="nmType" class="ps"><option>Kumaş</option><option>Dolgu</option><option>Yardımcı</option><option>Isıtıcı</option></select>
+ <label>Alt Tip</label><input id="nmSub" class="ps" placeholder="örn: Cam Elyaf, Taş Yünü...">
+ <label>Malzeme Cinsi</label><input id="nmName" class="ps" placeholder="örn: 1 Sİ - 0.5 mm - Gri">
+ <label>Birim</label><input id="nmUnit" class="ps" value="M²">
+ <div class="grid grid-cols-2 gap-3 mt-1">
+  <div><label>Fiyat</label><input type="number" id="nmPrice" class="ps font-mono" step=".001" value="0"></div>
+  <div><label>Döviz</label><select id="nmCur" class="ps"><option>TL</option><option>USD</option><option>EUR</option></select></div>
+ </div>
+ <label>Kalınlık Sabiti (mm)</label><input type="number" id="nmThick" class="ps font-mono" placeholder="opsiyonel">
+ <div class="flex gap-3 mt-6"><button onclick="submitMat()" class="bt bt1 flex-1 py-3">Ekle</button><button onclick="document.getElementById('modalMat').classList.remove('show')" class="bt bt4 flex-1 py-3">İptal</button></div>
+</div></div>
 
-<div class="opt-modal-bg" id="pdfModal">
-    <div class="opt-modal" style="width:800px;max-width:90vw;height:80vh;display:flex;flex-direction:column;">
-        <div class="flex justify-between items-center mb-4"><h3 class="text-slate-800 dark:text-white"><i data-lucide="file-text" class="text-indigo-500"></i> PDF Önizleme</h3><button onclick="closePopup('pdfModal')" class="text-slate-400 hover:text-red-500 cursor-pointer"><i data-lucide="x"></i></button></div>
-        <div class="flex-1 bg-white overflow-auto p-8 rounded text-gray-800 relative border border-slate-200" id="pdfContentToPrint">
-            <div class="text-center mb-8 border-b-2 border-gray-800 pb-4"><h1 class="text-3xl font-black tracking-widest text-gray-900">TEKLİF LİSTESİ</h1><p class="text-sm font-bold mt-2" id="pdfPrefixTitle"></p></div>
-            <table class="w-full text-left border-collapse text-sm"><thead><tr class="bg-gray-200 border-b-2 border-gray-800 text-gray-900"><th class="p-2">Kod</th><th class="p-2">Açıklama</th><th class="p-2 text-center">DN</th><th class="p-2 text-center">Miktar</th><th class="p-2 text-right">Birim Fiyat</th><th class="p-2 text-right">Toplam</th></tr></thead><tbody id="pdfTableBody"></tbody><tfoot id="pdfTableFoot"></tfoot></table>
-        </div>
-        <div class="mt-4 flex gap-4 justify-end"><button onclick="closePopup('pdfModal')" class="bt bt4 px-6 cursor-pointer">Vazgeç</button><button onclick="downloadPDF()" class="bt bt1 px-6"><i data-lucide="download"></i> İndir</button></div>
-    </div>
-</div>
+<div class="opt-modal-bg" id="qtyModal"><div class="opt-modal" style="width:400px">
+ <h3><i data-lucide="alert-triangle" class="w-5 h-5 text-[var(--am)]"></i>Adet Uyarısı</h3>
+ <p class="text-sm text-[var(--tx-mut)] mb-4 leading-relaxed">Fiyat Listesi'ndeki adet ile Ürün Detay'daki adet <strong class="text-[var(--am)]">birbiriyle çarpılır</strong>.</p>
+ <p class="text-sm mb-4 font-bold text-[var(--tx-main)]">Mevcut Çarpan: <span id="qmCur" class="text-[var(--ac)] font-bold text-lg ml-2">1</span></p>
+ <label>Yeni Adet</label><input type="number" id="qmVal" class="ps font-bold text-lg" min="1" value="1">
+ <div class="flex gap-3 mt-6"><button onclick="submitQty()" class="bt bt1 flex-1 py-3">Uygula</button><button onclick="document.getElementById('qtyModal').classList.remove('show')" class="bt bt4 flex-1 py-3">İptal</button></div>
+</div></div>
 
-<div class="opt-modal-bg" id="optConfirmBg">
-    <div class="opt-modal" style="width:400px">
-        <h3 class="text-slate-800 dark:text-white mb-2"><i data-lucide="alert-circle" class="text-amber-500"></i> Onay</h3>
-        <p class="text-sm text-slate-500 mb-6 mt-2" id="optConfirmMsg"></p>
-        <div class="flex gap-3"><button id="optConfirmYes" class="bt bt2 flex-1 py-3">Evet</button><button onclick="closePopup('optConfirmBg')" class="bt bt4 flex-1 py-3 cursor-pointer">İptal</button></div>
-    </div>
-</div>
+<div class="opt-modal-bg" id="persModal"><div class="opt-modal">
+ <h3><i data-lucide="user-plus" class="w-5 h-5 text-[var(--cy)]"></i>Personel Ekle</h3>
+ <label>Görev</label><select id="npGorev" class="ps"><option>USTABAŞI</option><option>ORTACI</option><option selected>DİKİŞÇİ</option><option>DOLUMCU</option><option>KALİTE</option><option>DİĞER</option></select>
+ <label>Ad Soyad</label><input id="npAd" class="ps" placeholder="Ad Soyad">
+ <label>Aylık Net Ücret (₺)</label><input type="number" id="npNet" class="ps font-bold text-lg" step="100" value="48000">
+ <div class="grid grid-cols-2 gap-3 mt-1">
+  <div><label>Kıdem Birikimi Var mı?</label><select id="npKidem" class="ps"><option value="1">Evet (formülle)</option><option value="0">Hayır</option></select></div>
+  <div><label>Servis Gideri (₺/ay)</label><input type="number" id="npServis" class="ps font-bold" value="2750"></div>
+ </div>
+ <div class="flex gap-3 mt-6"><button onclick="submitPers()" class="bt bt1 flex-1 py-3">Ekle</button><button onclick="document.getElementById('persModal').classList.remove('show')" class="bt bt4 flex-1 py-3">İptal</button></div>
+</div></div>
+
+<div class="opt-modal-bg" id="optConfirmBg"><div class="opt-modal" style="width:400px">
+ <h3 class="text-[var(--am)]"><i data-lucide="alert-circle"></i> Onay Gerekli</h3>
+ <p class="text-sm text-[var(--tx-mut)] mb-6 mt-2" id="optConfirmMsg"></p>
+ <div class="flex gap-3"><button id="optConfirmYes" class="bt bt2 flex-1 py-3">Evet</button><button onclick="document.getElementById('optConfirmBg').classList.remove('show')" class="bt bt4 flex-1 py-3">İptal</button></div>
+</div></div>
 
 <div class="toast-container" id="toastBox"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-    try {
-        const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
-        const masterSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        masterSupabase.auth.onAuthStateChange((event, session) => {
-            if (!session) window.location.replace('../login.html');
-        });
-    } catch(e) {}
-</script>
+// ====== SÜTUN AYARLARI RENDER ======
+function rColSettings() {
+    const box = document.getElementById('colToggles');
+    let html = '';
+    const labels = {ref:'REF', tip:'Tip', parca:'Parça', dn:'DN', cls:'Class', adet:'Adet', zorluk:'Zorluk', altk:'Alt Kumaş', ustk:'Üst Kumaş', dolgu:'Dolgu', izol:'İzolasyon', fcap:'F.Çap', s:'S (Çevre)', t:'T (Boy)', mkumas:'M.Kumaş', mdolgu:'M.Dolgu', mdikis:'M.Dikiş', mbogma:'M.Boğma', mcirt:'M.Cırt', magraf:'M.Agraf', mpul:'M.Pul', mlz:'Malzeme Fyt', isc:'İşçilik Fyt', bmly:'B.Maliyet', bsat:'B.Satış', toplam:'Toplam', sil:'Sil'};
+    Object.keys(colVis).forEach(k => {
+        html += `<label class="flex items-center gap-2 cursor-pointer text-[var(--tx-main)]"><input type="checkbox" ${colVis[k]?'checked':''} onchange="colVis['${k}']=this.checked; applyColVis(); rProd(); saveData();" style="accent-color:var(--ac);width:16px;height:16px;"> ${labels[k]}</label>`;
+    });
+    box.innerHTML = html;
+}
+function applyColVis() {
+    Object.keys(colVis).forEach(key => {
+        const th = document.querySelector(`th[data-col="${key}"]`);
+        if(th) { if(!colVis[key]) th.classList.add('col-hidden'); else th.classList.remove('col-hidden'); }
+    });
+}
+function openGlobalMatModal(){
+ document.getElementById('globalMatModal').classList.add('show');
+ const fab=M.filter(m=>m.t==='Kumaş'), fil=M.filter(m=>m.t==='Dolgu'), hlp=M.filter(m=>m.t==='Yardımcı');
+ function gs(lb,k,list,cur){return`<div><label class="text-[10px] font-bold text-[var(--tx-mut)] uppercase">${lb}</label><select class="ps mt-1 font-bold" data-k="${k}" onchange="P[this.dataset.k]=this.value;recalcAll()">${list.map(m=>`<option value="${m.n}"${m.n===cur?' selected':''}>${m.n}</option>`).join('')}</select></div>`}
+ const el = document.getElementById('globalMatContent');
+ if(el){
+     el.innerHTML=
+      gs('Alt Kumaş','gFB',fab,P.gFB)+gs('Üst Kumaş','gFT',fab,P.gFT)+gs('Dolgu Malzemesi','gFL',fil,P.gFL)+
+      gs('Dikiş İpi','gST',hlp.filter(m=>m.s==='Dikiş İpi'),P.gST)+gs('Boğma İpi','gDS',hlp.filter(m=>m.s==='Boğma İpi'),P.gDS)+
+      gs('Cırt Bant','gVL',hlp.filter(m=>m.s==='Cırtbant'),P.gVL)+
+      gs('Agraf','gSP',hlp.filter(m=>m.s==='Zımba Set'),P.gSP)+gs('Ç.Pul','gND',hlp.filter(m=>m.s==='Ç.Pul Set'),P.gND)+
+      gs('Toka','gBK',hlp.filter(m=>m.s==='Toka'),P.gBK)+gs('Etiket','gLB',hlp.filter(m=>m.s==='Etiket'),P.gLB);
+ }
+}
 
-<script src="/master/js/app.js"></script>
+// ====== CEKET HESAPLAMA (SVG) ======
+let _chMode   = 'vana';   
+let _chDf     = 1.2;      
+let _chKenar  = 'kenarsiz';
+const $v = id => parseFloat(document.getElementById(id)?.value) || 0;
+const $s = id => document.getElementById(id)?.value || '';
+function chMpByName(name){ const m=M.find(x=>x.n===name); return m?mp(m):0; }
+function chFmt(v,d=2){ return Number(v).toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d}); }
+
+function chOnOpen(){
+  chPopVTypes(); chRefreshMats();
+  document.getElementById('chHC').value  = parseFloat(P.hc)||250;
+  document.getElementById('chMUL').value = parseFloat(P.mul)||2.5;
+  document.getElementById('chLBX').value = parseFloat(P.lbx)||0.30;
+  chLive();
+}
+
+function chMode(m){
+  _chMode = m; const v = m==='vana';
+  const btn=(id,on)=>{const e=document.getElementById(id);if(!e)return;e.style.background=on?'var(--ac)':'transparent';e.style.color=on?'#fff':'var(--tx-mut)';e.style.boxShadow=on?'0 2px 8px rgba(0,0,0,.2)':'none'};
+  btn('chTabV',v); btn('chTabP',!v);
+  const db=document.getElementById('chSecDB');if(db)db.style.display=v?'flex':'none';
+  ['chSecVD','chPayV','chRowCirt','chRowBogma','chDFSec'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display=v?'':'none'});
+  ['chSecPD','chPayP'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display=!v?'':'none'});
+  document.getElementById('chGS2L').textContent = v?'S₂ Eni':'Kenar Alanı';
+  document.getElementById('chResults').innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:100px 40px;text-align:center;color:var(--tx-mut)"><i data-lucide="calculator" style="width:64px;height:64px;opacity:0.2"></i><div><p style="font-size:1.1rem;font-weight:800;color:var(--tx-main);margin-bottom:8px">Sonuçlar Burada Görünecek</p><p style="font-size:.85rem;max-width:300px;line-height:1.6">Sol panelden parametreleri girin, veritabanından vana seçin ve <strong style="color:var(--ac)">Hesapla</strong> butonuna tıklayın.</p></div></div>`;
+  const gb=document.getElementById('chGonderBtn');if(gb){gb.disabled=true;gb.style.opacity='.4';gb.style.cursor='not-allowed';}
+  window._chLastResult=null; chLive(); lucide.createIcons();
+}
+
+function chSetDf(btn){
+  document.querySelectorAll('#p-ch [data-df]').forEach(b=>b.className='bt bt4');
+  btn.className='bt bt4 on'; _chDf=parseFloat(btn.dataset.df);
+}
+
+function chSetK(k){
+  _chKenar=k; const isK=k==='kenarli';
+  const ks=document.getElementById('chBKS'); const kl=document.getElementById('chBKL');
+  if(ks){ks.style.background=isK?'transparent':'var(--ac)';ks.style.color=isK?'var(--tx-mut)':'#fff';}
+  if(kl){kl.style.background=isK?'var(--ac)':'transparent';kl.style.color=isK?'#fff':'var(--tx-mut)';}
+  document.getElementById('chKD').textContent=isK?'Dolgunun 4 kenarı kumaş şeritle kapatılır':'Dolgu iki kumaş arasına, kenarlar açık/bantlı';
+  chLive();
+}
+
+function chPopVTypes(){
+  const sel=document.getElementById('chVT'); if(!sel)return;
+  sel.innerHTML='<option value="">— Seçin —</option>';
+  Object.entries(VALVE_DATA).forEach(([k,v])=>{ sel.innerHTML+=`<option value="${k}">${v.desc}</option>`; });
+}
+function chUpdDN(){
+  const ty=document.getElementById('chVT').value;
+  const sel=document.getElementById('chVDN'); sel.innerHTML='<option value="">— DN —</option>';
+  if(!ty)return;
+  const vd=VALVE_DATA[ty]; if(!vd||!vd.dims)return;
+  Object.keys(vd.dims).map(Number).sort((a,b)=>a-b).forEach(dn=>{ sel.innerHTML+=`<option value="${dn}">DN${dn}</option>`; });
+}
+function chAutoFill(){
+  const ty=document.getElementById('chVT').value; const dn=parseInt(document.getElementById('chVDN').value);
+  if(!ty||isNaN(dn))return;
+  const vd=VALVE_DATA[ty]; if(!vd||!vd.dims||!vd.dims[dn])return;
+  const d=vd.dims[dn];
+  if(d.D)document.getElementById('chD').value=d.D;
+  if(d.L)document.getElementById('chL').value=d.L;
+  if(d.H)document.getElementById('chH').value=d.H; else document.getElementById('chH').value=Math.round((d.D||100)*0.8);
+  document.getElementById('chDB').value=d.Dk||0;
+  
+  const dfMap={globe:1.2,gate:1.0,butterfly:1.0,yfilter:1.5,'3way':1.8};
+  const sugDf=vd.difficulty||dfMap[vd.type]||1.2;
+  document.querySelectorAll('#p-ch [data-df]').forEach(b=>{
+    const on=parseFloat(b.dataset.df)===sugDf; b.className=on?'bt bt4 on':'bt bt4'; if(on)_chDf=sugDf;
+  });
+  const ok=document.getElementById('chFillOk'); if(ok){ok.style.display='inline-flex';setTimeout(()=>ok.style.display='none',3000);}
+  chLive(); toast(`${vd.desc} DN${dn} ölçüleri dolduruldu`,'in');
+}
+
+function chRefreshMats(){
+  if(!M||!M.length){ setTimeout(chRefreshMats,300); return; }
+  const fab=M.filter(m=>m.t==='Kumaş'), fil=M.filter(m=>m.t==='Dolgu'), hlp=M.filter(m=>m.t==='Yardımcı');
+  const cirt=hlp.filter(m=>m.s==='Cırtbant'), bogma=hlp.filter(m=>m.s==='Boğma İpi'||m.s==='Bağlama İpi');
+  const dikis=hlp.filter(m=>m.s==='Dikiş İpi'), agraf=hlp.filter(m=>m.s==='Zımba Set'||m.n.toLowerCase().includes('agraf'));
+  const pul=hlp.filter(m=>m.s==='Ç.Pul Set'||m.n.toLowerCase().includes('pul')), toka=hlp.filter(m=>m.s.toLowerCase().includes('toka')||m.n.toLowerCase().includes('toka'));
+
+  function fill(id,list,defVal){
+    const el=document.getElementById(id); if(!el)return;
+    el.innerHTML=list.map(m=>`<option value="${m.n}"${m.n===defVal?' selected':''}>${m.n} — ₺${chFmt(mp(m))}</option>`).join('');
+    if(!el.value&&list.length)el.value=list[0].n;
+  }
+  fill('chMFB',fab,P.gFB); fill('chMFT',fab,P.gFT); fill('chMFL',fil,P.gFL);
+  fill('chMVL',cirt,P.gVL); fill('chMDS',bogma,P.gDS); fill('chMST',dikis,P.gST);
+  fill('chMSP',agraf,P.gSP); fill('chMND',pul,P.gND);
+  const tokaAll=toka.length?toka:hlp; fill('chMBK',tokaAll,P.gBK||'');
+}
+
+function chLive(){
+  if(_chMode==='vana'){
+    const D=$v('chD'),L=$v('chL'),H=$v('chH'),I=$v('chI'),pc=$v('chPC'),py=$v('chPY');
+    const Db_ham=$v('chDB')>0?$v('chDB'):D*0.5;
+    const D1=D+2*I, Db=Db_ham+2*I;
+    const S1=D1*Math.PI+pc, T1=L+2*py, S2=Db*Math.PI+pc, T2=H;
+    chDrawV({S1,T1,S2,T2,D1,Db});
+    const A=(S1*T1+S2*T2)/1e6;
+    const $n=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
+    $n('chGA',chFmt(A,4)); $n('chGS1',S1>0?S1.toFixed(1):'—');
+    $n('chGT1',T1>0?T1:'—'); $n('chGS2',S2>0?S2.toFixed(1):'—');
+    if(S1>0&&T1>0)document.getElementById('chFBox').innerHTML=`<span style="color:var(--tx-mut)">D_yeni=</span><span style="color:var(--cy)">${D1.toFixed(1)}</span>mm &nbsp;|&nbsp; <span style="color:var(--tx-mut)">S₁=</span><span style="color:var(--cy)">${S1.toFixed(1)}</span>mm &nbsp;|&nbsp; <span style="color:var(--tx-mut)">T₁=</span><span style="color:var(--cy)">${T1}</span>mm<br><span style="color:var(--tx-mut)">D_boyun=</span><span style="color:var(--am)">${Db.toFixed(1)}</span>mm &nbsp;|&nbsp; <span style="color:var(--tx-mut)">S₂=</span><span style="color:var(--am)">${S2.toFixed(1)}</span>mm &nbsp;|&nbsp; <span style="color:var(--tx-mut)">T₂=</span><span style="color:var(--am)">${T2}</span>mm`;
+  } else {
+    const W=$v('chPW'),H_p=$v('chPH'),I=$v('chI'),sm=$v('chPSM');
+    const We=W+2*sm, He=H_p+2*sm;
+    chDrawP({W,H_pad:H_p,W_eff:We,H_eff:He,kenarli:_chKenar==='kenarli',I});
+    const alan_yuz=We*He/1e6; const alan_kenar=_chKenar==='kenarli'?(2*We*I+2*He*I)/1e6:0;
+    const A=alan_yuz*2+alan_kenar;
+    const $n=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
+    $n('chGA',chFmt(A,4)); $n('chGS1',We); $n('chGT1',He);
+    $n('chGS2',_chKenar==='kenarli'?chFmt(alan_kenar,5):'—');
+    document.getElementById('chFBox').innerHTML=`<span style="color:var(--tx-mut)">W_eff=</span><span style="color:var(--cy)">${We}</span>mm &nbsp;|&nbsp; <span style="color:var(--tx-mut)">H_eff=</span><span style="color:var(--cy)">${He}</span>mm<br><span style="color:var(--tx-mut)">Kenar=</span><span style="color:var(--am)">${_chKenar==='kenarli'?'Kenarlı ✓ +'+chFmt(alan_kenar,4)+'m²':'Kenarsız'}</span>`;
+  }
+}
+
+function chDrawV(g){
+  const svg=document.getElementById('chSVG'); if(!svg||!g.S1)return;
+  const W=240,H=190,pad=20;
+  const sc=Math.min((W-2*pad)/g.S1,(H-2*pad-4)/(g.T1+(g.T2||50)))*0.78;
+  const bW=g.S1*sc,bH=g.T1*sc,nW=g.S2*sc,nH=(g.T2||50)*sc;
+  const bX=W/2-bW/2,bY=H-pad-bH,nX=W/2-nW/2,nY=bY-nH;
+  svg.innerHTML=`<defs><pattern id="cg" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M8,0 L0,0 L0,8" fill="none" stroke="rgba(99,102,241,.1)" stroke-width=".5"/></pattern></defs><rect width="${W}" height="${H}" fill="url(#cg)"/><rect x="${nX}" y="${nY}" width="${nW}" height="${nH}" fill="rgba(244,63,94,.15)" stroke="var(--rd)" stroke-width="1.5" rx="3"/><text x="${W/2}" y="${nY+nH/2+3}" text-anchor="middle" fill="var(--rd)" font-size="8" font-weight="800">BOYUN S₂×T₂</text><rect x="${bX}" y="${bY}" width="${bW}" height="${bH}" fill="rgba(99,102,241,.15)" stroke="var(--ac)" stroke-width="1.5" rx="3"/><text x="${W/2}" y="${bY+bH/2+3}" text-anchor="middle" fill="var(--ac)" font-size="8" font-weight="800">GÖVDE S₁×T₁</text><line x1="${bX+2}" y1="${H-4}" x2="${bX+bW-2}" y2="${H-4}" stroke="var(--ac)" stroke-width="1"/><text x="${W/2}" y="${H+1}" text-anchor="middle" fill="var(--ac)" font-size="7" font-weight="800">${g.S1.toFixed(0)}</text><line x1="${nX+2}" y1="${nY-4}" x2="${nX+nW-2}" y2="${nY-4}" stroke="var(--rd)" stroke-width="1"/><text x="${W/2}" y="${nY-6}" text-anchor="middle" fill="var(--rd)" font-size="7" font-weight="800">${g.S2.toFixed(0)}</text>`;
+}
+
+function chDrawP(g){
+  const svg=document.getElementById('chSVG'); if(!svg||!g.W_eff)return;
+  const W=240,H=190,pad=24;
+  const sc=Math.min((W-2*pad)/g.W_eff,(H-2*pad)/g.H_eff)*0.82;
+  const rW=g.W_eff*sc,rH=g.H_eff*sc,rx=W/2-rW/2,ry=H/2-rH/2;
+  const ip=g.kenarli?Math.max(6,g.I*sc):0;
+  svg.innerHTML=`<defs><pattern id="cg2" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M8,0 L0,0 L0,8" fill="none" stroke="rgba(245,158,11,.1)" stroke-width=".5"/></pattern></defs><rect width="${W}" height="${H}" fill="url(#cg2)"/><rect x="${rx}" y="${ry}" width="${rW}" height="${rH}" fill="rgba(245,158,11,.15)" stroke="var(--am)" stroke-width="1.5" rx="3"/>${g.kenarli?`<rect x="${rx}" y="${ry-ip}" width="${rW}" height="${ip}" fill="rgba(16,185,129,.2)" stroke="var(--gn)" stroke-width="1" rx="1"/><rect x="${rx}" y="${ry+rH}" width="${rW}" height="${ip}" fill="rgba(16,185,129,.2)" stroke="var(--gn)" stroke-width="1" rx="1"/><rect x="${rx-ip}" y="${ry}" width="${ip}" height="${rH}" fill="rgba(16,185,129,.2)" stroke="var(--gn)" stroke-width="1" rx="1"/><rect x="${rx+rW}" y="${ry}" width="${ip}" height="${rH}" fill="rgba(16,185,129,.2)" stroke="var(--gn)" stroke-width="1" rx="1"/>`:''}<text x="${W/2}" y="${ry+rH/2}" text-anchor="middle" fill="var(--am)" font-size="8" font-weight="800">YASTIK ${g.W}×${g.H_pad}mm</text><text x="${W/2}" y="${ry+rH/2+14}" text-anchor="middle" fill="var(--am)" opacity="0.8" font-size="7" font-weight="700">${g.kenarli?'Kenarlı':'Kenarsız'}</text>`;
+}
+
+function chHesapla(){
+  if(_chMode==='vana') chHesaplaVana(); else chHesaplaPad();
+  setTimeout(()=>{const gb=document.getElementById('chGonderBtn');if(gb&&window._chLastResult){gb.disabled=false;gb.style.opacity='1';gb.style.cursor='pointer';}},100);
+}
+
+function chGonderFiyatListesi(){
+  const r=window._chLastResult; if(!r){toast('Önce hesaplama yapın','er');return;}
+  const qt = r.tip==='vana' ? (parseInt(document.getElementById('chVQ')?.value)||1) : (r.adet||1);
+  const dn = r.tip==='vana' ? (r.D||0) : 0;
+  const vty= r.tip==='vana' ? (document.getElementById('chVT')?.value||'manuel') : 'pad';
+  const desc= r.tip==='vana' ? (VALVE_DATA[vty]?.desc||'Özel Kalıp Vana')+' DN'+dn : `Düz Yastık ${r.W||'?'}×${r.H_p||'?'}mm${r.kenarli?' (Kenarlı)':''}`;
+
+  const item = {
+    ref: RN++, ty: vty || 'pad', vref: vty || 'pad', dn: dn, cl: VALVE_DATA[vty]?.pn||16, qt: qt, df: _chDf,
+    parts: [{nm: r.tip==='vana'?'Ceket':'Yastık', ov:{}, calc:{
+      mc: r.mc?.malzeme||0, lc: r.mc?.iscilik||0, uc: r.mc?.toplam||0, us: r.mc?.satis||0, tS: (r.mc?.satis||0)*qt,
+      fab: r.altK||r.dolgu||0, fil: r.dolgu||0, sew: r.dikis||r.dikis_m||0, vlc: r.cirt||0, drw: r.bogm||0,
+      ag: r.agAd||0, pl: r.pulAd||0, S: r.S1||r.We||0, T: r.T1||r.He||0
+    }, matOv:{}}],
+    mh: desc,
+    calc: { mc: r.mc?.malzeme||0, lc: r.mc?.iscilik||0, uc: r.mc?.toplam||0, us: r.mc?.satis||0, tS: (r.mc?.satis||0)*qt },
+    _fromCalc: true,
+  };
+  IT.push(item); recalcAll(); toast(`"${desc}" fiyat listesine eklendi ✓`,'ok');
+  const plBtn=document.querySelector('button.slink[onclick*="\'pl\'"]');
+  if(plBtn) setTimeout(()=>go('pl',plBtn),400);
+}
+
+function chHesaplaVana(){
+  const D=$v('chD'),L=$v('chL'),H=$v('chH'); const Db_ham=$v('chDB')>0?$v('chDB'):D*0.5;
+  const I=$v('chI'), pc=$v('chPC'), py=$v('chPY'), pr=$v('chPR');
+  const lbx=$v('chLBX'), hc=parseFloat(P.hc)||250, mul=parseFloat(P.mul)||2.5; const df=_chDf;
+  const fw=parseFloat(P.fw)||0.05, iw=parseFloat(P.iw)||0.05, sw=parseFloat(P.sw)||0.10;
+
+  const pAlt=chMpByName($s('chMFB')), pUst=chMpByName($s('chMFT'));
+  const pFil=chMpByName($s('chMFL')), pCirt=chMpByName($s('chMVL'));
+  const pBog=chMpByName($s('chMDS')), pDik=chMpByName($s('chMST'));
+  const pAgr=chMpByName($s('chMSP')), pPul=chMpByName($s('chMND')), pTok=chMpByName($s('chMBK'));
+
+  const D1=D+2*I, Db=Db_ham+2*I;
+  const S1=D1*Math.PI+pc, T1=L+2*py, S2=Db*Math.PI+pc, T2=H;
+  const A1=S1*T1, A2=S2*T2, A_m2=(A1+A2)/1e6;
+
+  const altK=A_m2*(1+fw), ustK=A_m2*(1+fw), dolgu=A_m2*(1+iw);
+  const cirt=(2*T1+2*T2)/1000;
+  const bgG=(D1*Math.PI+pr)/1000, bgB=(Db*Math.PI+pr)/1000;
+  const bogAdet=H>100?4:3, bogm=bgG*2+(H>100?bgB*2:bgB);
+  const cevG=2*S1+2*T1, cevB=2*T2+S2, kap=S1-S2, dikis=((cevG+cevB+kap)/1000)*(1+sw);
+  const agAd=Math.max(2,Math.round(D/60)), pulAd=agAd*2, tokAd=Math.max(1,Math.round(Db*Math.PI/200));
+
+  const mc={ altK:altK*pAlt, ustK:ustK*pUst, dolgu:dolgu*pFil, cirt:cirt*pCirt, bogm:bogm*pBog, dikis:dikis*pDik, agraf:agAd*pAgr, pul:pulAd*pPul, toka:tokAd*pTok };
+  mc.malzeme=Object.values(mc).reduce((a,b)=>a+b,0);
+  const is_sa=A_m2*lbx*df; mc.iscilik=is_sa*hc; mc.toplam=mc.malzeme+mc.iscilik; mc.satis=mc.toplam*mul;
+
+  chRenderVana({D,L,H,Db_ham,I,pc,py,D1,Db,S1,T1,S2,T2,A_m2,altK,ustK,dolgu,cirt,bogm,bogAdet,dikis,agAd,pulAd,tokAd},{mc,is_sa,lbx,df,hc,mul},{pAlt,pUst,pFil,pCirt,pBog,pDik,pAgr,pPul,pTok});
+  window._chLastResult={tip:'vana',D,L,H,D1,Db,S1,T1,S2,T2,A_m2,altK,ustK,dolgu,cirt,bogm,bogAdet,dikis,agAd,pulAd,tokAd,mc};
+}
+
+function chHesaplaPad(){
+  const W=$v('chPW'),H_p=$v('chPH'),adet=$v('chPQ')||1;
+  const I=$v('chI'),sm=$v('chPSM');
+  const lbx=$v('chLBX'),hc=parseFloat(P.hc)||250,mul=parseFloat(P.mul)||2.5; const kenarli=_chKenar==='kenarli';
+  const fw=parseFloat(P.fw)||0.05,iw=parseFloat(P.iw)||0.05,sw=parseFloat(P.sw)||0.10;
+
+  const pAlt=chMpByName($s('chMFB')),pUst=chMpByName($s('chMFT'));
+  const pFil=chMpByName($s('chMFL')),pDik=chMpByName($s('chMST'));
+  const pAgr=chMpByName($s('chMSP')),pPul=chMpByName($s('chMND')),pTok=chMpByName($s('chMBK'));
+
+  const We=W+2*sm,He=H_p+2*sm;
+  const a_yuz=We*He/1e6; const a_kenar=kenarli?(2*We*I+2*He*I)/1e6:0;
+  const A=a_yuz*2+a_kenar;
+
+  const altK=(a_yuz+a_kenar/2)*(1+fw), ustK=(a_yuz+a_kenar/2)*(1+fw), dolgu=a_yuz*(1+iw);
+  const dikis_m=((2*(We+He))/1000)*(1+sw);
+  const agAd=Math.max(2,Math.round(2*(W+H_p)/300)), pulAd=agAd*2, tokAd=(W>600||H_p>600)?4:2;
+
+  const mc_b={ altK:altK*pAlt,ustK:ustK*pUst,dolgu:dolgu*pFil,dikis:dikis_m*pDik,agraf:agAd*pAgr,pul:pulAd*pPul,toka:tokAd*pTok };
+  mc_b.malzeme=Object.values(mc_b).reduce((a,b)=>a+b,0);
+  const is_sa=A*lbx; mc_b.iscilik=is_sa*hc; mc_b.toplam=mc_b.malzeme+mc_b.iscilik; mc_b.satis=mc_b.toplam*mul;
+  const mc_t={malzeme:mc_b.malzeme*adet,iscilik:mc_b.iscilik*adet,toplam:mc_b.toplam*adet,satis:mc_b.satis*adet};
+
+  chRenderPad({W,H_p,We,He,a_yuz,a_kenar,A,kenarli,altK,ustK,dolgu,dikis_m,agAd,pulAd,tokAd,adet},{mc_b,mc_t,is_sa,lbx,hc,mul},{pAlt,pUst,pFil,pDik,pAgr,pPul,pTok});
+  window._chLastResult={tip:'pad',W,H_p:H_p,We,He,a_yuz,a_kenar,A,kenarli,altK,ustK,dolgu,dikis_m,agAd,pulAd,tokAd,adet,mc:mc_t};
+}
+
+function chRenderVana(g,c,p){
+  const {mc,is_sa,lbx,df,hc,mul}=c;
+  const kpi=(v,l,s,col)=>`<div class="cd" style="padding:14px;text-align:center; border:1px solid ${col}; background:var(--bg-pane);"><div style="font-size:1.15rem;font-weight:900;color:${col}">${v}</div><div style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--tx-main);margin-top:6px">${l}</div><div style="font-size:.6rem;color:var(--tx-mut);margin-top:2px;font-weight:700">${s}</div></div>`;
+  const row=(lbl,q,bp,tot)=>`<tr><td style="padding:8px 16px;font-size:.75rem;font-weight:700;color:var(--tx-main);border-bottom:1px solid var(--brd)">${lbl}</td><td style="padding:8px 16px;text-align:right;font-size:.72rem;font-weight:800;color:var(--cy);border-bottom:1px solid var(--brd)">${q}</td><td style="padding:8px 16px;text-align:right;font-size:.66rem;font-weight:700;color:var(--tx-mut);border-bottom:1px solid var(--brd)">${bp}</td><td style="padding:8px 16px;text-align:right;font-weight:800;font-size:.75rem;color:var(--gn);border-bottom:1px solid var(--brd)">₺${chFmt(tot)}</td></tr>`;
+  const grp=lbl=>`<tr><td colspan="4" style="padding:6px 16px;font-size:.6rem;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;color:var(--ac);background:rgba(99,102,241,.06);border-bottom:1px solid var(--brd)">${lbl}</td></tr>`;
+  const sec=(label)=>{const e=document.getElementById('chVT');return e&&e.value?`${VALVE_DATA[e.value]?.desc||''} — DN${document.getElementById('chVDN')?.value||'Manuel'}`:label};
+
+  document.getElementById('chResults').innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px">
+      ${kpi(chFmt(g.A_m2,4)+' m²','Toplam Alan','T-Kalıp','var(--cy)')}
+      ${kpi('₺'+chFmt(mc.malzeme),'Malzeme','9 kalem','var(--rd)')}
+      ${kpi('₺'+chFmt(mc.iscilik),'İşçilik',chFmt(is_sa,3)+' sa × df'+df,'var(--am)')}
+      ${kpi('₺'+chFmt(mc.satis),'Satış Fiyatı','×'+mul,'var(--gn)')}
+    </div>
+    <div class="cd" style="padding:0;overflow:hidden;margin-bottom:14px;background:var(--bg-pane)">
+      <div style="background:var(--bg-card);padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--brd)">
+        <span style="font-weight:900;font-size:.85rem;color:var(--tx-main)">Malzeme Reçetesi & Maliyet</span>
+        <span style="font-size:.7rem;font-weight:700;color:var(--tx-mut)">${sec('Vana Ceketi')} · ${chFmt(g.A_m2,5)} m²</span>
+      </div>
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr style="background:var(--bg-inp)">
+          <th style="padding:8px 16px;font-size:.65rem;font-weight:900;text-transform:uppercase;color:var(--tx-mut);text-align:left;border-bottom:1px solid var(--brd)">Kalem</th>
+          <th style="padding:8px 16px;font-size:.65rem;text-align:right;color:var(--tx-mut);border-bottom:1px solid var(--brd)">Miktar</th>
+          <th style="padding:8px 16px;font-size:.65rem;text-align:right;color:var(--tx-mut);border-bottom:1px solid var(--brd)">Birim Fiyat</th>
+          <th style="padding:8px 16px;font-size:.65rem;text-align:right;color:var(--tx-mut);border-bottom:1px solid var(--brd)">Tutar</th>
+        </tr></thead>
+        <tbody>
+          ${grp('KUMAŞLAR')}
+          ${row('Alt Kumaş (iç yüzey)',chFmt(g.altK,4)+' m²','₺'+chFmt(p.pAlt)+'/m²',mc.altK)}
+          ${row('Üst Kumaş (dış yüzey)',chFmt(g.ustK,4)+' m²','₺'+chFmt(p.pUst)+'/m²',mc.ustK)}
+          ${grp('DOLGU')}
+          ${row('İzolasyon Malzeme',chFmt(g.dolgu,4)+' m²','₺'+chFmt(p.pFil)+'/m²',mc.dolgu)}
+          ${grp('BAĞLANTI & DİKİŞ')}
+          ${row('Cırt Bant',chFmt(g.cirt,3)+' m','₺'+chFmt(p.pCirt)+'/m',mc.cirt)}
+          ${row(`Boğma İpi (${g.bogAdet} boğaz)`,chFmt(g.bogm,3)+' m','₺'+chFmt(p.pBog)+'/m',mc.bogm)}
+          ${row('Dikiş İpi',chFmt(g.dikis,3)+' m','₺'+chFmt(p.pDik)+'/m',mc.dikis)}
+          ${grp('AGRAF · PUL · TOKA')}
+          ${row('Agraf Seti',g.agAd+' takım','₺'+chFmt(p.pAgr)+'/ad',mc.agraf)}
+          ${row('Pul',g.pulAd+' adet','₺'+chFmt(p.pPul)+'/ad',mc.pul)}
+          ${row('Toka',g.tokAd+' adet','₺'+chFmt(p.pTok)+'/ad',mc.toka)}
+        </tbody>
+        <tfoot>
+          <tr style="background:rgba(245,158,11,.07)"><td colspan="3" style="padding:10px 16px;font-weight:800;font-size:.75rem;color:var(--tx-main)">TOPLAM MALZEME</td><td style="padding:10px 16px;text-align:right;color:var(--am);font-weight:900;font-size:.8rem">₺${chFmt(mc.malzeme)}</td></tr>
+          <tr style="background:rgba(6,182,212,.07)"><td colspan="3" style="padding:10px 16px;font-weight:800;font-size:.75rem;color:var(--tx-main)">İŞÇİLİK (${chFmt(is_sa,3)} sa × ₺${chFmt(hc)} × df${df})</td><td style="padding:10px 16px;text-align:right;color:var(--cy);font-weight:900;font-size:.8rem">₺${chFmt(mc.iscilik)}</td></tr>
+          <tr style="background:rgba(99,102,241,.1)"><td colspan="3" style="padding:12px 16px;font-weight:900;font-size:.85rem;color:var(--tx-main)">TOPLAM MALİYET</td><td style="padding:12px 16px;text-align:right;color:var(--ac);font-weight:900;font-size:.95rem">₺${chFmt(mc.toplam)}</td></tr>
+          <tr style="background:rgba(16,185,129,.15)"><td colspan="3" style="padding:14px 16px;font-weight:900;font-size:.9rem;color:var(--tx-main)">SATIŞ FİYATI ×${mul}</td><td style="padding:14px 16px;text-align:right;color:var(--gn);font-weight:900;font-size:1.15rem">₺${chFmt(mc.satis)}</td></tr>
+        </tfoot>
+      </table>
+    </div>`;
+  lucide.createIcons();
+}
+
+function chRenderPad(g,c,p){
+  const {mc_b,mc_t,is_sa,lbx,hc,mul}=c;
+  const kpi=(v,l,s,col)=>`<div class="cd" style="padding:14px;text-align:center; border:1px solid ${col}; background:var(--bg-pane);"><div style="font-size:1.15rem;font-weight:900;color:${col}">${v}</div><div style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--tx-main);margin-top:6px">${l}</div><div style="font-size:.6rem;color:var(--tx-mut);margin-top:2px;font-weight:700">${s}</div></div>`;
+  const row=(lbl,q,bp,tot)=>`<tr><td style="padding:8px 16px;font-size:.75rem;font-weight:700;color:var(--tx-main);border-bottom:1px solid var(--brd)">${lbl}</td><td style="padding:8px 16px;text-align:right;font-size:.72rem;font-weight:800;color:var(--cy);border-bottom:1px solid var(--brd)">${q}</td><td style="padding:8px 16px;text-align:right;font-size:.66rem;font-weight:700;color:var(--tx-mut);border-bottom:1px solid var(--brd)">${bp}</td><td style="padding:8px 16px;text-align:right;font-weight:800;font-size:.75rem;color:var(--gn);border-bottom:1px solid var(--brd)">₺${chFmt(tot)}</td></tr>`;
+  const ktag=g.kenarli?'Kenarlı ⊡':'Kenarsız ▭';
+
+  document.getElementById('chResults').innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px">
+      ${kpi(chFmt(g.A,4)+' m²','Alan (birim)',ktag,'var(--cy)')}
+      ${kpi('₺'+chFmt(mc_b.malzeme),'Malzeme (birim)','×'+g.adet+' = ₺'+chFmt(mc_t.malzeme),'var(--rd)')}
+      ${kpi('₺'+chFmt(mc_b.iscilik),'İşçilik (birim)',chFmt(is_sa,3)+' sa','var(--am)')}
+      ${kpi('₺'+chFmt(mc_t.satis),'Toplam Satış',g.adet+' ad × ₺'+chFmt(mc_b.satis),'var(--gn)')}
+    </div>
+    <div class="cd" style="padding:0;overflow:hidden;background:var(--bg-pane)">
+      <div style="background:var(--bg-card);padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--brd)">
+        <span style="font-weight:900;font-size:.85rem;color:var(--tx-main)">Yastık Reçetesi — ${ktag}</span>
+        <span style="font-size:.7rem;font-weight:700;color:var(--tx-mut)">${g.adet} adet · ${g.W}×${g.H_p}mm</span>
+      </div>
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr style="background:var(--bg-inp)">
+          <th style="padding:8px 16px;font-size:.65rem;font-weight:900;text-transform:uppercase;color:var(--tx-mut);text-align:left;border-bottom:1px solid var(--brd)">Kalem</th>
+          <th style="padding:8px 16px;font-size:.65rem;text-align:right;color:var(--tx-mut);border-bottom:1px solid var(--brd)">Miktar</th>
+          <th style="padding:8px 16px;font-size:.65rem;text-align:right;color:var(--tx-mut);border-bottom:1px solid var(--brd)">Birim Fiyat</th>
+          <th style="padding:8px 16px;font-size:.65rem;text-align:right;color:var(--tx-mut);border-bottom:1px solid var(--brd)">Birim Tutar</th>
+        </tr></thead>
+        <tbody>
+          ${g.kenarli?`<tr style="background:rgba(16,185,129,.06)"><td colspan="3" style="padding:6px 16px;font-size:.65rem;font-weight:800;color:var(--gn)">+ Kenar şerit (${chFmt(g.a_kenar,5)} m²)</td><td style="padding:6px 16px;text-align:right;color:var(--gn);font-size:.65rem;font-weight:800;">eklendi ✓</td></tr>`:''}
+          ${row('Alt Kumaş',chFmt(g.altK,4)+' m²','₺'+chFmt(p.pAlt)+'/m²',mc_b.altK)}
+          ${row('Üst Kumaş',chFmt(g.ustK,4)+' m²','₺'+chFmt(p.pUst)+'/m²',mc_b.ustK)}
+          ${row('Dolgu',chFmt(g.dolgu,4)+' m²','₺'+chFmt(p.pFil)+'/m²',mc_b.dolgu)}
+          ${row('Dikiş İpi',chFmt(g.dikis_m,3)+' m','₺'+chFmt(p.pDik)+'/m',mc_b.dikis)}
+          ${row('Agraf',g.agAd+' takım','₺'+chFmt(p.pAgr)+'/ad',mc_b.agraf)}
+          ${row('Pul',g.pulAd+' adet','₺'+chFmt(p.pPul)+'/ad',mc_b.pul)}
+          ${row('Toka',g.tokAd+' adet','₺'+chFmt(p.pTok)+'/ad',mc_b.toka)}
+        </tbody>
+        <tfoot>
+          <tr style="background:rgba(245,158,11,.07)"><td colspan="3" style="padding:10px 16px;font-weight:800;font-size:.75rem;color:var(--tx-main)">BİRİM MALZEME</td><td style="padding:10px 16px;text-align:right;color:var(--am);font-weight:900;font-size:.8rem">₺${chFmt(mc_b.malzeme)}</td></tr>
+          <tr style="background:rgba(6,182,212,.07)"><td colspan="3" style="padding:10px 16px;font-weight:800;font-size:.75rem;color:var(--tx-main)">BİRİM İŞÇİLİK</td><td style="padding:10px 16px;text-align:right;color:var(--cy);font-weight:900;font-size:.8rem">₺${chFmt(mc_b.iscilik)}</td></tr>
+          <tr style="background:rgba(99,102,241,.1)"><td colspan="3" style="padding:10px 16px;font-weight:800;font-size:.75rem;color:var(--tx-main)">BİRİM MALİYET</td><td style="padding:10px 16px;text-align:right;color:var(--ac);font-weight:900;font-size:.8rem">₺${chFmt(mc_b.toplam)}</td></tr>
+          <tr style="background:rgba(99,102,241,.15)"><td colspan="3" style="padding:12px 16px;font-weight:900;font-size:.85rem;color:var(--tx-main)">TOPLAM (${g.adet} adet)</td><td style="padding:12px 16px;text-align:right;color:var(--ac);font-weight:900;font-size:.95rem">₺${chFmt(mc_t.toplam)}</td></tr>
+          <tr style="background:rgba(16,185,129,.15)"><td colspan="3" style="padding:14px 16px;font-weight:900;font-size:.9rem;color:var(--tx-main)">TOPLAM SATIŞ ×${mul}</td><td style="padding:14px 16px;text-align:right;color:var(--gn);font-weight:900;font-size:1.15rem">₺${chFmt(mc_t.satis)}</td></tr>
+        </tfoot>
+      </table>
+    </div>`;
+  lucide.createIcons();
+}
+
+// ====== DB & INIT ======
+function updatePrefix(val) { P.prefix = val; document.getElementById('setPrefix').value=val; rPL(); rProd(); toast('Ön ek güncellendi', 'in'); saveData(); }
+
+function extrapolateValue(dict, targetX) {
+    let keys = Object.keys(dict).map(Number).filter(k => !isNaN(dict[k]) && dict[k] !== null).sort((a,b)=>a-b);
+    if(keys.length === 0) return 0;
+    if(keys.length === 1) return dict[keys[0]];
+    if(keys.includes(targetX)) return dict[targetX];
+
+    let lower = keys[0], upper = keys[keys.length-1];
+    if (targetX <= lower) { lower = keys[0]; upper = keys[1]; } 
+    else if (targetX >= upper) { lower = keys[keys.length-2]; upper = keys[keys.length-1]; }
+    else {
+        for(let i=0; i<keys.length; i++) {
+            if(keys[i] < targetX) lower = keys[i];
+            if(keys[i] > targetX) { upper = keys[i]; break; }
+        }
+    }
+    if (lower === upper) return dict[lower];
+    let y1 = dict[lower], y2 = dict[upper];
+    let slope = (y2 - y1) / (upper - lower);
+    let res = y1 + slope * (targetX - lower);
+    return res > 0 ? res : 0; 
+}
+
+function initExtrapolation() {
+    DN_LIST.forEach(dn => {
+        if(!FD[dn]) FD[dn] = {};
+        CLS.forEach(cl => {
+            if(!FD[dn][cl]) {
+                let classDict = {};
+                Object.keys(FD).forEach(k => { if (k != dn && FD[k] && FD[k][cl]) classDict[k] = FD[k][cl]; });
+                FD[dn][cl] = extrapolateValue(classDict, dn);
+            }
+        });
+    });
+
+    ['gate', 'globe', 'butterfly'].forEach(ty => {
+        if(!BL[ty]) BL[ty] = {};
+        DN_LIST.forEach(dn => {
+            if(!BL[ty][dn]) BL[ty][dn] = {};
+            CLS.forEach(cl => {
+                if(!BL[ty][dn][cl]) {
+                    ['L1', 'L1p', 'L2'].forEach(dim => {
+                        let dimDict = {};
+                        Object.keys(BL[ty]).forEach(k => {
+                            if (k != dn && BL[ty][k] && BL[ty][k][cl] && typeof BL[ty][k][cl][dim] === 'number') dimDict[k] = BL[ty][k][cl][dim];
+                        });
+                        if(!BL[ty][dn][cl]) BL[ty][dn][cl] = {};
+                        BL[ty][dn][cl][dim] = extrapolateValue(dimDict, dn);
+                    });
+                }
+            });
+        });
+    });
+
+    DN_LIST.forEach(dn => {
+        let inch = DN_INCH[dn];
+        if (inch && !AP[String(inch)]) {
+            let aDict = {}, pDict = {};
+            Object.keys(AP).forEach(k => {
+                if (k != inch && AP[k]) { aDict[k] = AP[k].a; pDict[k] = AP[k].p; }
+            });
+            AP[String(inch)] = { a: Math.round(extrapolateValue(aDict, inch)), p: Math.round(extrapolateValue(pDict, inch)) };
+        }
+    });
+}
+
+window.onload=()=>{
+ document.getElementById('themeBtn').innerHTML = `<i data-lucide="${currentTheme === 'dark' ? 'sun' : 'moon'}" class="w-4 h-4"></i>`;
+ 
+ const D=EXCEL_DATA; P.usd=D.fx.USD; P.eur=D.fx.EUR;
+ M=D.mat.map(m=>({...m})); M.forEach(m=>{if(m.k)TK[m.n]=m.k});
+ FD={};for(const[dn,cls] of Object.entries(D.fd)){FD[parseInt(dn)]={};for(const[c,v] of Object.entries(cls))FD[parseInt(dn)][parseInt(c)]=v}
+ 
+ // THE FATAL BUG FIX (#VALUE! CLEANSING)
+ BL={};
+ for(const[ty,tbl] of Object.entries(D.bl)){
+   BL[ty]={};
+   for(const[dn,cls] of Object.entries(tbl)){
+     BL[ty][parseInt(dn)]={};
+     for(const[c,v] of Object.entries(cls)){
+       let obj = {};
+       if(v && typeof v === 'object') {
+           for(const [dim, val] of Object.entries(v)) {
+               obj[dim] = (val === "#VALUE!" || isNaN(val)) ? null : parseFloat(val);
+           }
+       }
+       BL[ty][parseInt(dn)][parseInt(c)] = obj;
+     }
+   }
+ }
+ AP=D.ap;
+ 
+ try{const sv=JSON.parse(localStorage.getItem('optimizi_insjack_v5'));if(sv&&sv.IT){Object.assign(P,sv.P||{});M=sv.M||M;IT=sv.IT||[];FD=sv.FD||FD;BL=sv.BL||BL;AP=sv.AP||AP;TK=sv.TK||TK;SVC=sv.SVC||SVC;plQty=sv.plQty||{};curShow=sv.curShow||curShow;if(sv.PERS)PERS=sv.PERS;if(sv.PP)PP=sv.PP;RN=sv.RN||(Math.max(...IT.map(i=>i.ref),0)+1);if(sv.colVis)colVis=sv.colVis;}}catch(e){}
+ 
+ try { initExtrapolation(); } catch(e) { console.error('Extrapolate Error', e) }
+ try { rPers(); } catch(e) { console.error('Pers Error', e) }
+ 
+ document.getElementById('setPrefix').value = P.prefix;
+ document.getElementById('prefInput').value = P.prefix;
+ 
+ try { 
+   rPar(); rMat(); rGlobal(); updDN(); recalcAll(); rVRef(); applyColVis(); rColSettings(); 
+ } catch(e) { 
+   console.error("Render Error:", e);
+ }
+ 
+ fetchKur(); 
+ lucide.createIcons();
+}
+
+function saveData(){localStorage.setItem('optimizi_insjack_v5',JSON.stringify({P,M,IT,FD,BL,AP,TK,SVC,plQty,curShow,PERS,PP,RN,colVis}));toast('Sistem veritabanı yedeği alındı');}
+
+</script>
 </body>
 </html>
