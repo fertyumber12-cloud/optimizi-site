@@ -1,38 +1,49 @@
 // ============================================
-// GÖRÜNMEZ GÜVENLİK STİLİ (Ctrl+U'dan Gizlendi)
-// ============================================
-(function injectSecurityStyle() {
-    const style = document.createElement('style');
-    style.innerHTML = `
-        body:not(.auth-checked) { opacity: 0 !important; pointer-events: none !important; }
-        body.auth-checked { opacity: 1 !important; transition: opacity 0.3s ease !important; }
-    `;
-    // Stili sayfanın en üstüne gizlice ekle
-    document.head.appendChild(style);
-})();
-
-// ============================================
-// CENTRAL AUTHENTICATION SYSTEM
+// CENTRAL AUTHENTICATION SYSTEM & SECURITY
 // ============================================
 const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZsdWRrcnN4bnBpZ3lkcW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NTI5OTQsImV4cCI6MjA4NjEyODk5NH0.GE9KbO7dx_W7BYihAzvJl744R317xEA8Ars98UW-VWo';
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// 1. HANGİ SAYFALAR HERKESE AÇIK? (Kilitlenmeyecek ve yönlendirilmeyecek sayfalar)
+const currentPath = window.location.pathname.toLowerCase();
+const isPublicPage = 
+    currentPath === '/' || 
+    currentPath.includes('index') || 
+    currentPath.includes('login') || 
+    currentPath.includes('signup') || 
+    currentPath.includes('iletisim') || 
+    currentPath.includes('blog') ||
+    currentPath.includes('404');
+
+// 2. GÖRÜNMEZ GÜVENLİK STİLİ (SADECE KİLİTLİ SAYFALARDA ÇALIŞIR)
+if (!isPublicPage) {
+    const style = document.createElement('style');
+    style.innerHTML = `
+        body:not(.auth-checked) { opacity: 0 !important; pointer-events: none !important; }
+        body.auth-checked { opacity: 1 !important; transition: opacity 0.3s ease !important; }
+    `;
+    document.head.appendChild(style);
+} else {
+    // Eğer herkese açık bir sayfadaysak (ana sayfa vb.), CSS eklenmediği için 
+    // sayfa zaten görünürdür, işlemi garantiye almak için sınıfı yine de ekleriz.
+    document.addEventListener("DOMContentLoaded", () => {
+        document.body.classList.add('auth-checked');
+    });
+}
+
 const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 dakika
 let inactivityTimer = null;
 
 (async function checkAuthentication() {
-  if (window.location.pathname.includes('login') || 
-      window.location.pathname.includes('index.html') ||
-      window.location.pathname === '/') {
-    return;
-  }
+  // EĞER SAYFA HERKESE AÇIKSA GÜVENLİK SORGUSU VE LOGİNE ATMA İŞLEMİNİ İPTAL ET
+  if (isPublicPage) return;
 
   try {
     let { data: { session }, error } = await supabaseClient.auth.getSession();
     
-    // YARIŞ DURUMUNU ÇÖZEN DÖNGÜ
+    // Yarış durumunu çözen döngü
     let retryCount = 0;
     while (!session && !error && retryCount < 5) {
       await new Promise(resolve => setTimeout(resolve, 300));
@@ -48,6 +59,7 @@ let inactivityTimer = null;
     if (!session) {
       redirectToLogin();
     } else {
+      // Müşteri yetkiliyse ekran kilidini kaldır (görünür yap)
       window.currentUser = session.user;
       document.body.classList.add('auth-checked');
       startInactivityTimer();
@@ -101,7 +113,13 @@ if (document.readyState === 'loading') {
 
 function redirectToLogin() {
   if (inactivityTimer) clearTimeout(inactivityTimer);
-  sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
+  
+  const currentPath = window.location.pathname;
+  // GÜVENLİK DUVARI: Herkese açık sayfalardaysa (ana sayfa vs) hafızaya kaydetme!
+  if (!isPublicPage) {
+    sessionStorage.setItem('redirectAfterLogin', currentPath);
+  }
+  
   window.location.replace('/login.html');
 }
 
@@ -115,10 +133,12 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) chec
 window.addEventListener('focus', () => checkAuthenticationSync());
 
 async function checkAuthenticationSync() {
+  // Herkese açık sayfalarda sekme arası geçişlerde de logine atma olayını iptal et
+  if (isPublicPage) return;
+
   try {
     let { data: { session }, error } = await supabaseClient.auth.getSession();
     
-    // YARIŞ DURUMUNU ÇÖZEN DÖNGÜ 2
     let retryCount = 0;
     while (!session && !error && retryCount < 5) {
       await new Promise(resolve => setTimeout(resolve, 300));
