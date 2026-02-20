@@ -1,6 +1,6 @@
 // ================================================================
 // CEKET FIYATLANDIRMA - APP.JS
-// Optimizi.App | v3.1 Kesin Matematik Motoru
+// Optimizi.App | v4.0 İki Silindirli T-Kalıp & Dinamik Fiyat Motoru
 // ================================================================
 
 // ============ GLOBAL DATA (JSON'dan yüklenir) ============
@@ -132,7 +132,7 @@ const TN = {'PV-16':'Pistonlu Vana','GV-16K':'Glob Vana PN16','GV-25Z':'Glob Van
 const TT  = {piston:'globe', globe:'globe', bellow:'globe', gate:'gate', '3way':'globe', yfilter:'globe', check_clv:'globe', ball_2:'gate', ball_3:'gate', butterfly:'gate', trap:'globe', flange:'gate', elbow:'gate'};
 
 // ============ GLOBAL STATE ============
-let P = {usd:32.1, eur:35.2, hc:250, oh:.15, mul:2.5, pd:60, ir:.03, sr:.00948, fw:.10, iw:.10, sw:.30, fr:50, fl:50, sm:15, re:150, lbw:0.2, lbx:0.4, lby:0.5, lbyf:0.3, gFB:'1 Sİ - 0.5 mm - Gri', gFT:'1 Sİ - 0.5 mm - Gri', gFL:'TY-50mm', gST:'SS - 3', gDS:'CamElyf-4mm', gVL:'40 mm - Gri', gSP:'SS Z+A+P', gND:'SS Ç.Pul Set', gBK:'D-Toka', gLB:'30*60', gDF:1.2, prefix:'INSJACK'};
+let P = {usd:32.1, eur:35.2, hc:250, oh:.15, mul:2.5, pd:60, ir:.03, sr:.00948, fw:.10, iw:.10, sw:.30, fr:50, fl:50, sm:50, re:150, lbw:0.2, lbx:0.4, lby:0.5, lbyf:0.3, gFB:'1 Sİ - 0.5 mm - Gri', gFT:'1 Sİ - 0.5 mm - Gri', gFL:'TY-50mm', gST:'SS - 3', gDS:'CamElyf-4mm', gVL:'40 mm - Gri', gSP:'SS Z+A+P', gND:'SS Ç.Pul Set', gBK:'D-Toka', gLB:'30*60', gDF:1.2, prefix:'INSJACK'};
 let M = [], FD = {}, BL = {}, AP = {}, TK = {}, IT = [], RN = 1, plQty = {}, curShow = {TL:true,USD:false,EUR:true};
 let colVis = {kumas:true, dolgu:true, dikis:true, bogma:true, cirt:true, agraf:true, pul:true, S:true, T:true, I:true, N:true, mc:true, lc:true, lh:false};
 let SVC = {cad:0, montajGun:0, montajGunMly:0, nakliye:0};
@@ -174,44 +174,53 @@ async function fetchRates() {
     }
 }
 
-// ============ HESAPLAMA (EXCEL MANTIĞININ BİREBİR AYNISI) ============
+// ==============================================================================
+// 🔥 DİNAMİK T-KALIP (SİLİNDİR) GEOMETRİSİ VE HESAPLAMA MOTORU 🔥
+// Excel mantığı tamamen çöpe atıldı. Saf geometri ve modüler sistem entegre edildi.
+// ==============================================================================
 function calcItem(it) {
     const _vd = VALVE_DATA[it.vref || it.ty];
     const _dd = _vd && _vd.dims && _vd.dims[it.dn] ? _vd.dims[it.dn] : null;
     const gFM = mn2(P.gFL);
-    const I   = gFM ? tk2(gFM.n) : 20; // İzolasyon Kalınlığı (mm)
-    const N   = _dd ? _dd.D : gfd(it.dn, it.cl); // Flanş Dış Çapı (mm)
+    const I   = gFM ? tk2(gFM.n) : 20; // İzolasyon kalınlığı
+
+    // 1. HAM ÖLÇÜLER (Veritabanından Veya Standart Tablolardan Çekilir)
+    const N = _dd ? _dd.D : gfd(it.dn, it.cl); // Gövde/Flanş Çapı
     const lens = gbl(it.ty, it.dn, it.cl);
+    const L = (_dd && _dd.L) ? _dd.L : (lens.L1 || 0); // Vana Boyu
+    const H = (_dd && _dd.H) ? _dd.H : (N * 0.8);      // Kapak/Boyun Yüksekliği
+    const Dk = (_dd && _dd.Dk) ? _dd.Dk : (N * 0.5);   // Boyun Çapı
+
+    let tMC=0, tLC=0, tLH=0;
     const inch = DN_INCH[it.dn] || 0;
     const apv  = gap(inch);
-    let tMC=0, tLC=0, tLH=0;
 
     it.parts.forEach((pt, pi) => {
+        // Dinamik Fiyat Çekimleri (Seçilen malzemeye göre)
         const mFB = mn2(pt.matOv.fb || P.gFB);
         const mFT = mn2(pt.matOv.ft || P.gFT);
         const mFL = mn2(pt.matOv.fl || P.gFL);
         const localI = mFL ? tk2(mFL.n) : I;
+        
         const fbP = mp(mFB), ftP = mp(mFT), flP = mp(mFL);
         const stP = mp(mn2(P.gST)), dsP = mp(mn2(P.gDS)), vlP = mp(mn2(P.gVL));
         const spP = mp(mn2(P.gSP)), ndP = mp(mn2(P.gND));
+        
         let S, T;
 
-        const L = lens.L1 || 0;
-
-        // 1. BOY VE ÇEVRE (Excel S ve T formülleri)
-        if (pt.nm === 'Gövde' || pt.nm === 'Tek Parça') {
-            const K = L + P.fr + P.fl; // Gerçek Boy (Vana Boyu + Sağ + Sol Flanş Payı)
-            S = it.qt === 0 ? 0 : (((N + 2 * localI) * Math.PI) + P.sm); // Çevre = (Dış Çap + 2*İzolasyon) * PI + Dikiş Payı
-            T = it.qt === 0 ? 0 : (K + localI + P.sm); // Boy
-        } else if (pt.nm === 'Flanş') {
-            const fL = lens.L1p || lens.L2 || L;
-            const K = fL - N/2;
-            S = it.qt === 0 ? 0 : (((N + 2 * localI) * Math.PI) + P.sm);
-            T = it.qt === 0 ? 0 : (K + localI + P.sm);
+        // 2. T-KALIP: SİLİNDİR AÇINIM GEOMETRİSİ (S = En, T = Boy)
+        if (pt.nm === 'Gövde' || pt.nm === 'Tek Parça' || pt.nm === 'Flanş') {
+            // YATAY SİLİNDİR (Ana Gövde)
+            const Dyeni = N + (2 * localI); // İzolasyonla şişirilmiş çap
+            S = it.qt === 0 ? 0 : (Dyeni * Math.PI) + P.sm; // Çevre + Cırt Payı
+            T = it.qt === 0 ? 0 : L + P.fl + P.fr;          // Flanş-Flanş Boyu + Taşma Payları
         } else if (pt.nm === 'Kapak') {
-            S = it.qt === 0 ? 0 : ((N + 2 * localI) + P.sm);
-            T = S;
-        } else if (pt.nm === 'Yastık') {
+            // DİKEY SİLİNDİR (Boyun / Volan)
+            const Dbyeni = Dk + (2 * localI); // İzolasyonla şişirilmiş boyun çapı
+            S = it.qt === 0 ? 0 : (Dbyeni * Math.PI) + P.sm; // Boyun Çevresi + Cırt Payı
+            T = it.qt === 0 ? 0 : H;                         // Doğrudan Yükseklik
+        } else if (it.ty === 'pad') {
+            // DÜZ YASTIK
             S = it.padW || 0;
             T = it.padH || 0;
         } else {
@@ -219,6 +228,7 @@ function calcItem(it) {
             T = pt.ov.T || 0;
         }
 
+        // Kullanıcı arayüzden (tablodan) ezmişse onu kullan
         if (pt.ov.S != null) S = pt.ov.S;
         if (pt.ov.T != null) T = pt.ov.T;
 
@@ -227,21 +237,33 @@ function calcItem(it) {
             return;
         }
 
-        // 2. METRAJ VE FİRE HESAPLAMALARI (Excel Milyona Bölme Hilesi)
-        let fab = pt.ov.fab != null ? pt.ov.fab : ((S * T * 2 * (1 + P.fw)) / 1000000); // Kumaş (m2) - 2 Kat
-        let fil = pt.ov.fil != null ? pt.ov.fil : ((S * T * (1 + P.iw)) / 1000000);     // Dolgu (m2)
-        let sew = pt.ov.sew != null ? pt.ov.sew : ((((T * 2) + S) * (1 + P.sw)) / 1000); // Dikiş İpi (m)
-        let drw = pt.ov.drw != null ? pt.ov.drw : (((S + P.re) * 2) / 1000);            // Boğma İpi (m)
-        let vlc = pt.ov.vlc != null ? pt.ov.vlc : (T / 1000);                           // Cırt Bant (m)
-        let ag  = pt.ov.ag  != null ? pt.ov.ag  : apv.a;                                // Agraf Adet
-        let pl  = pt.ov.pl  != null ? pt.ov.pl  : apv.p;                                // Pul Adet
-
-        // 3. BİRİM MALZEME MALİYETİ
-        let mc  = pt.ov.mc  != null ? pt.ov.mc  : ((fab/2*fbP) + (fab/2*ftP) + (fil*flP) + (sew*stP) + (drw*dsP) + (vlc*vlP) + (ag*spP) + (pl*ndP));
+        // 3. REÇETE VE FİRE HESABI (Alan Bazlı Saf Mantık)
+        const Alan_m2 = (S * T) / 1000000;
         
-        // 4. İŞÇİLİK MALİYETİ
+        // Kumaş ve Dolgu (m2)
+        let fab = pt.ov.fab != null ? pt.ov.fab : (Alan_m2 * 2 * (1 + P.fw)); // İç ve dış yüzey = 2 kat
+        let fil = pt.ov.fil != null ? pt.ov.fil : (Alan_m2 * (1 + P.iw));
+        
+        // Dikiş İpi (metre) - Tüm çevreyi dönme
+        let sew = pt.ov.sew != null ? pt.ov.sew : ((2 * S + 2 * T) * (1 + P.sw)) / 1000;
+        
+        // Boğma İpi (metre) - Gövde ise 2 boğaz (sağ/sol), Kapak ise 1 boğaz büzülür
+        const bogazSayisi = (pt.nm === 'Kapak') ? 1 : 2;
+        let drw = pt.ov.drw != null ? pt.ov.drw : ((S + P.re) * bogazSayisi) / 1000;
+        
+        // Cırt Bant (metre) - Kapanma ekseni (Boy)
+        let vlc = pt.ov.vlc != null ? pt.ov.vlc : (T / 1000);
+        
+        // Agraf ve Pul (adet) - Standart olarak sadece gövdeye takılır
+        let ag  = pt.ov.ag  != null ? pt.ov.ag  : (pt.nm === 'Kapak' ? 0 : apv.a);
+        let pl  = pt.ov.pl  != null ? pt.ov.pl  : (pt.nm === 'Kapak' ? 0 : apv.p);
+
+        // 4. MALİYET HESABI (Hesaplanan Birimler x Dinamik Fiyatlar)
+        let mc  = pt.ov.mc  != null ? pt.ov.mc  : ((fab/2 * fbP) + (fab/2 * ftP) + (fil * flP) + (sew * stP) + (drw * dsP) + (vlc * vlP) + (ag * spP) + (pl * ndP));
+        
+        // 5. İŞÇİLİK HESABI (Alan x Zorluk)
         const baseLabor = (pt.nm === 'Flanş' ? P.lbyf : P.lby);
-        const lh = ((fab/2 * P.lbx) + baseLabor) * it.df;
+        const lh = ((Alan_m2 * P.lbx) + baseLabor) * it.df;
         let lc = pt.ov.lc != null ? pt.ov.lc : (lh * P.hc);
 
         pt.calc = {S,T,I:localI,N,fab,fil,sew,drw,vlc,ag,pl,mc,lc,lh};
@@ -257,6 +279,8 @@ function calcItem(it) {
         tS:  (tMC + tLC) * P.mul * it.qt
     };
 }
+// ==============================================================================
+
 
 function recalcAll() {
     IT.forEach(calcItem); rProd();
@@ -452,7 +476,7 @@ function rPar() {
         pi('Ödeme Vadesi','pd',P.pd,'g',0) + pi('Yıllık Faiz','ir',P.ir*100,'%',1) + pi('Damga V.','sr',P.sr*100,'%',3);
     document.getElementById('pFir').innerHTML =
         pi('Kumaş Fire','fw',P.fw*100,'%',0) + pi('İzolasyon Fire','iw',P.iw*100,'%',0) + pi('Dikiş İpi Fire','sw',P.sw*100,'%',0) + '<hr class="my-2 opacity-20">' +
-        pi('Bindirme SAĞ','fr',P.fr,'mm',0) + pi('Bindirme SOL','fl',P.fl,'mm',0) + pi('Dikiş Payı','sm',P.sm,'mm',0) + pi('Boğma Fazlalık','re',P.re,'mm',0);
+        pi('Bindirme SAĞ','fr',P.fr,'mm',0) + pi('Bindirme SOL','fl',P.fl,'mm',0) + pi('Cırt Payı','sm',P.sm,'mm',0) + pi('Boğma Fazlalık','re',P.re,'mm',0);
     document.getElementById('pLab').innerHTML =
         pi('Dikiş (sa/mt)','lbw',P.lbw,'',3) + pi('Metraj (sa/m²)','lbx',P.lbx,'',2) + pi('Parça Gövde','lby',P.lby,'',2) + pi('Parça Flanş','lbyf',P.lbyf,'',2);
     rFT(); rLT('gate'); rAT();
@@ -695,6 +719,7 @@ function wizMaterialHTML() {
 function wizPickCat(cat)   { wizCat=cat; wizStep=2; renderWizStep(); }
 function wizPickBrand(brand) { wizBrand=brand; wizStep=3; renderWizStep(); }
 function wizBack() { if (wizStep>1) { wizStep--; if (wizStep===2 && (wizCat==='flat_pad'||wizCat==='elbow')) wizStep=1; renderWizStep(); } }
+
 function wizUpdDN() {
     const sel = document.getElementById('wModel'); if (!sel) return;
     const ty  = sel.value, vd = VALVE_DATA[ty], s = document.getElementById('wDN');
@@ -704,6 +729,7 @@ function wizUpdDN() {
     const dfEl = document.getElementById('wDF'); if (dfEl && vd && vd.difficulty) dfEl.value = vd.difficulty;
     wizFillDims();
 }
+
 function wizFillDims() {
     const ty = document.getElementById('wModel')?.value, dn = document.getElementById('wDN')?.value;
     if (!ty||!dn) { ['wDimD','wDimL','wDimH','wDimC'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; }); return; }
@@ -713,6 +739,7 @@ function wizFillDims() {
     if (document.getElementById('wDimH')) document.getElementById('wDimH').value = dims.H||'';
     if (document.getElementById('wDimC') && dims.D) document.getElementById('wDimC').value = Math.round(Math.PI*dims.D);
 }
+
 function wizRecalcCirc() { const d = parseFloat(document.getElementById('wDimD')?.value)||0; if (document.getElementById('wDimC')) document.getElementById('wDimC').value = d ? Math.round(Math.PI*d) : ''; }
 function wizCalcPadPreview() {
     const w = parseFloat(document.getElementById('wPadW')?.value)||500, h = parseFloat(document.getElementById('wPadH')?.value)||300, div = parseInt(document.getElementById('wPadDiv')?.value)||1;
@@ -767,5 +794,5 @@ window.addEventListener('load', async () => {
 
     fetchRates(); rPers(); rPar(); rMat(); rGlobal(); recalcAll(); rVRef();
     lucide.createIcons();
-    console.log('✅ Uygulama başlatıldı, formüller Excel ile senkronize edildi.');
+    console.log('✅ Uygulama başlatıldı, T-Kalıp Matematik Motoru devrede.');
 });
