@@ -1,24 +1,30 @@
 // ================================================================
-// OPTIMIZI.APP - FIYAT TEKLIF ARACI v4.0 (Final Bugfix)
-// JSON Veritabanı, Akıllı Extrapolasyon ve Ceket Motoru
+// OPTIMIZI.APP - FIYAT TEKLIF ARACI v5.0 (JSON Entegreli Final)
 // ================================================================
 
 let currentTheme = localStorage.getItem('insjack_theme') || 'dark';
 
-// ====== APP STATE ======
-let P={prefix:'Optimizi', usd:43.1, eur:50.3, hc:459.33, oh:.33, mul:2.5, pd:60, ir:.03, sr:.00948, fw:.1, iw:.1, sw:.3, fr:50, fl:50, sm:15, re:150, lbw:.01, lbx:.3, lby:.3, lbyf:.2, gFB:'1 Sİ - 0.5 mm - Gri', gFT:'1 Sİ - 0.5 mm - Gri', gFL:'TY-50mm', gST:'SS - 3', gDS:'CamElyf-4mm', gVL:'40 mm - Gri', gSP:'SS Z+A+P', gND:'SS Ç.Pul Set', gBK:'D-Toka', gLB:'30*60', gDF:1};
-let M=[], FD={}, BL={}, AP={}, TK={}, IT=[], RN=1, plQty={}, curShow={TL:true,USD:false,EUR:true};
-let colVis = {ref:true, tip:true, parca:true, dn:true, cls:true, adet:true, zorluk:true, altk:true, ustk:true, dolgu:true, izol:true, fcap:true, s:true, t:true, mkumas:false, mdolgu:false, mdikis:false, mbogma:false, mcirt:false, magraf:false, mpul:false, mlz:true, isc:true, bmly:true, bsat:true, toplam:true, sil:true};
-let SVC={cad:0, montaj:0, montajGun:0, montajGunMly:0, nakliye:0};
+// ====== APP STATE (GLOBAL DEĞİŞKENLER) ======
+let P = {
+    prefix: 'Optimizi', usd: 43.1, eur: 50.3, hc: 459.33, oh: .33, mul: 2.5, pd: 60, ir: .03, sr: .00948, 
+    fw: .1, iw: .1, sw: .3, fr: 50, fl: 50, sm: 15, re: 150, lbw: .01, lbx: .3, lby: .3, lbyf: .2, 
+    gFB: '1 Sİ - 0.5 mm - Gri', gFT: '1 Sİ - 0.5 mm - Gri', gFL: 'TY-50mm', gST: 'SS - 3', 
+    gDS: 'CamElyf-4mm', gVL: '40 mm - Gri', gSP: 'SS Z+A+P', gND: 'SS Ç.Pul Set', gBK: 'D-Toka', gLB: '30*60', gDF: 1
+};
 
-let PP={gun:22, servis:2750, yemek:220, kkd:31200, saat:9, fcRate:0.05, ekKat:0};
-let PERS=[
- {g:"USTABAŞI",a:"Mehmet Şahin",net:78000,kidem:1,servis:2750},
- {g:"ORTACI",a:"Metehan Cin",net:42900,kidem:1,servis:2750},
- {g:"DİKİŞÇİ",a:"Aziz-SR",net:44700,kidem:1,servis:2750},
- {g:"DOLUMCU",a:"Dol - 1",net:63800,kidem:0,servis:0}
+let M = [], FD = {}, BL = {}, AP = {}, TK = {}, IT = [], RN = 1, plQty = {}, curShow = {TL:true, USD:false, EUR:true};
+let colVis = {ref:true, tip:true, parca:true, dn:true, cls:true, adet:true, zorluk:true, altk:true, ustk:true, dolgu:true, izol:true, fcap:true, s:true, t:true, mkumas:false, mdolgu:false, mdikis:false, mbogma:false, mcirt:false, magraf:false, mpul:false, mlz:true, isc:true, bmly:true, bsat:true, toplam:true, sil:true};
+let SVC = {cad:0, montaj:0, montajGun:0, montajGunMly:0, nakliye:0};
+
+let PP = {gun:22, servis:2750, yemek:220, kkd:31200, saat:9, fcRate:0.05, ekKat:0};
+let PERS = [
+ {g:"USTABAŞI", a:"Mehmet Şahin", net:78000, kidem:1, servis:2750},
+ {g:"ORTACI", a:"Metehan Cin", net:42900, kidem:1, servis:2750},
+ {g:"DİKİŞÇİ", a:"Aziz-SR", net:44700, kidem:1, servis:2750},
+ {g:"DOLUMCU", a:"Dol - 1", net:63800, kidem:0, servis:0}
 ];
 
+// ====== SABİTLER ======
 const DN_LIST = [15,20,25,32,40,50,65,80,100,125,150,200,250,300,350,400,450,500,550,600,650,700,750,800,850,900,1000];
 const DN_INCH = {15:.5,20:.75,25:1,32:1.25,40:1.5,50:2,65:2.5,80:3,100:4,125:5,150:6,200:8,250:10,300:12,350:14,400:16,450:18,500:20,550:22,600:24,650:26,700:28,750:30,800:32,850:34,900:36,1000:40};
 const CLS = [150,300,400,600,900,1500,2500];
@@ -27,29 +33,29 @@ const TN = {gate:'Gate Vana', globe:'Globe Vana', butterfly:'Kelebek Vana', yfil
 const TT = {gate:'gate', globe:'globe', butterfly:'butterfly', yfilter:'butterfly', check_clv:'butterfly', ball_2:'gate', ball_3:'gate', '3way':'globe', trap:'globe', elbow:'pipe', flange:'butterfly', manual_pad:null};
 const TP = {gate:['Gövde','Flanş'], globe:['Gövde','Flanş','Kapak'], butterfly:['Tek Parça'], yfilter:['Tek Parça'], check_clv:['Gövde'], ball_2:['Gövde','Flanş'], ball_3:['Gövde','Flanş'], '3way':['Gövde','Flanş','Kapak'], trap:['Gövde','Flanş'], elbow:['Gövde'], flange:['Tek Parça'], manual_pad:['Yastık']};
 
-// Hardcoded Vana Boyutları (Extrapolation Öncesi PDF Verileri)
-let VALVE_DATA = {
-    '3way': { desc: 'Üç Yollu Vana', pn: 16, type: 'globe', dims: { '15':{L:130,D:95}, '25':{L:160,D:115}, '50':{L:230,D:165}, '100':{L:350,D:220} } },
-    'yfilter': { desc: 'Pislik Tutucu', pn: 16, type: 'butterfly', dims: { '15':{L:130,D:95}, '50':{L:230,D:165}, '150':{L:480,D:285} } },
-    'check_clv': { desc: 'Çekvalf CLV', pn: 16, type: 'butterfly', dims: { '15':{L:25,D:45}, '50':{L:43,D:107}, '100':{L:64,D:162}, '300':{L:114,D:380} } }, 
-    'trap': { desc: 'Kondenstop', pn: 16, type: 'globe', dims: { '15':{L:150,D:95}, '25':{L:160,D:115} } }
+const PDF_DIMS = {
+    '3way': { '15':{L:130,D:95}, '25':{L:160,D:115}, '50':{L:230,D:165}, '100':{L:350,D:220} },
+    'yfilter': { '15':{L:130,D:95}, '50':{L:230,D:165}, '150':{L:480,D:285} },
+    'check_clv': { '15':{L:25,D:45}, '50':{L:43,D:107}, '100':{L:64,D:162}, '300':{L:114,D:380} }, 
+    'trap': { '15':{L:150,D:95}, '25':{L:160,D:115} }
 };
 
-// Senin gönderdiğin son standards.json ve materials.json verilerinin Local yedeği (CORS Hatası yaşanmasın diye)
-const FALLBACK_MATERIALS = [{"id":"KUM-001","type":"Kumaş","subtype":"Cam Elyaf","name":"1 Sİ - 0.5 mm - Gri","unit":"M²","price":2.49,"currency":"USD","thickness_mm":null},{"id":"KUM-002","type":"Kumaş","subtype":"Cam Elyaf","name":"2 Sİ - 0.5 mm - Gri","unit":"M²","price":2.95,"currency":"USD","thickness_mm":null},{"id":"DOL-003","type":"Dolgu","subtype":"Taş Yünü","name":"TY-50mm","unit":"M²","price":285,"currency":"TL","thickness_mm":45},{"id":"DOL-004","type":"Dolgu","subtype":"İğnelenmiş Cam Elyaf","name":"İCE - 20mm","unit":"M²","price":6.3,"currency":"EUR","thickness_mm":20},{"id":"YRD-005","type":"Yardımcı","subtype":"Dikiş İpi","name":"SS - 3","unit":"MT","price":0.013,"currency":"USD","thickness_mm":null},{"id":"YRD-006","type":"Yardımcı","subtype":"Cırtbant","name":"40 mm - Gri","unit":"MT","price":0.5,"currency":"EUR","thickness_mm":null},{"id":"YRD-007","type":"Yardımcı","subtype":"Boğma İpi","name":"CamElyf-4mm","unit":"MT","price":0.25,"currency":"USD","thickness_mm":null},{"id":"YRD-008","type":"Yardımcı","subtype":"Zımba Set","name":"SS Z+A+P","unit":"SET","price":0.06,"currency":"USD","thickness_mm":null},{"id":"YRD-009","type":"Yardımcı","subtype":"Ç.Pul Set","name":"SS Ç.Pul Set","unit":"ADET","price":0.15,"currency":"USD","thickness_mm":null},{"id":"YRD-010","type":"Yardımcı","subtype":"Toka","name":"D-Toka","unit":"ADET","price":0.25,"currency":"USD","thickness_mm":null},{"id":"YRD-011","type":"Yardımcı","subtype":"Etiket","name":"30*60","unit":"ADET","price":3.2,"currency":"TL","thickness_mm":null}];
-const FALLBACK_STANDARDS = {"fx":{"USD":43.1,"EUR":50.3},"hourly_cost":459.331,"flange_diameters":{"15":{"150":89,"300":95,"400":95.2,"600":95.2,"900":121,"1500":121,"2500":133.4},"20":{"150":99,"300":117,"400":117.5,"600":117.5,"900":130,"1500":130,"2500":139.7},"25":{"150":108,"300":124,"400":123.8,"600":123.8,"900":149.2,"1500":149.2,"2500":159},"50":{"150":152,"300":165,"400":165,"600":165,"900":216,"1500":216,"2500":235},"100":{"150":229,"300":254,"400":254,"600":273,"900":292,"1500":311,"2500":356},"300":{"150":483,"300":521,"400":521,"600":559,"900":610,"1500":673,"2500":762}},"body_lengths":{"gate":{"15":{"150":{"L1":140,"L1p":162.4,"L2":269},"300":{"L1":151,"L1p":179.4,"L2":260}},"50":{"150":{"L1":191,"L1p":229,"L2":409},"300":{"L1":232,"L1p":276.2,"L2":424}},"100":{"150":{"L1":242,"L1p":289.8,"L2":590}},"300":{"150":{"L1":369,"L1p":432.4,"L2":1378}}},"globe":{"15":{"150":{"L1":140,"L1p":162.4,"L2":269}},"50":{"150":{"L1":216,"L1p":254,"L2":410}},"100":{"150":{"L1":305,"L1p":352.8,"L2":500}}},"butterfly":{"15":{"150":{"L1":108,"L1p":130.4,"L2":95}},"50":{"150":{"L1":216,"L1p":254,"L2":165}},"100":{"150":{"L1":305,"L1p":352.8,"L2":217}}}},"agraf_pul":{"1":{"a":0,"p":0},"4":{"a":4,"p":2},"6":{"a":6,"p":2},"10":{"a":6,"p":4},"16":{"a":8,"p":6},"20":{"a":8,"p":8},"32":{"a":12,"p":12},"40":{"a":14,"p":16}}};
+const VALVE_DATA={"PV-16":{"desc":"Pistonlu Vana PN16","pn":16,"dims":{"15":{"D":95,"L":130,"H":0,"Dk":100},"20":{"D":105,"L":150,"H":0,"Dk":100},"25":{"D":115,"L":160,"H":0,"Dk":120},"32":{"D":135,"L":180,"H":0,"Dk":140},"40":{"D":145,"L":200,"H":0,"Dk":140},"50":{"D":160,"L":230,"H":0,"Dk":200},"65":{"D":180,"L":290,"H":0,"Dk":200},"80":{"D":195,"L":310,"H":0,"Dk":240},"100":{"D":215,"L":350,"H":0,"Dk":280},"125":{"D":245,"L":400,"H":0,"Dk":360},"150":{"D":280,"L":480,"H":0,"Dk":360},"200":{"D":335,"L":600,"H":0,"Dk":400}}},"GV-16K":{"desc":"Glob Vana PN16 (Pik Döküm)","pn":16,"dims":{"15":{"D":95,"L":130,"H":210,"Dk":100},"20":{"D":105,"L":150,"H":210,"Dk":100},"25":{"D":115,"L":160,"H":210,"Dk":120},"32":{"D":140,"L":180,"H":210,"Dk":140},"40":{"D":150,"L":200,"H":245,"Dk":140},"50":{"D":165,"L":230,"H":255,"Dk":200},"65":{"D":185,"L":290,"H":310,"Dk":200},"80":{"D":200,"L":310,"H":325,"Dk":240},"100":{"D":220,"L":350,"H":385,"Dk":280},"125":{"D":250,"L":400,"H":435,"Dk":360},"150":{"D":285,"L":480,"H":475,"Dk":360},"200":{"D":340,"L":600,"H":620,"Dk":400},"250":{"D":405,"L":730,"H":740,"Dk":450},"300":{"D":460,"L":850,"H":853,"Dk":600}}},"GV-25Z":{"desc":"Glob Vana PN25 (Sfero Döküm)","pn":25,"dims":{"15":{"D":95,"L":130,"H":167,"Dk":100},"20":{"D":105,"L":150,"H":167,"Dk":100},"25":{"D":115,"L":160,"H":175,"Dk":120},"32":{"D":140,"L":180,"H":186,"Dk":120},"40":{"D":150,"L":200,"H":235,"Dk":160},"50":{"D":165,"L":230,"H":248,"Dk":160},"65":{"D":185,"L":290,"H":260,"Dk":180},"80":{"D":200,"L":310,"H":291,"Dk":200},"100":{"D":235,"L":350,"H":338,"Dk":250},"125":{"D":270,"L":400,"H":373,"Dk":250},"150":{"D":300,"L":480,"H":429,"Dk":320},"200":{"D":360,"L":600,"H":529,"Dk":360}}},"GV-40K":{"desc":"Glob Vana PN40 (Çelik Döküm)","pn":40,"dims":{"15":{"D":95,"L":130,"H":190,"Dk":140},"20":{"D":105,"L":150,"H":190,"Dk":140},"25":{"D":115,"L":160,"H":195,"Dk":160},"32":{"D":140,"L":180,"H":210,"Dk":180},"40":{"D":150,"L":200,"H":220,"Dk":180},"50":{"D":165,"L":230,"H":230,"Dk":200},"65":{"D":185,"L":290,"H":280,"Dk":200},"80":{"D":200,"L":310,"H":290,"Dk":250},"100":{"D":235,"L":350,"H":365,"Dk":280},"125":{"D":270,"L":400,"H":390,"Dk":300},"150":{"D":300,"L":480,"H":545,"Dk":315},"200":{"D":375,"L":600,"H":680,"Dk":400}}},"MK-16":{"desc":"Körüklü Vana PN16 (Pik Döküm)","pn":16,"dims":{"15":{"D":95,"L":130,"H":178,"Dk":125},"20":{"D":105,"L":150,"H":178,"Dk":125},"25":{"D":115,"L":160,"H":193,"Dk":125},"32":{"D":140,"L":180,"H":201,"Dk":125},"40":{"D":150,"L":200,"H":224,"Dk":150},"50":{"D":165,"L":230,"H":228,"Dk":150},"65":{"D":185,"L":290,"H":270,"Dk":175},"80":{"D":200,"L":310,"H":295,"Dk":200},"100":{"D":220,"L":350,"H":325,"Dk":250},"125":{"D":250,"L":400,"H":380,"Dk":300},"150":{"D":285,"L":480,"H":427,"Dk":400},"200":{"D":340,"L":600,"H":569,"Dk":500},"250":{"D":405,"L":730,"H":645,"Dk":500}}},"MK-25":{"desc":"Körüklü Vana PN25 (Sfero Döküm)","pn":25,"dims":{"15":{"D":95,"L":130,"H":178,"Dk":125},"20":{"D":105,"L":150,"H":178,"Dk":125},"25":{"D":115,"L":160,"H":193,"Dk":125},"32":{"D":140,"L":180,"H":201,"Dk":125},"40":{"D":150,"L":200,"H":224,"Dk":150},"50":{"D":165,"L":230,"H":228,"Dk":150},"65":{"D":185,"L":290,"H":270,"Dk":175},"80":{"D":200,"L":310,"H":295,"Dk":200},"100":{"D":235,"L":350,"H":325,"Dk":250},"125":{"D":270,"L":400,"H":380,"Dk":300},"150":{"D":300,"L":480,"H":427,"Dk":400},"200":{"D":360,"L":600,"H":569,"Dk":500}}},"MK-40":{"desc":"Körüklü Vana PN40 (Çelik Döküm)","pn":40,"dims":{"15":{"D":95,"L":130,"H":189,"Dk":125},"20":{"D":105,"L":150,"H":189,"Dk":125},"25":{"D":115,"L":160,"H":189,"Dk":125},"32":{"D":140,"L":180,"H":220,"Dk":150},"40":{"D":150,"L":200,"H":220,"Dk":150},"50":{"D":165,"L":230,"H":295,"Dk":200},"65":{"D":185,"L":290,"H":295,"Dk":200},"80":{"D":200,"L":310,"H":368,"Dk":300},"100":{"D":235,"L":350,"H":368,"Dk":300},"125":{"D":270,"L":400,"H":523,"Dk":400},"150":{"D":300,"L":480,"H":523,"Dk":400}}},"GTK-18":{"desc":"Sürgülü Vana PN16 (GGG-50)","pn":16,"dims":{"50":{"D":165,"L":150,"H":215,"Dk":200},"65":{"D":185,"L":170,"H":250,"Dk":200},"80":{"D":200,"L":180,"H":275,"Dk":254},"100":{"D":220,"L":190,"H":320,"Dk":254},"125":{"D":250,"L":200,"H":355,"Dk":315},"150":{"D":285,"L":210,"H":398,"Dk":315},"200":{"D":340,"L":230,"H":495,"Dk":315},"250":{"D":405,"L":250,"H":590,"Dk":406},"300":{"D":460,"L":270,"H":670,"Dk":406}}}};
 
-// ============ VERİ YÜKLEME VE İŞLEME ============
+// =================================================================
+// 1. JSON VERİLERİNİ ÇEKME VE İŞLEME (KALBİ BURASI)
+// =================================================================
 async function loadAllData() {
     try {
         const [matRes, stdRes] = await Promise.all([
-            fetch('data/materials.json').catch(() => null),
-            fetch('data/standards.json').catch(() => null)
+            fetch('data/materials.json'),
+            fetch('data/standards.json')
         ]);
 
-        let matData, stdData;
-        if (matRes && matRes.ok) matData = await matRes.json(); else matData = { materials: FALLBACK_MATERIALS };
-        if (stdRes && stdRes.ok) stdData = await stdRes.json(); else stdData = FALLBACK_STANDARDS;
+        if (!matRes.ok || !stdRes.ok) throw new Error("JSON Dosyaları bulunamadı!");
+
+        const matData = await matRes.json();
+        const stdData = await stdRes.json();
 
         // Malzemeleri Aktar
         M = matData.materials.map(m => ({
@@ -57,13 +63,18 @@ async function loadAllData() {
         }));
         M.forEach(m => { if (m.k) TK[m.n] = m.k; });
         
-        // Standartları Aktar
+        // Standartları Aktar (Kurlar ve Saatlik Ücret)
+        if (stdData.fx) { P.usd = stdData.fx.USD || P.usd; P.eur = stdData.fx.EUR || P.eur; }
+        if (stdData.hourly_cost) P.hc = stdData.hourly_cost;
+
+        // Flanş Çaplarını Aktar
         FD = {};
         for (const [dn, cls] of Object.entries(stdData.flange_diameters || {})) {
             FD[parseInt(dn)] = {};
             for (const [c, v] of Object.entries(cls)) FD[parseInt(dn)][parseInt(c)] = v;
         }
         
+        // Gövde Boylarını Aktar (Ve #VALUE! hatalarını temizle)
         BL = {};
         for (const [ty, tbl] of Object.entries(stdData.body_lengths || {})) {
             BL[ty] = {};
@@ -73,6 +84,7 @@ async function loadAllData() {
                     let obj = {};
                     if(v && typeof v === 'object') {
                         for(const [dim, val] of Object.entries(v)) {
+                            // EN KRİTİK FİLTRE BURASI, SİSTEMİ ÇÖKERTEN YERİ DÜZELTTİK
                             obj[dim] = (val === "#VALUE!" || isNaN(val)) ? null : parseFloat(val);
                         }
                     }
@@ -81,15 +93,14 @@ async function loadAllData() {
             }
         }
         AP = stdData.agraf_pul || {};
-        if (stdData.fx) { P.usd = stdData.fx.USD || P.usd; P.eur = stdData.fx.EUR || P.eur; }
-        if (stdData.hourly_cost) P.hc = stdData.hourly_cost;
 
     } catch (e) {
-        console.error("Veri yükleme hatası:", e);
+        console.error("Veritabanı Yükleme Hatası:", e);
+        alert("Sistem veri tabanı dosyalarını (JSON) okuyamadı. Tarayıcınız yerel dosyaları engelliyor olabilir (CORS Hatası). Lütfen projeyi VS Code Live Server gibi bir ortamda açın.");
     }
 }
 
-// ============ EXTRAPOLATION ENGINE ============
+// ============ YZ EXTRAPOLATION ENGINE (EKSİK ÇAPLARI DOLDURMA) ============
 function extrapolateValue(dict, targetX) {
     let keys = Object.keys(dict).map(Number).filter(k => !isNaN(dict[k]) && dict[k] !== null).sort((a,b)=>a-b);
     if(keys.length === 0) return 0;
@@ -155,10 +166,10 @@ function initExtrapolation() {
 
 function gfd(dn,cl){return (FD[dn]&&FD[dn][cl])||0;}
 function gbl(ty,dn,cl){
-    if(VALVE_DATA[ty] && VALVE_DATA[ty].dims) { 
-        if (VALVE_DATA[ty].dims[dn]) return {L1:VALVE_DATA[ty].dims[dn].L, L1p:0, L2:0};
+    if(PDF_DIMS[ty]) { 
+        if (PDF_DIMS[ty][dn]) return {L1:PDF_DIMS[ty][dn].L, L1p:0, L2:0};
         let lDict = {};
-        Object.keys(VALVE_DATA[ty].dims).forEach(k => lDict[k] = VALVE_DATA[ty].dims[k].L);
+        Object.keys(PDF_DIMS[ty]).forEach(k => lDict[k] = PDF_DIMS[ty][k].L);
         return {L1: extrapolateValue(lDict, dn), L1p:0, L2:0};
     }
     const t=TT[ty]; if(!t||!BL[t]||!BL[t][dn])return{L1:0,L1p:0,L2:0};
@@ -169,7 +180,7 @@ function gbl(ty,dn,cl){
 }
 function gap(inch){return AP[String(inch)]||{a:0,p:0}}
 
-// ====== CORE HELPERS ======
+// ====== TEMEL YARDIMCILAR ======
 const fm=(v,d=2)=>Number(v).toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d});
 const ftl=v=>'₺'+fm(v); const feu=v=>'€'+fm(v); const fus=v=>'$'+fm(v);
 function mn2(n){return M.find(m=>m.n===n)}
@@ -177,7 +188,7 @@ function mp(m){if(!m)return 0; return m.c==='USD'?m.p*P.usd:m.c==='EUR'?m.p*P.eu
 function tk2(n){return TK[n]||20}
 function curConv(tl,cur){return cur==='USD'?tl/P.usd:cur==='EUR'?tl/P.eur:tl}
 
-// ====== EXCHANGE API ======
+// ====== DÖVİZ APİ (TCMB) ======
 async function fetchKur() {
     try {
         const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
@@ -191,12 +202,12 @@ async function fetchKur() {
             try { rPar(); } catch(e){}
             const badge = document.getElementById('apiStatusBadge');
             if(badge) badge.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-[var(--gn)]"></i> Güncel`;
-            toast('Kurlar API ile güncellendi', 'in');
+            toast('Kurlar TCMB muadili API ile güncellendi', 'in');
         }
     } catch(e) { console.log('Kur API hatası', e); }
 }
 
-// ====== PERSONEL CALCULATIONS ======
+// ====== PERSONEL / ADAM SAAT HESAPLAMA (THE BRAIN) ======
 function calcPers(p){
  const E=p.net*1.4*12; const F=p.kidem?E/12:0; const G=p.kidem?F/2:0;
  const base=E+F+G+(p.servis||0)*12+PP.yemek*PP.gun*12+PP.kkd;
@@ -207,7 +218,7 @@ function calcAllPers(){
  let tN=0,tO=0,tM=0,cnt=PERS.length;
  PERS.forEach(p=>{const c=calcPers(p);p._c=c;tN+=c.N;tO+=c.O;tM+=c.M});
  const avg=cnt>0?tO/cnt*(1+PP.ekKat):0;
- P.hc=avg; // MASTER LINK TO PARAMETERS
+ P.hc=avg; // ANA SİSTEME SAATLİK MALİYETİ BAĞLAR!
  return{tN,avg,cnt,tM};
 }
 
@@ -247,7 +258,7 @@ function rPers(){
  document.getElementById('pmOTot').textContent=fm(res.avg);
 }
 
-// ====== PRODUCT CALCULATION ======
+// ====== ÜRÜN (CEKET) HESAPLAMA MOTORU ======
 function calcItem(it){
  const gFM=mn2(P.gFL), I=gFM?tk2(gFM.n):20, N=gfd(it.dn,it.cl), lens=gbl(it.ty,it.dn,it.cl), inch=DN_INCH[it.dn]||0, apv=gap(inch);
  let tMC=0, tLC=0, tLH=0;
@@ -285,7 +296,7 @@ function recalcAll(){
  document.getElementById('sI').textContent=tI; document.getElementById('sJ').textContent=tJ;
 }
 
-// ====== RENDERS ======
+// ====== RENDER FONKSIYONLARI ======
 function rProd(){
  const b=document.getElementById('pdBody'); b.innerHTML=''; const cur=document.getElementById('pdCur').value;
  const fab=M.filter(m=>m.t==='Kumaş'), fil=M.filter(m=>m.t==='Dolgu');
@@ -333,6 +344,12 @@ function ovr(ii,pi,k,td){
 }
 
 // SÜTUN AYARLARI 
+function applyColVis() {
+    Object.keys(colVis).forEach(key => {
+        const th = document.querySelector(`th[data-col="${key}"]`);
+        if(th) { if(!colVis[key]) th.classList.add('col-hidden'); else th.classList.remove('col-hidden'); }
+    });
+}
 function rColSettings() {
     const box = document.getElementById('colToggles'); if(!box) return;
     let html = '';
@@ -342,14 +359,8 @@ function rColSettings() {
     });
     box.innerHTML = html;
 }
-function applyColVis() {
-    Object.keys(colVis).forEach(key => {
-        const th = document.querySelector(`th[data-col="${key}"]`);
-        if(th) { if(!colVis[key]) th.classList.add('col-hidden'); else th.classList.remove('col-hidden'); }
-    });
-}
-function openGlobalMatModal(){
- document.getElementById('globalMatModal').classList.add('show');
+
+function rGlobal(){
  const fab=M.filter(m=>m.t==='Kumaş'), fil=M.filter(m=>m.t==='Dolgu'), hlp=M.filter(m=>m.t==='Yardımcı');
  function gs(lb,k,list,cur){return`<div><label class="text-[10px] font-bold text-[var(--tx-mut)] uppercase">${lb}</label><select class="ps mt-1 font-bold" data-k="${k}" onchange="P[this.dataset.k]=this.value;recalcAll()">${list.map(m=>`<option value="${m.n}"${m.n===cur?' selected':''}>${m.n}</option>`).join('')}</select></div>`}
  const el = document.getElementById('globalMatContent');
@@ -419,14 +430,7 @@ function rMas(){
  document.getElementById('tMS').innerHTML=`<thead><tr><th>Döviz</th><th>Kur</th><th>Satış</th><th>Maliyet</th><th>Kâr</th></tr></thead><tbody><tr><td class="lb text-[var(--tx-main)] font-bold">TL</td><td class="c text-[var(--tx-mut)]">1</td><td class="g font-mono">${ftl(tS)}</td><td class="c font-mono text-[var(--tx-main)]">${ftl(tc)}</td><td class="font-mono ${pr>=0?'g':'r'} font-bold">${ftl(pr)}</td></tr><tr><td class="lb text-[var(--tx-main)] font-bold">USD</td><td class="c font-mono text-[var(--tx-mut)]">${fm(P.usd)}</td><td class="g font-mono">${fus(tS/P.usd)}</td><td class="c font-mono text-[var(--tx-main)]">${fus(tc/P.usd)}</td><td class="font-mono ${pr>=0?'g':'r'} font-bold">${fus(pr/P.usd)}</td></tr><tr><td class="lb text-[var(--tx-main)] font-bold">EUR</td><td class="c font-mono text-[var(--tx-mut)]">${fm(P.eur)}</td><td class="g font-mono">${feu(tS/P.eur)}</td><td class="c font-mono text-[var(--tx-main)]">${feu(tc/P.eur)}</td><td class="font-mono ${pr>=0?'g':'r'} font-bold">${feu(pr/P.eur)}</td></tr></tbody>`;
 }
 
-// ====== SIDEBAR & NAVIGATION ======
-function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('collapsed');
-    const ic = document.getElementById('collapseIcon');
-    if(document.getElementById('sidebar').classList.contains('collapsed')) ic.setAttribute('data-lucide', 'chevron-right');
-    else ic.setAttribute('data-lucide', 'chevron-left');
-    lucide.createIcons();
-}
+// ====== PANE & MODAL CONTROLS ======
 function go(id,el){
  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
  document.querySelectorAll('.slink').forEach(s=>s.classList.remove('on'));
@@ -435,14 +439,10 @@ function go(id,el){
  if(id==='pd') rColSettings();
  if(id==='pl') rPL();
  if(id==='ms') rMas();
- if(id==='ch') {
-     if(typeof chOnOpen === 'function') chOnOpen();
- }
+ if(id==='ch' && typeof chOnOpen === 'function') chOnOpen();
  lucide.createIcons();
 }
-
 function updDN(){const ty=document.getElementById('aType').value; const s=document.getElementById('aDN'); s.innerHTML='<option value="">DN</option>'; if(ty==='manual_pad'){s.innerHTML='<option value="0">Manuel</option>';return} DN_LIST.forEach(dn=>{s.innerHTML+=`<option value="${dn}">DN${dn}</option>`});}
-
 function addItem(){
  const ty=document.getElementById('aType').value, dn=parseInt(document.getElementById('aDN').value), cl=parseInt(document.getElementById('aCls').value), qt=parseInt(document.getElementById('aQty').value);
  if(!ty||(isNaN(dn)&&ty!=='manual_pad')) return optAlert('Lütfen Tip ve DN seçin.');
@@ -450,6 +450,7 @@ function addItem(){
  const parts=(TP[ty]||['Tek Parça']).map((nm,i)=>({nm,ov:{},bw:P.lbw,bx:P.lbx,by:i===0?P.lby:P.lbyf,calc:{},matOv:{}}));
  IT.push({ref:RN++, ty, dn:dn||0, cl, qt:qt||1, df, parts, mh:'', calc:{}}); recalcAll(); toast(`${TN[ty]} eklendi`);
 }
+function updatePrefix(val) { P.prefix = val; document.getElementById('setPrefix').value=val; rPL(); rProd(); toast('Ön ek güncellendi', 'in'); saveData(); }
 
 function optAlert(m){document.getElementById('optConfirmMsg').textContent=m;document.getElementById('optConfirmBg').classList.add('show');document.getElementById('optConfirmYes').onclick=()=>document.getElementById('optConfirmBg').classList.remove('show');}
 function optConfirm(m,cb){document.getElementById('optConfirmMsg').textContent=m;document.getElementById('optConfirmBg').classList.add('show');document.getElementById('optConfirmYes').onclick=()=>{cb();document.getElementById('optConfirmBg').classList.remove('show')}}
@@ -499,12 +500,16 @@ let mfl='all';
 function rMat(){const b=document.getElementById('mBody'); if(!b) return; b.innerHTML='';M.forEach((m,i)=>{if(mfl!=='all'&&m.t!==mfl)return;const tr=document.createElement('tr');tr.innerHTML=`<td class="lb text-xs text-center">${i+1}</td><td><select onchange="M[${i}].t=this.value;rGlobal()">${['Kumaş','Dolgu','Yardımcı','Isıtıcı'].map(t=>`<option${m.t===t?' selected':''}>${t}</option>`).join('')}</select></td><td><input value="${m.s}" onchange="M[${i}].s=this.value"></td><td><input value="${m.n}" onchange="M[${i}].n=this.value;rGlobal()" style="font-weight:700" class="text-[var(--tx-main)]"></td><td><input value="${m.u}" onchange="M[${i}].u=this.value" style="width:50px;text-align:center"></td><td><input type="number" value="${m.p}" step=".001" class="font-mono" onchange="M[${i}].p=parseFloat(this.value)||0;rMat();recalcAll()"></td><td><select onchange="M[${i}].c=this.value;rMat();recalcAll()" style="width:60px">${['TL','USD','EUR'].map(c=>`<option${m.c===c?' selected':''}>${c}</option>`).join('')}</select></td><td class="c font-mono font-bold text-[var(--gn)]">${fm(mp(m))}</td><td><input type="number" value="${m.k||''}" onchange="M[${i}].k=parseFloat(this.value)||null;TK[M[${i}].n]=M[${i}].k;recalcAll()" style="width:50px;text-align:center" placeholder="—"></td><td style="text-align:center"><button onclick="M.splice(${i},1);rMat();rGlobal()" class="bt bt2 px-2 py-1"><i data-lucide="trash-2" class="w-3 h-3"></i></button></td>`;b.appendChild(tr)});document.getElementById('mfBtns').innerHTML=['all','Kumaş','Dolgu','Yardımcı','Isıtıcı'].map(t=>`<button class="${mfl===t?'on':''}" onclick="mfl='${t}';rMat()">${t==='all'?'Tümü':t}</button>`).join('');lucide.createIcons();}
 
 // ====== CEKET HESAPLAMA (SVG KALIP) ======
-// DOM Elemanları (Null Check için)
 const $c = id => document.getElementById(id);
 const $cv = id => parseFloat($c(id)?.value) || 0;
 const $cs = id => $c(id)?.value || '';
 
+let _chMode   = 'vana';   
+let _chDf     = 1.2;      
+let _chKenar  = 'kenarsiz';
+
 function chMpByName(name){ const m=M.find(x=>x.n===name); return m?mp(m):0; }
+function chFmt(v,d=2){ return Number(v).toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d}); }
 
 function chOnOpen(){
   chPopVTypes(); 
@@ -798,7 +803,7 @@ function chGonderFiyatListesi(){
   const r=window._chLastResult; if(!r){toast('Önce hesaplama yapın','er');return;}
   const qt = r.tip==='vana' ? (parseInt($c('chVQ')?.value)||1) : (r.adet||1);
   const dn = r.tip==='vana' ? (r.D||0) : 0;
-  const vty= r.tip==='vana' ? ($c('chVT')?.value||'manuel') : 'pad';
+  const vty= r.tip==='vana' ? ($c('chVT')?.value||'manual') : 'pad';
   const desc= r.tip==='vana' ? (VALVE_DATA[vty]?.desc||'Özel Kalıp Vana')+' DN'+dn : `Düz Yastık ${r.W||'?'}×${r.H_p||'?'}mm${r.kenarli?' (Kenarlı)':''}`;
 
   const item = {
@@ -817,8 +822,9 @@ function chGonderFiyatListesi(){
   if(plBtn) setTimeout(()=>go('pl',plBtn),400);
 }
 
+// ====== SAVE VE YAZDIRMA ======
+function saveData(){localStorage.setItem('optimizi_insjack_v6',JSON.stringify({P,M,IT,FD,BL,AP,TK,SVC,plQty,curShow,PERS,PP,RN,colVis}));toast('Sistem veritabanı yedeği alındı');}
 
-// ====== SAVE & INIT ======
 function previewPDF() {
     let pa = document.getElementById('printArea');
     let pfx = P.prefix ? P.prefix + ' ' : '';
@@ -842,37 +848,41 @@ function previewPDF() {
     document.getElementById('printModal').classList.add('show');
 }
 
-function saveData(){localStorage.setItem('optimizi_insjack_v6',JSON.stringify({P,M,IT,FD,BL,AP,TK,SVC,plQty,curShow,PERS,PP,RN,colVis}));toast('Sistem veritabanı yedeği alındı');}
-
+// ====== PENCERE YÜKLENDİĞİNDE (INIT) ======
 window.onload = async () => {
+    // 1. Arayüz hazırlığı
     document.getElementById('themeBtn').innerHTML = `<i data-lucide="${currentTheme === 'dark' ? 'sun' : 'moon'}" class="w-4 h-4"></i>`;
     
-    // EN KRITIK NOKTA: VERILERI CEK!
+    // 2. EN KRİTİK NOKTA: Verileri JSON dosyalarından asenkron (fetch) ile çek
     await loadAllData(); 
     
-    // LocalStorage Restore
-    try{
-        const sv=JSON.parse(localStorage.getItem('optimizi_insjack_v6'));
-        if(sv&&sv.IT){
-            Object.assign(P,sv.P||{}); IT=sv.IT||[]; 
-            plQty=sv.plQty||{}; curShow=sv.curShow||curShow;
-            if(sv.PERS)PERS=sv.PERS; if(sv.PP)PP=sv.PP;
-            RN=sv.RN||(Math.max(...IT.map(i=>i.ref),0)+1);
-            if(sv.colVis)colVis=sv.colVis;
+    // 3. LocalStorage Restore (Kullanıcı değişiklikleri varsa üzerine yaz)
+    try {
+        const sv = JSON.parse(localStorage.getItem('optimizi_insjack_v6'));
+        if(sv && sv.IT) {
+            Object.assign(P, sv.P||{}); IT = sv.IT||[]; 
+            plQty = sv.plQty||{}; curShow = sv.curShow||curShow;
+            if(sv.PERS) PERS = sv.PERS; if(sv.PP) PP = sv.PP;
+            RN = sv.RN||(Math.max(...IT.map(i=>i.ref),0)+1);
+            if(sv.colVis) colVis = sv.colVis;
         }
-    }catch(e){}
+    } catch(e) {}
 
-    try { rPers(); } catch(e) { console.error('Pers Error', e) }
+    // 4. Hesaplamaları ve API çağrılarını tetikle
+    try { rPers(); } catch(e) { console.error('Personel Hesabı Hatası:', e) }
     fetchKur(); 
     
-    document.getElementById('setPrefix').value = P.prefix;
+    // Prefix Ayarları
+    const setPref = document.getElementById('setPrefix'); if(setPref) setPref.value = P.prefix;
     const pi = document.getElementById('prefInput'); if(pi) pi.value = P.prefix;
     
+    // 5. Arayüzü Çizdir (Render)
     try { 
         rPar(); rMat(); rGlobal(); updDN(); recalcAll(); rVRef(); applyColVis(); rColSettings(); 
     } catch(e) { 
-        console.error("Render Error:", e);
+        console.error("Arayüz çizim hatası:", e);
     }
     
+    // İkonları Aktifleştir
     lucide.createIcons();
 }
