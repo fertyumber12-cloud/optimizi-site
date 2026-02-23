@@ -58,10 +58,10 @@
   .popup-content { transition: transform 0.2s ease, opacity 0.2s ease; }
   @media print {
     @page { margin: 0; size: A4; }
-    html, body { width: 210mm; height: 297mm; margin: 0 !important; padding: 0 !important; background: white !important; color: black !important; overflow: visible !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    html, body { width: 100%; height: auto !important; min-height: 100%; margin: 0 !important; padding: 0 !important; background: white !important; color: black !important; overflow: visible !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     #app-layer, .bg-grid, .blob-bg, nav, .glass-card, button, input, .popup-overlay { display: none !important; }
     #print-area { display: block !important; }
-    .print-page { width: 210mm; height: 296mm; position: relative; page-break-after: always; overflow: hidden; background: white; }
+    .print-page { width: 210mm; min-height: 297mm; position: relative; page-break-after: always; overflow: hidden; background: white; }
     .print-page:last-child { page-break-after: auto; }
     .cover-bg { background-color: white !important; color: #1e293b !important; }
     .audit-table th { background-color: #fef2f2; color: #991b1b; font-weight: 700; text-transform: uppercase; font-size: 7px; padding: 4px; border-bottom: 2px solid #ef4444; }
@@ -1099,7 +1099,23 @@
             document.getElementById('sumCumulativeLoss').innerText = currSym + Math.round(totalProj).toLocaleString();
             document.getElementById('sumCumulativePercent').innerText = '500%';
 
-            setTimeout(()=>{ lucide.createIcons(); window.print(); }, 250); 
+            setTimeout(()=>{ 
+                lucide.createIcons(); 
+                
+                // Karanlık mod kontrolü ve anlık kapatılması
+                const isDark = document.documentElement.classList.contains('dark');
+                if (isDark) {
+                    document.documentElement.classList.remove('dark');
+                }
+                
+                window.print(); 
+                
+                // Rapor pencesi kapandığında eski haline dönmesi
+                if (isDark) {
+                    document.documentElement.classList.add('dark');
+                }
+            }, 250); 
+
         }catch(e){ showAlert('Rapor hatası: ' + e.message, 'Hata'); console.error(e); }
     }
 
