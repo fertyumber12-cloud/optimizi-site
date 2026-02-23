@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Enerji Kayıp ve Kaçak Analizi</title>
+ <style>
+  body:not(.auth-checked) { opacity: 0; pointer-events: none; }
+  body.auth-checked { opacity: 1; transition: opacity 0.3s ease; }
+</style>
+<meta name="description" content="İşletmenizdeki yalıtımsız yüzeylerden kaynaklanan yıllık finansal kaybı hesaplayın.">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../auth.js"></script>
+<script src="../shared/constants-browser.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" href="../favicon.png" type="image/png">
+</head>
+
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+      extend: {
+        colors: { slate: { 850: '#151e2e', 900: '#0f172a', 950: '#020617' } },
+        animation: { 'float-slow': 'float 8s ease-in-out infinite', 'blob': 'blob 20s infinite', },
+        keyframes: {
+            float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' }, },
+            blob: { '0%': { transform: 'translate(0px, 0px) scale(1)' }, '33%': { transform: 'translate(30px, -50px) scale(1.1)' }, '66%': { transform: 'translate(-20px, 20px) scale(0.9)' }, '100%': { transform: 'translate(0px, 0px) scale(1)' }, }
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  :root { --bg-color: #f1f5f9; --glass-bg: #ffffff; --glass-border: rgba(148, 163, 184, 0.4); --input-bg: #f8fafc; --input-border: #cbd5e1; --text-main: #0f172a; --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); --grid-color: rgba(0, 0, 0, 0.05); }
+  .dark { --bg-color: #0f172a; --glass-bg: rgba(30, 41, 59, 0.4); --glass-border: rgba(255, 255, 255, 0.08); --input-bg: rgba(15, 23, 42, 0.6); --input-border: rgba(255, 255, 255, 0.1); --text-main: #f1f5f9; --card-shadow: none; --grid-color: rgba(255, 255, 255, 0.03); }
+  .grid-input { background: transparent; border: 1px solid transparent; border-radius: 4px; padding: 4px; width: 100%; text-align: center; transition: all 0.2s; font-weight: bold; }
+  .grid-input:hover { border-color: #cbd5e1; background-color: rgba(255,255,255,0.1); }
+  .grid-input:focus { border-color: #ef4444; background-color: rgba(255,255,255,0.2); outline: none; }
+  html:not(.dark) .blob-bg { display: none; }
+  html.dark body { background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f172a 40%, #020617 100%); background-attachment: fixed; }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+  html { scroll-behavior: smooth; }
+  body { background-color: var(--bg-color); color: var(--text-main); overflow-x: hidden; transition: background-color 0.3s ease, color 0.3s ease; }
+  .app-container { max-width: 1440px; margin: 0 auto; width: 100%; }
+  .glass-card { transition: all 0.3s ease; background-color: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); box-shadow: var(--card-shadow); }
+  .glass-input { transition: all 0.2s; border-radius: 0.5rem; padding: 0.6rem 0.75rem; width: 100%; background-color: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-main); }
+  .glass-input:focus { outline: none; border-color: #ef4444; box-shadow: 0 0 0 2px rgba(239,68,68,0.1); }
+  .bg-grid { background-size: 40px 40px; background-image: linear-gradient(to right, var(--grid-color) 1px, transparent 1px), linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px); mask-image: radial-gradient(circle at center, black 70%, transparent 100%); pointer-events: none; }
+  .popup-overlay { transition: opacity 0.2s ease; }
+  .popup-content { transition: transform 0.2s ease, opacity 0.2s ease; }
+  @media print {
+    @page { margin: 0; size: A4; }
+    html, body { width: 100%; height: auto !important; min-height: 100%; margin: 0 !important; padding: 0 !important; background: white !important; color: black !important; overflow: visible !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    #app-layer, .bg-grid, .blob-bg, nav, .glass-card, button, input, .popup-overlay { display: none !important; }
+    #print-area { display: block !important; }
+    .print-page { width: 210mm; min-height: 297mm; position: relative; page-break-after: always; overflow: hidden; background: white; }
+    .print-page:last-child { page-break-after: auto; }
+    .cover-bg { background-color: white !important; color: #1e293b !important; }
+    .audit-table th { background-color: #fef2f2; color: #991b1b; font-weight: 700; text-transform: uppercase; font-size: 7px; padding: 4px; border-bottom: 2px solid #ef4444; }
+    .audit-table td { border-bottom: 1px solid #e2e8f0; padding: 4px; font-size: 8px; color: #334155; vertical-align: middle; }
+    .audit-table tr:nth-child(even) { background-color: #fef2f2; }
+  }
+  #print-area { display: none; }
+  #qr-generator-dump { display: none; }
+</style>
+<body class="antialiased selection:bg-red-500/30 selection:text-red-600" onload="initApp()">
+
+<div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+    <div class="absolute inset-0 bg-grid"></div>
+    <div class="blob-bg absolute top-0 -left-1/4 w-[900px] h-[900px] bg-red-500/10 rounded-full blur-[120px] animate-blob mix-blend-multiply dark:mix-blend-screen"></div>
+    <div class="blob-bg absolute bottom-0 -right-1/4 w-[900px] h-[900px] bg-orange-500/10 rounded-full blur-[120px] animate-blob mix-blend-multiply dark:mix-blend-screen" style="animation-delay: 5s;"></div>
+</div>
+
+<div id="app-layer" class="relative z-10 flex flex-col min-h-screen">
+    <nav class="sticky top-0 z-50 glass-card !bg-white/90 dark:!bg-slate-900/80 !border-x-0 !border-t-0 !rounded-none border-b border-slate-200 dark:border-white/10 backdrop-blur-xl">
+      <div class="app-container px-6 h-16 flex items-center justify-between">
+          <a href="../dashboard.html" class="flex items-center gap-3 group cursor-pointer hover:opacity-80 transition">
+              <div><h1 class="text-lg font-bold text-slate-800 dark:text-white tracking-wide">Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500">.Anlık Kayıp</span></h1></div>
+          </a>
+          <div class="flex items-center gap-3">
+              <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-xs text-slate-500 dark:text-slate-300">
+                  <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                  <span id="fxVal" class="font-bold text-slate-800 dark:text-white">...</span> <span class="text-[10px] opacity-70">TL/USD</span>
+                  <button onclick="getFx()"><i data-lucide="refresh-cw" class="w-3 h-3 ml-1 hover:animate-spin text-slate-400 hover:text-red-500 dark:hover:text-white cursor-pointer"></i></button>
+              </div>
+              
+              <button onclick="toggleTheme()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-400 hover:text-red-600 dark:hover:text-white transition cursor-pointer">
+                  <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                  <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+              </button>
+              
+              <button onclick="saveData()" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition shadow-lg shadow-emerald-600/20 active:scale-95 cursor-pointer">
+                  <i data-lucide="save" class="w-4 h-4"></i> Kaydet
+              </button>
+              
+              <button onclick="showReportLangPopup()" class="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition shadow-lg shadow-red-600/20 active:scale-95 ml-2 cursor-pointer">
+                  <i data-lucide="file-warning" class="w-4 h-4"></i> Kayıp Raporu
+              </button>
+          </div>
+      </div>
+    </nav>
+
+    <main class="flex-1 app-container p-6 lg:p-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="glass-card p-6 relative overflow-hidden group rounded-2xl border-red-500/20">
+               <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110"><i data-lucide="flame" class="w-24 h-24 text-red-500"></i></div>
+               <div class="text-red-500 dark:text-red-400 text-[10px] font-bold uppercase tracking-wider mb-2">Toplam Yıllık Kayıp</div>
+               <div class="text-4xl font-black text-red-600 dark:text-red-500 tracking-tight" id="dashLossMoney">0</div>
+               <div class="mt-2 text-xs text-slate-500">İşletmenizin havaya savurduğu tutar.</div>
+            </div>
+            <div class="glass-card p-6 relative overflow-hidden group rounded-2xl">
+               <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition"><i data-lucide="zap-off" class="w-24 h-24 text-orange-500"></i></div>
+               <div class="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-2">Boşa Harcanan Enerji</div>
+               <div class="text-3xl font-bold text-orange-600 dark:text-orange-400 tracking-tight" id="dashLossKwh">0</div>
+               <div class="mt-2 text-xs text-slate-500">kWh/Yıl</div>
+            </div>
+            <div class="glass-card p-6 relative overflow-hidden rounded-2xl">
+               <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition"><i data-lucide="factory" class="w-24 h-24 text-slate-500"></i></div>
+               <div class="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-2">Gereksiz Emisyon</div>
+               <div class="text-3xl font-bold text-slate-800 dark:text-white tracking-tight" id="dashCo2">0 <span class="text-sm font-normal text-slate-500">Ton</span></div>
+               <div class="mt-2 text-xs text-slate-500">CO2 Salımı</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+            <div class="xl:col-span-4 space-y-6 max-h-[calc(100vh-120px)] overflow-y-auto pr-2">
+                <div class="glass-card p-6 rounded-2xl">
+                   <h3 class="text-red-500 dark:text-red-400 text-xs font-bold uppercase mb-4 flex items-center gap-2"><i data-lucide="briefcase" class="w-4 h-4"></i> Firma & Proje</h3>
+                   <div class="space-y-4">
+                       <div><label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Hazırlayan</label><div class="grid gap-2"><input type="text" id="pName" class="glass-input text-xs" placeholder="Firma Adı"><input type="text" id="pEng" class="glass-input text-xs" placeholder="Mühendis Adı"></div></div>
+                       <div class="h-px bg-slate-200 dark:bg-white/5 my-3"></div>
+                       <div><label class="text-[10px] uppercase text-slate-500 font-bold mb-1 block">Firma Bilgileri</label><div class="grid gap-2"><input type="text" id="cName" class="glass-input text-xs" placeholder="Firma Adı"><input type="text" id="cEng" class="glass-input text-xs" placeholder="Yetkili Kişi / Ünvan"></div></div>
+                   </div>
+                </div>
+
+                <div class="glass-card p-6 rounded-2xl">
+                    <h3 class="text-orange-500 dark:text-orange-400 text-xs font-bold uppercase mb-4 flex items-center gap-2"><i data-lucide="flame" class="w-4 h-4"></i> Ortam & Yakıt</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Ortam Sıc. (°C)</label><input type="number" id="tAmb" class="glass-input text-xs" value="25"></div>
+                        <div><label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Rüzgar (m/s)</label><input type="number" id="vWind" class="glass-input text-xs" value="0" step="0.5"></div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Yakıt Tipi</label>
+                        <select id="fuel" onchange="toggleFuelMode(); updateGlobalFinancials()" class="glass-input text-xs">
+                             <option value="gas">Doğalgaz (8250 kcal/m³)</option>
+                             <option value="elec">Elektrik (860 kcal/kWh)</option>
+                             <option value="lng">LNG (11500 kcal/kg)</option>
+                             <option value="fueloil">Fuel Oil (9600 kcal/kg)</option>
+                             <option value="coal_imp">İthal Kömür (6000 kcal/kg)</option>
+                             <option value="coal_loc">Yerli Kömür (3500 kcal/kg)</option>
+                             <option value="manual" class="font-bold text-red-500">⚡ Manuel Giriş</option>
+                        </select>
+                    </div>
+
+                    <div id="manualFuelBox" class="hidden mt-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/10">
+                         <div class="grid grid-cols-2 gap-3">
+                             <div>
+                                 <label class="text-[9px] text-slate-500 font-bold mb-1 block">LHV (kcal)</label>
+                                 <input type="number" id="fuelLhv" onchange="updateGlobalFinancials()" class="glass-input text-xs" placeholder="Örn: 8250">
+                             </div>
+                             <div>
+                                 <label class="text-[9px] text-slate-500 font-bold mb-1 block">Birim</label>
+                                 <select id="fuelUnit" onchange="updateGlobalFinancials()" class="glass-input text-xs">
+                                     <option value="m3">kcal/m³</option>
+                                     <option value="kg">kcal/kg</option>
+                                     <option value="kwh">kcal/kWh</option>
+                                 </select>
+                             </div>
+                         </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Kazan Verimi %</label>
+                        <input type="number" id="eff" onchange="updateGlobalFinancials()" class="glass-input text-center text-xs" value="85">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Birim Fiyat</label>
+                            <div class="flex gap-1"><input type="number" id="price" onchange="updateGlobalFinancials()" class="glass-input text-xs" value="0.15"><select id="energyCurr" onchange="updateGlobalFinancials()" class="glass-input !px-1 w-14 text-center text-xs"><option value="TL" selected>₺</option><option value="USD">$</option><option value="EUR">€</option><option value="GBP">£</option></select></div>
+                        </div>
+                        <div><label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Yıllık Saat</label><input type="number" id="hours" onchange="updateGlobalFinancials()" class="glass-input text-xs" value="8000"></div>
+                    </div>
+                </div>
+
+                <div class="glass-card p-6 border-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.1)] rounded-2xl relative overflow-hidden">
+                    <h3 class="text-slate-800 dark:text-white text-sm font-bold uppercase mb-4 flex items-center gap-2 relative z-10"><i data-lucide="plus-circle" class="w-4 h-4 text-red-500"></i> Kayıp Noktası Ekle</h3>
+                    
+                    <div class="flex bg-slate-100 dark:bg-slate-900/50 rounded-lg p-1 mb-4 border border-slate-200 dark:border-white/5 relative z-10">
+                        <button onclick="setType('valve')" id="btn-valve" class="flex-1 py-1.5 text-xs font-medium rounded text-white bg-slate-700 shadow transition-all">Armatür</button>
+                        <button onclick="setType('pipe')" id="btn-pipe" class="flex-1 py-1.5 text-xs font-medium rounded text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">Boru</button>
+                        <button onclick="setType('tank')" id="btn-tank" class="flex-1 py-1.5 text-xs font-medium rounded text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">Düz Yüzey</button>
+                    </div>
+                    <select id="type" class="hidden"><option value="valve">Valve</option><option value="pipe">Pipe</option><option value="tank">Flat</option></select>
+                    
+                    <div id="g-valve" class="space-y-3 relative z-10">
+                        <select id="valveType" class="glass-input text-xs">
+                            <optgroup label="Vanalar">
+                                <option value="gate">Sürgülü Vana</option>
+                                <option value="globe">Glob Vana</option>
+                                <option value="ball">Küresel Vana</option>
+                                <option value="butterfly">Kelebek Vana</option>
+                                <option value="check">Çekvalf</option>
+                                <option value="strainer">Pislik Tutucu</option>
+                                <option value="separator">Buhar Seperatörü</option>
+                            </optgroup>
+                            <optgroup label="Bağlantı Elemanları">
+                                <option value="flange">Flanş Çifti (Takım)</option>
+                                <option value="elbow">Dirsek (90°)</option>
+                            </optgroup>
+                            <optgroup label="Kondenstoplar">
+                                <option value="trap_float">Şamandıralı</option>
+                                <option value="trap_thermo">Termodinamik</option>
+                                <option value="trap_bimetal">Bimetalik</option>
+                                <option value="trap_bucket">Ters Kovalı</option>
+                            </optgroup>
+                        </select>
+                        <select id="vDN" class="glass-input text-xs"></select>
+                    </div>
+                    <div id="g-pipe" class="hidden grid grid-cols-2 gap-3 relative z-10"><select id="pDN" class="glass-input text-xs"></select><input type="number" id="pLen" class="glass-input text-xs" placeholder="Boru Uzunluğu (m)" value="1"></div>
+                    
+                    <div id="g-tank" class="hidden relative z-10">
+                        <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-white/5 mb-3">
+                            <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-2 block font-bold">1. Seçenek: Dikdörtgen Yüzeyler (mm)</label>
+                            <div class="flex gap-2 mb-2">
+                                <input type="number" id="surfW" class="glass-input text-xs" placeholder="En (mm)">
+                                <input type="number" id="surfH" class="glass-input text-xs" placeholder="Boy (mm)">
+                                <button onclick="addSurface()" class="bg-red-500 hover:bg-red-600 text-white rounded-lg px-3 flex items-center justify-center transition"><i data-lucide="plus" class="w-4 h-4"></i></button>
+                            </div>
+                            <div id="surfaceList" class="space-y-1 mb-2 max-h-24 overflow-y-auto"></div>
+                            
+                            <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-2 block font-bold border-t border-slate-200 dark:border-white/5 pt-2 mt-2">2. Seçenek: Dairesel Yüzeyler (mm)</label>
+                            <div class="flex gap-2 mb-2">
+                                <input type="number" id="circD" class="glass-input text-xs" placeholder="Çap (mm)">
+                                <button onclick="addCircle()" class="bg-red-500 hover:bg-red-600 text-white rounded-lg px-3 flex items-center justify-center transition"><i data-lucide="plus" class="w-4 h-4"></i></button>
+                            </div>
+                            <div id="circleList" class="space-y-1 mb-2 max-h-24 overflow-y-auto"></div>
+
+                            <div class="text-right text-[10px] text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-white/5 pt-2">
+                                Toplam Alan: <span id="totalSurfArea" class="font-bold text-slate-800 dark:text-white text-xs">0.0000</span> m²
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3 mt-4 relative z-10">
+                        <div><label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Ölçülen Yüzey Sıc. (°C)</label><div class="relative"><input type="number" id="tProc" class="glass-input pl-8 text-xs font-bold text-red-600" value="150"><i data-lucide="thermometer" class="w-3 h-3 text-red-500 absolute left-2.5 top-2.5"></i></div></div>
+                        <div><label id="lblQty" class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Adet</label><input type="number" id="qty" class="glass-input text-center font-bold text-xs" value="1"></div>
+                    </div>
+                    
+                    <div class="mt-4 relative z-10">
+                         <label class="text-[10px] text-slate-500 dark:text-slate-400 mb-1 block">Mahal / Lokasyon</label>
+                         <input type="text" id="location" class="glass-input text-xs" placeholder="Örn: Kazan Dairesi">
+                    </div>
+
+                    <div class="mt-4 relative z-10">
+                        <input type="file" id="imgInp" class="hidden" accept="image/*" onchange="readImg(this)">
+                        <div onclick="document.getElementById('imgInp').click()" class="border border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-3 text-center cursor-pointer hover:border-red-500 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition group"><i data-lucide="camera" class="w-4 h-4 text-slate-400 dark:text-slate-500 mx-auto group-hover:text-red-500 dark:group-hover:text-red-400 mb-1"></i><span class="text-[10px] text-slate-400 block">Termal Foto Seç</span></div>
+                        <img id="prevImg" class="hidden w-full h-24 object-cover rounded-lg mt-2 border border-slate-300 dark:border-slate-600">
+                    </div>
+
+                    <div class="bg-slate-100 dark:bg-slate-900/50 rounded-lg p-3 mt-4 border border-slate-200 dark:border-white/5 relative z-10">
+                        <label class="text-[10px] text-slate-500 font-bold uppercase mb-2 block flex items-center gap-1">Potansiyel Tasarruf Hesabı İçin:</label>
+                        <div class="mb-2"><select id="calcStd" class="glass-input text-[10px] !py-1 !h-7 text-slate-500 dark:text-slate-300"><option value="iso">ISO 12241 (Standard)</option><option value="astm">ASTM C680 (USA)</option><option value="vdi">VDI 2055 (German)</option></select></div>
+                        <select id="matSelect" class="glass-input text-xs mb-2">
+                            <option value="rockwool">Taş Yünü (Sanayi)</option>
+                            <option value="glasswool">İğnelenmiş Cam Elyaf</option> 
+                            <option value="rubber">Elastomerik Kauçuk</option>
+                            <option value="aerogel">Aerogel</option>
+                            <option value="ceramic">Seramik Yünü</option>
+                        </select>
+                        <div class="grid grid-cols-2 gap-2 mt-2 mb-2">
+                            <input type="number" id="thk" class="glass-input text-xs" value="50" placeholder="Ref. Kalınlık (mm)">
+                            <div class="flex items-center text-[10px] text-slate-400 pl-1">
+                                (Bu kalınlıkta yalıtım yapılsa ne kadar kurtarırız?)
+                            </div>
+                        </div>
+                        
+                        <div class="mt-2 pt-2 border-t border-slate-300 dark:border-white/10">
+                            <label class="flex items-center gap-2 cursor-pointer mb-2">
+                                <input type="checkbox" id="useL2" onchange="toggleL2()" class="w-3 h-3 rounded border-slate-400 text-red-500">
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold">2. Katman (Kompozit)</span>
+                            </label>
+                            <div id="layer2Box" class="hidden">
+                                <select id="matSelect2" class="glass-input text-xs mb-2">
+                                    <option value="rubber" selected>Elastomerik Kauçuk</option>
+                                    <option value="rockwool">Taş Yünü</option>
+                                    <option value="glasswool">Cam Elyaf</option>
+                                    <option value="aerogel">Aerogel</option>
+                                    <option value="ceramic">Seramik Yünü</option>
+                                </select>
+                                <input type="number" id="thk2" class="glass-input text-xs" value="19" placeholder="Kalınlık (mm)">
+                            </div>
+                        </div>
+
+                        <div class="mt-3 text-right">
+                            <label class="text-[9px] text-slate-500 mr-2 uppercase font-bold">Rapor Para Birimi:</label>
+                            <select id="curr" class="glass-input text-[10px] !w-20 inline-block !py-1 !h-7" onchange="render()"><option value="TL" selected>₺ TL</option><option value="USD">$ USD</option><option value="EUR">€ EUR</option><option value="GBP">£ GBP</option></select>
+                        </div>
+                    </div>
+
+                    <div id="btn-group" class="mt-4 relative z-10">
+                        <button id="btnAdd" onclick="calc()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-red-600/20 transition active:scale-95 flex items-center justify-center gap-2 text-sm cursor-pointer"><i data-lucide="plus" class="w-4 h-4"></i> Hesapla & Listeye Ekle</button>
+                        <button id="btnUpdate" onclick="finishUpdate()" class="hidden w-full bg-orange-500 hover:bg-orange-400 text-white font-bold py-3 rounded-xl shadow-lg shadow-orange-500/20 transition active:scale-95 flex items-center justify-center gap-2 text-sm cursor-pointer"><i data-lucide="check" class="w-4 h-4"></i> Güncellemeyi Bitir</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="xl:col-span-8">
+                <div class="glass-card p-0 overflow-hidden min-h-[600px] flex flex-col rounded-2xl">
+                    <div class="p-4 border-b border-slate-200 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-slate-900/30">
+                        <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-2"><i data-lucide="list" class="w-4 h-4 text-red-500"></i> Kaçak Noktası Listesi</h3>
+                        <div class="flex gap-2">
+                             <button onclick="showClearPopup()" class="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition cursor-pointer">Temizle</button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto overflow-y-auto max-h-[500px] flex-1">
+                        <table class="w-full text-left text-sm" id="grid">
+                        <thead class="bg-slate-100 dark:bg-slate-900/80 text-[10px] uppercase text-slate-500 dark:text-slate-400 font-semibold sticky top-0 backdrop-blur-md">
+                            <tr>
+                            <th class="px-6 py-3">Görsel</th>
+                            <th class="px-6 py-3">Bileşen</th>
+                            <th class="px-6 py-3 text-center">Miktar</th>
+                            
+                            <th class="px-6 py-3 text-center text-red-500">Çıplak Kayıp<br><span class="text-[9px]">(kWh/Yıl)</span></th>
+                            <th class="px-6 py-3 text-center text-orange-500">Yalıtımlı Kayıp<br><span class="text-[9px]">(kWh/Yıl)</span></th>
+                            <th class="px-6 py-3 text-center text-green-600">Kazanç<br><span class="text-[9px]">(Fark kWh)</span></th>
+                            
+                            <th class="px-6 py-3 text-right text-red-600 dark:text-red-400">Yıllık Finansal Karşılığı</th>
+                            <th class="px-6 py-3 text-right">İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 dark:divide-slate-700/50" id="gridBody">
+                            <tr><td colspan="8" class="px-6 py-20 text-center text-slate-500"><i data-lucide="search" class="w-12 h-12 mx-auto mb-3 opacity-20"></i><span id="emptyMsg">Henüz kayıp noktası eklenmedi.</span></td></tr>
+                        </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div id="reportLangPopup" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/50 backdrop-blur-sm popup-overlay">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 popup-content scale-95 opacity-0" id="reportLangPopupInner">
+        <div class="text-center mb-6">
+            <div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="languages" class="w-7 h-7 text-red-600 dark:text-red-500"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Rapor Dili Seçin</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Raporun tüm içeriği seçtiğiniz dilde oluşturulacaktır.</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <button onclick="generateReport('tr')" class="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-600 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition cursor-pointer group">
+                <span class="text-3xl">🇹🇷</span>
+                <span class="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-red-600 dark:group-hover:text-red-400">Türkçe</span>
+            </button>
+            <button onclick="generateReport('en')" class="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-600 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition cursor-pointer group">
+                <span class="text-3xl">🇬🇧</span>
+                <span class="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-red-600 dark:group-hover:text-red-400">English</span>
+            </button>
+        </div>
+        <button onclick="closePopup('reportLangPopup')" class="w-full text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition py-2 cursor-pointer">İptal</button>
+    </div>
+</div>
+
+<div id="deleteConfirmPopup" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/50 backdrop-blur-sm popup-overlay">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 popup-content scale-95 opacity-0" id="deleteConfirmInner">
+        <div class="text-center mb-6">
+            <div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="trash-2" class="w-7 h-7 text-red-600"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Silme Onayı</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2" id="deleteConfirmMsg">Bu kalemi silmek istediğinize emin misiniz?</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+            <button onclick="closePopup('deleteConfirmPopup')" class="py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer">İptal</button>
+            <button onclick="confirmDelete()" class="py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-sm transition cursor-pointer shadow-lg shadow-red-600/20">Sil</button>
+        </div>
+    </div>
+</div>
+
+<div id="clearConfirmPopup" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/50 backdrop-blur-sm popup-overlay">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 popup-content scale-95 opacity-0" id="clearConfirmInner">
+        <div class="text-center mb-6">
+            <div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="trash" class="w-7 h-7 text-red-600"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Listeyi Temizle</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">Tüm listeyi temizlemek istediğinize emin misiniz? Bu işlem geri alınamaz.</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+            <button onclick="closePopup('clearConfirmPopup')" class="py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer">İptal</button>
+            <button onclick="confirmClearAll()" class="py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-sm transition cursor-pointer shadow-lg shadow-red-600/20">Temizle</button>
+        </div>
+    </div>
+</div>
+
+<div id="customAlertPopup" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/50 backdrop-blur-sm popup-overlay">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 popup-content scale-95 opacity-0" id="customAlertInner">
+        <div class="text-center mb-6">
+            <div class="w-14 h-14 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="alert-triangle" class="w-7 h-7 text-amber-600"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100" id="customAlertTitle">Uyarı</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2" id="customAlertMsg">Mesaj</p>
+        </div>
+        <button onclick="closePopup('customAlertPopup')" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-white font-bold text-sm transition cursor-pointer shadow-lg shadow-amber-500/20">Tamam</button>
+    </div>
+</div>
+
+<div id="print-area">
+    <div id="p-cover" class="print-page cover-bg relative overflow-hidden flex flex-col bg-white">
+        <div class="flex-1 flex flex-col relative p-12 pb-4">
+            <div class="absolute top-0 right-0 p-8 opacity-[0.03]"><i data-lucide="flame" class="w-64 h-64 text-slate-900"></i></div>
+            
+            <div class="flex justify-between items-start mb-4 relative z-10">
+                <div>
+                    <div class="text-4xl font-black tracking-tighter text-slate-900">Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500">.App</span></div>
+                    <div class="text-[9px] uppercase tracking-[4px] text-slate-400 mt-0.5">Energy Loss Detection</div>
+                </div>
+                <div class="inline-block bg-red-100 text-red-700 px-3 py-1 rounded text-[9px] font-bold uppercase tracking-wider" id="covIsoLabel">ISO 12241</div>
+            </div>
+
+            <div class="relative z-10 mb-4 mt-8">
+                <h1 class="text-5xl font-black text-slate-900 leading-none mb-3" id="covMainTitle">TERMAL <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-600">KAYIP</span> ANALİZİ</h1>
+                <p class="text-xs text-slate-500 leading-relaxed max-w-lg" id="covIntro">
+                    Tesisinizde gerçekleştirilen termal denetimler sonucunda; yalıtımsız ekipmanlardan kaynaklanan ısı kayıpları ve finansal maliyetler hesaplanmıştır.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mb-4 relative z-10">
+                <div class="border border-slate-200 rounded-xl p-3">
+                    <div class="text-[9px] uppercase text-slate-400 font-bold mb-1" id="covClientLabel">Firma / Müşteri</div>
+                    <div class="text-base font-bold text-slate-900 leading-tight" id="covClient">FİRMA ADI</div>
+                    <div class="text-xs text-slate-400 mt-0.5" id="covContact">Yetkili Kişi</div>
+                </div>
+                <div class="border border-slate-200 rounded-xl p-3">
+                    <div class="text-[9px] uppercase text-slate-400 font-bold mb-1" id="covProvLabel">Tedarikçi / Hazırlayan</div>
+                    <div class="text-base font-bold text-slate-900" id="covProv">TEDARİKÇİ</div>
+                    <div class="text-xs text-slate-400 mt-0.5" id="covDate">...</div>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 rounded-xl border border-slate-200 p-4 mb-4 relative z-10">
+                <div class="text-[9px] uppercase text-slate-400 font-bold mb-2 tracking-wider">Simülasyon Parametreleri</div>
+                <div class="text-xs text-slate-600 leading-relaxed" id="covNarrative">...</div>
+            </div>
+
+            <div class="flex flex-col gap-1.5 relative z-10">
+                <div class="p-2 bg-slate-50 rounded-lg border border-slate-100 flex items-center justify-between">
+                     <div class="text-xs font-bold text-slate-400 uppercase tracking-wide w-24" id="covDailyLabel">GÜNLÜK</div>
+                     <div class="text-base font-black text-slate-700 text-right flex-1" id="covMoneyDay">0</div>
+                </div>
+                <div class="p-2 bg-slate-50 rounded-lg border border-slate-100 flex items-center justify-between">
+                     <div class="text-xs font-bold text-slate-400 uppercase tracking-wide w-24" id="covWeeklyLabel">HAFTALIK</div>
+                     <div class="text-base font-black text-slate-700 text-right flex-1" id="covMoneyWeek">0</div>
+                </div>
+                <div class="p-2 bg-slate-50 rounded-lg border border-slate-100 flex items-center justify-between">
+                     <div class="text-xs font-bold text-slate-400 uppercase tracking-wide w-24" id="covMonthlyLabel">AYLIK</div>
+                     <div class="text-base font-black text-slate-700 text-right flex-1" id="covMoneyMonth">0</div>
+                </div>
+                <div class="p-2 bg-red-50 rounded-lg border border-red-100 flex items-center justify-between">
+                     <div class="text-xs font-bold text-red-400 uppercase tracking-wide w-24" id="covYearlyLabel">YILLIK</div>
+                     <div class="text-lg font-black text-red-600 text-right flex-1" id="covMoneyYear">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="border-t-2 border-slate-900 mx-12 pt-3 pb-5 flex justify-between items-end relative z-10">
+            <div class="qr-report-section">
+                <img id="covQrCode" src="" class="w-32 h-32 object-contain" alt="QR">
+            </div>
+            <div class="text-right">
+                <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1" id="covEnergyLabel">Toplam Enerji İsrafı</div>
+                <div class="text-7xl font-black text-slate-900 leading-none"><span id="covKwhTotal">0</span></div>
+                <div class="text-sm font-bold text-slate-400 mt-1 uppercase">kWh</div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="p-table" class="print-page p-12 hidden">
+        <div class="flex justify-between items-center border-b-2 border-slate-900 pb-4 mb-8"><h2 class="text-xl font-black text-slate-900 uppercase">Tespit Edilen Kaçak Noktaları</h2><div class="text-xs text-slate-500" id="rDate">...</div></div>
+        <table class="w-full audit-table mb-8"><thead><tr id="rep_table_head"></tr></thead><tbody id="rTable"></tbody></table>
+        <div class="page-num mt-auto pt-8 border-t border-slate-200 text-center text-[10px] text-slate-400"></div>
+    </div>
+    
+    <div id="p-summary" class="print-page p-12 flex flex-col h-full hidden">
+        <h2 class="text-2xl font-black text-slate-900 uppercase mb-8 border-b-2 border-slate-900 pb-4" id="sumTitle">Yönetici Özeti</h2>
+        
+        <div class="flex flex-col mb-12">
+            <div class="py-6 border-b border-slate-200 flex justify-between items-center group">
+                <div>
+                    <div class="text-sm text-red-500 font-bold uppercase tracking-widest flex items-center gap-2"><i data-lucide="flame" class="w-4 h-4"></i> <span id="sumLossLabel">Mevcut Yıllık Kayıp</span></div>
+                    <div class="text-xs text-slate-400 mt-1 font-medium"><span id="sumFuelLost">...</span> <span id="sumFuelUnitLabel">Birim</span></div>
+                </div>
+                <div class="text-5xl font-black text-red-600" id="sumLoss">0</div>
+            </div>
+
+            <div class="py-6 border-b border-slate-200 flex justify-between items-center group">
+                <div>
+                    <div class="text-sm text-orange-500 font-bold uppercase tracking-widest flex items-center gap-2"><i data-lucide="zap-off" class="w-4 h-4"></i> <span id="sumEnergyLabel">Enerji İsrafı</span></div>
+                    <div class="text-xs text-slate-400 mt-1">Yıllık Toplam</div>
+                </div>
+                <div class="text-5xl font-black text-orange-600" id="sumEnergy">0</div>
+            </div>
+
+            <div class="py-6 border-b border-slate-900 flex justify-between items-center group">
+                <div>
+                    <div class="text-sm text-slate-500 font-bold uppercase tracking-widest flex items-center gap-2"><i data-lucide="factory" class="w-4 h-4"></i> <span id="sumCo2Label">Karbon Ayak İzi</span></div>
+                    <div class="text-xs text-slate-400 mt-1">CO₂ Emisyonu</div>
+                </div>
+                <div class="text-5xl font-black text-slate-800"><span id="sumCo2">0</span> <span class="text-2xl font-normal text-slate-500">Ton</span></div>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="text-sm font-bold text-slate-900 uppercase mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-4 h-4"></i> <span id="sum5YearLabel">Finansal Projeksiyon (5 Yıl)</span></h3>
+            <table class="w-full text-xs text-right border-collapse">
+                <thead>
+                    <tr class="bg-slate-100 text-slate-500">
+                        <th class="p-2 text-left" id="sumScenarioLabel">Senaryo</th>
+                        <th class="p-2" id="sumYear1Label">Yıl 1</th>
+                        <th class="p-2" id="sumYear2Label">Yıl 2</th>
+                        <th class="p-2" id="sumYear3Label">Yıl 3</th>
+                        <th class="p-2" id="sumYear4Label">Yıl 4</th>
+                        <th class="p-2" id="sumYear5Label">Yıl 5</th>
+                        <th class="p-2 font-black" id="sumTotalLabel">TOPLAM</th>
+                    </tr>
+                </thead>
+                <tbody class="font-mono" id="projTable"></tbody>
+            </table>
+        </div>
+        
+        <div class="flex gap-8 mb-4">
+             <div class="flex-1 rounded-xl p-6 flex items-center justify-between relative overflow-hidden h-full border-2 border-red-200" style="background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%); color: white;">
+                  <div class="absolute right-0 bottom-0 opacity-10 pointer-events-none translate-x-4 translate-y-4"><i data-lucide="flame" class="w-48 h-48 text-white"></i></div>
+                 <div class="z-10">
+                     <div class="text-sm font-bold uppercase tracking-widest" style="color: #fca5a5;" id="sumCumulativeLabel">5 YILLIK KÜMÜLATİF ZARAR</div>
+                     <div class="text-5xl font-black mt-2" id="sumCumulativeLoss">0</div>
+                 </div>
+                 <div class="text-right z-10 pl-8" style="border-left: 1px solid #991b1b;">
+                     <div class="text-5xl font-black" id="sumCumulativePercent">500%</div>
+                     <div class="text-sm mt-1" style="color: #fca5a5;">Artış Oranı</div>
+                 </div>
+             </div>
+         </div>
+
+        <div class="border-t-2 border-slate-100 pt-4 mt-auto">
+            <p class="text-[10px] text-slate-400 text-center font-medium leading-relaxed" id="sumNote">Bu raporda yer alan tüm hesaplamalar ISO 12241 mühendislik standartlarına göre, ölçülen yüzey sıcaklıkları ve verilen parametreler baz alınarak bilgisayar simülasyonu ile yapılmıştır. Sonuçlar teorik değerleri yansıtmakta olup, fiili koşullardaki sapmalara bağlı olarak değişiklik gösterebilir.</p>
+        </div>
+    </div>
+</div>
+
+<div id="qr-generator-dump" style="display:none;"></div>
+
+<script>
+    let isCalculating = false;
+
+    function openPopup(id) {
+        const popup = document.getElementById(id);
+        popup.classList.remove('hidden'); popup.style.display = 'flex';
+        const inner = popup.querySelector('.popup-content');
+        if(inner) { setTimeout(() => { inner.classList.remove('scale-95','opacity-0'); inner.classList.add('scale-100','opacity-100'); }, 10); }
+        lucide.createIcons();
+    }
+    function closePopup(id) {
+        const popup = document.getElementById(id);
+        const inner = popup.querySelector('.popup-content');
+        if(inner) { inner.classList.add('scale-95','opacity-0'); inner.classList.remove('scale-100','opacity-100'); }
+        setTimeout(() => { popup.classList.add('hidden'); popup.style.display = 'none'; }, 200);
+    }
+    function showAlert(msg, title = 'Uyarı') {
+        document.getElementById('customAlertMsg').innerHTML = msg;
+        document.getElementById('customAlertTitle').innerText = title;
+        openPopup('customAlertPopup');
+    }
+    
+    function showClearPopup() {
+        if(LIST.length === 0) { showAlert("Liste zaten boş."); return; }
+        openPopup('clearConfirmPopup');
+    }
+    function confirmClearAll() {
+        LIST = []; editingIndex = null; resetForm();
+        let btnAdd = document.getElementById('btnAdd');
+        let btnUpdate = document.getElementById('btnUpdate');
+        if(btnAdd) btnAdd.classList.remove('hidden');
+        if(btnUpdate) btnUpdate.classList.add('hidden');
+        render(); closePopup('clearConfirmPopup');
+    }
+
+    let pendingDeleteIndex = null;
+    function del(i) { pendingDeleteIndex = i; openPopup('deleteConfirmPopup'); }
+    function confirmDelete() {
+        if (pendingDeleteIndex !== null) { LIST.splice(pendingDeleteIndex, 1); render(); }
+        closePopup('deleteConfirmPopup'); pendingDeleteIndex = null;
+    }
+
+    function showReportLangPopup() {
+        if(LIST.length === 0) { showAlert('Rapor oluşturmak için en az bir kaçak noktası eklemelisiniz.'); return; }
+        openPopup('reportLangPopup');
+    }
+
+    function toggleTheme() { document.documentElement.classList.toggle('dark'); }
+    function toggleL2() { const box = document.getElementById('layer2Box'); if(document.getElementById('useL2').checked) box.classList.remove('hidden'); else box.classList.add('hidden'); }
+    function toggleFuelMode() { const fuel = document.getElementById('fuel').value; const box = document.getElementById('manualFuelBox'); if(fuel === 'manual') box.classList.remove('hidden'); else box.classList.add('hidden'); }
+
+    function initApp(){ init(); }
+    
+    function setType(t){
+        ['valve','pipe','tank'].forEach(x=>{document.getElementById('g-'+x).classList.add('hidden');});
+        document.getElementById('g-'+t).classList.remove('hidden'); document.getElementById('type').value=t;
+        const buttons={valve:document.getElementById('btn-valve'),pipe:document.getElementById('btn-pipe'),tank:document.getElementById('btn-tank')};
+        const activeClass="bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow";
+        const inactiveClass="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
+        Object.values(buttons).forEach(btn=>{btn.className="flex-1 py-1.5 text-xs font-medium rounded transition-all "+inactiveClass;});
+        buttons[t].className="flex-1 py-1.5 text-xs font-medium rounded transition-all "+activeClass;
+        document.getElementById('qty').disabled = false; document.getElementById('qty').value = 1;
+    }
+
+    const PIPES = window.OPT.PIPES;
+    const SEPARATORS = window.OPT.SEPARATORS;
+    const VALVE_FACTORS = window.OPT.VALVE_FACTORS;
+    const FUELS = {}; Object.keys(window.OPT.FUEL_PARAMS).forEach(k => FUELS[k] = window.OPT.FUEL_PARAMS[k].lhv);
+    const CO2_FACTORS = window.OPT.CO2_FACTORS;
+
+    let LIST=[],FX={USD:34.50,EUR:36.50,GBP:43.20,TL:1.0},currImg=null,userQrImg=null,editingIndex=null;
+    let currentSurfaces = [], currentCircles = []; 
+
+    function addSurface(){
+        const w = parseFloat(document.getElementById('surfW').value);
+        const h = parseFloat(document.getElementById('surfH').value);
+        if(!w || !h){ showAlert("Lütfen En ve Boy değerlerini giriniz."); return; }
+        currentSurfaces.push({w: w, h: h});
+        document.getElementById('surfW').value = '';
+        document.getElementById('surfH').value = '';
+        renderSurfacesAll();
+    }
+    function removeSurface(idx){ currentSurfaces.splice(idx,1); renderSurfacesAll(); }
+    
+    function addCircle(){
+        const d = parseFloat(document.getElementById('circD').value);
+        if(!d){ showAlert("Lütfen Çap değerini giriniz."); return; }
+        currentCircles.push({d: d});
+        document.getElementById('circD').value = '';
+        renderSurfacesAll();
+    }
+    function removeCircle(idx){ currentCircles.splice(idx,1); renderSurfacesAll(); }
+
+    function renderSurfacesAll(){
+        const listEl = document.getElementById('surfaceList'); listEl.innerHTML = '';
+        currentSurfaces.forEach((s, idx) => {
+            const m2 = (s.w * s.h) / 1000000;
+            const div = document.createElement('div');
+            div.className = "flex justify-between items-center bg-white dark:bg-white/10 p-1.5 rounded border border-slate-200 dark:border-white/5";
+            div.innerHTML = `<span>${s.w} x ${s.h} mm</span> <button onclick="removeSurface(${idx})" class="text-red-500 hover:text-red-700"><i data-lucide="x" class="w-3 h-3"></i></button>`;
+            listEl.appendChild(div);
+        });
+
+        const circListEl = document.getElementById('circleList'); circListEl.innerHTML = '';
+        currentCircles.forEach((c, idx) => {
+            const r = (c.d / 2) / 1000; const m2 = Math.PI * r * r;
+            const div = document.createElement('div');
+            div.className = "flex justify-between items-center bg-white dark:bg-white/10 p-1.5 rounded border border-slate-200 dark:border-white/5";
+            div.innerHTML = `<span>⌀${c.d} mm</span> <button onclick="removeCircle(${idx})" class="text-red-500 hover:text-red-700"><i data-lucide="x" class="w-3 h-3"></i></button>`;
+            circListEl.appendChild(div);
+        });
+
+        let totalAreaM2 = 0;
+        currentSurfaces.forEach(s => totalAreaM2 += (s.w * s.h) / 1000000);
+        currentCircles.forEach(c => { const r = (c.d / 2) / 1000; totalAreaM2 += Math.PI * r * r; });
+        document.getElementById('totalSurfArea').innerText = totalAreaM2.toFixed(4);
+        lucide.createIcons();
+    }
+
+    async function getCalculationResult(){
+        const qty=parseFloat(document.getElementById('qty').value)||1;
+        const type=document.getElementById('type').value;
+        const location=document.getElementById('location').value||"";
+        const tProc=parseFloat(document.getElementById('tProc').value)||0;
+        const tAmb=parseFloat(document.getElementById('tAmb').value)||25;
+        const vWindInput = document.getElementById('vWind').value;
+        const vWind = (vWindInput === "") ? 0 : parseFloat(vWindInput);
+        
+        const matKey=document.getElementById('matSelect').value;
+        const thk=parseFloat(document.getElementById('thk').value)||0;
+        const useL2 = document.getElementById('useL2').checked;
+        const matKey2 = useL2 ? document.getElementById('matSelect2').value : null;
+        const thk2 = useL2 ? (parseFloat(document.getElementById('thk2').value)||0) : 0;
+        const standard=document.getElementById('calcStd').value;
+        const pLen = parseFloat(document.getElementById('pLen').value)||1; 
+        
+        const reportCurrencyCode = document.getElementById('curr').value;
+        const reportRate = FX[reportCurrencyCode] || 1; 
+        const eff=(parseFloat(document.getElementById('eff').value)||85)/100;
+        const priceRaw=parseFloat(document.getElementById('price').value)||0;
+        const energyCurrencyCode = document.getElementById('energyCurr').value;
+        const energyRate = FX[energyCurrencyCode] || 1;
+        const priceInReportCurr = priceRaw * (energyRate / reportRate);
+        const hours=parseFloat(document.getElementById('hours').value)||8000;
+        
+        const vDN = document.getElementById('vDN').value;
+        const pDN = document.getElementById('pDN').value;
+        const valveType = document.getElementById('valveType').value;
+        const selValve = document.getElementById('valveType');
+        const valveTypeName = selValve.options[selValve.selectedIndex].text;
+
+        const fuelType = document.getElementById('fuel').value;
+        let LHV_Val = 8250; let LHV_Unit = "m3";
+        if(fuelType === 'manual') { LHV_Val = parseFloat(document.getElementById('fuelLhv').value) || 0; LHV_Unit = document.getElementById('fuelUnit').value; } else { LHV_Val = FUELS[fuelType]; if(fuelType === 'gas') LHV_Unit = 'm3'; else if(fuelType === 'elec') LHV_Unit = 'kwh'; else LHV_Unit = 'kg'; }
+        
+        const savedSurfaces = JSON.parse(JSON.stringify(currentSurfaces));
+        const savedCircles = JSON.parse(JSON.stringify(currentCircles));
+
+        const payload = {
+            qty, type, tProc, tAmb, vWind, matKey, thk, useL2, matKey2, thk2,
+            standard, pLen, eff, priceInReportCurr, hours, vDN, pDN, valveType,
+            fuelType, LHV_Val, LHV_Unit, currentSurfaces: savedSurfaces, currentCircles: savedCircles, valveTypeName
+        };
+
+        try {
+            const response = await fetch('/api/anlik-kayip', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) throw new Error("API Hatası");
+            const data = await response.json(); 
+
+            const inputs={ type,qty,pLen,location, tProc,tAmb,matKey,thk, useL2, matKey2, thk2, vDN, pDN, valveType, surfaces: savedSurfaces, circles: savedCircles, img:currImg, energyCurr: energyCurrencyCode, fuelType: fuelType, fuelLhv: LHV_Val, fuelUnit: LHV_Unit, vWind: vWind };
+            
+            return {
+                name: data.Name, desc: `Ölçülen: ${tProc}°C`, location: location, qty: data.qty, unit: data.unitLabel,
+                moneyLoss: data.moneyLostBare, potentialSave: data.potentialSaveMoney, fuelLost: data.fuelLostBare, fuelUnit: LHV_Unit,
+                kwhBare: Math.round(data.energyLostBare_kWh).toLocaleString('tr-TR'), kwhIns: Math.round(data.energyLostIns_kWh).toLocaleString('tr-TR'),   
+                kwhSave: Math.round(data.potentialSaveKwh).toLocaleString('tr-TR'), rawKwhLoss: data.energyLostBare_kWh, rawKwhIns: data.energyLostIns_kWh, 
+                co2: data.co2, tSurf: typeof tProc === 'number' ? tProc.toFixed(1) : tProc, img:currImg, inputs
+            };
+        } catch(error) {
+            console.error(error);
+            showAlert("Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol edin.");
+            return null;
+        }
+    }
+
+    async function calc(){
+        if(isCalculating) return; 
+        isCalculating = true;
+        
+        const btn = document.getElementById('btnAdd');
+        const originalHtml = '<i data-lucide="plus" class="w-4 h-4"></i> Hesapla & Listeye Ekle';
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> İşleniyor...';
+        btn.classList.add('opacity-70', 'cursor-not-allowed');
+        lucide.createIcons();
+
+        const res = await getCalculationResult();
+        if(res){ LIST.push(res); resetForm(); render(); }
+
+        btn.innerHTML = originalHtml;
+        btn.classList.remove('opacity-70', 'cursor-not-allowed');
+        isCalculating = false; 
+        lucide.createIcons();
+    }
+    
+    async function finishUpdate(){
+        if(isCalculating) return;
+        isCalculating = true;
+
+        const btn = document.getElementById('btnUpdate');
+        const originalHtml = '<i data-lucide="check" class="w-4 h-4"></i> Güncellemeyi Bitir';
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> İşleniyor...';
+        btn.classList.add('opacity-70', 'cursor-not-allowed');
+        lucide.createIcons();
+
+        if(editingIndex!==null) {
+            const res = await getCalculationResult();
+            if(res) LIST[editingIndex] = res;
+        }
+        editingIndex=null;
+        document.getElementById('btnAdd').classList.remove('hidden');
+        document.getElementById('btnUpdate').classList.add('hidden');
+        resetForm(); render();
+
+        btn.innerHTML = originalHtml;
+        btn.classList.remove('opacity-70', 'cursor-not-allowed');
+        isCalculating = false;
+        lucide.createIcons();
+    }
+
+    function updateGlobalFinancials(){
+        const eff = (parseFloat(document.getElementById('eff').value)||85)/100;
+        const priceRaw = parseFloat(document.getElementById('price').value)||0;
+        const hours = parseFloat(document.getElementById('hours').value)||8000;
+        const reportCurrencyCode = document.getElementById('curr').value;
+        const reportRate = FX[reportCurrencyCode] || 1; 
+        const energyCurrencyCode = document.getElementById('energyCurr').value;
+        const energyRate = FX[energyCurrencyCode] || 1;
+        const priceInReportCurr = priceRaw * (energyRate / reportRate);
+        
+        const fuelType = document.getElementById('fuel').value;
+        let LHV_Val = 8250; let LHV_Unit = "m3";
+        if(fuelType === 'manual') { LHV_Val = parseFloat(document.getElementById('fuelLhv').value) || 0; LHV_Unit = document.getElementById('fuelUnit').value; } else { LHV_Val = FUELS[fuelType]; if(fuelType === 'gas') LHV_Unit = 'm3'; else if(fuelType === 'elec') LHV_Unit = 'kwh'; else LHV_Unit = 'kg'; }
+        const selectedCo2Factor = CO2_FACTORS[fuelType] || 0.3;
+
+        LIST.forEach(item => {
+            const energyLostBare_kWh = item.rawKwhLoss; 
+            const fuelLostBare = (energyLostBare_kWh * 860) / (LHV_Val * eff);
+            item.moneyLoss = fuelLostBare * priceInReportCurr;
+            const energyLostIns_kWh = item.rawKwhIns || 0;
+            const fuelLostIns = (energyLostIns_kWh * 860) / (LHV_Val * eff);
+            const moneyLostIns = fuelLostIns * priceInReportCurr;
+            
+            item.potentialSave = item.moneyLoss - moneyLostIns;
+            item.fuelLost = fuelLostBare; item.fuelUnit = LHV_Unit;
+            item.co2 = (energyLostBare_kWh / eff) * selectedCo2Factor / 1000;
+            
+            item.inputs.fuelType = fuelType; item.inputs.fuelLhv = LHV_Val;
+            item.inputs.fuelUnit = LHV_Unit; item.inputs.energyCurr = energyCurrencyCode;
+        });
+        render();
+    }
+
+    function init(){fillDN('vDN');fillDN('pDN');getFx();lucide.createIcons(); setType('valve');}
+    function fillDN(id){const el=document.getElementById(id);el.innerHTML='';for(const[k,v]of Object.entries(PIPES)){let o=document.createElement('option');o.value=v;o.text=`DN ${k}`;el.add(o);}if(id==='vDN')el.value=60.3;if(id==='pDN')el.value=88.9;}
+    function readImg(i){if(i.files&&i.files[0]){const r=new FileReader();r.onload=e=>{currImg=e.target.result;document.getElementById('prevImg').src=currImg;document.getElementById('prevImg').classList.remove('hidden');};r.readAsDataURL(i.files[0]);}}
+    async function getFx(){try{const r=await fetch('https://api.frankfurter.app/latest?from=USD&to=TRY');const d=await r.json();FX.USD=d.rates.TRY;const r2=await fetch('https://api.frankfurter.app/latest?from=EUR&to=TRY');const d2=await r2.json();FX.EUR=d2.rates.TRY;const r3=await fetch('https://api.frankfurter.app/latest?from=GBP&to=TRY');const d3=await r3.json();FX.GBP=d3.rates.TRY;document.getElementById('fxVal').innerText=FX.USD.toFixed(2);}catch(e){}}
+    
+    function edit(i){
+        editingIndex=i; const d=LIST[i].inputs;
+        setType(d.type);
+        document.getElementById('tProc').value = d.tProc; document.getElementById('matSelect').value = d.matKey;
+        document.getElementById('thk').value = d.thk; document.getElementById('qty').value = d.qty; document.getElementById('location').value = d.location || ""; 
+        document.getElementById('useL2').checked = d.useL2 || false; toggleL2();
+        if(d.useL2) { document.getElementById('matSelect2').value = d.matKey2; document.getElementById('thk2').value = d.thk2; }
+        if(d.energyCurr) document.getElementById('energyCurr').value = d.energyCurr;
+        document.getElementById('fuel').value = d.fuelType || 'gas'; toggleFuelMode();
+        if(d.fuelType === 'manual') { document.getElementById('fuelLhv').value = d.fuelLhv; document.getElementById('fuelUnit').value = d.fuelUnit; }
+        document.getElementById('vWind').value = (d.vWind !== undefined) ? d.vWind : 0;
+
+        if(d.img){ currImg=d.img; document.getElementById('prevImg').src=currImg; document.getElementById('prevImg').classList.remove('hidden'); }
+        if(d.type === 'valve'){ document.getElementById('valveType').value = d.valveType; document.getElementById('vDN').value = d.vDN; } 
+        else if (d.type === 'pipe'){ document.getElementById('pDN').value = d.pDN; document.getElementById('pLen').value = d.pLen || 1; } 
+        else if (d.type === 'tank'){ currentSurfaces = d.surfaces || []; currentCircles = d.circles || []; renderSurfacesAll(); }
+        document.getElementById('btnAdd').classList.add('hidden'); document.getElementById('btnUpdate').classList.remove('hidden');
+    }
+
+    function resetForm(){ currImg=null; document.getElementById('prevImg').classList.add('hidden'); document.getElementById('location').value=''; document.getElementById('vWind').value=0; currentSurfaces = []; currentCircles = []; renderSurfacesAll(); } 
+    
+    async function quickUpdate(i, field, val) {
+        const oldInputs = LIST[i].inputs;
+        setType(oldInputs.type);
+        document.getElementById('tProc').value = oldInputs.tProc; document.getElementById('tAmb').value = oldInputs.tAmb; document.getElementById('matSelect').value = oldInputs.matKey; document.getElementById('thk').value = oldInputs.thk; document.getElementById('calcStd').value = oldInputs.standard || 'iso'; document.getElementById('location').value = oldInputs.location || ""; 
+        document.getElementById('vWind').value = (oldInputs.vWind !== undefined) ? oldInputs.vWind : 0;
+        if(oldInputs.type==='pipe') { document.getElementById('pDN').value = oldInputs.pDN; document.getElementById('pLen').value = oldInputs.pLen; } else if(oldInputs.type==='valve'){ document.getElementById('vDN').value = oldInputs.vDN; document.getElementById('valveType').value = oldInputs.valveType; }
+        if(field === 'qty') document.getElementById('qty').value = val; else document.getElementById('qty').value = oldInputs.qty; 
+        
+        const res = await getCalculationResult();
+        if(res) LIST[i] = res; 
+        resetForm(); render();
+    }
+
+    function render(){
+        const tb=document.getElementById('gridBody');tb.innerHTML='';let gLoss=0,gEnergy=0,gCo2=0;
+        const currSymVal=document.getElementById('curr')?document.getElementById('curr').value:'TL';
+        const currSymMap={'USD':'$','EUR':'€','GBP':'£','TL':'₺'};
+        const currSym=currSymMap[currSymVal]||'';
+
+        LIST.forEach((i,x)=>{
+            gLoss+=i.moneyLoss; gEnergy+=i.rawKwhLoss; gCo2+=i.co2;
+            const imgTag=i.img?`<img src="${i.img}" class="w-10 h-10 object-cover rounded">`:`<div class="w-10 h-10 bg-slate-200 dark:bg-slate-800 rounded flex items-center justify-center text-xs text-slate-500">-</div>`;
+            const locTag = i.location ? `<div class="text-[9px] text-red-500 font-bold mt-1 uppercase"><i data-lucide="map-pin" class="w-3 h-3 inline"></i> ${i.location}</div>` : '';
+            const qtyInput = `<input type="number" class="grid-input text-slate-600 dark:text-slate-300" value="${i.qty}" onchange="quickUpdate(${x}, 'qty', this.value)">`;
+
+            tb.insertAdjacentHTML('beforeend',`
+            <tr class="hover:bg-slate-100 dark:hover:bg-slate-800/30 transition border-b border-slate-200 dark:border-slate-700/50 ${x===editingIndex?'bg-red-50 dark:bg-red-900/20':''}">
+                <td class="px-6 py-4">${imgTag}</td>
+                <td class="px-6 py-4 font-bold text-slate-800 dark:text-white">${i.name} ${locTag}</td>
+                <td class="px-6 py-4 text-center font-bold text-slate-600 dark:text-slate-300">${qtyInput} <span class="text-[9px] text-slate-400 block">${i.unit}</span></td>
+                <td class="px-6 py-4 text-center"><div class="font-bold text-red-600">${i.kwhBare} kWh</div></td>
+                <td class="px-6 py-4 text-center"><div class="font-bold text-orange-500 dark:text-orange-400">${i.kwhIns} kWh</div></td>
+                <td class="px-6 py-4 text-center"><div class="font-bold text-emerald-600 dark:text-green-400">+${i.kwhSave} kWh</div></td>
+                <td class="px-6 py-4 text-right font-black text-red-600 dark:text-red-400">${currSym}${Math.round(i.moneyLoss).toLocaleString()}</td>
+                <td class="px-6 py-4 text-right">
+                    <div class="flex items-center justify-end gap-1">
+                        <button onclick="edit(${x})" class="p-1.5 rounded-lg bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 transition" title="Düzenle"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+                        <button onclick="del(${x})" class="p-1.5 rounded-lg bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 transition" title="Sil"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                    </div>
+                </td>
+            </tr>`);
+        });
+        if(LIST.length===0)tb.innerHTML=`<tr><td colspan="8" class="px-6 py-20 text-center text-slate-500"><i data-lucide="search" class="w-12 h-12 mx-auto mb-3 opacity-20"></i><span id="emptyMsg">Henüz kayıp noktası eklenmedi.</span></td></tr>`;
+        
+        document.getElementById('dashLossMoney').innerText=currSym+Math.round(gLoss).toLocaleString();
+        document.getElementById('dashLossKwh').innerText=Math.round(gEnergy).toLocaleString();
+        document.getElementById('dashCo2').innerHTML=gCo2.toFixed(1)+' Ton';
+        lucide.createIcons();
+    }
+
+    const translations = {
+        tr: { clientLabel: 'Firma / Müşteri', providerLabel: 'Denetleyen / Hazırlayan', reportDateLabel: 'Rapor Tarihi', isoLabel: 'ISO 12241 Standartlarına Göre', mainTitle: 'TERMAL <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-600">KAYIP</span> ANALİZİ', introText: 'Tesisinizde gerçekleştirilen termal denetimler sonucunda; yalıtımsız ekipmanlardan kaynaklanan ısı kayıpları ve finansal maliyetler hesaplanmıştır. Aşağıdaki veriler mevcut durumun özetidir.', daily: 'GÜNLÜK', weekly: 'HAFTALIK', monthly: 'AYLIK', yearly: 'YILLIK', totalEnergyLabel: 'Toplam Enerji İsrafı', qrNote: 'Bu karekodu okutarak kayıp maliyetini canlı sayaç üzerinde anlık olarak takip edebilirsiniz.', reportTitle: 'TERMAL KAYIP ANALİZİ', reportSubtitle: 'KAYIP', isoStandard: 'ISO 12241 Standartlarına Göre', reportIntro: 'Tesisinizde gerçekleştirilen termal denetimler sonucunda; yalıtımsız ekipmanlardan kaynaklanan ısı kayıpları ve finansal maliyetler hesaplanmıştır. Aşağıdaki veriler mevcut durumun özetidir.', totalEnergyWaste: 'Toplam Enerji İsrafı', leakPoints: 'Tespit Edilen Kaçak Noktaları', image: 'Görsel', leakSource: 'Kaçak Kaynağı', temperature: 'Sıcaklık', quantity: 'Miktar', bareLoss: 'Çıplak<br>Kayıp (kWh)', insulatedLoss: 'Yalıtımlı<br>Kayıp (kWh)', saving: 'Kazanç<br>(kWh)', financialLoss: 'FİNANSAL KAYIP', page: 'Sayfa', managementSummary: 'Yönetici Özeti', totalFinancialLoss: 'TOPLAM FİNANSAL KAYIP', perYear: '/ Yıl', lossNote: 'Bu tutar, yalıtım yapılmadığı sürece her yıl işletme gideri olarak kaybedilmektedir.', energyWaste: 'ENERJİ İSRAFI', fuelWaste: 'YAKIT İSRAFI', unit: 'Birim', environmentalImpact: 'Çevresel Etki', carbonFootprint: 'KARBON AYAK İZİ', ton: 'Ton', carbonNote: 'Atmosfere salınan fazladan CO₂', fiveYearProjection: '5 Yıllık Kümülatif Zarar Projeksiyonu', atEndOfFiveYears: '5 YIL SONUNDA', totalLoss: 'TOPLAM ZARAR', year: 'Yıl', yearLoss: '. Yıl Zararı', cumulative: 'Kümülatif', total: 'TOPLAM', calculationNote: 'Hesaplamalar ISO 12241 mühendislik standartlarına göre, ölçülen yüzey sıcaklıkları baz alınarak yapılmıştır.', narrative: 'Bu analiz, <strong>{{temp}}°C</strong> ortam sıcaklığı, <strong>{{wind}} m/s</strong> rüzgar hızı ve <strong>%{{eff}}</strong> sistem verimliliği varsayımlarıyla hesaplanmıştır. Tesisin yıllık <strong>{{hours}} saat</strong> aktif çalıştığı öngörülmüştür.' },
+        en: { clientLabel: 'Client / Customer', providerLabel: 'Inspector / Prepared By', reportDateLabel: 'Report Date', isoLabel: 'According to ISO 12241 Standards', mainTitle: 'THERMAL <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-600">LOSS</span> ANALYSIS', introText: 'Following thermal inspections conducted at your facility, heat losses and financial costs from uninsulated equipment have been calculated. The data below summarizes the current situation.', daily: 'DAILY', weekly: 'WEEKLY', monthly: 'MONTHLY', yearly: 'YEARLY', totalEnergyLabel: 'Total Energy Waste', qrNote: 'Scan this QR code to track the loss cost in real-time on the live counter.', reportTitle: 'THERMAL LOSS ANALYSIS', reportSubtitle: 'LOSS', isoStandard: 'According to ISO 12241 Standards', reportIntro: 'Following thermal inspections conducted at your facility, heat losses and financial costs from uninsulated equipment have been calculated. The data below summarizes the current situation.', totalEnergyWaste: 'Total Energy Waste', leakPoints: 'Identified Leak Points', image: 'Image', leakSource: 'Leak Source', temperature: 'Temperature', quantity: 'Quantity', bareLoss: 'Bare<br>Loss (kWh)', insulatedLoss: 'Insulated<br>Loss (kWh)', saving: 'Savings<br>(kWh)', financialLoss: 'FINANCIAL LOSS', page: 'Page', managementSummary: 'Executive Summary', totalFinancialLoss: 'TOTAL FINANCIAL LOSS', perYear: '/ Year', lossNote: 'This amount is lost as operating expense every year as long as insulation is not installed.', energyWaste: 'ENERGY WASTE', fuelWaste: 'FUEL WASTE', unit: 'Unit', environmentalImpact: 'Environmental Impact', carbonFootprint: 'CARBON FOOTPRINT', ton: 'Tons', carbonNote: 'Additional CO₂ released into atmosphere', fiveYearProjection: '5-Year Cumulative Loss Projection', atEndOfFiveYears: 'AT END OF 5 YEARS', totalLoss: 'TOTAL LOSS', year: 'Year', yearLoss: ' Year Loss', cumulative: 'Cumulative', total: 'TOTAL', calculationNote: 'Calculations are based on ISO 12241 engineering standards and measured surface temperatures.', narrative: 'This analysis is calculated with assumptions of <strong>{{temp}}°C</strong> ambient temperature, <strong>{{wind}} m/s</strong> wind speed, and <strong>{{eff}}%</strong> system efficiency. The facility is projected to operate <strong>{{hours}} hours</strong> annually.' }
+    };
+
+    let printTemplateCache = null;
+    function generateReport(lang) { closePopup('reportLangPopup'); setTimeout(() => printRep(lang), 300); }
+
+    function printRep(lang = 'tr'){
+        try{
+            const t = translations[lang];
+            const printArea = document.getElementById('print-area');
+            if(!printTemplateCache){ printTemplateCache = printArea.innerHTML; }
+            printArea.innerHTML = printTemplateCache;
+            const d = new Date().toLocaleDateString('tr-TR');
+            
+            let gLoss=0, gEnergy=0, gCo2=0, gFuelLost=0; let lastFuelUnit=""; 
+            const currSymVal = document.getElementById('curr').value;
+            const currSymMap = {'USD':'$','EUR':'€','GBP':'£','TL':'₺'};
+            const currSym = currSymMap[currSymVal]||'';
+
+            LIST.forEach(i => { gLoss += i.moneyLoss; gEnergy += i.rawKwhLoss; gCo2 += i.co2; gFuelLost += i.fuelLost; lastFuelUnit = i.fuelUnit; });
+
+            const qrContainer = document.getElementById('qr-generator-dump');
+            qrContainer.innerHTML = ''; qrContainer.style.position = 'relative'; qrContainer.style.width = '200px'; qrContainer.style.height = '200px';
+            
+            const clientName = document.getElementById('cName').value || 'Müşteri';
+            const serialNo = 'LOSS-' + Math.floor(Math.random() * 10000);
+            
+            const priceRaw = parseFloat(document.getElementById('price').value) || 0;
+            const energyCurr = document.getElementById('energyCurr').value;
+            const nativeRate = FX[energyCurr] || 1;
+            const nativePriceTL = priceRaw * nativeRate;
+            const totalValTL = gFuelLost * nativePriceTL; 
+
+            const wHours = parseFloat(document.getElementById('hours').value) || 8000;
+            const fuel = document.getElementById('fuel').value;
+            
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - 2); 
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mins = String(now.getMinutes()).padStart(2, '0');
+            const fullDateTime = `${yyyy}-${mm}-${dd}-${hh}-${mins}`;
+            
+            const secondsInWorkYear = wHours * 3600;
+            const burnPerSecond = secondsInWorkYear > 0 ? (totalValTL / secondsInWorkYear) : 0;
+            const baseUrl = "https://optimizi.app/qrtakip.html";
+            let trackUrl = `${baseUrl}?c=${encodeURIComponent(clientName)}&s=${encodeURIComponent(serialNo)}&v=${totalValTL.toFixed(2)}&up=${nativePriceTL.toFixed(2)}&wh=${wHours}&f=${fuel}&d=${fullDateTime}&bps=${burnPerSecond.toFixed(6)}`;
+            
+            if(fuel === 'manual'){
+                let cLabel = document.getElementById('fuelLabel') ? document.getElementById('fuelLabel').value : 'Özel Yakıt';
+                const cUnit = document.getElementById('fuelUnit').value || 'kg';
+                const cCo2 = document.getElementById('fuelCo2') ? document.getElementById('fuelCo2').value : '0.36';
+                const cLhv = document.getElementById('fuelLhv').value;
+                if(cLhv) { cLabel += ` (${cLhv} kcal)`; }
+                trackUrl += `&fl=${encodeURIComponent(cLabel)}&fu=${encodeURIComponent(cUnit)}&fc=${encodeURIComponent(cCo2)}`;
+            }
+            
+            new QRCode(qrContainer, { text: trackUrl, width: 200, height: 200, colorDark: "#0f172a", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
+            
+            setTimeout(() => {
+                const canvas = qrContainer.querySelector("canvas");
+                if(canvas) {
+                    const qrDataUrl = canvas.toDataURL("image/png");
+                    const finalCanvas = document.createElement('canvas');
+                    finalCanvas.width = 200; finalCanvas.height = 200;
+                    const ctx = finalCanvas.getContext('2d');
+                    
+                    const qrImg = new Image();
+                    qrImg.onload = function() {
+                        ctx.drawImage(qrImg, 0, 0, 200, 200);
+                        ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(100, 100, 20, 0, 2 * Math.PI); ctx.fill();
+                        ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(100, 100, 20, 0, 2 * Math.PI); ctx.stroke();
+                        const flamePath = new Path2D('M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z');
+                        ctx.save(); ctx.translate(100, 100); ctx.scale(1.2, 1.2); ctx.translate(-12, -12); 
+                        ctx.fillStyle = '#dc2626'; ctx.fill(flamePath);
+                        ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 1.5; ctx.stroke(flamePath);
+                        ctx.restore();
+                        
+                        document.getElementById('covQrCode').src = finalCanvas.toDataURL("image/png");
+                        document.getElementById('covQrCode').classList.remove('opacity-50');
+                    };
+                    qrImg.src = qrDataUrl;
+                }
+            }, 100);
+
+            const ROWS_PER_PAGE = 20; 
+            const chunks = []; 
+            for (let i = 0; i < LIST.length; i += ROWS_PER_PAGE) { chunks.push(LIST.slice(i, i + ROWS_PER_PAGE)); } if(chunks.length === 0) chunks.push([]);
+            
+            const coverPage = document.getElementById('p-cover'); 
+            const tablePageTemplate = document.getElementById('p-table'); 
+            const summaryPage = document.getElementById('p-summary');
+            
+            if(tablePageTemplate) tablePageTemplate.remove();
+            summaryPage.classList.remove('hidden'); 
+            const totalPages = 1 + chunks.length + 1; 
+
+            const tableHeaderHTML = `
+                <th class="w-6">#</th>
+                <th class="w-20 text-center">${t.image}</th>
+                <th class="text-left w-48">${t.leakSource}</th>
+                <th class="text-center w-20">${t.temperature}</th>
+                <th class="text-center w-20">${t.quantity}</th>
+                <th class="text-right text-red-500 text-[9px]">${t.bareLoss}</th>
+                <th class="text-right text-orange-500 text-[9px]">${t.insulatedLoss}</th>
+                <th class="text-right text-emerald-600 font-bold">${t.saving}</th> 
+                <th class="text-right text-red-600 font-black">${t.financialLoss}</th>`;
+
+            chunks.forEach((chunk, index) => {
+                const newPage = tablePageTemplate ? tablePageTemplate.cloneNode(true) : document.createElement('div');
+                newPage.id = ''; newPage.classList.remove('hidden'); 
+                const titleEl = newPage.querySelector('h2'); 
+                if(titleEl) { titleEl.innerText = t.leakPoints; if(index > 0) { titleEl.innerHTML += ` <span class="text-sm text-slate-400 font-normal">(${index+1})</span>`; } }
+                
+                const dateEl = newPage.querySelector('#rDate'); if(dateEl) dateEl.innerText = d;
+                const theadTr = newPage.querySelector('thead tr'); if(theadTr) theadTr.innerHTML = tableHeaderHTML;
+                const pageNumEl = newPage.querySelector('.page-num'); if(pageNumEl) pageNumEl.innerText = `${t.page} ${index + 2} / ${totalPages}`;
+                
+                const tbody = newPage.querySelector('tbody'); 
+                if(tbody) {
+                    tbody.innerHTML = '';
+                    chunk.forEach((i, subIndex) => {
+                        const globalIndex = (index * ROWS_PER_PAGE) + subIndex + 1;
+                        const imgTag = i.img ? `<img src="${i.img}" class="w-16 h-16 object-cover rounded mx-auto border border-slate-200">` : `<div class="w-8 h-8 bg-slate-100 rounded mx-auto flex items-center justify-center text-[8px]">-</div>`;
+                        const locText = i.location ? `<div class="text-[8px] uppercase text-red-400 mt-1 font-bold">📍 ${i.location}</div>` : '';
+
+                        tbody.innerHTML += `<tr>
+                            <td class="text-center font-bold text-slate-400 border-b border-slate-100">${globalIndex}</td>
+                            <td class="text-center border-b border-slate-100 p-1">${imgTag}</td>
+                            <td class="font-bold text-slate-800 border-b border-slate-100 text-[10px]">${i.name} ${locText}</td>
+                            <td class="text-center border-b border-slate-100 font-bold text-red-600">${i.tSurf}°C</td>
+                            <td class="text-center border-b border-slate-100 text-[10px]">${i.qty} ${i.unit}</td>
+                            <td class="text-right font-mono text-[10px] text-red-500 border-b border-slate-100">${i.kwhBare}</td>
+                            <td class="text-right font-mono text-[10px] text-orange-500 border-b border-slate-100">${i.kwhIns}</td>
+                            <td class="text-right font-bold text-emerald-600 text-[10px] border-b border-slate-100">+${i.kwhSave}</td>
+                            <td class="text-right font-bold text-red-600 text-[10px] border-b border-slate-100">${currSym}${Math.round(i.moneyLoss).toLocaleString()}</td>
+                        </tr>`;
+                    });
+                }
+                printArea.insertBefore(newPage, summaryPage);
+            });
+
+            document.getElementById('covClientLabel').innerText = t.clientLabel;
+            document.getElementById('covProvLabel').innerText = t.providerLabel;
+            document.getElementById('covIsoLabel').innerText = t.isoLabel;
+            document.getElementById('covMainTitle').innerHTML = t.mainTitle;
+            document.getElementById('covIntro').innerText = t.introText;
+            document.getElementById('covDailyLabel').innerText = t.daily;
+            document.getElementById('covWeeklyLabel').innerText = t.weekly;
+            document.getElementById('covMonthlyLabel').innerText = t.monthly;
+            document.getElementById('covYearlyLabel').innerText = t.yearly;
+            document.getElementById('covEnergyLabel').innerText = t.totalEnergyLabel;
+
+            document.getElementById('covClient').innerText = document.getElementById('cName').value || "FİRMA ADI";
+            document.getElementById('covContact').innerText = document.getElementById('cEng').value || "";
+            document.getElementById('covProv').innerText = document.getElementById('pName').value || "TEDARİKÇİ";
+            document.getElementById('covDate').innerText = d;
+            
+            document.getElementById('covMoneyYear').innerText = currSym + Math.round(gLoss).toLocaleString();
+            document.getElementById('covMoneyMonth').innerText = currSym + Math.round(gLoss/12).toLocaleString();
+            document.getElementById('covMoneyWeek').innerText = currSym + Math.round(gLoss/52).toLocaleString();
+            document.getElementById('covMoneyDay').innerText = currSym + Math.round(gLoss/365).toLocaleString();
+            document.getElementById('covKwhTotal').innerText = Math.round(gEnergy).toLocaleString();
+
+            const tAmb = document.getElementById('tAmb').value; const vWind = document.getElementById('vWind').value; const eff = document.getElementById('eff').value;
+            const narrative = t.narrative.replace('{{temp}}', tAmb).replace('{{wind}}', vWind).replace('{{eff}}', eff).replace('{{hours}}', wHours);
+            document.getElementById('covNarrative').innerHTML = narrative;
+
+            document.getElementById('sumLoss').innerText = currSym + Math.round(gLoss).toLocaleString();
+            document.getElementById('sumFuelLost').innerText = Math.round(gFuelLost).toLocaleString();
+            document.getElementById('sumFuelUnitLabel').innerText = lastFuelUnit;
+            document.getElementById('sumEnergy').innerText = Math.round(gEnergy).toLocaleString() + ' kWh';
+            document.getElementById('sumCo2').innerText = gCo2.toFixed(1);
+
+            const projTable = document.getElementById('projTable');
+            const totalProj = gLoss * 5;
+            projTable.innerHTML = `
+                <tr class="border-b border-slate-100">
+                    <td class="p-2 text-left font-bold text-slate-700">Kayıp Devam Ederse</td>
+                    <td class="p-2 text-red-600 font-bold">${currSym}${Math.round(gLoss).toLocaleString()}</td>
+                    <td class="p-2 text-red-600 font-bold">${currSym}${Math.round(gLoss*2).toLocaleString()}</td>
+                    <td class="p-2 text-red-600 font-bold">${currSym}${Math.round(gLoss*3).toLocaleString()}</td>
+                    <td class="p-2 text-red-600 font-bold">${currSym}${Math.round(gLoss*4).toLocaleString()}</td>
+                    <td class="p-2 text-red-600 font-bold">${currSym}${Math.round(gLoss*5).toLocaleString()}</td>
+                    <td class="p-2 text-red-700 font-black">${currSym}${Math.round(totalProj).toLocaleString()}</td>
+                </tr>
+            `;
+            document.getElementById('sumCumulativeLoss').innerText = currSym + Math.round(totalProj).toLocaleString();
+            document.getElementById('sumCumulativePercent').innerText = '500%';
+
+            setTimeout(()=>{ 
+                lucide.createIcons(); 
+                
+                // Karanlık mod kontrolü ve anlık kapatılması
+                const isDark = document.documentElement.classList.contains('dark');
+                if (isDark) {
+                    document.documentElement.classList.remove('dark');
+                }
+                
+                window.print(); 
+                
+                // Rapor pencesi kapandığında eski haline dönmesi
+                if (isDark) {
+                    document.documentElement.classList.add('dark');
+                }
+            }, 250); 
+
+        }catch(e){ showAlert('Rapor hatası: ' + e.message, 'Hata'); console.error(e); }
+    }
+
+    async function saveData() {
+        if(LIST.length === 0) { showAlert('Kayıt yapılacak veri bulunmuyor. Lütfen önce kaçak noktaları ekleyin.'); return; }
+        
+        const activeSupabase = window.supabaseClient || window.supabase;
+        if(!activeSupabase) { showAlert('Veritabanı bağlantısı bulunamadı.', 'Hata'); return; }
+        
+        const { data: { session } } = await activeSupabase.auth.getSession();
+        if(!session) { showAlert('Lütfen önce giriş yapın.', 'Hata'); setTimeout(() => { window.location.href = '/login'; }, 2000); return; }
+        
+        const reportCurr = document.getElementById('curr').value;
+        let gLoss = 0, gEnergy = 0, gCo2 = 0;
+        LIST.forEach(i => { gLoss += i.moneyLoss; gEnergy += i.rawKwhLoss; gCo2 += i.co2; });
+        
+        try {
+            const calcData = {
+                    user_id: session.user.id, project_name: document.getElementById('pName').value || "İsimsiz Proje",
+                    client_name: document.getElementById('cName').value || "", client_contact: document.getElementById('cEng').value || "",
+                    provider_name: document.getElementById('pName').value || "", provider_engineer: document.getElementById('pEng').value || "",
+                    calculation_type: 'anlik-kayip', items: LIST, total_investment: 0, total_savings: 0, total_loss: gLoss, total_co2: gCo2,
+                    roi_months: 0, currency: reportCurr, ambient_temp: parseFloat(document.getElementById('tAmb').value),
+                    wind_speed: parseFloat(document.getElementById('vWind').value), fuel_type: document.getElementById('fuel').value,
+                    boiler_efficiency: parseFloat(document.getElementById('eff').value), energy_price: parseFloat(document.getElementById('price').value),
+                    annual_hours: parseInt(document.getElementById('hours').value)
+            };
+
+            let data, error;
+            if (window.loadedCalcId) { ({ data, error } = await activeSupabase.from('calculations').update(calcData).eq('id', window.loadedCalcId).select()); } 
+            else { ({ data, error } = await activeSupabase.from('calculations').insert(calcData).select()); }
+            
+            if(error) { showAlert('Kaydetme sırasında hata oluştu: ' + error.message, 'Hata'); } 
+            else {
+                const isUpdate = !!window.loadedCalcId;
+                const saveName = document.getElementById('cName').value || document.getElementById('pName').value || 'Proje';
+                if (!isUpdate && data && data[0]) { window.loadedCalcId = data[0].id; window.history.replaceState({}, '', window.location.pathname + '?load_id=' + data[0].id); }
+                showAlert(`"${saveName}" ${isUpdate ? 'güncellendi' : 'kaydedildi'}! Dashboard'dan görüntüleyebilirsiniz.`, 'Başarılı 🎉');
+            }
+        } catch(err) { showAlert('Bir hata oluştu: ' + err.message, 'Hata'); }
+    }
+</script>
+<script>
+    window.addEventListener('DOMContentLoaded', async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const loadId = urlParams.get('load_id');
+        window.loadedCalcId = loadId || null;
+        if (!loadId) return;
+
+        const activeSupabase = window.supabaseClient || window.supabase;
+        if (!activeSupabase) return;
+
+        const { data, error } = await activeSupabase.from('calculations').select('*').eq('id', loadId).single();
+        if (error || !data) return;
+
+        if(data.project_name) document.getElementById('pName').value = data.project_name;
+        if(data.client_name) document.getElementById('cName').value = data.client_name;
+        if(data.client_contact) document.getElementById('cEng').value = data.client_contact;
+        if(data.provider_engineer) document.getElementById('pEng').value = data.provider_engineer;
+        if(data.ambient_temp) document.getElementById('tAmb').value = data.ambient_temp;
+        if(data.wind_speed !== null && data.wind_speed !== undefined) document.getElementById('vWind').value = data.wind_speed;
+        if(data.boiler_efficiency) document.getElementById('eff').value = data.boiler_efficiency;
+        if(data.energy_price) document.getElementById('price').value = data.energy_price;
+        if(data.annual_hours) document.getElementById('hours').value = data.annual_hours;
+        
+        if(data.fuel_type) { document.getElementById('fuel').value = data.fuel_type; if(typeof toggleFuelMode === 'function') toggleFuelMode(); }
+
+        if (data.items && Array.isArray(data.items)) {
+            LIST = data.items;
+            if(typeof updateGlobalFinancials === 'function') updateGlobalFinancials();
+            if(typeof render === 'function') render();
+        }
+    });
+</script>
+</body>
+</html>
