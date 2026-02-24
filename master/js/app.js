@@ -47,9 +47,10 @@ const VALVE_DATA={"PV-16":{"desc":"Pistonlu Vana PN16","pn":16,"dims":{"15":{"D"
 // =================================================================
 async function loadAllData() {
     try {
+        const base = document.baseURI.includes('/master') ? '/master/' : '';
         const [matRes, stdRes] = await Promise.all([
-            fetch('data/materials.json'),
-            fetch('data/standards.json')
+            fetch(base + 'data/materials.json'),
+            fetch(base + 'data/standards.json')
         ]);
 
         if (!matRes.ok || !stdRes.ok) throw new Error("JSON Dosyaları bulunamadı!");
@@ -96,7 +97,7 @@ async function loadAllData() {
 
     } catch (e) {
         console.error("Veritabanı Yükleme Hatası:", e);
-        alert("Sistem veri tabanı dosyalarını (JSON) okuyamadı. Tarayıcınız yerel dosyaları engelliyor olabilir (CORS Hatası). Lütfen projeyi VS Code Live Server gibi bir ortamda açın.");
+        toast('Veritabanı yüklenemedi: ' + e.message, 'er');
     }
 }
 
@@ -431,6 +432,10 @@ function rMas(){
  IT.forEach(it=>it.parts.forEach(pt=>{const pc=pt.calc||{};tots.fab+=(pc.fab||0)*it.qt;tots.fil+=(pc.fil||0)*it.qt;tots.sew+=(pc.sew||0)*it.qt;tots.drw+=(pc.drw||0)*it.qt;tots.vlc+=(pc.vlc||0)*it.qt;tots.ag+=(pc.ag||0)*it.qt;tots.pl+=(pc.pl||0)*it.qt}));
  const mm=(l,s,q,u)=>{const m=mn2(s),p=mp(m);return`<tr><td class="lb text-[var(--tx-main)]">${l}</td><td style="font-size:.68rem;color:var(--tx-mut)">${s}</td><td class="c font-mono text-[var(--cy)]">${fm(q,2)}</td><td style="text-align:center;font-size:.68rem;color:var(--tx-mut)">${u}</td><td class="c font-mono text-[var(--tx-main)]">${fm(p)}</td><td class="c font-mono font-bold text-[var(--tx-main)]">${ftl(q*p)}</td></tr>`};
  document.getElementById('tMM').innerHTML=`<thead><tr><th>Malzeme</th><th>Seçim</th><th>Miktar</th><th>Br</th><th>B.Fyt</th><th>Toplam</th></tr></thead><tbody>${mm('Alt Kumaş',P.gFB,tots.fab/2,'M²')}${mm('Üst Kumaş',P.gFT,tots.fab/2,'M²')}${mm('Dolgu',P.gFL,tots.fil,'M²')}${mm('Dikiş İpi',P.gST,tots.sew,'MT')}${mm('Boğma İpi',P.gDS,tots.drw,'MT')}${mm('Cırt',P.gVL,tots.vlc,'MT')}${mm('Agraf',P.gSP,tots.ag,'SET')}${mm('Ç.Pul',P.gND,tots.pl,'AD')}<tr><td class="hd2 font-bold" colspan="5">TOPLAM</td><td class="c font-mono font-bold text-[var(--gn)] text-[1rem]">${ftl(tM)}</td></tr></tbody>`;
+ 
+ const msAH=document.getElementById('msAH'); if(msAH) msAH.textContent=fm(tLH,1);
+ const msAD=document.getElementById('msAD'); if(msAD) msAD.textContent=fm(tLH/(PP.saat||9),1);
+ const msJC=document.getElementById('msJC'); if(msJC) msJC.textContent=tJ;
  
  document.getElementById('tMS').innerHTML=`<thead><tr><th>Döviz</th><th>Kur</th><th>Satış</th><th>Maliyet</th><th>Kâr</th></tr></thead><tbody><tr><td class="lb text-[var(--tx-main)] font-bold">TL</td><td class="c text-[var(--tx-mut)]">1</td><td class="g font-mono">${ftl(tS)}</td><td class="c font-mono text-[var(--tx-main)]">${ftl(tc)}</td><td class="font-mono ${pr>=0?'g':'r'} font-bold">${ftl(pr)}</td></tr><tr><td class="lb text-[var(--tx-main)] font-bold">USD</td><td class="c font-mono text-[var(--tx-mut)]">${fm(P.usd)}</td><td class="g font-mono">${fus(tS/P.usd)}</td><td class="c font-mono text-[var(--tx-main)]">${fus(tc/P.usd)}</td><td class="font-mono ${pr>=0?'g':'r'} font-bold">${fus(pr/P.usd)}</td></tr><tr><td class="lb text-[var(--tx-main)] font-bold">EUR</td><td class="c font-mono text-[var(--tx-mut)]">${fm(P.eur)}</td><td class="g font-mono">${feu(tS/P.eur)}</td><td class="c font-mono text-[var(--tx-main)]">${feu(tc/P.eur)}</td><td class="font-mono ${pr>=0?'g':'r'} font-bold">${feu(pr/P.eur)}</td></tr></tbody>`;
 }
@@ -892,6 +897,7 @@ window.onload = async () => {
     
     // 2. EN KRİTİK NOKTA: Verileri JSON dosyalarından asenkron (fetch) ile çek
     await loadAllData(); 
+    initExtrapolation(); 
     
     // 3. LocalStorage Restore (Kullanıcı değişiklikleri varsa üzerine yaz)
     try {
@@ -947,4 +953,3 @@ function toggleTheme(){
 function openPdfModal(){ previewPDF(); }
 
 function openGlobalMatModal(){ rGlobal(); document.getElementById('globalMatModal').classList.add('show'); }
-
