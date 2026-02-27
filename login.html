@@ -148,7 +148,9 @@
     // ==============================================================================
     supabaseClient.auth.onAuthStateChange((event, session) => {
         if (session) {
-            window.location.replace('dashboard.html');
+            const savedPath = sessionStorage.getItem('redirectAfterLogin');
+            sessionStorage.removeItem('redirectAfterLogin');
+            window.location.replace(savedPath || 'dashboard.html');
         }
     });
 
