@@ -53,8 +53,8 @@ let inactivityTimer = null;
     
     // Yarış durumunu çözen bekleme döngüsü
     let retryCount = 0;
-    while (!session && !error && retryCount < 5) {
-      await new Promise(resolve => setTimeout(resolve, 300));
+    while (!session && !error && retryCount < 8) {
+      await new Promise(resolve => setTimeout(resolve, 400));
       ({ data: { session }, error } = await supabaseClient.auth.getSession());
       retryCount++;
     }
@@ -150,8 +150,8 @@ async function checkAuthenticationSync() {
     let { data: { session }, error } = await supabaseClient.auth.getSession();
     
     let retryCount = 0;
-    while (!session && !error && retryCount < 5) {
-      await new Promise(resolve => setTimeout(resolve, 300));
+    while (!session && !error && retryCount < 8) {
+      await new Promise(resolve => setTimeout(resolve, 400));
       ({ data: { session }, error } = await supabaseClient.auth.getSession());
       retryCount++;
     }
