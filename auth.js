@@ -1,6 +1,6 @@
 // ============================================
 // CENTRAL AUTHENTICATION SYSTEM & SECURITY
-// Optimizi.App | v2.1 Kusursuz Gizlilik Modülü
+// Optimizi.App | v2.2 - Login Loop Fix
 // ============================================
 
 const SUPABASE_URL = 'https://gktvludkrsxnpigydqml.supabase.co';
@@ -8,7 +8,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// 1. HANGİ SAYFALAR HERKESE AÇIK? (Kilitlenmeyecek ve yönlendirilmeyecek sayfalar)
+// 1. HANGİ SAYFALAR HERKESE AÇIK?
 const currentPath = window.location.pathname.toLowerCase();
 const isPublicPage = 
     currentPath === '/' || 
@@ -19,21 +19,17 @@ const isPublicPage =
     currentPath.includes('blog') ||
     currentPath.includes('404');
 
-// 2. GÖRÜNMEZ GÜVENLİK STİLİ VE TEMA ARKA PLANI (SADECE KİLİTLİ SAYFALARDA ÇALIŞIR)
+// 2. GÖRÜNMEZ GÜVENLİK STİLİ (SADECE KİLİTLİ SAYFALARDA)
 if (!isPublicPage) {
     const style = document.createElement('style');
     style.innerHTML = `
-        /* Beyaz flaşı önlemek için tarayıcının en arka duvarını temaya göre boyuyoruz */
         html.dark { background-color: #0f172a !important; }
         html:not(.dark) { background-color: #f8fafc !important; }
-        
-        /* Sayfa gövdesini gizle ama arka plan rengi html'den gelsin (Ctrl+U'dan saklandı) */
         body:not(.auth-checked) { opacity: 0 !important; pointer-events: none !important; }
         body.auth-checked { opacity: 1 !important; transition: opacity 0.3s ease !important; }
     `;
     document.head.appendChild(style);
 } else {
-    // Herkese açık bir sayfadaysak görünürlüğü garanti altına al
     document.addEventListener("DOMContentLoaded", () => {
         document.body.classList.add('auth-checked');
     });
@@ -44,64 +40,79 @@ const INACTIVITY_TIMEOUT = 5 * 60 * 1000;
 let inactivityTimer = null;
 
 // 4. ANA GÜVENLİK KONTROLÜ
-(async function checkAuthentication() {
-  if (isPublicPage) return;
+// =========================================================================
+// FIX: Eski yöntem getSession() + onAuthStateChange yarış durumuna giriyordu.
+// Yeni yöntem: Supabase'in INITIAL_SESSION event'ini TEK KAYNAK olarak kullanıyor.
+// onAuthStateChange ilk çağrıldığında Supabase otomatik olarak session'ı 
+// restore eder ve INITIAL_SESSION event'i fırlatır. Bu sayede token refresh 
+// tamamlanmadan login'e atma sorunu ortadan kalkıyor.
+// =========================================================================
+(function checkAuthentication() {
+    if (isPublicPage) return;
 
-  try {
-    let { data: { session }, error } = await supabaseClient.auth.getSession();
-    
-    // Session varsa direkt devam
-    if (session && !error) {
-      window.currentUser = session.user;
-      document.body.classList.add('auth-checked');
-      startInactivityTimer();
-      return;
-    }
+    let authResolved = false;
+    const AUTH_TIMEOUT = 8000; // 8 saniye - token refresh için yeterli süre
 
-    // Session yoksa — Supabase token restore'u bekle (max 5sn)
-    const restored = await new Promise(resolve => {
-      const timeout = setTimeout(() => resolve(null), 5000);
-      const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event, ses) => {
-        if (ses) {
-          clearTimeout(timeout);
-          subscription.unsubscribe();
-          resolve(ses);
+    // Tek bir listener ile hem ilk yüklemeyi hem de sonraki değişimleri yakala
+    const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event, session) => {
+        // Sadece ilk çözümleme için
+        if (!authResolved) {
+            authResolved = true;
+            clearTimeout(authTimeoutId);
+
+            if (session) {
+                onAuthSuccess(session);
+            } else {
+                // INITIAL_SESSION event'i session=null döndü → gerçekten giriş yapılmamış
+                redirectToLogin();
+            }
+        } else {
+            // Sonraki auth değişimleri (token refresh, sign out vb.)
+            if (event === 'SIGNED_OUT') {
+                redirectToLogin();
+            } else if (event === 'TOKEN_REFRESHED' && session) {
+                window.currentUser = session.user;
+                resetInactivityTimer();
+            }
         }
-      });
     });
 
-    if (restored) {
-      window.currentUser = restored.user;
-      document.body.classList.add('auth-checked');
-      startInactivityTimer();
-    } else {
-      redirectToLogin();
-    }
-  } catch (err) {
-    redirectToLogin();
-  }
+    // Güvenlik ağı: Supabase hiç event fırlatmazsa (ağ sorunu vs.)
+    const authTimeoutId = setTimeout(() => {
+        if (!authResolved) {
+            authResolved = true;
+            subscription.unsubscribe();
+            redirectToLogin();
+        }
+    }, AUTH_TIMEOUT);
 })();
+
+function onAuthSuccess(session) {
+    window.currentUser = session.user;
+    document.body.classList.add('auth-checked');
+    startInactivityTimer();
+}
 
 // 5. HAREKETSİZLİK SÜRESİ (AFK) KONTROLLERİ
 function startInactivityTimer() {
-  if (inactivityTimer) clearTimeout(inactivityTimer);
-  inactivityTimer = setTimeout(() => {
-    logoutDueToInactivity();
-  }, INACTIVITY_TIMEOUT);
+    if (inactivityTimer) clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(() => {
+        logoutDueToInactivity();
+    }, INACTIVITY_TIMEOUT);
 }
 
 function resetInactivityTimer() {
-  startInactivityTimer();
+    startInactivityTimer();
 }
 
 async function logoutDueToInactivity() {
-  await supabaseClient.auth.signOut();
-  sessionStorage.removeItem('redirectAfterLogin');
-  showInactivityPopup();
+    await supabaseClient.auth.signOut();
+    sessionStorage.removeItem('redirectAfterLogin');
+    showInactivityPopup();
 }
 
 function showInactivityPopup() {
-  const popupHTML = `
+    const popupHTML = `
     <div id="inactivityPopup" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center; z-index: 99999; backdrop-filter: blur(5px);">
       <div style="background: white; border-radius: 16px; padding: 40px; max-width: 450px; width: 90%; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); text-align: center;">
         <h2 style="margin: 0 0 16px 0; font-size: 24px; font-weight: 600; color: #1a202c;">Oturum Süresi Doldu</h2>
@@ -110,72 +121,88 @@ function showInactivityPopup() {
       </div>
     </div>
   `;
-  document.body.insertAdjacentHTML('beforeend', popupHTML);
-  document.getElementById('inactivityPopupBtn').addEventListener('click', () => window.location.replace('/login.html'));
+    document.body.insertAdjacentHTML('beforeend', popupHTML);
+    document.getElementById('inactivityPopupBtn').addEventListener('click', () => window.location.replace('/login.html'));
 }
 
 function setupActivityListeners() {
-  const activityEvents = ['click', 'scroll', 'touchstart'];
-  activityEvents.forEach(event => document.addEventListener(event, resetInactivityTimer, true));
+    const activityEvents = ['click', 'scroll', 'touchstart'];
+    activityEvents.forEach(event => document.addEventListener(event, resetInactivityTimer, true));
 }
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', setupActivityListeners);
+    document.addEventListener('DOMContentLoaded', setupActivityListeners);
 } else {
-  setupActivityListeners();
+    setupActivityListeners();
 }
 
 // 6. YÖNLENDİRME VE ÇIKIŞ İŞLEMLERİ
 function redirectToLogin() {
-  if (inactivityTimer) clearTimeout(inactivityTimer);
-  
-  const currentPath = window.location.pathname;
-  // Sadece kilitli sayfalarda hafızaya link kaydet
-  if (!isPublicPage) {
-    sessionStorage.setItem('redirectAfterLogin', currentPath);
-  }
-  
-  window.location.replace('/login.html');
+    if (inactivityTimer) clearTimeout(inactivityTimer);
+    
+    const currentPath = window.location.pathname;
+    if (!isPublicPage) {
+        sessionStorage.setItem('redirectAfterLogin', currentPath);
+    }
+    
+    window.location.replace('/login.html');
 }
 
 async function logout() {
-  if (inactivityTimer) clearTimeout(inactivityTimer);
-  await supabaseClient.auth.signOut();
-  window.location.replace('/login.html');
+    if (inactivityTimer) clearTimeout(inactivityTimer);
+    await supabaseClient.auth.signOut();
+    window.location.replace('/login.html');
 }
 
 // 7. SEKMELER ARASI GEÇİŞ (VISIBILITY) SENKRONİZASYONU
-document.addEventListener('visibilitychange', () => { if (!document.hidden) checkAuthenticationSync(); });
-window.addEventListener('focus', () => checkAuthenticationSync());
+// =========================================================================
+// FIX: Eski yöntem her focus/visibility değişiminde getSession + onAuthStateChange
+// çağırıyordu ve yeni subscription'lar birikiyordu. 
+// Yeni yöntem: Sadece getSession() ile kontrol yapar, token refresh'i Supabase'in 
+// kendi iç mekanizmasına bırakır. Debounce + lock mekanizması ekler.
+// =========================================================================
+let visibilityCheckInProgress = false;
+
+document.addEventListener('visibilitychange', () => { 
+    if (!document.hidden) debouncedAuthCheck(); 
+});
+window.addEventListener('focus', () => debouncedAuthCheck());
+
+let visibilityDebounceTimer = null;
+function debouncedAuthCheck() {
+    if (visibilityDebounceTimer) clearTimeout(visibilityDebounceTimer);
+    visibilityDebounceTimer = setTimeout(() => checkAuthenticationSync(), 500);
+}
 
 async function checkAuthenticationSync() {
-  if (isPublicPage) return;
+    if (isPublicPage || visibilityCheckInProgress) return;
+    visibilityCheckInProgress = true;
 
-  try {
-    let { data: { session }, error } = await supabaseClient.auth.getSession();
-    
-    if (session && !error) {
-      resetInactivityTimer();
-      return;
-    }
-
-    // Sekme geri geldiğinde kısa bekle
-    const restored = await new Promise(resolve => {
-      const timeout = setTimeout(() => resolve(null), 3000);
-      const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event, ses) => {
-        if (ses) {
-          clearTimeout(timeout);
-          subscription.unsubscribe();
-          resolve(ses);
+    try {
+        // Önce mevcut session'ı kontrol et
+        let { data: { session }, error } = await supabaseClient.auth.getSession();
+        
+        if (session && !error) {
+            resetInactivityTimer();
+            visibilityCheckInProgress = false;
+            return;
         }
-      });
-    });
 
-    if (restored) resetInactivityTimer();
-    else redirectToLogin();
-  } catch (err) {
-    redirectToLogin();
-  }
+        // Session yoksa, token refresh'i dene (expired token varsa kurtarır)
+        const { data: refreshData, error: refreshError } = await supabaseClient.auth.refreshSession();
+        
+        if (refreshData?.session) {
+            window.currentUser = refreshData.session.user;
+            resetInactivityTimer();
+        } else {
+            // Gerçekten oturum yok
+            redirectToLogin();
+        }
+    } catch (err) {
+        redirectToLogin();
+    } finally {
+        visibilityCheckInProgress = false;
+    }
 }
 
 // Global Erişime Açılan Değişkenler
