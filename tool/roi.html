@@ -1474,7 +1474,7 @@ async function saveCalculation() {
                 const invDisp=i.invTL/reportRate, saveDisp=i.saveTL/reportRate, lossDisp=i.lossTL/reportRate, lossBareDisp=i.lossBareTL/reportRate;
                 const itemTs=parseFloat(i.Ts)||0;
                 if(itemTs>maxTempDetected) maxTempDetected=itemTs;
-                if(i.inputs.type!=='package') allWinds.push(i.inputs.vWind||1);
+                if(i.inputs.type!=='package') allWinds.push(i.inputs.vWind ?? 0);
                 const rawKwh=parseFloat(i.kwhBare.replace(/\./g,'').replace(',','.'));
                 gTotalKwh+=rawKwh;
                 if(i.inputs.matKey!=='bare'){ gInv+=invDisp; gSave+=saveDisp; gCo2+=i.co2; gLoss+=lossBareDisp; gFuelLost+=i.fuelLost; }
