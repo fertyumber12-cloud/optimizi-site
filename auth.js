@@ -58,14 +58,15 @@ let inactivityTimer = null;
       return;
     }
 
-    // Session yoksa — Supabase token restore'u bekle (max 2sn)
-    // SIGNED_OUT veya INITIAL_SESSION(null) gelirse de hemen login'e at
+    // Session yoksa — Supabase token restore'u bekle (max 5sn)
     const restored = await new Promise(resolve => {
-      const timeout = setTimeout(() => resolve(null), 2000);
+      const timeout = setTimeout(() => resolve(null), 5000);
       const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event, ses) => {
-        clearTimeout(timeout);
-        subscription.unsubscribe();
-        resolve(ses); // ses null ise login'e gidecek
+        if (ses) {
+          clearTimeout(timeout);
+          subscription.unsubscribe();
+          resolve(ses);
+        }
       });
     });
 
@@ -160,11 +161,13 @@ async function checkAuthenticationSync() {
 
     // Sekme geri geldiğinde kısa bekle
     const restored = await new Promise(resolve => {
-      const timeout = setTimeout(() => resolve(null), 2000);
+      const timeout = setTimeout(() => resolve(null), 3000);
       const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event, ses) => {
-        clearTimeout(timeout);
-        subscription.unsubscribe();
-        resolve(ses);
+        if (ses) {
+          clearTimeout(timeout);
+          subscription.unsubscribe();
+          resolve(ses);
+        }
       });
     });
 
