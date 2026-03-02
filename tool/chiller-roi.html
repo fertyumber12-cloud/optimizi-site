@@ -1003,12 +1003,16 @@
     function buildReport(T, d, currSym, reportRate, reportCurr, isQr, qrImageSrc) {
         const printArea = document.getElementById('print-area');
         
-        let gInv=0, gSave=0, gCo2=0, gLossBare=0, gKwhSaveTotal=0;
+        let gInv=0, gSave=0, gCo2=0, gLossBare=0, gKwhSaveTotal=0, gTotalM2=0;
         LIST.forEach(i => {
             gInv += i.invTL / reportRate; gSave += i.saveTL / reportRate;
             gCo2 += (i.kwhSave * 0.44 / 1000); gKwhSaveTotal += i.kwhSave;
             const pRate = (i.raw.priceVal * (FX[i.raw.priceCurr]||1));
             gLossBare += (i.kwhBare * pRate) / reportRate;
+            if(i.raw.type === 'tank') {
+                if(i.raw.surfaces) i.raw.surfaces.forEach(s => gTotalM2 += (s.w*s.h)/1e6);
+                if(i.raw.circles) i.raw.circles.forEach(c => gTotalM2 += Math.PI*Math.pow(c.d/2000,2));
+            }
         });
         const totalRoi = gSave > 0 ? (gInv/gSave*12) : 0;
 
@@ -1074,11 +1078,12 @@
 
                 <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px;margin-bottom:20px;">
                     <div style="font-size:8px;font-weight:800;color:#0891b2;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px;">${T.paramTitle}</div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;">
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr${gTotalM2 > 0 ? ' 1fr' : ''};gap:12px;">
                         <div><div style="font-size:7px;color:#94a3b8;font-weight:600;text-transform:uppercase;">${T.copLabel}</div><div style="font-size:16px;font-weight:800;color:#0f172a;">${copVal}</div></div>
                         <div><div style="font-size:7px;color:#94a3b8;font-weight:600;text-transform:uppercase;">${T.hoursLabel}</div><div style="font-size:16px;font-weight:800;color:#0f172a;">${Number(hoursVal).toLocaleString()} h</div></div>
                         <div><div style="font-size:7px;color:#94a3b8;font-weight:600;text-transform:uppercase;">${T.unitPrice}</div><div style="font-size:16px;font-weight:800;color:#0f172a;">${priceCurrSym}${priceDisp}/kWh</div></div>
                         <div><div style="font-size:7px;color:#94a3b8;font-weight:600;text-transform:uppercase;">${T.ambTemp}</div><div style="font-size:16px;font-weight:800;color:#0f172a;">${ambVal}°C</div></div>
+                        ${gTotalM2 > 0 ? `<div><div style="font-size:7px;color:#94a3b8;font-weight:600;text-transform:uppercase;">${REPORT_LANG==='tr'?'Toplam Alan':'Total Area'}</div><div style="font-size:16px;font-weight:800;color:#0f172a;">${gTotalM2.toFixed(2)} m²</div></div>` : ''}
                     </div>
                 </div>
 
