@@ -47,36 +47,32 @@ let inactivityTimer = null;
 (async function checkAuthentication() {
   if (isPublicPage) return;
 
-  try {
-    let { data: { session }, error } = await supabaseClient.auth.getSession();
+  // Supabase v2: onAuthStateChange INITIAL_SESSION event'ini otomatik fire eder.
+  // Bu, token refresh dahil her durumda çalışır.
+  const session = await new Promise(resolve => {
+    const fallback = setTimeout(() => resolve(null), 3000);
     
-    // Session varsa direkt devam
-    if (session && !error) {
-      window.currentUser = session.user;
-      document.body.classList.add('auth-checked');
-      startInactivityTimer();
-      return;
-    }
-
-    // Session yoksa — Supabase token restore'u bekle (max 2sn)
-    // SIGNED_OUT veya INITIAL_SESSION(null) gelirse de hemen login'e at
-    const restored = await new Promise(resolve => {
-      const timeout = setTimeout(() => resolve(null), 2000);
-      const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event, ses) => {
-        clearTimeout(timeout);
+    const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event, ses) => {
+      // INITIAL_SESSION: sayfa yüklendiğinde ilk event (session olsun olmasın)
+      // TOKEN_REFRESHED: token yenilendi
+      // SIGNED_IN: yeni giriş
+      if (event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') {
+        clearTimeout(fallback);
         subscription.unsubscribe();
-        resolve(ses); // ses null ise login'e gidecek
-      });
+        resolve(ses);
+      } else if (event === 'SIGNED_OUT') {
+        clearTimeout(fallback);
+        subscription.unsubscribe();
+        resolve(null);
+      }
     });
+  });
 
-    if (restored) {
-      window.currentUser = restored.user;
-      document.body.classList.add('auth-checked');
-      startInactivityTimer();
-    } else {
-      redirectToLogin();
-    }
-  } catch (err) {
+  if (session) {
+    window.currentUser = session.user;
+    document.body.classList.add('auth-checked');
+    startInactivityTimer();
+  } else {
     redirectToLogin();
   }
 })();
@@ -149,26 +145,9 @@ window.addEventListener('focus', () => checkAuthenticationSync());
 
 async function checkAuthenticationSync() {
   if (isPublicPage) return;
-
   try {
-    let { data: { session }, error } = await supabaseClient.auth.getSession();
-    
-    if (session && !error) {
-      resetInactivityTimer();
-      return;
-    }
-
-    // Sekme geri geldiğinde kısa bekle
-    const restored = await new Promise(resolve => {
-      const timeout = setTimeout(() => resolve(null), 2000);
-      const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event, ses) => {
-        clearTimeout(timeout);
-        subscription.unsubscribe();
-        resolve(ses);
-      });
-    });
-
-    if (restored) resetInactivityTimer();
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) resetInactivityTimer();
     else redirectToLogin();
   } catch (err) {
     redirectToLogin();
