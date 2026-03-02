@@ -19,7 +19,7 @@ const isPublicPage =
     currentPath.includes('blog') ||
     currentPath.includes('404');
 
-// 2. LOADING SPINNER (kontrol bitene kadar sayfa yerine spinner göster)
+// 2. GÖRÜNMEZ GÜVENLİK STİLİ VE TEMA ARKA PLANI (SADECE KİLİTLİ SAYFALARDA ÇALIŞIR)
 if (!isPublicPage) {
     const style = document.createElement('style');
     style.innerHTML = `
@@ -28,11 +28,11 @@ if (!isPublicPage) {
         
         body:not(.auth-checked) { overflow: hidden !important; }
         body.auth-checked .auth-loading-overlay { display: none !important; }
-        body.auth-checked { opacity: 1 !important; }
+        body.auth-checked { opacity: 1 !important; transition: opacity 0.3s ease !important; }
         
         .auth-loading-overlay {
             position: fixed; inset: 0; z-index: 99999;
-            display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px;
+            display: flex; align-items: center; justify-content: center;
         }
         html.dark .auth-loading-overlay { background: #0f172a; }
         html:not(.dark) .auth-loading-overlay { background: #f8fafc; }
@@ -47,12 +47,12 @@ if (!isPublicPage) {
     `;
     document.head.appendChild(style);
     
-    // Spinner overlay'ı ekle
     const overlay = document.createElement('div');
     overlay.className = 'auth-loading-overlay';
     overlay.innerHTML = '<div class="auth-spinner"></div>';
     document.documentElement.appendChild(overlay);
 } else {
+    // Herkese açık bir sayfadaysak görünürlüğü garanti altına al
     document.addEventListener("DOMContentLoaded", () => {
         document.body.classList.add('auth-checked');
     });
@@ -64,14 +64,16 @@ let inactivityTimer = null;
 
 // 4. ANA GÜVENLİK KONTROLÜ
 (async function checkAuthentication() {
+  // Eğer sayfa herkese açıksa güvenlik sorgusunu ve logine atma işlemini iptal et
   if (isPublicPage) return;
 
   try {
     let { data: { session }, error } = await supabaseClient.auth.getSession();
     
+    // Yarış durumunu çözen bekleme döngüsü
     let retryCount = 0;
-    while (!session && !error && retryCount < 6) {
-      await new Promise(resolve => setTimeout(resolve, 500));
+    while (!session && !error && retryCount < 5) {
+      await new Promise(resolve => setTimeout(resolve, 300));
       ({ data: { session }, error } = await supabaseClient.auth.getSession());
       retryCount++;
     }
@@ -84,6 +86,7 @@ let inactivityTimer = null;
     if (!session) {
       redirectToLogin();
     } else {
+      // Müşteri yetkiliyse ekran kilidini kaldır (usulca görünür yap)
       window.currentUser = session.user;
       document.body.classList.add('auth-checked');
       startInactivityTimer();
@@ -161,10 +164,19 @@ window.addEventListener('focus', () => checkAuthenticationSync());
 
 async function checkAuthenticationSync() {
   if (isPublicPage) return;
+
   try {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session) resetInactivityTimer();
-    else redirectToLogin();
+    let { data: { session }, error } = await supabaseClient.auth.getSession();
+    
+    let retryCount = 0;
+    while (!session && !error && retryCount < 5) {
+      await new Promise(resolve => setTimeout(resolve, 300));
+      ({ data: { session }, error } = await supabaseClient.auth.getSession());
+      retryCount++;
+    }
+    
+    if (!session) redirectToLogin();
+    else resetInactivityTimer();
   } catch (err) {
     redirectToLogin();
   }
