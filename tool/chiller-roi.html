@@ -836,14 +836,9 @@
 
             const matName = I18N.tr.mats[matKey] || matKey;
             
-            // Tank/düz alan: mahal adı + m² göster
+            // Tank/düz alan: sadece mahal adı göster (m² adet sütununda)
             let displayName = data.name;
-            if (type === 'tank') {
-                const totalM2 = [...(currentSurfaces||[]).map(s=>(s.w*s.h)/1e6), ...(currentCircles||[]).map(c=>Math.PI*Math.pow(c.d/2000,2))].reduce((a,b)=>a+b,0);
-                if (location && totalM2 > 0) displayName = `${location} (${totalM2.toFixed(2)} m²)`;
-                else if (location) displayName = location;
-                else if (totalM2 > 0) displayName = `Düz Alan (${totalM2.toFixed(2)} m²)`;
-            }
+            if (type === 'tank' && location) displayName = location;
 
             // Tank: adet sütununda m² göster
             let dispQty = qty, dispUnit = data.unitLabel;
@@ -921,7 +916,7 @@
             tb.innerHTML += `
                 <tr class="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition ${idx===editingIndex ? 'bg-cyan-50 dark:bg-cyan-900/20' : ''}">
                     <td class="px-3 py-2 text-center">${imgHtml}</td>
-                    <td class="px-3 py-2 font-medium text-slate-800 dark:text-slate-200">${name} ${locText}<div class="text-[9px] text-slate-400 mt-0.5">${desc}</div></td>
+                    <td class="px-3 py-2 font-medium text-slate-800 dark:text-slate-200">${name}<div class="text-[9px] text-slate-400 mt-0.5">${desc}</div></td>
                     <td class="px-3 py-2 text-center text-slate-500 dark:text-slate-400">${item.qty} ${item.unit}</td>
                     <td class="px-3 py-2 text-center text-[10px] text-red-400 font-mono">${Math.round(item.kwhBare).toLocaleString()}</td>
                     <td class="px-3 py-2 text-center text-[10px] text-cyan-600 dark:text-cyan-400 font-mono">${Math.round(item.kwhIns).toLocaleString()}</td>
@@ -1176,7 +1171,7 @@
                 rowsHTML += `<tr style="${bgColor}">
                     <td style="text-align:center;padding:4px;font-size:8px;color:#94a3b8;font-weight:700;border-bottom:1px solid #e2e8f0;">${(index*ROWS_PER_PAGE)+subIndex+1}</td>
                     <td style="text-align:center;padding:3px;border-bottom:1px solid #e2e8f0;">${imgTag}</td>
-                    <td style="padding:4px;font-size:8px;font-weight:700;color:#0f172a;border-bottom:1px solid #e2e8f0;">${dispName}${locTag}<div style="font-weight:400;color:#64748b;font-size:7px;">${dispDesc}</div></td>
+                    <td style="padding:4px;font-size:8px;font-weight:700;color:#0f172a;border-bottom:1px solid #e2e8f0;">${dispName}<div style="font-weight:400;color:#64748b;font-size:7px;">${dispDesc}</div></td>
                     <td style="text-align:center;padding:4px;font-size:8px;color:#334155;border-bottom:1px solid #e2e8f0;">${i.qty} ${i.unit}</td>
                     <td style="text-align:center;padding:4px;font-size:8px;font-family:monospace;color:#dc2626;border-bottom:1px solid #e2e8f0;">${Math.round(i.kwhBare).toLocaleString()}</td>
                     <td style="text-align:center;padding:4px;font-size:8px;font-family:monospace;color:#0891b2;border-bottom:1px solid #e2e8f0;">${Math.round(i.kwhIns).toLocaleString()}</td>
