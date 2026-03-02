@@ -129,8 +129,22 @@
   }
 </style>
 </head>
-<body class="antialiased selection:bg-indigo-500/30 selection:text-indigo-700" onload="initApp()">
 
+<body class="antialiased selection:bg-red-500/30 selection:text-red-600" onload="initApp()">
+
+<div id="global-loader" class="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-white dark:bg-slate-900">
+    <div class="relative w-16 h-16 mb-4">
+        <div class="absolute inset-0 border-4 border-slate-200 dark:border-slate-800 rounded-full"></div>
+        <div class="absolute inset-0 border-4 border-indigo-600 dark:border-red-600 border-t-transparent rounded-full animate-spin"></div>
+        <div class="absolute inset-0 flex items-center justify-center text-indigo-600 dark:text-red-600">
+            <i data-lucide="shield-check" class="w-6 h-6"></i>
+        </div>
+    </div>
+    <div class="text-xs font-bold text-slate-500 dark:text-slate-400 tracking-[0.2em] animate-pulse">
+        GÜVENLİ BAĞLANTI KURULUYOR...
+    </div>
+</div>
+  
 <div id="langModal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8 border border-slate-100 relative transform transition-all animate-pop">
         <button onclick="toggleLangModal(false)" class="absolute top-4 right-4 text-slate-400 hover:text-red-500 cursor-pointer"><i data-lucide="x" class="w-6 h-6"></i></button>
