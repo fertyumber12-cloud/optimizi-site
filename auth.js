@@ -44,34 +44,29 @@ const INACTIVITY_TIMEOUT = 5 * 60 * 1000;
 let inactivityTimer = null;
 
 // 4. ANA GÜVENLİK KONTROLÜ
-(async function checkAuthentication() {
-  // Eğer sayfa herkese açıksa güvenlik sorgusunu ve logine atma işlemini iptal et
-  if (isPublicPage) return;
-
-  try {
-    let { data: { session }, error } = await supabaseClient.auth.getSession();
-    
-    // Yarış durumunu çözen bekleme döngüsü (Daha toleranslı hale getirildi)
-    let retryCount = 0;
-    while (!session && !error && retryCount < 15) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      ({ data: { session }, error } = await supabaseClient.auth.getSession());
-      retryCount++;
-    }
-    
-    if (error || !session) {
+if (!isPublicPage) {
+  (async function checkAuthentication() {
+    try {
+      const { data: { session }, error } = await supabaseClient.auth.getSession();
+      
+      if (session) {
+        // Kullanıcı var, kapıları aç
+        window.currentUser = session.user;
+        document.body.classList.add('auth-checked');
+        document.dispatchEvent(new CustomEvent('auth-ready', { detail: session.user }));
+        startInactivityTimer();
+      } else {
+         // Tarayıcı hafızasını okuması için çok ufak bir tolerans tanı ve son kez bak
+         setTimeout(async () => {
+            const { data: { session: retrySession } } = await supabaseClient.auth.getSession();
+            if (!retrySession) redirectToLogin();
+         }, 300);
+      }
+    } catch (err) {
       redirectToLogin();
-    } else {
-      // Müşteri yetkiliyse ekran kilidini kaldır ve sayfalara 'hazırım' sinyali gönder
-      window.currentUser = session.user;
-      document.dispatchEvent(new CustomEvent('auth-ready', { detail: session.user }));
-      document.body.classList.add('auth-checked');
-      startInactivityTimer();
     }
-  } catch (err) {
-    redirectToLogin();
-  }
-})();
+  })();
+}
 
 // 5. HAREKETSİZLİK SÜRESİ (AFK) KONTROLLERİ
 function startInactivityTimer() {
@@ -136,28 +131,22 @@ async function logout() {
 }
 
 // 7. SEKMELER ARASI GEÇİŞ (VISIBILITY) SENKRONİZASYONU
-document.addEventListener('visibilitychange', () => { if (!document.hidden) checkAuthenticationSync(); });
-window.addEventListener('focus', () => checkAuthenticationSync());
-
-async function checkAuthenticationSync() {
-  if (isPublicPage) return;
-
-  try {
-    let { data: { session }, error } = await supabaseClient.auth.getSession();
-    
-    let retryCount = 0;
-    while (!session && !error && retryCount < 10) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      ({ data: { session }, error } = await supabaseClient.auth.getSession());
-      retryCount++;
-    }
-    
-    if (!session) redirectToLogin();
-    else resetInactivityTimer();
-  } catch (err) {
-    redirectToLogin();
-  }
+// Eski manuel "focus" kontrolleri silindi çünkü sayfa yüklenirken yarış durumuna sebep oluyordu.
+if (!isPublicPage) {
+    // Supabase diğer sekmelerdeki çıkış işlemlerini vs. arka planda otomatik dinler
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+            redirectToLogin();
+        } else if (session) {
+            resetInactivityTimer();
+        }
+    });
 }
+
+// Global Erişime Açılan Değişkenler
+window.logout = logout;
+window.supabaseClient = supabaseClient;
+window.currentUser = window.currentUser || null;
 
 // Global Erişime Açılan Değişkenler
 window.logout = logout;
