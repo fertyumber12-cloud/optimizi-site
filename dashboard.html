@@ -789,21 +789,19 @@
         renderDashboardTable(filtered);
     }
 
-    // --- AUTH & DATA LOADING ---
-    async function initPage() {
-        // auth.js'in veriyi çekmesini sabırla bekle
-        let waitCount = 0;
-        while (!window.currentUser && waitCount < 15) {
-            await new Promise(resolve => setTimeout(resolve, 200));
-            waitCount++;
+   async function initPage() {
+        // Oturum zaten yüklendiyse direkt kur, yüklenmediyse auth.js'den gelecek sinyali bekle
+        if (window.currentUser) {
+            setupDashboard(window.currentUser);
+        } else {
+            document.addEventListener('auth-ready', (e) => {
+                setupDashboard(e.detail);
+            });
         }
+    }
 
-        if (!window.currentUser) {
-            window.location.href = 'login.html'; 
-            return;
-        }
-
-        currentUser = window.currentUser;
+    async function setupDashboard(user) {
+        currentUser = user;
         
         const fullName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
         const firstName = fullName.split(' ')[0];
@@ -818,7 +816,6 @@
         await loadUserProfile();
         fetchDashboardData();
     }
-
     async function fetchDashboardData() {
         const { data, error } = await window.supabaseClient.from('calculations').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
         if (error) return;
