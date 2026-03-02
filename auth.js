@@ -23,34 +23,15 @@ const isPublicPage =
 if (!isPublicPage) {
     const style = document.createElement('style');
     style.innerHTML = `
+        /* Beyaz flaşı önlemek için tarayıcının en arka duvarını temaya göre boyuyoruz */
         html.dark { background-color: #0f172a !important; }
         html:not(.dark) { background-color: #f8fafc !important; }
         
-        body:not(.auth-checked) { overflow: hidden !important; }
-        body.auth-checked .auth-loading-overlay { display: none !important; }
+        /* Sayfa gövdesini gizle ama arka plan rengi html'den gelsin (Ctrl+U'dan saklandı) */
+        body:not(.auth-checked) { opacity: 0 !important; pointer-events: none !important; }
         body.auth-checked { opacity: 1 !important; transition: opacity 0.3s ease !important; }
-        
-        .auth-loading-overlay {
-            position: fixed; inset: 0; z-index: 99999;
-            display: flex; align-items: center; justify-content: center;
-        }
-        html.dark .auth-loading-overlay { background: #0f172a; }
-        html:not(.dark) .auth-loading-overlay { background: #f8fafc; }
-        
-        .auth-spinner {
-            width: 36px; height: 36px;
-            border: 3px solid #e2e8f0; border-top-color: #06b6d4;
-            border-radius: 50%; animation: auth-spin 0.8s linear infinite;
-        }
-        html.dark .auth-spinner { border-color: #334155; border-top-color: #22d3ee; }
-        @keyframes auth-spin { to { transform: rotate(360deg); } }
     `;
     document.head.appendChild(style);
-    
-    const overlay = document.createElement('div');
-    overlay.className = 'auth-loading-overlay';
-    overlay.innerHTML = '<div class="auth-spinner"></div>';
-    document.documentElement.appendChild(overlay);
 } else {
     // Herkese açık bir sayfadaysak görünürlüğü garanti altına al
     document.addEventListener("DOMContentLoaded", () => {
