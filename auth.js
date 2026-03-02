@@ -51,24 +51,20 @@ let inactivityTimer = null;
   try {
     let { data: { session }, error } = await supabaseClient.auth.getSession();
     
-    // Yarış durumunu çözen bekleme döngüsü
+    // Yarış durumunu çözen bekleme döngüsü (Daha toleranslı hale getirildi)
     let retryCount = 0;
-    while (!session && !error && retryCount < 10) {
-      await new Promise(resolve => setTimeout(resolve, 500));
+    while (!session && !error && retryCount < 15) {
+      await new Promise(resolve => setTimeout(resolve, 300));
       ({ data: { session }, error } = await supabaseClient.auth.getSession());
       retryCount++;
     }
     
-    if (error) {
-      redirectToLogin();
-      return;
-    }
-    
-    if (!session) {
+    if (error || !session) {
       redirectToLogin();
     } else {
-      // Müşteri yetkiliyse ekran kilidini kaldır (usulca görünür yap)
+      // Müşteri yetkiliyse ekran kilidini kaldır ve sayfalara 'hazırım' sinyali gönder
       window.currentUser = session.user;
+      document.dispatchEvent(new CustomEvent('auth-ready', { detail: session.user }));
       document.body.classList.add('auth-checked');
       startInactivityTimer();
     }
