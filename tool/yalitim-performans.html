@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+  <style>
+  /* İçerik başlangıçta görünmez */
+  #app-layer { opacity: 0; visibility: hidden; transition: opacity 0.5s ease; }
+  
+  /* Auth onaylanınca içerik görünür */
+  body.auth-checked #app-layer { opacity: 1; visibility: visible; }
+  
+  /* Auth onaylanınca loader kaybolur */
+  body.auth-checked #global-loader { opacity: 0; pointer-events: none; transition: opacity 0.5s ease; }
+</style>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Yalıtım Performans Analizi</title>
