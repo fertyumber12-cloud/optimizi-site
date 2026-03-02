@@ -845,10 +845,17 @@
                 else if (totalM2 > 0) displayName = `Düz Alan (${totalM2.toFixed(2)} m²)`;
             }
 
+            // Tank: adet sütununda m² göster
+            let dispQty = qty, dispUnit = data.unitLabel;
+            if (type === 'tank') {
+                const totalM2 = [...(currentSurfaces||[]).map(s=>(s.w*s.h)/1e6), ...(currentCircles||[]).map(c=>Math.PI*Math.pow(c.d/2000,2))].reduce((a,b)=>a+b,0);
+                if (totalM2 > 0) { dispQty = totalM2.toFixed(2); dispUnit = 'm²'; }
+            }
+
             return {
                 name: displayName, 
                 desc: matKey==='bare' ? I18N.tr.uninsulated : `${matName} (${thk}mm)`,
-                qty: qty, unit: data.unitLabel, kwhBare: data.kwhBare, kwhIns: data.kwhIns, 
+                qty: dispQty, unit: dispUnit, kwhBare: data.kwhBare, kwhIns: data.kwhIns, 
                 kwhSave: data.kwhSave, invTL: data.invTL, saveTL: data.saveTL, 
                 roi: data.roi, img: currImg, raw: rawData
             };
