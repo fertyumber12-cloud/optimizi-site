@@ -45,27 +45,29 @@ let inactivityTimer = null;
 
 // 4. ANA GÜVENLİK KONTROLÜ
 if (!isPublicPage) {
-  (async function checkAuthentication() {
-    try {
-      const { data: { session }, error } = await supabaseClient.auth.getSession();
-      
-      if (session) {
-        // Kullanıcı var, kapıları aç
-        window.currentUser = session.user;
-        document.body.classList.add('auth-checked');
-        document.dispatchEvent(new CustomEvent('auth-ready', { detail: session.user }));
-        startInactivityTimer();
-      } else {
-         // Tarayıcı hafızasını okuması için çok ufak bir tolerans tanı ve son kez bak
-         setTimeout(async () => {
-            const { data: { session: retrySession } } = await supabaseClient.auth.getSession();
-            if (!retrySession) redirectToLogin();
-         }, 300);
-      }
-    } catch (err) {
-      redirectToLogin();
-    }
-  })();
+    // KİTLEYİCİ GÜÇ: Kod okunduğu an sayfayı görünmez yap (CSS'i bile bekleme)
+    document.documentElement.style.visibility = 'hidden';
+
+    (async function checkAuthentication() {
+        try {
+            // Supabase'den arka planda kesin cevabı bekle
+            const { data: { session }, error } = await supabaseClient.auth.getSession();
+            
+            if (session && !error) {
+                // Kullanıcı onaylandı, kapıları aç!
+                window.currentUser = session.user;
+                document.documentElement.style.visibility = ''; // Görünmezliği kaldır
+                document.body.classList.add('auth-checked');
+                document.dispatchEvent(new CustomEvent('auth-ready', { detail: session.user }));
+                startInactivityTimer();
+            } else {
+                // Hatalı giriş: Kullanıcıyı logine şutla
+                redirectToLogin();
+            }
+        } catch (err) {
+            redirectToLogin();
+        }
+    })();
 }
 
 // 5. HAREKETSİZLİK SÜRESİ (AFK) KONTROLLERİ
