@@ -45,32 +45,37 @@ let inactivityTimer = null;
 
 // 4. ANA GÜVENLİK KONTROLÜ
 (async function checkAuthentication() {
-  // Eğer sayfa herkese açıksa güvenlik sorgusunu ve logine atma işlemini iptal et
   if (isPublicPage) return;
 
   try {
     let { data: { session }, error } = await supabaseClient.auth.getSession();
     
-    // Yarış durumunu çözen bekleme döngüsü
-    let retryCount = 0;
-    while (!session && !error && retryCount < 8) {
-      await new Promise(resolve => setTimeout(resolve, 400));
-      ({ data: { session }, error } = await supabaseClient.auth.getSession());
-      retryCount++;
-    }
-    
-    if (error) {
-      redirectToLogin();
-      return;
-    }
-    
-    if (!session) {
-      redirectToLogin();
-    } else {
-      // Müşteri yetkiliyse ekran kilidini kaldır (usulca görünür yap)
+    // Session varsa direkt devam
+    if (session && !error) {
       window.currentUser = session.user;
       document.body.classList.add('auth-checked');
       startInactivityTimer();
+      return;
+    }
+
+    // Session yoksa — Supabase token restore'u bekle (max 5sn)
+    const restored = await new Promise(resolve => {
+      const timeout = setTimeout(() => resolve(null), 5000);
+      const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event, ses) => {
+        if (ses) {
+          clearTimeout(timeout);
+          subscription.unsubscribe();
+          resolve(ses);
+        }
+      });
+    });
+
+    if (restored) {
+      window.currentUser = restored.user;
+      document.body.classList.add('auth-checked');
+      startInactivityTimer();
+    } else {
+      redirectToLogin();
     }
   } catch (err) {
     redirectToLogin();
@@ -149,15 +154,25 @@ async function checkAuthenticationSync() {
   try {
     let { data: { session }, error } = await supabaseClient.auth.getSession();
     
-    let retryCount = 0;
-    while (!session && !error && retryCount < 8) {
-      await new Promise(resolve => setTimeout(resolve, 400));
-      ({ data: { session }, error } = await supabaseClient.auth.getSession());
-      retryCount++;
+    if (session && !error) {
+      resetInactivityTimer();
+      return;
     }
-    
-    if (!session) redirectToLogin();
-    else resetInactivityTimer();
+
+    // Sekme geri geldiğinde kısa bekle
+    const restored = await new Promise(resolve => {
+      const timeout = setTimeout(() => resolve(null), 3000);
+      const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event, ses) => {
+        if (ses) {
+          clearTimeout(timeout);
+          subscription.unsubscribe();
+          resolve(ses);
+        }
+      });
+    });
+
+    if (restored) resetInactivityTimer();
+    else redirectToLogin();
   } catch (err) {
     redirectToLogin();
   }
