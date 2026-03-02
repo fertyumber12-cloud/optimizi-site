@@ -1154,14 +1154,15 @@
                     const raw = i.raw;
                     if(raw.type === 'valve') { dispName = `${I18N.en.valves[raw.valveType] || raw.valveType} (DN ${raw.vDN})`; } 
                     else if(raw.type === 'pipe') { dispName = `${I18N.en.pipe} (DN ${raw.pDN})`; } 
-                    else if(raw.type === 'tank') { dispName = I18N.en.flat; }
+                    else if(raw.type === 'tank') { dispName = i.name !== 'Düz Alan / Eşanjör' ? i.name : I18N.en.flat; }
                     dispDesc = raw.matKey === 'bare' ? I18N.en.uninsulated : `${I18N.en.mats[raw.matKey]} (${raw.thk}mm)`;
                 }
                 
+                const locTag = i.raw.location ? `<div style="font-size:6px;color:#0891b2;font-weight:700;margin-top:1px;">📍 ${i.raw.location}</div>` : '';
                 rowsHTML += `<tr style="${bgColor}">
                     <td style="text-align:center;padding:4px;font-size:8px;color:#94a3b8;font-weight:700;border-bottom:1px solid #e2e8f0;">${(index*ROWS_PER_PAGE)+subIndex+1}</td>
                     <td style="text-align:center;padding:3px;border-bottom:1px solid #e2e8f0;">${imgTag}</td>
-                    <td style="padding:4px;font-size:8px;font-weight:700;color:#0f172a;border-bottom:1px solid #e2e8f0;">${dispName}<div style="font-weight:400;color:#64748b;font-size:7px;">${dispDesc}</div></td>
+                    <td style="padding:4px;font-size:8px;font-weight:700;color:#0f172a;border-bottom:1px solid #e2e8f0;">${dispName}${locTag}<div style="font-weight:400;color:#64748b;font-size:7px;">${dispDesc}</div></td>
                     <td style="text-align:center;padding:4px;font-size:8px;color:#334155;border-bottom:1px solid #e2e8f0;">${i.qty} ${i.unit}</td>
                     <td style="text-align:center;padding:4px;font-size:8px;font-family:monospace;color:#dc2626;border-bottom:1px solid #e2e8f0;">${Math.round(i.kwhBare).toLocaleString()}</td>
                     <td style="text-align:center;padding:4px;font-size:8px;font-family:monospace;color:#0891b2;border-bottom:1px solid #e2e8f0;">${Math.round(i.kwhIns).toLocaleString()}</td>
