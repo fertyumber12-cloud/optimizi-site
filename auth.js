@@ -28,7 +28,7 @@ if (!isPublicPage) {
         html:not(.dark) { background-color: #f8fafc !important; }
         
         /* Sayfa gövdesini gizle ama arka plan rengi html'den gelsin (Ctrl+U'dan saklandı) */
-        body:not(.auth-checked) { opacity: 0 !important; pointer-events: none !important; }
+        body:not(.auth-checked) { pointer-events: none !important; }
         body.auth-checked { opacity: 1 !important; transition: opacity 0.3s ease !important; }
     `;
     document.head.appendChild(style);
@@ -53,8 +53,8 @@ let inactivityTimer = null;
     
     // Yarış durumunu çözen bekleme döngüsü
     let retryCount = 0;
-    while (!session && !error && retryCount < 5) {
-      await new Promise(resolve => setTimeout(resolve, 300));
+    while (!session && !error && retryCount < 10) {
+      await new Promise(resolve => setTimeout(resolve, 500));
       ({ data: { session }, error } = await supabaseClient.auth.getSession());
       retryCount++;
     }
@@ -150,8 +150,8 @@ async function checkAuthenticationSync() {
     let { data: { session }, error } = await supabaseClient.auth.getSession();
     
     let retryCount = 0;
-    while (!session && !error && retryCount < 5) {
-      await new Promise(resolve => setTimeout(resolve, 300));
+    while (!session && !error && retryCount < 10) {
+      await new Promise(resolve => setTimeout(resolve, 500));
       ({ data: { session }, error } = await supabaseClient.auth.getSession());
       retryCount++;
     }
