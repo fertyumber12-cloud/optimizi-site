@@ -4,9 +4,15 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Enerji Kayıp ve Kaçak Analizi</title>
- <style>
-  body:not(.auth-checked) { opacity: 0; pointer-events: none; }
-  body.auth-checked { opacity: 1; transition: opacity 0.3s ease; }
+<style>
+  /* İçerik başlangıçta görünmez */
+  #app-layer { opacity: 0; visibility: hidden; transition: opacity 0.5s ease; }
+  
+  /* Auth onaylanınca içerik görünür */
+  body.auth-checked #app-layer { opacity: 1; visibility: visible; }
+  
+  /* Auth onaylanınca loader kaybolur */
+  body.auth-checked #global-loader { opacity: 0; pointer-events: none; transition: opacity 0.5s ease; }
 </style>
 <meta name="description" content="İşletmenizdeki yalıtımsız yüzeylerden kaynaklanan yıllık finansal kaybı hesaplayın.">
 <script src="https://cdn.tailwindcss.com"></script>
@@ -74,10 +80,17 @@
 </style>
 <body class="antialiased selection:bg-red-500/30 selection:text-red-600" onload="initApp()">
 
-<div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-    <div class="absolute inset-0 bg-grid"></div>
-    <div class="blob-bg absolute top-0 -left-1/4 w-[900px] h-[900px] bg-red-500/10 rounded-full blur-[120px] animate-blob mix-blend-multiply dark:mix-blend-screen"></div>
-    <div class="blob-bg absolute bottom-0 -right-1/4 w-[900px] h-[900px] bg-orange-500/10 rounded-full blur-[120px] animate-blob mix-blend-multiply dark:mix-blend-screen" style="animation-delay: 5s;"></div>
+<div id="global-loader" class="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-white dark:bg-slate-900">
+    <div class="relative w-16 h-16 mb-4">
+        <div class="absolute inset-0 border-4 border-slate-200 dark:border-slate-800 rounded-full"></div>
+        <div class="absolute inset-0 border-4 border-indigo-600 dark:border-red-600 border-t-transparent rounded-full animate-spin"></div>
+        <div class="absolute inset-0 flex items-center justify-center text-indigo-600 dark:text-red-600">
+            <i data-lucide="shield-check" class="w-6 h-6"></i>
+        </div>
+    </div>
+    <div class="text-xs font-bold text-slate-500 dark:text-slate-400 tracking-[0.2em] animate-pulse">
+        GÜVENLİ BAĞLANTI KURULUYOR...
+    </div>
 </div>
 
 <div id="app-layer" class="relative z-10 flex flex-col min-h-screen">
