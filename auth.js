@@ -45,23 +45,27 @@ let inactivityTimer = null;
 
 // 4. ANA GÜVENLİK KONTROLÜ
 if (!isPublicPage) {
-    // KİTLEYİCİ GÜÇ: Kod okunduğu an sayfayı görünmez yap (CSS'i bile bekleme)
-    document.documentElement.style.visibility = 'hidden';
-
     (async function checkAuthentication() {
         try {
             // Supabase'den arka planda kesin cevabı bekle
             const { data: { session }, error } = await supabaseClient.auth.getSession();
             
             if (session && !error) {
-                // Kullanıcı onaylandı, kapıları aç!
+                // KULLANICI ONAYLANDI!
                 window.currentUser = session.user;
-                document.documentElement.style.visibility = ''; // Görünmezliği kaldır
+                
+                // Sayfayı ve loader'ı kontrol eden o sihirli class'ı ekle
                 document.body.classList.add('auth-checked');
+                
+                // İşi biten loader'ı DOM'dan temizle
+                setTimeout(() => {
+                    const loader = document.getElementById('global-loader');
+                    if(loader) loader.remove();
+                }, 500);
+
                 document.dispatchEvent(new CustomEvent('auth-ready', { detail: session.user }));
                 startInactivityTimer();
             } else {
-                // Hatalı giriş: Kullanıcıyı logine şutla
                 redirectToLogin();
             }
         } catch (err) {
@@ -70,6 +74,11 @@ if (!isPublicPage) {
     })();
 }
 
+// Sekme zıplamasını önlemek için login yönlendirmesi
+function redirectToLogin() {
+    const loginPath = window.location.pathname.includes('/tool/') ? '../login.html' : 'login.html';
+    window.location.replace(loginPath);
+}
 // 5. HAREKETSİZLİK SÜRESİ (AFK) KONTROLLERİ
 function startInactivityTimer() {
   if (inactivityTimer) clearTimeout(inactivityTimer);
