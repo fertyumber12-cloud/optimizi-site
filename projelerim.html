@@ -749,19 +749,18 @@
     }
 
     async function initPage() {
-        // auth.js'in veriyi çekmesini sabırla bekle
-        let waitCount = 0;
-        while (!window.currentUser && waitCount < 15) {
-            await new Promise(resolve => setTimeout(resolve, 200));
-            waitCount++;
+        // Oturum zaten yüklendiyse direkt kur, yüklenmediyse auth.js'den gelecek sinyali bekle
+        if (window.currentUser) {
+            setupProjelerim(window.currentUser);
+        } else {
+            document.addEventListener('auth-ready', (e) => {
+                setupProjelerim(e.detail);
+            });
         }
+    }
 
-        if (!window.currentUser) {
-            window.location.href = 'login.html'; 
-            return;
-        }
-
-        currentUser = window.currentUser;
+    async function setupProjelerim(user) {
+        currentUser = user;
         const fullName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
         
         document.getElementById('sidebarUserName').textContent = fullName;
