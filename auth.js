@@ -19,21 +19,40 @@ const isPublicPage =
     currentPath.includes('blog') ||
     currentPath.includes('404');
 
-// 2. GÖRÜNMEZ GÜVENLİK STİLİ VE TEMA ARKA PLANI (SADECE KİLİTLİ SAYFALARDA ÇALIŞIR)
+// 2. LOADING SPINNER (kontrol bitene kadar sayfa yerine spinner göster)
 if (!isPublicPage) {
     const style = document.createElement('style');
     style.innerHTML = `
-        /* Beyaz flaşı önlemek için tarayıcının en arka duvarını temaya göre boyuyoruz */
         html.dark { background-color: #0f172a !important; }
         html:not(.dark) { background-color: #f8fafc !important; }
         
-        /* Sayfa gövdesini gizle ama arka plan rengi html'den gelsin (Ctrl+U'dan saklandı) */
-        body:not(.auth-checked) { opacity: 0 !important; pointer-events: none !important; }
-        body.auth-checked { opacity: 1 !important; transition: opacity 0.3s ease !important; }
+        body:not(.auth-checked) { overflow: hidden !important; }
+        body.auth-checked .auth-loading-overlay { display: none !important; }
+        body.auth-checked { opacity: 1 !important; }
+        
+        .auth-loading-overlay {
+            position: fixed; inset: 0; z-index: 99999;
+            display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px;
+        }
+        html.dark .auth-loading-overlay { background: #0f172a; }
+        html:not(.dark) .auth-loading-overlay { background: #f8fafc; }
+        
+        .auth-spinner {
+            width: 36px; height: 36px;
+            border: 3px solid #e2e8f0; border-top-color: #06b6d4;
+            border-radius: 50%; animation: auth-spin 0.8s linear infinite;
+        }
+        html.dark .auth-spinner { border-color: #334155; border-top-color: #22d3ee; }
+        @keyframes auth-spin { to { transform: rotate(360deg); } }
     `;
     document.head.appendChild(style);
+    
+    // Spinner overlay'ı ekle
+    const overlay = document.createElement('div');
+    overlay.className = 'auth-loading-overlay';
+    overlay.innerHTML = '<div class="auth-spinner"></div>';
+    document.documentElement.appendChild(overlay);
 } else {
-    // Herkese açık bir sayfadaysak görünürlüğü garanti altına al
     document.addEventListener("DOMContentLoaded", () => {
         document.body.classList.add('auth-checked');
     });
@@ -44,37 +63,28 @@ const INACTIVITY_TIMEOUT = 5 * 60 * 1000;
 let inactivityTimer = null;
 
 // 4. ANA GÜVENLİK KONTROLÜ
-(async function checkAuthentication() {
+(function checkAuthentication() {
   if (isPublicPage) return;
 
-  // Supabase v2: onAuthStateChange INITIAL_SESSION event'ini otomatik fire eder.
-  // Bu, token refresh dahil her durumda çalışır.
-  const session = await new Promise(resolve => {
-    const fallback = setTimeout(() => resolve(null), 3000);
-    
-    const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event, ses) => {
-      // INITIAL_SESSION: sayfa yüklendiğinde ilk event (session olsun olmasın)
-      // TOKEN_REFRESHED: token yenilendi
-      // SIGNED_IN: yeni giriş
-      if (event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') {
-        clearTimeout(fallback);
-        subscription.unsubscribe();
-        resolve(ses);
-      } else if (event === 'SIGNED_OUT') {
-        clearTimeout(fallback);
-        subscription.unsubscribe();
-        resolve(null);
-      }
-    });
-  });
+  let resolved = false;
+  const fallback = setTimeout(() => {
+    if (!resolved) { resolved = true; redirectToLogin(); }
+  }, 3000);
 
-  if (session) {
-    window.currentUser = session.user;
-    document.body.classList.add('auth-checked');
-    startInactivityTimer();
-  } else {
-    redirectToLogin();
-  }
+  // login.html'de çalışan pattern — event filtrelemesi yok
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (resolved) return;
+    resolved = true;
+    clearTimeout(fallback);
+    
+    if (session) {
+      window.currentUser = session.user;
+      document.body.classList.add('auth-checked');
+      startInactivityTimer();
+    } else {
+      redirectToLogin();
+    }
+  });
 })();
 
 // 5. HAREKETSİZLİK SÜRESİ (AFK) KONTROLLERİ
