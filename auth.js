@@ -63,28 +63,34 @@ const INACTIVITY_TIMEOUT = 5 * 60 * 1000;
 let inactivityTimer = null;
 
 // 4. ANA GÜVENLİK KONTROLÜ
-(function checkAuthentication() {
+(async function checkAuthentication() {
   if (isPublicPage) return;
 
-  let resolved = false;
-  const fallback = setTimeout(() => {
-    if (!resolved) { resolved = true; redirectToLogin(); }
-  }, 3000);
-
-  // login.html'de çalışan pattern — event filtrelemesi yok
-  supabaseClient.auth.onAuthStateChange((event, session) => {
-    if (resolved) return;
-    resolved = true;
-    clearTimeout(fallback);
+  try {
+    let { data: { session }, error } = await supabaseClient.auth.getSession();
     
-    if (session) {
+    let retryCount = 0;
+    while (!session && !error && retryCount < 6) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      ({ data: { session }, error } = await supabaseClient.auth.getSession());
+      retryCount++;
+    }
+    
+    if (error) {
+      redirectToLogin();
+      return;
+    }
+    
+    if (!session) {
+      redirectToLogin();
+    } else {
       window.currentUser = session.user;
       document.body.classList.add('auth-checked');
       startInactivityTimer();
-    } else {
-      redirectToLogin();
     }
-  });
+  } catch (err) {
+    redirectToLogin();
+  }
 })();
 
 // 5. HAREKETSİZLİK SÜRESİ (AFK) KONTROLLERİ
