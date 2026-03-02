@@ -838,9 +838,11 @@
             
             // Tank/düz alan: mahal adı + m² göster
             let displayName = data.name;
-            if (type === 'tank' && location) {
+            if (type === 'tank') {
                 const totalM2 = [...(currentSurfaces||[]).map(s=>(s.w*s.h)/1e6), ...(currentCircles||[]).map(c=>Math.PI*Math.pow(c.d/2000,2))].reduce((a,b)=>a+b,0);
-                displayName = totalM2 > 0 ? `${location} (${totalM2.toFixed(2)} m²)` : location;
+                if (location && totalM2 > 0) displayName = `${location} (${totalM2.toFixed(2)} m²)`;
+                else if (location) displayName = location;
+                else if (totalM2 > 0) displayName = `Düz Alan (${totalM2.toFixed(2)} m²)`;
             }
 
             return {
