@@ -330,6 +330,15 @@
                                 <input type="number" id="vWind" value="1" step="0.5" class="glass-input text-xs" oninput="calc()">
                             </div>
                         </div>
+                        <!-- EiiF Modu Toggle -->
+                        <div class="mt-3">
+                            <label class="flex items-center gap-3 cursor-pointer select-none group">
+                                <input type="checkbox" id="eiifMode" onchange="toggleEiifMode()" class="w-4 h-4 rounded border-slate-300 text-green-600 focus:ring-green-500">
+                                <span class="text-[10px] font-bold text-slate-500 group-hover:text-green-600 transition flex items-center gap-1.5">
+                                    <i data-lucide="shield-check" class="w-3 h-3"></i> EN 17956 Referans Modu (Ortam 15°C · Rüzgar 0 m/s)
+                                </span>
+                            </label>
+                        </div>
                     </div>
 
                     <div class="mt-6 pt-4 border-t border-slate-100">
@@ -436,11 +445,32 @@
                     </div>
 
                     <div class="bg-white rounded-2xl p-6 border border-slate-200 relative z-10 mb-6 shadow-sm">
-                         <div class="flex justify-between items-end mb-4 border-b border-slate-100 pb-3">
-                             <h4 class="text-xs font-black text-slate-700 uppercase flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-4 h-4 text-indigo-500"></i> Enerji Verimlilik Sınıfı</h4>
-                             <span class="text-[9px] text-slate-400 font-bold bg-slate-50 px-2 py-1 rounded">EN 17956 / VDI 2055</span>
+                         <!-- BAŞLIK — moda göre değişir -->
+                         <div id="panelHeaderThermal" class="flex justify-between items-end mb-4 border-b border-slate-100 pb-3">
+                             <h4 class="text-xs font-black text-slate-700 uppercase flex items-center gap-2"><i data-lucide="layers" class="w-4 h-4 text-orange-500"></i> Termal Kesit Görünümü</h4>
+                             <span class="text-[9px] text-slate-400 font-bold bg-orange-50 px-2 py-1 rounded border border-orange-100">GERÇEK KOŞULLAR</span>
                          </div>
-                         <div id="eiifChart"></div>
+                         <div id="panelHeaderEiif" class="hidden flex justify-between items-end mb-4 border-b border-slate-100 pb-3">
+                             <h4 class="text-xs font-black text-slate-700 uppercase flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-4 h-4 text-green-600"></i> Enerji Verimlilik Sınıfı</h4>
+                             <span class="text-[9px] text-slate-400 font-bold bg-green-50 px-2 py-1 rounded border border-green-100">EN 17956</span>
+                         </div>
+
+                         <!-- TERMAL KESİT SVG (EiiF kapalıyken) -->
+                         <div id="thermalCrossSection">
+                             <svg id="thermalSvg" viewBox="0 0 500 220" class="w-full" style="max-height:220px;"></svg>
+                         </div>
+
+                         <!-- EiiF CHART (EiiF açıkken) -->
+                         <div id="eiifChartWrap" class="hidden">
+                             <div id="eiifChart"></div>
+                         </div>
+
+                         <div id="eiifNote" class="mt-2 text-[9px] text-slate-400 text-center italic hidden">EN 17956 sınıflandırması 15°C referans ortam sıcaklığına göredir</div>
+                         <div id="eiifModeActive" class="hidden mt-2 text-center">
+                             <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold bg-green-100 text-green-700 border border-green-200">
+                                 <i data-lucide="shield-check" class="w-3 h-3"></i> EN 17956 Referans Modu Aktif
+                             </span>
+                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 relative z-10">
@@ -718,6 +748,53 @@
         rubber:     {a:0.034, b:0.000075, c:0,      limit:105},
         pu:         {a:0.024, b:0.000075, c:0,      limit:100}
     };
+    // EiiF Modu — önceki değerleri saklamak için
+    let eiifPrevAmb = null;
+    let eiifPrevWind = null;
+    function toggleEiifMode() {
+        const cb = document.getElementById('eiifMode');
+        const tAmb = document.getElementById('tAmb');
+        const vWind = document.getElementById('vWind');
+        const indicator = document.getElementById('eiifModeActive');
+        const note = document.getElementById('eiifNote');
+        const thermalPanel = document.getElementById('thermalCrossSection');
+        const eiifPanel = document.getElementById('eiifChartWrap');
+        const headerThermal = document.getElementById('panelHeaderThermal');
+        const headerEiif = document.getElementById('panelHeaderEiif');
+        if (cb.checked) {
+            eiifPrevAmb = tAmb.value;
+            eiifPrevWind = vWind.value;
+            tAmb.value = 15;
+            vWind.value = 0;
+            tAmb.disabled = true;
+            vWind.disabled = true;
+            tAmb.classList.add('!bg-green-50', '!border-green-300', '!text-green-700');
+            vWind.classList.add('!bg-green-50', '!border-green-300', '!text-green-700');
+            // Panel geçişi: termal gizle, eiif göster
+            thermalPanel.classList.add('hidden');
+            eiifPanel.classList.remove('hidden');
+            headerThermal.classList.add('hidden');
+            headerEiif.classList.remove('hidden');
+            indicator.classList.remove('hidden');
+            note.classList.add('hidden');
+        } else {
+            tAmb.value = eiifPrevAmb || 25;
+            vWind.value = eiifPrevWind || 1;
+            tAmb.disabled = false;
+            vWind.disabled = false;
+            tAmb.classList.remove('!bg-green-50', '!border-green-300', '!text-green-700');
+            vWind.classList.remove('!bg-green-50', '!border-green-300', '!text-green-700');
+            // Panel geçişi: eiif gizle, termal göster
+            thermalPanel.classList.remove('hidden');
+            eiifPanel.classList.add('hidden');
+            headerThermal.classList.remove('hidden');
+            headerEiif.classList.add('hidden');
+            indicator.classList.add('hidden');
+            note.classList.add('hidden');
+        }
+        lucide.createIcons();
+        calc();
+    }
     function initApp(){ fillDN('dn'); setType('pipe'); lucide.createIcons(); calc(); toggleProjectInfo(); }
     function setStd(val){ document.getElementById('calcStd').value = val; document.querySelectorAll('.std-btn').forEach(b=>b.classList.remove('active')); document.getElementById('std-'+val).classList.add('active'); const n={iso:'TS EN ISO 12241',astm:'ASTM C680',vdi:'VDI 2055'}; document.getElementById('stdBadge').innerText=n[val]; calc(); }
     function fillDN(id){ const el=document.getElementById(id); el.innerHTML=''; for(const[k,v]of Object.entries(PIPES)){let o=document.createElement('option'); o.value=k; o.text=`DN ${k} (${v}mm)`; el.add(o);} el.value='100'; }
@@ -791,9 +868,118 @@
         document.getElementById('resTs').innerText=Ts.toFixed(1); document.getElementById('resQTotal').innerText=Math.round(Qt).toLocaleString(); document.getElementById('resQUnitVal').innerText=Qu.toFixed(1); document.getElementById('resQUnitLabel').innerText=isF?"W/m²":"W/m"; document.getElementById('resArea').innerText=(isF?mul:(mul*Math.PI*(dP+2*(th1+th2)))).toFixed(2)+" m²";
         if(uL2){document.getElementById('resTInter').innerText=Ti.toFixed(1)+" °C";document.getElementById('rowInter').classList.remove('hidden');}else{document.getElementById('rowInter').classList.add('hidden');}
         const bd=document.getElementById('badgeContainer'); if(Ts>55)bd.innerHTML=`<span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-red-100 text-red-700 border border-red-200 shadow-sm"><i data-lucide="flame" class="w-3 h-3 mr-1"></i> YANIK RİSKİ</span>`;else bd.innerHTML=`<span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-green-100 text-green-700 border border-green-200 shadow-sm"><i data-lucide="shield-check" class="w-3 h-3 mr-1"></i> GÜVENLİ</span>`;
-        lucide.createIcons(); renderEnergyClass(Qu,dn,tP,tA,isF);
+        lucide.createIcons(); renderEnergyClass(Qu,dn,tP,tA,isF); renderThermalSvg(tP,Ts,tA,th1,useL2?th2:0,document.getElementById('mat1').value,useL2?document.getElementById('mat2').value:null,isF,Ti);
     }
     function renderEnergyClass(q,d,p,a,f){ const c=document.getElementById('eiifChart'); c.innerHTML=''; if(f){c.innerHTML=`<div class="text-center text-xs text-slate-400 py-4 border border-dashed border-slate-200 rounded-lg">Düz yüzey: EN 17956 sınıflandırması boru geometrisi içindir</div>`;return;} const l=getEiifLimits(d,p,a); const cls=['A','B','C','D','E','F','G']; let mc='G'; if(q<=l.F)mc='F';if(q<=l.E)mc='E';if(q<=l.D)mc='D';if(q<=l.C)mc='C';if(q<=l.B)mc='B';if(q<=l.A)mc='A'; cls.forEach(k=>{const ia=(k===mc);c.innerHTML+=`<div class="eiif-row ${ia?'active':''}"><div class="eiif-label">${k}</div><div class="eiif-bar-container"><div class="eiif-bar w-${k.toLowerCase()}">${ia?'<span class="ml-auto mr-2 bg-white text-slate-900 px-1.5 py-0.5 rounded text-[9px] shadow font-bold">SİZİN</span>':''}</div></div><div class="eiif-val">&lt; ${Math.round(l[k]||(l.G*1.5))} W/m</div></div>`;}); }
+
+    function renderThermalSvg(tProc, tSurf, tAmb, thk1m, thk2m, mat1Key, mat2Key, isFlat, tInter) {
+        const svg = document.getElementById('thermalSvg');
+        if (!svg) return;
+
+        const thk1 = thk1m * 1000; // mm
+        const thk2 = thk2m * 1000;
+        const hasL2 = thk2 > 0 && mat2Key;
+        const W = 500, H = 220;
+        const centerY = H / 2;
+
+        // Sıcaklık → renk
+        function tempColor(t) {
+            const clamped = Math.max(-30, Math.min(650, t));
+            const ratio = (clamped + 30) / 680;
+            if (ratio < 0.25) return `rgb(${Math.round(60 + ratio*4*140)},${Math.round(120 + ratio*4*135)},255)`;
+            if (ratio < 0.5) { const r2=(ratio-0.25)*4; return `rgb(${Math.round(200+r2*55)},${Math.round(255-r2*80)},${Math.round(255-r2*200)})`; }
+            if (ratio < 0.75) { const r3=(ratio-0.5)*4; return `rgb(255,${Math.round(175-r3*120)},${Math.round(55-r3*55)})`; }
+            const r4 = (ratio - 0.75) * 4;
+            return `rgb(${Math.round(255-r4*60)},${Math.round(55-r4*55)},0)`;
+        }
+
+        // Katman genişlikleri (orantılı)
+        const pipeW = 50;
+        const maxInsulW = 260;
+        const totalThk = thk1 + thk2;
+        const scale = totalThk > 0 ? maxInsulW / (totalThk * (hasL2 ? 1 : 1.3)) : maxInsulW;
+        const l1W = Math.max(30, Math.min(maxInsulW, thk1 * scale));
+        const l2W = hasL2 ? Math.max(20, Math.min(maxInsulW - l1W, thk2 * scale)) : 0;
+        const airW = 60;
+
+        const mat1Name = (MATS[mat1Key]||{}).name || mat1Key;
+        const mat2Name = hasL2 ? ((MATS[mat2Key]||{}).name || mat2Key) : '';
+
+        // Boru konum
+        const pipeX = 30;
+        const l1X = pipeX + pipeW;
+        const l2X = l1X + l1W;
+        const surfX = l2X + l2W;
+        const airX = surfX;
+
+        const barH = 120;
+        const barY = centerY - barH / 2;
+
+        // Dış yüzey rengi
+        const surfColor = tSurf > 55 ? '#ef4444' : '#22c55e';
+
+        let s = '';
+        // Arka plan gradyan
+        s += `<defs>
+            <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="${tempColor(tProc)}" stop-opacity="0.08"/>
+                <stop offset="100%" stop-color="${tempColor(tAmb)}" stop-opacity="0.05"/>
+            </linearGradient>
+        </defs>`;
+        s += `<rect x="0" y="0" width="${W}" height="${H}" rx="8" fill="url(#bgGrad)"/>`;
+
+        // Boru (proses)
+        s += `<rect x="${pipeX}" y="${barY}" width="${pipeW}" height="${barH}" rx="4" fill="${tempColor(tProc)}" opacity="0.85"/>`;
+        s += `<text x="${pipeX + pipeW/2}" y="${barY - 8}" text-anchor="middle" fill="${tempColor(tProc)}" font-size="11" font-weight="800">${parseFloat(tProc).toFixed(0)}°C</text>`;
+        s += `<text x="${pipeX + pipeW/2}" y="${barY + barH + 16}" text-anchor="middle" fill="#94a3b8" font-size="8" font-weight="700">PROSES</text>`;
+
+        // Katman 1
+        s += `<rect x="${l1X}" y="${barY}" width="${l1W}" height="${barH}" fill="#6366f1" opacity="0.18"/>`;
+        s += `<rect x="${l1X}" y="${barY}" width="${l1W}" height="${barH}" fill="none" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="4 2"/>`;
+        s += `<text x="${l1X + l1W/2}" y="${centerY - 6}" text-anchor="middle" fill="#4338ca" font-size="8" font-weight="700">${mat1Name}</text>`;
+        s += `<text x="${l1X + l1W/2}" y="${centerY + 10}" text-anchor="middle" fill="#6366f1" font-size="10" font-weight="800">${thk1.toFixed(0)} mm</text>`;
+
+        // Katman 2
+        if (hasL2) {
+            s += `<rect x="${l2X}" y="${barY}" width="${l2W}" height="${barH}" fill="#8b5cf6" opacity="0.15"/>`;
+            s += `<rect x="${l2X}" y="${barY}" width="${l2W}" height="${barH}" fill="none" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="4 2"/>`;
+            s += `<text x="${l2X + l2W/2}" y="${centerY - 6}" text-anchor="middle" fill="#6d28d9" font-size="8" font-weight="700">${mat2Name}</text>`;
+            s += `<text x="${l2X + l2W/2}" y="${centerY + 10}" text-anchor="middle" fill="#8b5cf6" font-size="10" font-weight="800">${thk2.toFixed(0)} mm</text>`;
+
+            // Ara yüzey sıcaklığı göstergesi
+            if (tInter) {
+                s += `<line x1="${l2X}" y1="${barY - 2}" x2="${l2X}" y2="${barY + barH + 2}" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="3 2"/>`;
+                s += `<text x="${l2X}" y="${barY - 8}" text-anchor="middle" fill="#7c3aed" font-size="9" font-weight="700">${parseFloat(tInter).toFixed(1)}°C</text>`;
+            }
+        }
+
+        // Dış yüzey çizgisi
+        s += `<line x1="${surfX}" y1="${barY - 5}" x2="${surfX}" y2="${barY + barH + 5}" stroke="${surfColor}" stroke-width="2.5"/>`;
+
+        // Dış yüzey sıcaklığı — büyük gösterim
+        const tsVal = parseFloat(tSurf).toFixed(1);
+        const tsLabel = tSurf > 55 ? 'YANIK RİSKİ' : 'GÜVENLİ';
+        const tsBg = tSurf > 55 ? '#fef2f2' : '#f0fdf4';
+        const tsBorder = tSurf > 55 ? '#fecaca' : '#bbf7d0';
+        s += `<rect x="${surfX + 8}" y="${centerY - 32}" width="90" height="64" rx="10" fill="${tsBg}" stroke="${tsBorder}" stroke-width="1"/>`;
+        s += `<text x="${surfX + 53}" y="${centerY - 10}" text-anchor="middle" fill="${surfColor}" font-size="22" font-weight="900">${tsVal}°</text>`;
+        s += `<text x="${surfX + 53}" y="${centerY + 8}" text-anchor="middle" fill="${surfColor}" font-size="8" font-weight="800">${tsLabel}</text>`;
+        // Küçük ısı ikonu
+        s += `<text x="${surfX + 53}" y="${centerY + 24}" text-anchor="middle" fill="${surfColor}" font-size="10">🌡️</text>`;
+
+        // Ortam
+        const ambX = surfX + 110;
+        s += `<text x="${ambX}" y="${centerY - 4}" text-anchor="middle" fill="#64748b" font-size="10" font-weight="700">${parseFloat(tAmb).toFixed(0)}°C</text>`;
+        s += `<text x="${ambX}" y="${centerY + 12}" text-anchor="middle" fill="#94a3b8" font-size="8" font-weight="600">ORTAM</text>`;
+
+        // Isı akış okları (soldan sağa)
+        const arrowY = barY + barH + 30;
+        s += `<line x1="${pipeX + 10}" y1="${arrowY}" x2="${surfX + 90}" y2="${arrowY}" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrowHead)"/>`;
+        s += `<defs><marker id="arrowHead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#f59e0b"/></marker></defs>`;
+        s += `<text x="${(pipeX + surfX + 90)/2}" y="${arrowY - 5}" text-anchor="middle" fill="#f59e0b" font-size="8" font-weight="700">ISI AKIŞI →</text>`;
+
+        svg.innerHTML = s;
+    }
 
 // --- KAYITLI PROJEYİ GERİ YÜKLEME ---
 // (Bu kısım kalsın ki eski kayıtlı bir projeyi açarsan verileri çekebilsin. Ama yeni kayıt yapamaz.)
