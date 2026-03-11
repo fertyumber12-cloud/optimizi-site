@@ -330,15 +330,6 @@
                                 <input type="number" id="vWind" value="1" step="0.5" class="glass-input text-xs" oninput="calc()">
                             </div>
                         </div>
-                        <!-- EiiF Modu Toggle -->
-                        <div class="mt-3">
-                            <label class="flex items-center gap-3 cursor-pointer select-none group">
-                                <input type="checkbox" id="eiifMode" onchange="toggleEiifMode()" class="w-4 h-4 rounded border-slate-300 text-green-600 focus:ring-green-500">
-                                <span class="text-[10px] font-bold text-slate-500 group-hover:text-green-600 transition flex items-center gap-1.5">
-                                    <i data-lucide="shield-check" class="w-3 h-3"></i> EN 17956 Referans Modu (Ortam 15°C · Rüzgar 0 m/s)
-                                </span>
-                            </label>
-                        </div>
                     </div>
 
                     <div class="mt-6 pt-4 border-t border-slate-100">
@@ -455,9 +446,9 @@
                              <span class="text-[9px] text-slate-400 font-bold bg-green-50 px-2 py-1 rounded border border-green-100">EN 17956</span>
                          </div>
 
-                         <!-- TERMAL KESİT SVG (EiiF kapalıyken) -->
+                         <!-- TERMAL KESİT SVG — DİKEY (EiiF kapalıyken) -->
                          <div id="thermalCrossSection">
-                             <svg id="thermalSvg" viewBox="0 0 500 220" class="w-full" style="max-height:220px;"></svg>
+                             <svg id="thermalSvg" viewBox="0 0 360 320" class="w-full" style="max-height:320px;"></svg>
                          </div>
 
                          <!-- EiiF CHART (EiiF açıkken) -->
@@ -465,11 +456,19 @@
                              <div id="eiifChart"></div>
                          </div>
 
-                         <div id="eiifNote" class="mt-2 text-[9px] text-slate-400 text-center italic hidden">EN 17956 sınıflandırması 15°C referans ortam sıcaklığına göredir</div>
-                         <div id="eiifModeActive" class="hidden mt-2 text-center">
+                         <div id="eiifModeActive" class="hidden mt-3 text-center">
                              <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold bg-green-100 text-green-700 border border-green-200">
-                                 <i data-lucide="shield-check" class="w-3 h-3"></i> EN 17956 Referans Modu Aktif
+                                 <i data-lucide="shield-check" class="w-3 h-3"></i> EN 17956 Referans Modu Aktif · Ortam 15°C · Rüzgar 0 m/s
                              </span>
+                         </div>
+
+                         <!-- EiiF MODU BUTON — sağ alt -->
+                         <div class="mt-4 pt-3 border-t border-slate-100 flex justify-end">
+                             <input type="checkbox" id="eiifMode" onchange="toggleEiifMode()" class="hidden">
+                             <button onclick="document.getElementById('eiifMode').checked=!document.getElementById('eiifMode').checked; toggleEiifMode();" id="eiifToggleBtn" class="flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-bold transition-all border cursor-pointer bg-white text-green-700 border-green-300 hover:bg-green-50 hover:border-green-400 shadow-sm">
+                                 <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                                 <span id="eiifBtnLabel">EN 17956 Moduna Geç</span>
+                             </button>
                          </div>
                     </div>
 
@@ -756,11 +755,12 @@
         const tAmb = document.getElementById('tAmb');
         const vWind = document.getElementById('vWind');
         const indicator = document.getElementById('eiifModeActive');
-        const note = document.getElementById('eiifNote');
         const thermalPanel = document.getElementById('thermalCrossSection');
         const eiifPanel = document.getElementById('eiifChartWrap');
         const headerThermal = document.getElementById('panelHeaderThermal');
         const headerEiif = document.getElementById('panelHeaderEiif');
+        const toggleBtn = document.getElementById('eiifToggleBtn');
+        const btnLabel = document.getElementById('eiifBtnLabel');
         if (cb.checked) {
             eiifPrevAmb = tAmb.value;
             eiifPrevWind = vWind.value;
@@ -770,13 +770,13 @@
             vWind.disabled = true;
             tAmb.classList.add('!bg-green-50', '!border-green-300', '!text-green-700');
             vWind.classList.add('!bg-green-50', '!border-green-300', '!text-green-700');
-            // Panel geçişi: termal gizle, eiif göster
             thermalPanel.classList.add('hidden');
             eiifPanel.classList.remove('hidden');
             headerThermal.classList.add('hidden');
             headerEiif.classList.remove('hidden');
             indicator.classList.remove('hidden');
-            note.classList.add('hidden');
+            toggleBtn.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-bold transition-all border cursor-pointer bg-green-600 text-white border-green-700 hover:bg-green-700 shadow-md';
+            btnLabel.textContent = 'Termal Görünüme Dön';
         } else {
             tAmb.value = eiifPrevAmb || 25;
             vWind.value = eiifPrevWind || 1;
@@ -784,13 +784,13 @@
             vWind.disabled = false;
             tAmb.classList.remove('!bg-green-50', '!border-green-300', '!text-green-700');
             vWind.classList.remove('!bg-green-50', '!border-green-300', '!text-green-700');
-            // Panel geçişi: eiif gizle, termal göster
             thermalPanel.classList.remove('hidden');
             eiifPanel.classList.add('hidden');
             headerThermal.classList.remove('hidden');
             headerEiif.classList.add('hidden');
             indicator.classList.add('hidden');
-            note.classList.add('hidden');
+            toggleBtn.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-bold transition-all border cursor-pointer bg-white text-green-700 border-green-300 hover:bg-green-50 hover:border-green-400 shadow-sm';
+            btnLabel.textContent = 'EN 17956 Moduna Geç';
         }
         lucide.createIcons();
         calc();
@@ -876,107 +876,135 @@
         const svg = document.getElementById('thermalSvg');
         if (!svg) return;
 
-        const thk1 = thk1m * 1000; // mm
+        const thk1 = thk1m * 1000;
         const thk2 = thk2m * 1000;
-        const hasL2 = thk2 > 0 && mat2Key;
-        const W = 500, H = 220;
-        const centerY = H / 2;
+        const useL2 = document.getElementById('useL2').checked;
+        const hasL2 = useL2 && thk2 > 0 && mat2Key;
 
-        // Sıcaklık → renk
+        const W = 360, H = 320;
+        const centerX = W / 2;
+        const barW = 180;
+        const barX = centerX - barW / 2;
+
         function tempColor(t) {
             const clamped = Math.max(-30, Math.min(650, t));
             const ratio = (clamped + 30) / 680;
-            if (ratio < 0.25) return `rgb(${Math.round(60 + ratio*4*140)},${Math.round(120 + ratio*4*135)},255)`;
+            if (ratio < 0.25) return `rgb(${Math.round(60+ratio*4*140)},${Math.round(120+ratio*4*135)},255)`;
             if (ratio < 0.5) { const r2=(ratio-0.25)*4; return `rgb(${Math.round(200+r2*55)},${Math.round(255-r2*80)},${Math.round(255-r2*200)})`; }
             if (ratio < 0.75) { const r3=(ratio-0.5)*4; return `rgb(255,${Math.round(175-r3*120)},${Math.round(55-r3*55)})`; }
-            const r4 = (ratio - 0.75) * 4;
-            return `rgb(${Math.round(255-r4*60)},${Math.round(55-r4*55)},0)`;
+            const r4=(ratio-0.75)*4; return `rgb(${Math.round(255-r4*60)},${Math.round(55-r4*55)},0)`;
         }
 
-        // Katman genişlikleri (orantılı)
-        const pipeW = 50;
-        const maxInsulW = 260;
-        const totalThk = thk1 + thk2;
-        const scale = totalThk > 0 ? maxInsulW / (totalThk * (hasL2 ? 1 : 1.3)) : maxInsulW;
-        const l1W = Math.max(30, Math.min(maxInsulW, thk1 * scale));
-        const l2W = hasL2 ? Math.max(20, Math.min(maxInsulW - l1W, thk2 * scale)) : 0;
-        const airW = 60;
+        // Yükseklikleri hesapla (aşağıdan yukarı: proses → katman1 → katman2? → yüzey → ortam)
+        const procH = 50;
+        const maxInsulH = hasL2 ? 130 : 160;
+        const totalThk = thk1 + (hasL2 ? thk2 : 0);
+        const scale = totalThk > 0 ? maxInsulH / totalThk : 1;
+        const l1H = Math.max(30, Math.min(maxInsulH, thk1 * scale));
+        const l2H = hasL2 ? Math.max(25, Math.min(maxInsulH - l1H, thk2 * scale)) : 0;
+        const surfLineH = 2;
+        const ambH = 36;
 
+        // Y konumları (aşağıdan yukarı)
+        const bottomY = H - 16;
+        const procY = bottomY - procH;
+        const l1Y = procY - l1H;
+        const l2Y = hasL2 ? l1Y - l2H : l1Y;
+        const surfY = hasL2 ? l2Y : l1Y;
+        const ambY = surfY - ambH;
+
+        const surfColor = tSurf > 55 ? '#ef4444' : '#22c55e';
         const mat1Name = (MATS[mat1Key]||{}).name || mat1Key;
         const mat2Name = hasL2 ? ((MATS[mat2Key]||{}).name || mat2Key) : '';
 
-        // Boru konum
-        const pipeX = 30;
-        const l1X = pipeX + pipeW;
-        const l2X = l1X + l1W;
-        const surfX = l2X + l2W;
-        const airX = surfX;
-
-        const barH = 120;
-        const barY = centerY - barH / 2;
-
-        // Dış yüzey rengi
-        const surfColor = tSurf > 55 ? '#ef4444' : '#22c55e';
-
         let s = '';
-        // Arka plan gradyan
+
+        // Defs — gradyanlar ve animasyonlu ısı parçacıkları
         s += `<defs>
-            <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stop-color="${tempColor(tProc)}" stop-opacity="0.08"/>
-                <stop offset="100%" stop-color="${tempColor(tAmb)}" stop-opacity="0.05"/>
+            <linearGradient id="bgGradV" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0%" stop-color="${tempColor(tProc)}" stop-opacity="0.1"/>
+                <stop offset="100%" stop-color="${tempColor(tAmb)}" stop-opacity="0.03"/>
             </linearGradient>
+            <linearGradient id="heatGrad" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0%" stop-color="#ef4444" stop-opacity="0.6"/>
+                <stop offset="50%" stop-color="#f59e0b" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+            </linearGradient>
+            <marker id="arrowUp" markerWidth="8" markerHeight="8" refX="4" refY="8" orient="auto">
+                <polygon points="0 8, 4 0, 8 8" fill="#f59e0b"/>
+            </marker>
+            <style>
+                @keyframes riseUp { 0%{opacity:0.8;transform:translateY(0)} 100%{opacity:0;transform:translateY(-40px)} }
+                .heat-particle { animation: riseUp 2s ease-out infinite; }
+                .hp-d1 { animation-delay: 0s; }
+                .hp-d2 { animation-delay: 0.5s; }
+                .hp-d3 { animation-delay: 1s; }
+                .hp-d4 { animation-delay: 1.5s; }
+            </style>
         </defs>`;
-        s += `<rect x="0" y="0" width="${W}" height="${H}" rx="8" fill="url(#bgGrad)"/>`;
 
-        // Boru (proses)
-        s += `<rect x="${pipeX}" y="${barY}" width="${pipeW}" height="${barH}" rx="4" fill="${tempColor(tProc)}" opacity="0.85"/>`;
-        s += `<text x="${pipeX + pipeW/2}" y="${barY - 8}" text-anchor="middle" fill="${tempColor(tProc)}" font-size="11" font-weight="800">${parseFloat(tProc).toFixed(0)}°C</text>`;
-        s += `<text x="${pipeX + pipeW/2}" y="${barY + barH + 16}" text-anchor="middle" fill="#94a3b8" font-size="8" font-weight="700">PROSES</text>`;
+        // Arka plan
+        s += `<rect x="0" y="0" width="${W}" height="${H}" rx="10" fill="url(#bgGradV)"/>`;
 
-        // Katman 1
-        s += `<rect x="${l1X}" y="${barY}" width="${l1W}" height="${barH}" fill="#6366f1" opacity="0.18"/>`;
-        s += `<rect x="${l1X}" y="${barY}" width="${l1W}" height="${barH}" fill="none" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="4 2"/>`;
-        s += `<text x="${l1X + l1W/2}" y="${centerY - 6}" text-anchor="middle" fill="#4338ca" font-size="8" font-weight="700">${mat1Name}</text>`;
-        s += `<text x="${l1X + l1W/2}" y="${centerY + 10}" text-anchor="middle" fill="#6366f1" font-size="10" font-weight="800">${thk1.toFixed(0)} mm</text>`;
+        // ===== PROSES BÖLGESI (alt) =====
+        s += `<rect x="${barX}" y="${procY}" width="${barW}" height="${procH}" rx="6" fill="${tempColor(tProc)}" opacity="0.85"/>`;
+        s += `<text x="${centerX}" y="${procY + procH/2 - 6}" text-anchor="middle" fill="white" font-size="18" font-weight="900" filter="drop-shadow(0 1px 2px rgba(0,0,0,0.3))">${parseFloat(tProc).toFixed(0)}°C</text>`;
+        s += `<text x="${centerX}" y="${procY + procH/2 + 12}" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="8" font-weight="700" letter-spacing="2">PROSES</text>`;
 
-        // Katman 2
+        // Isı parçacıkları (yukarı doğru yükselen)
+        const particleBaseY = procY - 5;
+        for (let i = 0; i < 4; i++) {
+            const px = barX + 30 + i * 40;
+            s += `<circle cx="${px}" cy="${particleBaseY}" r="3" fill="#f59e0b" opacity="0.7" class="heat-particle hp-d${i+1}"/>`;
+        }
+
+        // Isı akış oku (sol taraf, aşağıdan yukarı)
+        const arrowX = barX - 22;
+        s += `<line x1="${arrowX}" y1="${bottomY - 10}" x2="${arrowX}" y2="${surfY + 10}" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrowUp)"/>`;
+        s += `<text x="${arrowX}" y="${(procY + surfY)/2}" text-anchor="middle" fill="#f59e0b" font-size="7" font-weight="700" transform="rotate(-90 ${arrowX} ${(procY + surfY)/2})">ISI AKIŞI</text>`;
+
+        // ===== KATMAN 1 =====
+        s += `<rect x="${barX}" y="${l1Y}" width="${barW}" height="${l1H}" rx="0" fill="#6366f1" opacity="0.15"/>`;
+        s += `<rect x="${barX}" y="${l1Y}" width="${barW}" height="${l1H}" rx="0" fill="none" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="5 3"/>`;
+        s += `<text x="${centerX}" y="${l1Y + l1H/2 - 5}" text-anchor="middle" fill="#4338ca" font-size="8" font-weight="700">${mat1Name}</text>`;
+        s += `<text x="${centerX}" y="${l1Y + l1H/2 + 10}" text-anchor="middle" fill="#6366f1" font-size="11" font-weight="800">${thk1.toFixed(0)} mm</text>`;
+        // Kalınlık etiketi sağda
+        s += `<text x="${barX + barW + 8}" y="${l1Y + l1H/2 + 3}" text-anchor="start" fill="#a5b4fc" font-size="7" font-weight="600">K1</text>`;
+
+        // ===== KATMAN 2 (sadece seçiliyse) =====
         if (hasL2) {
-            s += `<rect x="${l2X}" y="${barY}" width="${l2W}" height="${barH}" fill="#8b5cf6" opacity="0.15"/>`;
-            s += `<rect x="${l2X}" y="${barY}" width="${l2W}" height="${barH}" fill="none" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="4 2"/>`;
-            s += `<text x="${l2X + l2W/2}" y="${centerY - 6}" text-anchor="middle" fill="#6d28d9" font-size="8" font-weight="700">${mat2Name}</text>`;
-            s += `<text x="${l2X + l2W/2}" y="${centerY + 10}" text-anchor="middle" fill="#8b5cf6" font-size="10" font-weight="800">${thk2.toFixed(0)} mm</text>`;
+            s += `<rect x="${barX}" y="${l2Y}" width="${barW}" height="${l2H}" rx="0" fill="#8b5cf6" opacity="0.13"/>`;
+            s += `<rect x="${barX}" y="${l2Y}" width="${barW}" height="${l2H}" rx="0" fill="none" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="5 3"/>`;
+            s += `<text x="${centerX}" y="${l2Y + l2H/2 - 5}" text-anchor="middle" fill="#6d28d9" font-size="8" font-weight="700">${mat2Name}</text>`;
+            s += `<text x="${centerX}" y="${l2Y + l2H/2 + 10}" text-anchor="middle" fill="#8b5cf6" font-size="11" font-weight="800">${thk2.toFixed(0)} mm</text>`;
+            s += `<text x="${barX + barW + 8}" y="${l2Y + l2H/2 + 3}" text-anchor="start" fill="#c4b5fd" font-size="7" font-weight="600">K2</text>`;
 
-            // Ara yüzey sıcaklığı göstergesi
+            // Ara yüzey sıcaklığı çizgisi (K1-K2 arası)
             if (tInter) {
-                s += `<line x1="${l2X}" y1="${barY - 2}" x2="${l2X}" y2="${barY + barH + 2}" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="3 2"/>`;
-                s += `<text x="${l2X}" y="${barY - 8}" text-anchor="middle" fill="#7c3aed" font-size="9" font-weight="700">${parseFloat(tInter).toFixed(1)}°C</text>`;
+                s += `<line x1="${barX - 5}" y1="${l1Y}" x2="${barX + barW + 5}" y2="${l1Y}" stroke="#a78bfa" stroke-width="1" stroke-dasharray="3 2"/>`;
+                s += `<rect x="${barX + barW + 6}" y="${l1Y - 9}" width="42" height="16" rx="4" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="0.5"/>`;
+                s += `<text x="${barX + barW + 27}" y="${l1Y + 3}" text-anchor="middle" fill="#7c3aed" font-size="8" font-weight="700">${parseFloat(tInter).toFixed(1)}°</text>`;
             }
         }
 
-        // Dış yüzey çizgisi
-        s += `<line x1="${surfX}" y1="${barY - 5}" x2="${surfX}" y2="${barY + barH + 5}" stroke="${surfColor}" stroke-width="2.5"/>`;
+        // ===== DIŞ YÜZEY =====
+        s += `<line x1="${barX - 8}" y1="${surfY}" x2="${barX + barW + 8}" y2="${surfY}" stroke="${surfColor}" stroke-width="2.5"/>`;
 
-        // Dış yüzey sıcaklığı — büyük gösterim
+        // Yüzey sıcaklığı kutusu (üstte, merkezde)
         const tsVal = parseFloat(tSurf).toFixed(1);
         const tsLabel = tSurf > 55 ? 'YANIK RİSKİ' : 'GÜVENLİ';
         const tsBg = tSurf > 55 ? '#fef2f2' : '#f0fdf4';
         const tsBorder = tSurf > 55 ? '#fecaca' : '#bbf7d0';
-        s += `<rect x="${surfX + 8}" y="${centerY - 32}" width="90" height="64" rx="10" fill="${tsBg}" stroke="${tsBorder}" stroke-width="1"/>`;
-        s += `<text x="${surfX + 53}" y="${centerY - 10}" text-anchor="middle" fill="${surfColor}" font-size="22" font-weight="900">${tsVal}°</text>`;
-        s += `<text x="${surfX + 53}" y="${centerY + 8}" text-anchor="middle" fill="${surfColor}" font-size="8" font-weight="800">${tsLabel}</text>`;
-        // Küçük ısı ikonu
-        s += `<text x="${surfX + 53}" y="${centerY + 24}" text-anchor="middle" fill="${surfColor}" font-size="10">🌡️</text>`;
+        const boxW = 120, boxH = 48;
+        const boxX = centerX - boxW/2;
+        const boxY = surfY - boxH - 8;
+        s += `<rect x="${boxX}" y="${boxY}" width="${boxW}" height="${boxH}" rx="10" fill="${tsBg}" stroke="${tsBorder}" stroke-width="1.5"/>`;
+        s += `<text x="${centerX - 10}" y="${boxY + 20}" text-anchor="middle" fill="${surfColor}" font-size="20" font-weight="900">${tsVal}°C</text>`;
+        s += `<text x="${centerX + 42}" y="${boxY + 20}" text-anchor="middle" fill="${surfColor}" font-size="11">🌡️</text>`;
+        s += `<text x="${centerX}" y="${boxY + 36}" text-anchor="middle" fill="${surfColor}" font-size="8" font-weight="700" letter-spacing="1">${tsLabel}</text>`;
 
-        // Ortam
-        const ambX = surfX + 110;
-        s += `<text x="${ambX}" y="${centerY - 4}" text-anchor="middle" fill="#64748b" font-size="10" font-weight="700">${parseFloat(tAmb).toFixed(0)}°C</text>`;
-        s += `<text x="${ambX}" y="${centerY + 12}" text-anchor="middle" fill="#94a3b8" font-size="8" font-weight="600">ORTAM</text>`;
-
-        // Isı akış okları (soldan sağa)
-        const arrowY = barY + barH + 30;
-        s += `<line x1="${pipeX + 10}" y1="${arrowY}" x2="${surfX + 90}" y2="${arrowY}" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrowHead)"/>`;
-        s += `<defs><marker id="arrowHead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#f59e0b"/></marker></defs>`;
-        s += `<text x="${(pipeX + surfX + 90)/2}" y="${arrowY - 5}" text-anchor="middle" fill="#f59e0b" font-size="8" font-weight="700">ISI AKIŞI →</text>`;
+        // ===== ORTAM (en üst) =====
+        s += `<text x="${centerX}" y="${boxY - 12}" text-anchor="middle" fill="#64748b" font-size="10" font-weight="600">${parseFloat(tAmb).toFixed(0)}°C Ortam</text>`;
 
         svg.innerHTML = s;
     }
