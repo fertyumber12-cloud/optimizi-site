@@ -886,24 +886,13 @@
         const barW = 180;
         const barX = centerX - barW / 2;
 
-        function tempColor(t) {
-            const clamped = Math.max(-30, Math.min(650, t));
-            const ratio = (clamped + 30) / 680;
-            if (ratio < 0.25) return `rgb(${Math.round(60+ratio*4*140)},${Math.round(120+ratio*4*135)},255)`;
-            if (ratio < 0.5) { const r2=(ratio-0.25)*4; return `rgb(${Math.round(200+r2*55)},${Math.round(255-r2*80)},${Math.round(255-r2*200)})`; }
-            if (ratio < 0.75) { const r3=(ratio-0.5)*4; return `rgb(255,${Math.round(175-r3*120)},${Math.round(55-r3*55)})`; }
-            const r4=(ratio-0.75)*4; return `rgb(${Math.round(255-r4*60)},${Math.round(55-r4*55)},0)`;
-        }
-
-        // Yükseklikleri hesapla (aşağıdan yukarı: proses → katman1 → katman2? → yüzey → ortam)
+        // Yükseklikleri hesapla (aşağıdan yukarı)
         const procH = 50;
         const maxInsulH = hasL2 ? 130 : 160;
         const totalThk = thk1 + (hasL2 ? thk2 : 0);
         const scale = totalThk > 0 ? maxInsulH / totalThk : 1;
         const l1H = Math.max(30, Math.min(maxInsulH, thk1 * scale));
         const l2H = hasL2 ? Math.max(25, Math.min(maxInsulH - l1H, thk2 * scale)) : 0;
-        const surfLineH = 2;
-        const ambH = 36;
 
         // Y konumları (aşağıdan yukarı)
         const bottomY = H - 16;
@@ -911,7 +900,6 @@
         const l1Y = procY - l1H;
         const l2Y = hasL2 ? l1Y - l2H : l1Y;
         const surfY = hasL2 ? l2Y : l1Y;
-        const ambY = surfY - ambH;
 
         const surfColor = tSurf > 55 ? '#ef4444' : '#22c55e';
         const mat1Name = (MATS[mat1Key]||{}).name || mat1Key;
@@ -919,22 +907,14 @@
 
         let s = '';
 
-        // Defs — gradyanlar ve animasyonlu ısı parçacıkları
+        // Defs
         s += `<defs>
             <linearGradient id="bgGradV" x1="0" y1="1" x2="0" y2="0">
-                <stop offset="0%" stop-color="${tempColor(tProc)}" stop-opacity="0.1"/>
-                <stop offset="100%" stop-color="${tempColor(tAmb)}" stop-opacity="0.03"/>
+                <stop offset="0%" stop-color="#f97316" stop-opacity="0.06"/>
+                <stop offset="100%" stop-color="#e2e8f0" stop-opacity="0.03"/>
             </linearGradient>
-            <linearGradient id="heatGrad" x1="0" y1="1" x2="0" y2="0">
-                <stop offset="0%" stop-color="#ef4444" stop-opacity="0.6"/>
-                <stop offset="50%" stop-color="#f59e0b" stop-opacity="0.3"/>
-                <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
-            </linearGradient>
-            <marker id="arrowUp" markerWidth="8" markerHeight="8" refX="4" refY="8" orient="auto">
-                <polygon points="0 8, 4 0, 8 8" fill="#f59e0b"/>
-            </marker>
             <style>
-                @keyframes riseUp { 0%{opacity:0.8;transform:translateY(0)} 100%{opacity:0;transform:translateY(-40px)} }
+                @keyframes riseUp { 0%{opacity:0.9;transform:translateY(0)} 100%{opacity:0;transform:translateY(-36px)} }
                 .heat-particle { animation: riseUp 2s ease-out infinite; }
                 .hp-d1 { animation-delay: 0s; }
                 .hp-d2 { animation-delay: 0.5s; }
@@ -946,40 +926,45 @@
         // Arka plan
         s += `<rect x="0" y="0" width="${W}" height="${H}" rx="10" fill="url(#bgGradV)"/>`;
 
-        // ===== PROSES BÖLGESI (alt) =====
-        s += `<rect x="${barX}" y="${procY}" width="${barW}" height="${procH}" rx="6" fill="${tempColor(tProc)}" opacity="0.85"/>`;
-        s += `<text x="${centerX}" y="${procY + procH/2 - 6}" text-anchor="middle" fill="white" font-size="18" font-weight="900" filter="drop-shadow(0 1px 2px rgba(0,0,0,0.3))">${parseFloat(tProc).toFixed(0)}°C</text>`;
-        s += `<text x="${centerX}" y="${procY + procH/2 + 12}" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="8" font-weight="700" letter-spacing="2">PROSES</text>`;
+        // ===== PROSES (alt) — Turuncu =====
+        s += `<rect x="${barX}" y="${procY}" width="${barW}" height="${procH}" rx="6" fill="#f97316"/>`;
+        s += `<text x="${centerX}" y="${procY + procH/2 - 5}" text-anchor="middle" fill="#fff" font-size="18" font-weight="900">${parseFloat(tProc).toFixed(0)}°C</text>`;
+        s += `<text x="${centerX}" y="${procY + procH/2 + 12}" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-size="8" font-weight="700" letter-spacing="2">PROSES</text>`;
 
-        // Isı parçacıkları (yukarı doğru yükselen)
-        const particleBaseY = procY - 5;
+        // Isı parçacıkları (yukarı yükselen)
+        const particleBaseY = procY - 4;
         for (let i = 0; i < 4; i++) {
             const px = barX + 30 + i * 40;
-            s += `<circle cx="${px}" cy="${particleBaseY}" r="3" fill="#f59e0b" opacity="0.7" class="heat-particle hp-d${i+1}"/>`;
+            s += `<circle cx="${px}" cy="${particleBaseY}" r="2.5" fill="#fb923c" class="heat-particle hp-d${i+1}"/>`;
         }
 
-        // Isı akış oku (sol taraf, aşağıdan yukarı)
-        const arrowX = barX - 22;
-        s += `<line x1="${arrowX}" y1="${bottomY - 10}" x2="${arrowX}" y2="${surfY + 10}" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrowUp)"/>`;
-        s += `<text x="${arrowX}" y="${(procY + surfY)/2}" text-anchor="middle" fill="#f59e0b" font-size="7" font-weight="700" transform="rotate(-90 ${arrowX} ${(procY + surfY)/2})">ISI AKIŞI</text>`;
+        // ===== ISI AKIŞ OKU (sol taraf) =====
+        const arrowX = barX - 20;
+        const arrowTop = surfY + 6;
+        const arrowBot = bottomY - 10;
+        // Düz çubuk
+        s += `<line x1="${arrowX}" y1="${arrowBot}" x2="${arrowX}" y2="${arrowTop + 8}" stroke="#f97316" stroke-width="2" stroke-linecap="round"/>`;
+        // Ok ucu (üçgen)
+        s += `<polygon points="${arrowX - 5},${arrowTop + 10} ${arrowX},${arrowTop} ${arrowX + 5},${arrowTop + 10}" fill="#f97316"/>`;
+        // Etiket
+        s += `<text x="${arrowX}" y="${(arrowBot + arrowTop)/2 + 4}" text-anchor="middle" fill="#ea580c" font-size="7" font-weight="800" transform="rotate(-90 ${arrowX} ${(arrowBot + arrowTop)/2 + 4})">ISI AKIŞI</text>`;
 
         // ===== KATMAN 1 =====
-        s += `<rect x="${barX}" y="${l1Y}" width="${barW}" height="${l1H}" rx="0" fill="#6366f1" opacity="0.15"/>`;
-        s += `<rect x="${barX}" y="${l1Y}" width="${barW}" height="${l1H}" rx="0" fill="none" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="5 3"/>`;
+        s += `<rect x="${barX}" y="${l1Y}" width="${barW}" height="${l1H}" fill="#6366f1" opacity="0.15"/>`;
+        s += `<rect x="${barX}" y="${l1Y}" width="${barW}" height="${l1H}" fill="none" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="5 3"/>`;
         s += `<text x="${centerX}" y="${l1Y + l1H/2 - 5}" text-anchor="middle" fill="#4338ca" font-size="8" font-weight="700">${mat1Name}</text>`;
         s += `<text x="${centerX}" y="${l1Y + l1H/2 + 10}" text-anchor="middle" fill="#6366f1" font-size="11" font-weight="800">${thk1.toFixed(0)} mm</text>`;
-        // Kalınlık etiketi sağda
         s += `<text x="${barX + barW + 8}" y="${l1Y + l1H/2 + 3}" text-anchor="start" fill="#a5b4fc" font-size="7" font-weight="600">K1</text>`;
 
-        // ===== KATMAN 2 (sadece seçiliyse) =====
+        // ===== KATMAN 2 (sadece checkbox seçiliyse) =====
         if (hasL2) {
-            s += `<rect x="${barX}" y="${l2Y}" width="${barW}" height="${l2H}" rx="0" fill="#8b5cf6" opacity="0.13"/>`;
-            s += `<rect x="${barX}" y="${l2Y}" width="${barW}" height="${l2H}" rx="0" fill="none" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="5 3"/>`;
+            s += `<rect x="${barX}" y="${l2Y}" width="${barW}" height="${l2H}" fill="#8b5cf6" opacity="0.13"/>`;
+            s += `<rect x="${barX}" y="${l2Y}" width="${barW}" height="${l2H}" fill="none" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="5 3"/>`;
             s += `<text x="${centerX}" y="${l2Y + l2H/2 - 5}" text-anchor="middle" fill="#6d28d9" font-size="8" font-weight="700">${mat2Name}</text>`;
             s += `<text x="${centerX}" y="${l2Y + l2H/2 + 10}" text-anchor="middle" fill="#8b5cf6" font-size="11" font-weight="800">${thk2.toFixed(0)} mm</text>`;
             s += `<text x="${barX + barW + 8}" y="${l2Y + l2H/2 + 3}" text-anchor="start" fill="#c4b5fd" font-size="7" font-weight="600">K2</text>`;
 
-            // Ara yüzey sıcaklığı çizgisi (K1-K2 arası)
+            // Ara yüzey sıcaklığı (K1–K2 arası)
             if (tInter) {
                 s += `<line x1="${barX - 5}" y1="${l1Y}" x2="${barX + barW + 5}" y2="${l1Y}" stroke="#a78bfa" stroke-width="1" stroke-dasharray="3 2"/>`;
                 s += `<rect x="${barX + barW + 6}" y="${l1Y - 9}" width="42" height="16" rx="4" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="0.5"/>`;
@@ -990,21 +975,20 @@
         // ===== DIŞ YÜZEY =====
         s += `<line x1="${barX - 8}" y1="${surfY}" x2="${barX + barW + 8}" y2="${surfY}" stroke="${surfColor}" stroke-width="2.5"/>`;
 
-        // Yüzey sıcaklığı kutusu (üstte, merkezde)
+        // Yüzey sıcaklığı kutusu — ikon yok, sadece yazı
         const tsVal = parseFloat(tSurf).toFixed(1);
         const tsLabel = tSurf > 55 ? 'YANIK RİSKİ' : 'GÜVENLİ';
         const tsBg = tSurf > 55 ? '#fef2f2' : '#f0fdf4';
         const tsBorder = tSurf > 55 ? '#fecaca' : '#bbf7d0';
-        const boxW = 120, boxH = 48;
-        const boxX = centerX - boxW/2;
+        const boxW = 110, boxH = 42;
+        const boxX = centerX - boxW / 2;
         const boxY = surfY - boxH - 8;
         s += `<rect x="${boxX}" y="${boxY}" width="${boxW}" height="${boxH}" rx="10" fill="${tsBg}" stroke="${tsBorder}" stroke-width="1.5"/>`;
-        s += `<text x="${centerX - 10}" y="${boxY + 20}" text-anchor="middle" fill="${surfColor}" font-size="20" font-weight="900">${tsVal}°C</text>`;
-        s += `<text x="${centerX + 42}" y="${boxY + 20}" text-anchor="middle" fill="${surfColor}" font-size="11">🌡️</text>`;
-        s += `<text x="${centerX}" y="${boxY + 36}" text-anchor="middle" fill="${surfColor}" font-size="8" font-weight="700" letter-spacing="1">${tsLabel}</text>`;
+        s += `<text x="${centerX}" y="${boxY + 18}" text-anchor="middle" fill="${surfColor}" font-size="18" font-weight="900">${tsVal}°C</text>`;
+        s += `<text x="${centerX}" y="${boxY + 34}" text-anchor="middle" fill="${surfColor}" font-size="8" font-weight="700" letter-spacing="1">${tsLabel}</text>`;
 
         // ===== ORTAM (en üst) =====
-        s += `<text x="${centerX}" y="${boxY - 12}" text-anchor="middle" fill="#64748b" font-size="10" font-weight="600">${parseFloat(tAmb).toFixed(0)}°C Ortam</text>`;
+        s += `<text x="${centerX}" y="${boxY - 10}" text-anchor="middle" fill="#64748b" font-size="10" font-weight="600">${parseFloat(tAmb).toFixed(0)}°C Ortam</text>`;
 
         svg.innerHTML = s;
     }
