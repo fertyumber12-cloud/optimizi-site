@@ -1,0 +1,115 @@
+{
+  "version": "2026-02",
+  "materials": [
+    {
+      "id": "KUM-001",
+      "type": "Kumaş",
+      "subtype": "Cam Elyaf",
+      "name": "1 Sİ - 0.5 mm - Gri",
+      "unit": "M²",
+      "price": 2.49,
+      "currency": "USD",
+      "thickness_mm": null
+    },
+    {
+      "id": "KUM-002",
+      "type": "Kumaş",
+      "subtype": "Cam Elyaf",
+      "name": "2 Sİ - 0.5 mm - Gri",
+      "unit": "M²",
+      "price": 2.95,
+      "currency": "USD",
+      "thickness_mm": null
+    },
+    {
+      "id": "DOL-003",
+      "type": "Dolgu",
+      "subtype": "Taş Yünü",
+      "name": "TY-50mm",
+      "unit": "M²",
+      "price": 285,
+      "currency": "TL",
+      "thickness_mm": 45
+    },
+    {
+      "id": "DOL-004",
+      "type": "Dolgu",
+      "subtype": "İğnelenmiş Cam Elyaf",
+      "name": "İCE - 20mm",
+      "unit": "M²",
+      "price": 6.3,
+      "currency": "EUR",
+      "thickness_mm": 20
+    },
+    {
+      "id": "YRD-005",
+      "type": "Yardımcı",
+      "subtype": "Dikiş İpi",
+      "name": "SS - 3",
+      "unit": "MT",
+      "price": 0.013,
+      "currency": "USD",
+      "thickness_mm": null
+    },
+    {
+      "id": "YRD-006",
+      "type": "Yardımcı",
+      "subtype": "Cırtbant",
+      "name": "40 mm - Gri",
+      "unit": "MT",
+      "price": 0.5,
+      "currency": "EUR",
+      "thickness_mm": null
+    },
+    {
+      "id": "YRD-007",
+      "type": "Yardımcı",
+      "subtype": "Boğma İpi",
+      "name": "CamElyf-4mm",
+      "unit": "MT",
+      "price": 0.25,
+      "currency": "USD",
+      "thickness_mm": null
+    },
+    {
+      "id": "YRD-008",
+      "type": "Yardımcı",
+      "subtype": "Zımba Set",
+      "name": "SS Z+A+P",
+      "unit": "SET",
+      "price": 0.06,
+      "currency": "USD",
+      "thickness_mm": null
+    },
+    {
+      "id": "YRD-009",
+      "type": "Yardımcı",
+      "subtype": "Ç.Pul Set",
+      "name": "SS Ç.Pul Set",
+      "unit": "ADET",
+      "price": 0.15,
+      "currency": "USD",
+      "thickness_mm": null
+    },
+    {
+      "id": "YRD-010",
+      "type": "Yardımcı",
+      "subtype": "Toka",
+      "name": "D-Toka",
+      "unit": "ADET",
+      "price": 0.25,
+      "currency": "USD",
+      "thickness_mm": null
+    },
+    {
+      "id": "YRD-011",
+      "type": "Yardımcı",
+      "subtype": "Etiket",
+      "name": "30*60",
+      "unit": "ADET",
+      "price": 3.2,
+      "currency": "TL",
+      "thickness_mm": null
+    }
+  ]
+}
