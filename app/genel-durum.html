@@ -1,0 +1,1140 @@
+<!doctype html>
+<html lang="tr" class="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Genel Durum | Optimizi.App</title>
+<link rel="stylesheet" href="/app/css/base.css">
+<link rel="icon" type="image/png" href="/favicon.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={darkMode:'class'}</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="/auth.js"></script>
+<style>
+
+/* LAYOUT OVERRIDE - Tailwind reset fix */
+html, body { height: 100% !important; overflow: hidden !important; margin: 0 !important; padding: 0 !important; }
+.app-shell { display: flex !important; height: 100vh !important; width: 100% !important; overflow: hidden !important; }
+.app-sidebar { flex-shrink: 0 !important; width: 256px !important; height: 100% !important; }
+.app-main { flex: 1 !important; display: flex !important; flex-direction: column !important; height: 100% !important; overflow: hidden !important; min-width: 0 !important; }
+.app-topbar { height: 54px !important; flex-shrink: 0 !important; }
+.app-content { flex: 1 !important; overflow: hidden !important; display: flex !important; min-height: 0 !important; }
+
+.page-scroll{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px;min-height:0}
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.tl-card{background:var(--glass-card-bg);border:1px solid var(--glass-border);border-radius:14px;overflow:hidden}
+.orders-card{display:flex;flex-direction:column;overflow:hidden;max-height:400px;background:var(--glass-panel);border:1px solid var(--glass-border);border-radius:14px;backdrop-filter:blur(10px)}
+.orders-scroll{flex:1;overflow:auto;min-height:0}
+.bottom-grid{display:grid;grid-template-columns:1fr 300px;gap:12px}
+.act-list{overflow-y:auto;max-height:240px}
+.act-row{display:flex;align-items:flex-start;gap:8px;padding:7px 12px;border-bottom:1px solid var(--glass-border);transition:background .08s;cursor:default}
+.act-row:hover{background:var(--accent-light)}
+.act-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.act-body{flex:1;min-width:0}
+.act-ttl{font-size:.74rem;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.act-sub{font-size:.63rem;color:var(--text-muted)}
+.act-badge{font-size:.57rem;font-weight:700;padding:1px 6px;border-radius:4px;text-transform:uppercase;align-self:flex-start;margin-top:2px;flex-shrink:0}
+.act-time{font-size:.59rem;color:var(--text-muted);white-space:nowrap;flex-shrink:0}
+.act-tabs{display:flex;gap:3px;padding:8px 12px;border-bottom:1px solid var(--glass-border);flex-wrap:wrap;flex-shrink:0}
+.act-tab{padding:3px 9px;border-radius:999px;font-size:.63rem;font-weight:700;cursor:pointer;border:1px solid var(--glass-border);background:transparent;color:var(--text-muted);transition:all .12s;font-family:inherit}
+.act-tab.on{color:#fff;border-color:transparent}
+.dist-body{padding:10px 14px;display:flex;flex-direction:column;gap:6px}
+.prog-col{display:flex;flex-direction:column;gap:2px;min-width:130px}
+/* FP popup */
+.fp-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(5px);z-index:80;display:flex;align-items:center;justify-content:center;padding:12px}
+.fp-shell{width:100%;max-width:1050px;max-height:94vh;background:var(--glass-card-bg);border:1px solid var(--glass-border);border-radius:20px;display:flex;flex-direction:column;overflow:hidden}
+.fp-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--glass-border);flex-shrink:0}
+.fp-summary{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--glass-border);flex-shrink:0}
+.fp-sum-cell{padding:10px 16px;border-right:1px solid var(--glass-border)}
+.fp-sum-cell:last-child{border-right:none}
+.fp-sum-label{font-size:.56rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:2px}
+.fp-sum-val{font-size:1.1rem;font-weight:900;line-height:1.1}
+.fp-sum-hint{font-size:.58rem;color:var(--text-muted)}
+.fp-body{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:12px;min-height:0}
+.fp-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fp-row3{display:grid;grid-template-columns:2fr 1fr;gap:10px}
+.fp-ftr{padding:10px 20px;border-top:1px solid var(--glass-border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;background:var(--glass-panel)}
+.status-btns{display:flex;gap:4px;flex-wrap:wrap}
+.status-btn{padding:3px 8px;border-radius:6px;font-size:.63rem;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--input-bg);color:var(--text-muted);font-family:inherit;transition:all .12s;white-space:nowrap}
+.status-btn.cur{font-weight:800}
+.status-btn:hover{border-color:#6366f1;color:#6366f1}
+/* Wizard */
+.wiz-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.52);backdrop-filter:blur(4px);z-index:60;display:flex;align-items:center;justify-content:center;padding:10px}
+.wiz-shell{background:var(--glass-card-bg);border:1px solid var(--glass-border);border-radius:16px;width:100%;max-width:840px;max-height:94vh;display:flex;flex-direction:column;overflow:hidden}
+.wiz-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--glass-border);flex-shrink:0;background:var(--glass-panel)}
+.wiz-body{flex:1;overflow-y:auto;padding:16px 18px;min-height:0}
+.wiz-ftr{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-top:1px solid var(--glass-border);flex-shrink:0;background:var(--glass-panel)}
+.wiz-steps{display:flex;align-items:center;gap:2px}
+.wiz-step{display:flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:.62rem;font-weight:700;color:var(--text-muted)}
+.wiz-step.active{background:#6366f1;color:#fff}
+.wiz-step.done{color:#6366f1}
+.wiz-step-num{width:16px;height:16px;border-radius:50%;background:var(--border);color:var(--text-muted);display:flex;align-items:center;justify-content:center;font-size:.56rem;font-weight:800}
+.wiz-step.active .wiz-step-num{background:rgba(255,255,255,.25);color:#fff}
+.wiz-step.done .wiz-step-num{background:var(--accent-light);color:#6366f1}
+.wiz-sep{width:14px;height:1px;background:var(--border)}
+.wiz-section{margin-bottom:14px}
+.wiz-section-label{font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#6366f1;display:flex;align-items:center;gap:4px;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--glass-border)}
+.wiz-section-label svg{width:11px;height:11px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.est-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.est-col{border:1px solid var(--glass-border);border-radius:9px;overflow:hidden}
+.est-col-hdr{padding:6px 10px;font-size:.61rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--glass-border)}
+.est-col-body{padding:7px 9px;display:flex;flex-direction:column;gap:3px;min-height:44px;max-height:130px;overflow-y:auto}
+.est-item{display:flex;align-items:center;gap:5px;padding:3px 6px;border-radius:6px;background:var(--input-bg);border:1px solid var(--border);font-size:.68rem}
+.est-item-lbl{flex:1;color:var(--text-secondary)}
+.est-item-val{font-weight:800;color:var(--text-primary)}
+.add-btn{padding:2px 6px;border-radius:4px;font-size:.59rem;font-weight:700;cursor:pointer;border:1px solid rgba(99,102,241,.25);background:var(--accent-light);color:#6366f1;font-family:inherit;transition:all .12s}
+.add-btn:hover{background:#6366f1;color:#fff}
+.empty-msg{font-size:.64rem;color:var(--text-muted);text-align:center;padding:6px 0}
+.satis-row{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.15)}
+.edit-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:5px;font-size:.61rem;font-weight:700;background:rgba(245,158,11,.15);color:#d97706;border:1px solid rgba(245,158,11,.3)}
+/* Stok modal */
+.stok-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+.stok-shell{background:var(--glass-card-bg);border:1px solid var(--glass-border);border-radius:14px;width:100%;max-width:520px;max-height:76vh;display:flex;flex-direction:column;overflow:hidden}
+.stok-item{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:7px;border:1px solid var(--glass-border);background:var(--input-bg);transition:all .12s;cursor:pointer}
+.stok-item:hover,.stok-item.sel{border-color:#6366f1;background:var(--accent-light)}
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="app-sidebar" id="appSidebar">
+    <div class="sb-header">
+      <button class="sb-toggle" onclick="toggleSidebar()" title="Menüyü Aç/Kapat">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:20px;height:20px"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>
+      </button>
+    </div>
+    <nav class="sb-nav" id="sbNav">
+
+      <div class="sb-section">
+        <div class="sb-section-label">Genel</div>
+        <a href="/app/genel-durum" class="sb-link" data-page="genel-durum"><svg data-lucide="home"></svg><span>Genel Durum</span></a>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-section-label">Tasarım</div>
+        <div>
+          <button class="sb-link sb-submenu-btn" onclick="toggleSubmenu('designMenu')">
+            <span class="sb-btn-inner"><svg data-lucide="pen-tool"></svg><span>Tasarım Yönetimi</span></span>
+            <span class="sb-chevron" id="chv_designMenu"><svg data-lucide="chevron-down" style="width:14px;height:14px"></svg></span>
+          </button>
+          <div class="sb-submenu" id="designMenu">
+            <a href="/app/tasarim-hareketleri" class="sb-sublink" data-page="tasarim-hareketleri"><span class="sb-dot"></span>Tasarım Hareketleri</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-section-label">Üretim</div>
+        <div>
+          <button class="sb-link sb-submenu-btn" onclick="toggleSubmenu('prodMenu')">
+            <span class="sb-btn-inner"><svg data-lucide="factory"></svg><span>Üretim Yönetimi</span></span>
+            <span class="sb-chevron" id="chv_prodMenu"><svg data-lucide="chevron-down" style="width:14px;height:14px"></svg></span>
+          </button>
+          <div class="sb-submenu" id="prodMenu">
+            <a href="/app/uretim-takibi" class="sb-sublink" data-page="uretim-takibi"><span class="sb-dot"></span>Üretim Takibi</a>
+            <a href="/app/uretim-programi" class="sb-sublink" data-page="uretim-programi"><span class="sb-dot"></span>Üretim Programı</a>
+            <a href="/app/personel-yonetimi" class="sb-sublink" data-page="personel-yonetimi"><span class="sb-dot"></span>Personel Yönetimi</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-section-label">Stok</div>
+        <div>
+          <button class="sb-link sb-submenu-btn" onclick="toggleSubmenu('stockMenu')">
+            <span class="sb-btn-inner"><svg data-lucide="package"></svg><span>Stok Yönetimi</span></span>
+            <span class="sb-chevron" id="chv_stockMenu"><svg data-lucide="chevron-down" style="width:14px;height:14px"></svg></span>
+          </button>
+          <div class="sb-submenu" id="stockMenu">
+            <a href="/app/stok-durumu" class="sb-sublink" data-page="stok-durumu"><span class="sb-dot"></span>Stok Durumu</a>
+            <a href="/app/stok-hareketler" class="sb-sublink" data-page="stok-hareketler"><span class="sb-dot"></span>Hareketler</a>
+            <a href="/app/stok-girdi" class="sb-sublink" data-page="stok-girdi"><span class="sb-dot"></span>Hammadde Girdisi</a>
+            <a href="/app/stok-cikti" class="sb-sublink" data-page="stok-cikti"><span class="sb-dot"></span>Hammadde Çıktısı</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-section-label">Enerji</div>
+        <div>
+          <button class="sb-link sb-submenu-btn" onclick="toggleSubmenu('energyMenu')">
+            <span class="sb-btn-inner"><svg data-lucide="leaf"></svg><span>Enerji Verimliliği</span></span>
+            <span class="sb-chevron" id="chv_energyMenu"><svg data-lucide="chevron-down" style="width:14px;height:14px"></svg></span>
+          </button>
+          <div class="sb-submenu" id="energyMenu">
+            <a href="/app/verimlilik" class="sb-sublink" data-page="verimlilik"><span class="sb-dot"></span>Verimlilik Projeleri</a>
+            <a href="/endustriyel-enerji-kaybi-hesaplama" class="sb-sublink" target="_blank"><span class="sb-dot"></span>Enerji Hesaplama <svg data-lucide="external-link" style="width:10px;height:10px;opacity:.5;margin-left:2px"></svg></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-section-label">Yönetim</div>
+        <div>
+          <button class="sb-link sb-submenu-btn" onclick="toggleSubmenu('adminMenu')">
+            <span class="sb-btn-inner"><svg data-lucide="settings"></svg><span>Sistem Ayarları</span></span>
+            <span class="sb-chevron" id="chv_adminMenu"><svg data-lucide="chevron-down" style="width:14px;height:14px"></svg></span>
+          </button>
+          <div class="sb-submenu" id="adminMenu">
+            <a href="/app/kullanicilar" class="sb-sublink" data-page="kullanicilar"><span class="sb-dot"></span>Kullanıcılar</a>
+            <a href="/app/durum-yonetimi" class="sb-sublink" data-page="durum-yonetimi"><span class="sb-dot"></span>Durum Yönetimi</a>
+            <a href="/app/sistem-ayarlari" class="sb-sublink" data-page="sistem-ayarlari"><span class="sb-dot"></span>Sistem Ayarları</a>
+          </div>
+        </div>
+      </div>
+
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-user" id="sbUserBtn" onclick="openUserMenu()">
+        <div class="sb-avatar" id="sbAvatar">U</div>
+        <div class="sb-user-info">
+          <div class="sb-user-name" id="sbUserName">Yükleniyor...</div>
+          <div class="sb-user-role" id="sbUserRole">—</div>
+        </div>
+        <svg data-lucide="chevron-right" style="width:14px;height:14px;color:var(--text-muted);opacity:.3;flex-shrink:0"></svg>
+      </div>
+    </div>
+  </aside>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="app-main">
+    <header class="app-topbar">
+      <header class="app-topbar">
+      <button class="btn-icon" onclick="toggleSidebar()" title="Menü">
+        <svg data-lucide="panel-left" style="width:20px;height:20px"></svg>
+      </button>
+      <a href="/app/genel-durum" class="topbar-brand">Optimizi<span class="accent">.App</span></a>
+      <div class="topbar-mid">
+        <span class="topbar-page-title">Genel Durum</span>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-pill" id="datePill">
+          <svg data-lucide="calendar" style="width:14px;height:14px"></svg>—
+        </div>
+        <div class="fx-bar">
+          <span class="fx-item" id="fxEur"><strong>EUR</strong> —</span>
+          <span class="fx-item" id="fxUsd"><strong>USD</strong> —</span>
+        </div>
+        <button class="btn-icon" onclick="toggleTheme()" title="Tema">
+          <svg data-lucide="sun" style="width:16px;height:16px"></svg>
+        </button>
+        <button class="btn-icon" id="notifBtn" onclick="openNotifPanel()" title="Bildirimler" style="position:relative">
+          <svg data-lucide="bell" style="width:16px;height:16px"></svg>
+          <span id="notifBadge" style="display:none;position:absolute;top:2px;right:2px;width:7px;height:7px;background:#ef4444;border-radius:50%;border:1px solid var(--glass-panel)"></span>
+        </button>
+      </div>
+    </header>
+    </header>
+    <div class="app-content" id="appContent">
+      <div style="display:flex;flex-direction:column;height:100%;overflow:hidden;min-height:0">
+  <div class="page-scroll" id="pageScroll">
+    <!-- KPIs -->
+    <div class="kpi-grid" id="kpiGrid"></div>
+
+    <!-- Timeline -->
+    <div class="tl-card">
+      <div class="tl-header">
+        <div class="tl-title"><svg data-lucide="activity"></svg>Genel İlerleme Takvimi</div>
+        <div class="tl-stats">
+          <div class="tl-stat"><div class="tl-stat-dot" style="background:#10b981"></div>Tamamlanan: <strong id="tlDone">—</strong></div>
+          <div class="tl-stat"><div class="tl-stat-dot" style="background:#6366f1"></div>Devam: <strong id="tlProg">—</strong></div>
+          <div class="tl-stat"><div class="tl-stat-dot" style="background:rgba(148,163,184,.3)"></div>Bekleyen: <strong id="tlPend">—</strong></div>
+          <div class="tl-stat" style="margin-left:4px">Ort: <strong id="tlAvg" style="color:#6366f1">—</strong></div>
+        </div>
+      </div>
+      <div class="tl-body">
+        <div class="tl-bar" id="tlBar"></div>
+        <div class="tl-cal" id="tlCal"></div>
+      </div>
+    </div>
+
+    <!-- Orders -->
+    <div class="orders-card">
+      <div class="card-header" style="flex-shrink:0">
+        <div class="card-title"><svg data-lucide="list"></svg>Siparişler</div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <input type="text" class="search-input" id="ordSearch" placeholder="Ara..." oninput="filterOrders(this.value)" style="width:160px">
+          <button onclick="openWizard()" class="btn btn-primary btn-sm"><svg data-lucide="plus"></svg>Yeni Sipariş</button>
+        </div>
+      </div>
+      <div class="orders-scroll">
+        <table class="data-table" id="ordTbl">
+          <thead><tr>
+            <th style="min-width:100px">
+              <div class="th-inner" onclick="sortOrders('siparis_no')">Sipariş No <svg data-lucide="chevrons-up-down" style="width:10px;height:10px;opacity:.4"></svg></div>
+              <div class="th-filter"><input placeholder="No..." oninput="setOrdFilter('siparis_no',this.value)"></div>
+            </th>
+            <th style="min-width:150px">
+              <div class="th-inner" onclick="sortOrders('musteri_adi')">Müşteri / Konu <svg data-lucide="chevrons-up-down" style="width:10px;height:10px;opacity:.4"></svg></div>
+              <div class="th-filter"><input placeholder="Müşteri..." oninput="setOrdFilter('musteri_adi',this.value)"></div>
+            </th>
+            <th style="min-width:150px">
+              <div class="th-inner" onclick="sortOrders('asama')">İlerleme Aşaması <svg data-lucide="chevrons-up-down" style="width:10px;height:10px;opacity:.4"></svg></div>
+              <div class="th-filter" style="display:grid;grid-template-columns:1fr 1fr;gap:3px">
+                <input type="number" placeholder="Min%" oninput="setOrdFilter('asama_min',this.value)">
+                <input type="number" placeholder="Max%" oninput="setOrdFilter('asama_max',this.value)">
+              </div>
+            </th>
+            <th style="min-width:110px">
+              <div class="th-inner" onclick="sortOrders('siparis_durumu')">Durum <svg data-lucide="chevrons-up-down" style="width:10px;height:10px;opacity:.4"></svg></div>
+              <div class="th-filter"><select id="fDurum" onchange="setOrdFilter('durum',this.value)"><option value="">Tümü</option></select></div>
+            </th>
+            <th style="min-width:90px"><div class="th-inner">Kar/Zarar</div><div class="th-filter"></div></th>
+            <th style="width:70px"><div class="th-inner">İşlem</div><div class="th-filter"></div></th>
+          </tr></thead>
+          <tbody id="ordBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Bottom -->
+    <div class="bottom-grid">
+      <div class="card" style="display:flex;flex-direction:column;overflow:hidden">
+        <div class="card-header" style="flex-shrink:0">
+          <div class="card-title"><svg data-lucide="zap"></svg>Tüm Hareketler</div>
+          <span id="actCnt" style="font-size:.63rem;color:var(--text-muted)">0 kayıt</span>
+        </div>
+        <div class="act-tabs" style="flex-shrink:0">
+          <button class="act-tab on" data-f="all" onclick="setActFilter('all',this)" style="background:#6366f1">Tümü</button>
+          <button class="act-tab" data-f="tasarim" onclick="setActFilter('tasarim',this)">Tasarım</button>
+          <button class="act-tab" data-f="uretim" onclick="setActFilter('uretim',this)">Üretim</button>
+          <button class="act-tab" data-f="stok" onclick="setActFilter('stok',this)">Stok</button>
+          <button class="act-tab" data-f="sistem" onclick="setActFilter('sistem',this)">Sistem</button>
+        </div>
+        <div class="act-list" id="actList"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title"><svg data-lucide="pie-chart"></svg>Durum Dağılımı</div></div>
+        <div class="dist-body" id="distBody"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FİNANS MERKEZİ -->
+<div id="fpPopup" class="fp-backdrop" style="display:none" onclick="if(event.target===this)closeFP()">
+  <div class="fp-shell">
+    <div class="fp-hdr">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#6366f1,#3b82f6);display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0"><svg data-lucide="bar-chart-2" style="width:16px;height:16px"></svg></div>
+        <div><div style="font-size:.96rem;font-weight:900;color:var(--text-primary)" id="fpTitle">—</div><div id="fpStatusBadge"></div></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button onclick="openEditFromFP()" class="btn btn-secondary btn-sm"><svg data-lucide="pencil"></svg>Düzenle</button>
+        <button onclick="closeFP()" class="btn-icon"><svg data-lucide="x" style="width:16px;height:16px"></svg></button>
+      </div>
+    </div>
+    <div class="fp-summary">
+      <div class="fp-sum-cell"><div class="fp-sum-label">Satış</div><div class="fp-sum-val" id="fpSatis">—</div><div class="fp-sum-hint" id="fpSatisHint"></div></div>
+      <div class="fp-sum-cell"><div class="fp-sum-label">Tahmini Maliyet</div><div class="fp-sum-val" id="fpEst">—</div><div class="fp-sum-hint">Satışçı tahmini</div></div>
+      <div class="fp-sum-cell"><div class="fp-sum-label">Gerçekleşen</div><div class="fp-sum-val" id="fpAct">—</div><div class="fp-sum-hint">Üretim verisi</div></div>
+      <div class="fp-sum-cell"><div class="fp-sum-label">Kar / Zarar</div><div class="fp-sum-val" id="fpKar">—</div><div class="fp-sum-hint" id="fpKarHint"></div></div>
+    </div>
+    <div class="fp-body">
+      <div><div style="font-size:.63rem;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px">Durum Değiştir</div><div class="status-btns" id="fpStatusBtns"></div></div>
+      <div class="fp-row">
+        <div class="glass-card" style="padding:12px">
+          <div class="section-title"><svg data-lucide="calculator"></svg>Tahmini Maliyetler</div>
+          <table style="width:100%;border-collapse:collapse;font-size:.7rem">
+            <thead><tr style="color:var(--text-muted);font-size:.58rem"><th style="text-align:left;padding:3px 5px">Kategori</th><th style="padding:3px 5px">Kalem</th><th style="text-align:right;padding:3px 5px">Tutar</th></tr></thead>
+            <tbody id="fpEstBody"></tbody>
+          </table>
+          <div style="display:flex;justify-content:space-between;padding:5px;margin-top:4px;border-radius:6px;background:rgba(99,102,241,.08)">
+            <span style="font-size:.68rem;font-weight:700;color:#6366f1">Toplam</span>
+            <span id="fpEstTot" style="font-size:.78rem;font-weight:900;color:#6366f1">—</span>
+          </div>
+        </div>
+        <div class="glass-card" style="padding:12px">
+          <div class="section-title"><svg data-lucide="trending-up"></svg>Gerçekleşen</div>
+          <div id="fpActBody"></div>
+        </div>
+      </div>
+      <div class="fp-row3">
+        <div class="glass-card" style="padding:12px">
+          <div class="section-title"><svg data-lucide="bar-chart-3"></svg>Karşılaştırma</div>
+          <div style="height:150px;position:relative"><canvas id="fpBarChart"></canvas></div>
+        </div>
+        <div class="glass-card" style="padding:12px">
+          <div class="section-title"><svg data-lucide="pie-chart"></svg>Dağılım</div>
+          <div style="height:90px;position:relative"><canvas id="fpDonutChart"></canvas></div>
+          <div id="fpDonutLeg" style="margin-top:6px"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fp-ftr">
+      <div style="font-size:.68rem;color:var(--text-muted)" id="fpOrdInfo"></div>
+      <button onclick="deleteOrderFromFP()" class="btn btn-danger btn-sm"><svg data-lucide="trash-2"></svg>Sil</button>
+    </div>
+  </div>
+</div>
+
+<!-- WIZARD -->
+<div id="wizModal" class="wiz-backdrop" style="display:none" onclick="if(event.target===this)closeWizard()">
+  <div class="wiz-shell">
+    <div class="wiz-hdr">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:30px;height:30px;border-radius:9px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;color:#6366f1"><svg data-lucide="clipboard-list" style="width:14px;height:14px"></svg></div>
+        <div><div style="font-size:.9rem;font-weight:800;color:var(--text-primary)" id="wizTitle">Yeni Sipariş</div><div style="font-size:.62rem;color:var(--text-muted)" id="wizStepLbl">Adım 1</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span id="wizEditBadge" class="edit-badge" style="display:none"><svg data-lucide="pencil" style="width:11px;height:11px"></svg>Düzenleme</span>
+        <div class="wiz-steps">
+          <div class="wiz-step active" id="wsp1"><div class="wiz-step-num">1</div><span>Temel</span></div>
+          <div class="wiz-sep"></div>
+          <div class="wiz-step" id="wsp2"><div class="wiz-step-num">2</div><span>Maliyetler</span></div>
+          <div class="wiz-sep"></div>
+          <div class="wiz-step" id="wsp3"><div class="wiz-step-num">3</div><span>Detaylar</span></div>
+        </div>
+        <button class="btn-icon" onclick="closeWizard()"><svg data-lucide="x" style="width:16px;height:16px"></svg></button>
+      </div>
+    </div>
+    <div class="wiz-body">
+      <div id="ws1">
+        <div class="wiz-section">
+          <div class="wiz-section-label"><svg data-lucide="user"></svg>Müşteri & Sipariş</div>
+          <div class="grid2">
+            <div class="field"><label class="field-label">Müşteri Adı *</label><input class="field-input" id="wMus" placeholder="Firma adı"></div>
+            <div class="field"><label class="field-label">Kontak</label><input class="field-input" id="wKontak" placeholder="İlgili kişi"></div>
+            <div class="field"><label class="field-label">Sipariş No *</label><input class="field-input" id="wNo" placeholder="SIP-2026-001"></div>
+            <div class="field"><label class="field-label">Konu</label><input class="field-input" id="wKonu" placeholder="Proje konusu"></div>
+          </div>
+        </div>
+        <div class="wiz-section">
+          <div class="wiz-section-label"><svg data-lucide="calendar"></svg>Tarih & Durum</div>
+          <div class="grid2">
+            <div class="field"><label class="field-label">Sipariş Tarihi</label><input type="date" class="field-input" id="wTarih"></div>
+            <div class="field"><label class="field-label">Hatırlatma</label><input type="date" class="field-input" id="wHatir"></div>
+            <div class="field"><label class="field-label">Durum</label><select class="field-input" id="wDurum"></select></div>
+            <div class="field"><label class="field-label">Oluşturan</label><input class="field-input" id="wUser" placeholder="Ad Soyad"></div>
+          </div>
+        </div>
+      </div>
+      <div id="ws2" style="display:none">
+        <div class="wiz-section">
+          <div class="wiz-section-label"><svg data-lucide="calculator"></svg>Tahmini Maliyetler</div>
+          <div class="est-grid">
+            <div class="est-col">
+              <div class="est-col-hdr" style="color:#6366f1;background:rgba(99,102,241,.06)"><span>Hammadde</span><button class="add-btn" onclick="openStokModal()">+ Stoktan Seç</button></div>
+              <div class="est-col-body" id="eHm"><div class="empty-msg">Henüz giriş yok</div></div>
+            </div>
+            <div class="est-col">
+              <div class="est-col-hdr" style="color:#8b5cf6;background:rgba(139,92,246,.06)"><span>İşçilik</span><button class="add-btn" onclick="openAdamSaatModal()">+ Ekle</button></div>
+              <div class="est-col-body" id="eIs"><div class="empty-msg">Henüz giriş yok</div></div>
+            </div>
+            <div class="est-col" style="grid-column:1/-1">
+              <div class="est-col-hdr" style="color:#f59e0b;background:rgba(245,158,11,.06)"><span>Diğer Maliyetler</span><button class="add-btn" onclick="openDigerModal()">+ Ekle</button></div>
+              <div class="est-col-body" id="eDg"><div class="empty-msg">Henüz giriş yok</div></div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.15)">
+            <span style="font-size:.72rem;font-weight:700;color:#6366f1">Toplam Tahmini Maliyet</span>
+            <span style="font-size:.9rem;font-weight:900;color:#6366f1" id="wEstTotal">₺0</span>
+          </div>
+        </div>
+      </div>
+      <div id="ws3" style="display:none">
+        <div class="wiz-section">
+          <div class="wiz-section-label"><svg data-lucide="banknote"></svg>Satış Tutarı</div>
+          <div class="satis-row">
+            <label style="font-size:.74rem;font-weight:700;flex:1">Sipariş Tutarı</label>
+            <select class="field-input" id="wSatisBirim" style="width:80px;padding:4px 8px" onchange="updateKurGoster()">
+              <option value="TRY">₺ TL</option><option value="USD">$ USD</option><option value="EUR">€ EUR</option>
+            </select>
+            <input type="text" id="wSatisTutar" placeholder="0,00" inputmode="decimal" oninput="fmtTutarInput(this);updateKurGoster()"
+              style="width:140px;padding:5px 9px;border-radius:7px;border:1px solid var(--border);background:var(--input-bg);color:var(--text-primary);font-size:.82rem;font-weight:800;font-family:inherit;outline:none;text-align:right">
+          </div>
+          <div id="kurGoster" style="font-size:.64rem;color:var(--text-muted);margin-top:4px;padding-left:4px"></div>
+        </div>
+        <div class="wiz-section">
+          <div class="wiz-section-label"><svg data-lucide="sticky-note"></svg>Notlar</div>
+          <textarea class="field-input" id="wNotlar" rows="4" placeholder="Sipariş notları, özel koşullar..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="wiz-ftr">
+      <button onclick="closeWizard()" class="btn btn-secondary btn-sm">İptal</button>
+      <div style="display:flex;gap:6px">
+        <button id="wBtnPrev" onclick="wizPrev()" class="btn btn-secondary btn-sm" style="display:none"><svg data-lucide="chevron-left"></svg>Geri</button>
+        <button id="wBtnNext" onclick="wizNext()" class="btn btn-primary btn-sm">İleri<svg data-lucide="chevron-right"></svg></button>
+        <button id="wBtnSave" onclick="saveOrder()" class="btn btn-primary btn-sm" style="display:none"><svg data-lucide="check"></svg><span id="wSaveLbl">Oluştur</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STOK MODAL -->
+<div id="stokModal" class="stok-backdrop" style="display:none" onclick="if(event.target===this)closeStokModal()">
+  <div class="stok-shell">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--glass-border);flex-shrink:0">
+      <div><div style="font-size:.86rem;font-weight:800">Hammadde Seç</div><div style="font-size:.6rem;color:var(--text-muted)">Stok listesinden</div></div>
+      <button class="btn-icon" onclick="closeStokModal()"><svg data-lucide="x" style="width:15px;height:15px"></svg></button>
+    </div>
+    <div style="padding:8px 14px;border-bottom:1px solid var(--glass-border);flex-shrink:0">
+      <input type="text" id="stokSearch" placeholder="Malzeme ara..." oninput="filterStok(this.value)" class="field-input">
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:5px" id="stokList"></div>
+    <div id="stokQtyRow" style="display:none;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid var(--glass-border);background:var(--glass-panel);flex-shrink:0">
+      <label id="stokQtyLbl" style="font-size:.74rem;font-weight:600;flex:1">Miktar:</label>
+      <input type="number" id="stokQty" min="0.01" step="0.01" placeholder="0" style="width:90px;padding:5px 8px;border-radius:7px;border:1px solid var(--border);background:var(--input-bg);color:var(--text-primary);font-size:.8rem;font-family:inherit;outline:none;text-align:right">
+    </div>
+    <div style="display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--glass-border);background:var(--glass-panel);flex-shrink:0">
+      <button onclick="closeStokModal()" class="btn btn-secondary btn-sm" style="flex:1;justify-content:center">İptal</button>
+      <button onclick="confirmStok()" class="btn btn-primary btn-sm" style="flex:1;justify-content:center"><svg data-lucide="check"></svg>Ekle</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADAM SAAT MODAL -->
+<div id="asModal" class="modal-backdrop" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box modal-sm">
+    <div class="modal-header"><span class="modal-title">İşçilik Maliyeti</span><button class="btn-icon" onclick="document.getElementById('asModal').style.display='none'"><svg data-lucide="x" style="width:15px;height:15px"></svg></button></div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:9px">
+      <div class="field"><label class="field-label">Açıklama</label><input class="field-input" id="asLbl" placeholder="İşçilik kalemi"></div>
+      <div class="grid2">
+        <div class="field"><label class="field-label">Adam Saat</label><input type="number" class="field-input" id="asSaat" min="0" step="0.5" oninput="calcAs()"></div>
+        <div class="field"><label class="field-label">Saatlik Ücret (₺)</label><input type="number" class="field-input" id="asRate" min="0" oninput="calcAs()"><div id="asAutoHint" style="font-size:.6rem;color:#10b981;display:none;margin-top:2px"></div></div>
+      </div>
+      <div style="padding:7px 10px;border-radius:8px;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.15)">
+        <div style="font-size:.62rem;color:var(--text-muted);margin-bottom:2px">Toplam İşçilik</div>
+        <div style="font-size:.92rem;font-weight:900;color:#8b5cf6" id="asTotal">₺0</div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary btn-sm" onclick="document.getElementById('asModal').style.display='none'">İptal</button><button class="btn btn-primary btn-sm" onclick="confirmAs()">Ekle</button></div>
+  </div>
+</div>
+
+<!-- DİĞER MALİYET MODAL -->
+<div id="dgModal" class="modal-backdrop" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box modal-sm">
+    <div class="modal-header"><span class="modal-title">Diğer Maliyet</span><button class="btn-icon" onclick="document.getElementById('dgModal').style.display='none'"><svg data-lucide="x" style="width:15px;height:15px"></svg></button></div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:9px">
+      <div class="field"><label class="field-label">Kalem Adı</label><input class="field-input" id="dgLbl" placeholder="Nakliye, Montaj..."></div>
+      <div class="field"><label class="field-label">Tutar (₺)</label><input type="number" class="field-input" id="dgAmt" min="0"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary btn-sm" onclick="document.getElementById('dgModal').style.display='none'">İptal</button><button class="btn btn-primary btn-sm" onclick="confirmDg()">Ekle</button></div>
+  </div>
+</div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- SHARED MODALS -->
+<!-- Confirm -->
+<div id="confirmModal" class="modal-backdrop" style="display:none">
+  <div class="modal-box modal-sm">
+    <div class="modal-header"><span class="modal-title" id="confirmTitle">Onay</span></div>
+    <div class="modal-body"><p id="confirmMsg" style="font-size:.84rem;color:var(--text-secondary)"></p></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary btn-sm" onclick="confirmResolve(false)">İptal</button>
+      <button class="btn btn-danger btn-sm" id="confirmYesBtn" onclick="confirmResolve(true)">Evet</button>
+    </div>
+  </div>
+</div>
+<!-- Alert -->
+<div id="alertModal" class="modal-backdrop" style="display:none">
+  <div class="modal-box modal-sm">
+    <div class="modal-header"><span class="modal-title" id="alertTitle">Bilgi</span></div>
+    <div class="modal-body"><p id="alertMsg" style="font-size:.84rem;color:var(--text-secondary)"></p></div>
+    <div class="modal-footer"><button class="btn btn-primary btn-sm" onclick="document.getElementById('alertModal').style.display='none'">Tamam</button></div>
+  </div>
+</div>
+<!-- User Menu -->
+<div id="userMenuModal" class="modal-backdrop" style="display:none" onclick="if(event.target===this)closeUserMenu()">
+  <div class="modal-box modal-sm">
+    <div class="modal-header">
+      <span class="modal-title">Hesap & Ayarlar</span>
+      <button class="btn-icon" onclick="closeUserMenu()"><svg data-lucide="x" style="width:16px;height:16px"></svg></button>
+    </div>
+    <div class="modal-body" id="userMenuBody"></div>
+  </div>
+</div>
+<!-- Notification Panel -->
+<div id="notifPanel">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--glass-border)">
+    <span style="font-size:.82rem;font-weight:800">Bildirimler</span>
+    <button class="btn-icon btn-xs" onclick="document.getElementById('notifPanel').style.display='none'">
+      <svg data-lucide="x" style="width:14px;height:14px"></svg>
+    </button>
+  </div>
+  <div id="notifList" style="max-height:320px;overflow-y:auto;padding:8px"></div>
+</div>
+
+<!-- Bildirim Paneli -->
+<div id="notifPanel">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--glass-border)">
+    <span style="font-size:.82rem;font-weight:800">Bildirimler</span>
+    <button class="btn-icon btn-xs" onclick="document.getElementById('notifPanel').style.display='none'">
+      <svg data-lucide="x" style="width:14px;height:14px"></svg>
+    </button>
+  </div>
+  <div id="notifList" style="max-height:320px;overflow-y:auto;padding:8px"></div>
+</div>
+
+<!-- SCRIPTS -->
+<script src="/app/js/api.js"></script>
+<script>
+// ── INIT ──
+(function(){
+  const t=localStorage.getItem('optimizi:theme');
+  if(t==='light')document.documentElement.classList.remove('dark');
+  else document.documentElement.classList.add('dark');
+})();
+
+// Topbar tarih + kullanıcı
+document.addEventListener('DOMContentLoaded', async () => {
+  const d=new Date();
+  const dn=['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'];
+  const dp=document.getElementById('datePill');
+  if(dp)dp.innerHTML='<svg data-lucide="calendar" style="width:14px;height:14px"></svg>'+dn[d.getDay()]+' '+d.toLocaleDateString('tr-TR');
+  
+  // Kullanıcı bilgisi
+  window._optCurrentUser = await OPT.currentUser().catch(()=>null);
+  const u = window._optCurrentUser;
+  if(u){
+    const av=document.getElementById('sbAvatar');const nm=document.getElementById('sbUserName');const rl=document.getElementById('sbUserRole');
+    if(av){av.textContent=u.initials||u.name[0];av.style.background=u.avatar_color||'#6366f1';}
+    if(nm)nm.textContent=u.name;
+    if(rl)rl.textContent={'admin':'Yönetici','satis':'Satışçı','tasarim':'Tasarımcı','uretim':'Üretimci','depo':'Depo','izleyici':'İzleyici'}[u.role]||u.role;
+    // Bildirim sayacı
+    OPT.aktivite.sayac().then(c=>{const b=document.getElementById('notifBadge');if(b)b.style.display=c>0?'block':'none';}).catch(()=>{});
+  }
+  lucide.createIcons();
+  
+  // Bildirim paneli
+  window.openNotifPanel = async function(){
+    const panel=document.getElementById('notifPanel');
+    if(panel.style.display!=='none'){panel.style.display='none';return;}
+    const list=document.getElementById('notifList');
+    try{
+      const notifs=await OPT.aktivite.bildirimler();
+      if(!notifs.length){list.innerHTML='<div style="text-align:center;padding:18px;font-size:.76rem;color:var(--text-muted)">Bildirim yok</div>';}
+      else{list.innerHTML=notifs.map(n=>`<div style="display:flex;gap:8px;padding:8px 4px;border-bottom:1px solid var(--glass-border)"><div style="width:8px;height:8px;border-radius:50%;background:${n.renk||'#6366f1'};flex-shrink:0;margin-top:4px"></div><div style="flex:1;min-width:0"><div style="font-size:.75rem;font-weight:600;color:var(--text-primary)">${n.baslik||'—'}</div><div style="font-size:.65rem;color:var(--text-muted)">${n.icerik||''} · ${fmt(n.created_at)}</div></div></div>`).join('');}
+      panel.style.display='block';
+      OPT.aktivite.markAllRead().catch(()=>{});
+      const badge=document.getElementById('notifBadge');if(badge)badge.style.display='none';
+    }catch(e){list.innerHTML='<div style="text-align:center;padding:18px;font-size:.76rem;color:var(--text-muted)">Yüklenemedi</div>';panel.style.display='block';}
+  };
+  
+  window.openUserMenu = function(){
+    const u=window._optCurrentUser;if(!u)return;
+    const body=document.getElementById('userMenuBody');
+    const roleLabels={'admin':'Yönetici','satis':'Satışçı','tasarim':'Tasarımcı','uretim':'Üretimci','depo':'Depo','izleyici':'İzleyici'};
+    body.innerHTML=`<div style="text-align:center;padding:10px 0 14px"><div style="width:44px;height:44px;border-radius:50%;background:${u.avatar_color||'#6366f1'};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:1rem;margin:0 auto 7px">${u.initials||u.name[0]||'U'}</div><div style="font-weight:800">${u.name||'—'}</div><div style="font-size:.72rem;color:var(--text-muted)">${roleLabels[u.role]||u.role}</div></div>
+    <div style="display:flex;flex-direction:column;gap:5px">
+      <a href="/app/sistem-ayarlari.html" class="btn btn-secondary btn-sm" style="justify-content:center">Hesap Ayarları</a>
+      ${u.role==='admin'?'<a href="/app/kullanicilar.html" class="btn btn-secondary btn-sm" style="justify-content:center">Kullanıcı Yönetimi</a><a href="/app/durum-yonetimi.html" class="btn btn-secondary btn-sm" style="justify-content:center">Durum Yönetimi</a>':''}
+      <button onclick="window.supabaseClient.auth.signOut().then(()=>location.href='/login')" class="btn btn-danger btn-sm" style="justify-content:center;margin-top:6px">Çıkış Yap</button>
+    </div>`;
+    document.getElementById('userMenuModal').style.display='flex';
+    lucide.createIcons();
+  };
+  window.closeUserMenu = function(){document.getElementById('userMenuModal').style.display='none';};
+});
+
+// ═══════════════════════════════════
+// GENEL DURUM PAGE JS
+// ═══════════════════════════════════
+let allOrders=[], ordSrch='', ordFilters={}, ordSort={k:'',d:1};
+let wizStep=1, wizCosts={hm:[],is:[],dg:[]}, editingId=null;
+let fpId=null, fpBarChart=null, fpDonutChart=null, actFilter='all';
+let stokList=[], stokSel=null, durumlar=[];
+
+async function loadPage(){
+  try{
+    // Load statuses
+    durumlar = await OPT.getDurumlar().catch(()=>[
+      {kod:'Taslak',renk:'#94a3b8'},{kod:'Beklemede',renk:'#f59e0b'},{kod:'Onaylandı',renk:'#3b82f6'},
+      {kod:'Tasarımda',renk:'#8b5cf6'},{kod:'Üretimde',renk:'#ec4899'},{kod:'Sevkte',renk:'#06b6d4'},
+      {kod:'Tamamlandı',renk:'#10b981'},{kod:'İptal',renk:'#ef4444'}
+    ]);
+    // Populate status filter
+    const sel=document.getElementById('fDurum');
+    durumlar.forEach(d=>{const o=document.createElement('option');o.value=d.kod;o.textContent=d.kod;sel.appendChild(o);});
+    // Load stok
+    stokList = await OPT.stok.list().catch(()=>[]);
+    // Load orders
+    await refreshOrders();
+    // Load aktivite
+    await refreshAct();
+    // Get avg adam saat rate
+    const rate = await OPT.personel.avgRate().catch(()=>({avg_rate:0}));
+    if(rate.avg_rate>0) window._adamSaatRate=rate.avg_rate;
+  }catch(e){ console.error('loadPage error',e); }
+}
+
+function stCol(kod){ return (durumlar.find(d=>d.kod===kod)||{renk:'#6b7280'}).renk; }
+
+// ── ORDERS ──
+async function refreshOrders(){
+  try{
+    const params={};
+    if(ordSrch) params.q=ordSrch;
+    allOrders = await OPT.siparisler.list(params);
+    renderOrders();
+    renderKPI();
+    renderTimeline_GD();
+    renderDist();
+  }catch(e){ console.error('refreshOrders',e); }
+}
+function filterOrders(q){ ordSrch=q.toLowerCase(); renderOrders(); }
+function setOrdFilter(k,v){ ordFilters[k]=v||''; renderOrders(); }
+function sortOrders(k){ if(ordSort.k===k)ordSort.d*=-1;else{ordSort.k=k;ordSort.d=1;} renderOrders(); }
+
+function getFiltered(){
+  let o=[...allOrders];
+  if(ordSrch) o=o.filter(x=>(x.siparis_no||'').toLowerCase().includes(ordSrch)||(x.musteri_adi||'').toLowerCase().includes(ordSrch)||(x.siparis_konusu||'').toLowerCase().includes(ordSrch));
+  if(ordFilters.siparis_no) o=o.filter(x=>(x.siparis_no||'').toLowerCase().includes(ordFilters.siparis_no.toLowerCase()));
+  if(ordFilters.musteri_adi) o=o.filter(x=>((x.musteri_adi||'')+' '+(x.siparis_konusu||'')).toLowerCase().includes(ordFilters.musteri_adi.toLowerCase()));
+  if(ordFilters.asama_min!==undefined&&ordFilters.asama_min!=='') o=o.filter(x=>(Number(x.asama)||0)>=Number(ordFilters.asama_min));
+  if(ordFilters.asama_max!==undefined&&ordFilters.asama_max!=='') o=o.filter(x=>(Number(x.asama)||0)<=Number(ordFilters.asama_max));
+  if(ordFilters.durum) o=o.filter(x=>x.siparis_durumu===ordFilters.durum);
+  if(ordSort.k) o=[...o].sort((a,b)=>{
+    let va=a[ordSort.k]??'',vb=b[ordSort.k]??'';
+    if(ordSort.k==='asama'){return(Number(va)-Number(vb))*ordSort.d;}
+    return String(va).localeCompare(String(vb),'tr')*ordSort.d;
+  });
+  return o;
+}
+
+function buildProgressBar(o){
+  const uD=o.uretim_takip;
+  const uPct=uD?Number(uD.uretim_pct)||0:0;
+  const tPct=Number(o.asama)||0;
+  const sPct=['Sevkte','Tamamlandı'].includes(o.siparis_durumu)?100:0;
+  const overall=Math.round(tPct*0.33+uPct*0.50+sPct*0.17);
+  const w1=Math.round(tPct*0.33),w2=Math.round(uPct*0.50),w3=Math.round(sPct*0.17);
+  return `<div class="prog-col">
+    <div style="display:flex;height:7px;border-radius:4px;overflow:hidden;background:rgba(148,163,184,.18)">
+      ${w1>0?`<div style="width:${w1}%;background:#8b5cf6;height:100%"></div>`:''}
+      ${w2>0?`<div style="width:${w2}%;background:#6366f1;height:100%"></div>`:''}
+      ${w3>0?`<div style="width:${w3}%;background:#10b981;height:100%"></div>`:''}
+    </div>
+    <div style="display:flex;gap:5px;margin-top:2px">
+      <span style="font-size:.54rem;color:#8b5cf6">T:${tPct}%</span>
+      <span style="font-size:.54rem;color:#6366f1">Ü:${uPct}%</span>
+      <span style="font-size:.54rem;color:#10b981">S:${sPct}%</span>
+      <span style="font-size:.54rem;font-weight:700;color:${overall>66?'#10b981':overall>33?'#6366f1':'#8b5cf6'};margin-left:auto">${overall}%</span>
+    </div>
+  </div>`;
+}
+
+function renderOrders(){
+  const fl=getFiltered();
+  const tbody=document.getElementById('ordBody');
+  if(!fl.length){
+    tbody.innerHTML=`<tr><td colspan="6" style="text-align:center;padding:22px;color:var(--text-muted);font-size:.76rem">${allOrders.length?'Filtre sonucu yok':'Henüz sipariş yok — Yeni Sipariş butonuna basın'}</td></tr>`;
+    return;
+  }
+  tbody.innerHTML=fl.map(o=>{
+    const stc=stCol(o.siparis_durumu);
+    const est=o.tahmini_maliyetler?.est_total||0;
+    const satisTL=o.satis_tutar?toTL(o.satis_tutar,o.satis_birim):0;
+    let karHtml='<span style="color:var(--text-muted);font-size:.65rem">—</span>';
+    if(est&&satisTL){const kar=satisTL-est;const pctK=Math.round(kar/satisTL*100);const kc=kar>=0?'#10b981':'#ef4444';karHtml=`<div><span style="color:${kc};font-size:.7rem;font-weight:800">${kar>=0?'+':''}${pctK}%</span><div style="font-size:.58rem;color:var(--text-muted)">${money(kar)}</div></div>`;}
+    return `<tr onclick="openFP('${o.id}')">
+      <td><span style="font-weight:800">${o.siparis_no||'—'}</span></td>
+      <td><div style="font-weight:700;font-size:.74rem">${o.musteri_adi||'—'}</div><div style="font-size:.63rem;color:var(--text-muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.siparis_konusu||''}</div></td>
+      <td>${buildProgressBar(o)}</td>
+      <td><span class="badge" style="background:${stc}18;color:${stc}"><span class="badge-dot" style="background:${stc}"></span>${o.siparis_durumu||'—'}</span></td>
+      <td>${karHtml}</td>
+      <td onclick="event.stopPropagation()"><div style="display:flex;gap:2px">
+        <button onclick="openEdit('${o.id}')" class="btn-icon" title="Düzenle"><svg data-lucide="pencil" style="width:13px;height:13px"></svg></button>
+        <button onclick="deleteOrder('${o.id}')" class="btn-icon" style="color:#ef4444" title="Sil"><svg data-lucide="trash-2" style="width:13px;height:13px"></svg></button>
+      </div></td>
+    </tr>`;
+  }).join('');
+  lucide.createIcons();
+}
+
+// ── KPI ──
+function renderKPI(){
+  const o=allOrders,total=o.length;
+  const done=o.filter(x=>x.siparis_durumu==='Tamamlandı').length;
+  const inProg=o.filter(x=>Number(x.asama)>0&&Number(x.asama)<100).length;
+  const pend=o.filter(x=>!Number(x.asama)).length;
+  const avg=total?Math.round(o.reduce((s,x)=>s+Number(x.asama||0),0)/total):0;
+  const margins=[];
+  o.forEach(ord=>{
+    const satisTL=ord.satis_tutar?toTL(ord.satis_tutar,ord.satis_birim):0;
+    const est=ord.tahmini_maliyetler?.est_total||0;
+    if(est&&satisTL>0)margins.push((satisTL-est)/satisTL*100);
+  });
+  const avgKar=margins.length?Math.round(margins.reduce((a,b)=>a+b,0)/margins.length):null;
+  const defs=[
+    {lbl:'Toplam Sipariş',val:total,sub:'Aktif kayıtlar',col:'#6366f1',icon:'clipboard-list'},
+    {lbl:'Tamamlanan',val:done,sub:total?Math.round(done/total*100)+'% oran':'—',col:'#10b981',icon:'check-circle-2'},
+    {lbl:'Devam Eden',val:inProg,sub:'Aktif proses',col:'#f59e0b',icon:'clock'},
+    {lbl:'Bekleyen',val:pend,sub:'Başlamadı',col:'#ef4444',icon:'alert-circle'},
+    {lbl:'Ort. Aşama',val:avg+'%',sub:'Tüm siparişler',col:'#3b82f6',icon:'bar-chart-3'},
+    {lbl:'Ort. Kar Marjı',val:avgKar!==null?(avgKar>=0?'+':'')+avgKar+'%':'—',sub:margins.length+' sipariş',col:'#a855f7',icon:'trending-up',vc:avgKar!==null?(avgKar>=0?'#10b981':'#ef4444'):''},
+  ];
+  document.getElementById('kpiGrid').innerHTML=defs.map(d=>`<div class="kpi-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div class="kpi-label">${d.lbl}</div>
+      <div class="kpi-icon" style="background:${d.col}18"><svg data-lucide="${d.icon}" style="color:${d.col}"></svg></div>
+    </div>
+    <div class="kpi-value" style="${d.vc?'color:'+d.vc:''}${String(d.val).length>5?';font-size:1.1rem':''}">${d.val}</div>
+    <div class="kpi-sub">${d.sub}</div>
+  </div>`).join('');
+  lucide.createIcons();
+}
+
+// ── TIMELINE ──
+function renderTimeline_GD(){
+  const o=allOrders,total=o.length;
+  const done=o.filter(x=>x.siparis_durumu==='Tamamlandı').length;
+  const inProg=o.filter(x=>Number(x.asama)>0&&Number(x.asama)<100).length;
+  const pend=o.filter(x=>!Number(x.asama)).length;
+  const avg=total?Math.round(o.reduce((s,x)=>s+Number(x.asama||0),0)/total):0;
+  document.getElementById('tlDone').textContent=done;
+  document.getElementById('tlProg').textContent=inProg;
+  document.getElementById('tlPend').textContent=pend;
+  document.getElementById('tlAvg').textContent=avg+'%';
+  const pD=total?Math.round(done/total*100):0;
+  const pP=total?Math.round(inProg/total*100):0;
+  const pR=100-pD-pP;
+  const segs=[
+    {pct:pD,color:'#10b981',label:`Tamamlanan ${pD}%`},
+    {pct:pP,color:'linear-gradient(90deg,#6366f1,#8b5cf6)',label:`Devam ${pP}%`},
+    {pct:pR,color:'rgba(148,163,184,.18)',label:`Bekleyen ${pR}%`},
+  ];
+  const now=new Date(),yr=now.getFullYear(),mo=now.getMonth(),todayStr=now.toISOString().split('T')[0];
+  const events=[];
+  o.forEach(ord=>{
+    if(ord.hatirlatma_tarihi){const d=new Date(ord.hatirlatma_tarihi);if(d.getFullYear()===yr&&d.getMonth()===mo)events.push({day:d.getDate(),title:ord.siparis_no+': Hatırlatma',color:ord.hatirlatma_tarihi<todayStr?'#ef4444':'#f59e0b',overdue:ord.hatirlatma_tarihi<todayStr});}
+  });
+  renderTimeline('tlBar','tlCal',segs,events,avg);
+}
+
+// ── DIST ──
+function renderDist(){
+  const body=document.getElementById('distBody');
+  const counts={};
+  allOrders.forEach(o=>{const s=o.siparis_durumu||'—';counts[s]=(counts[s]||0)+1;});
+  const max=Math.max(...Object.values(counts),1);
+  body.innerHTML=Object.entries(counts).map(([s,n])=>{
+    const c=stCol(s);
+    return `<div style="display:flex;align-items:center;gap:8px"><span style="font-size:.68rem;color:var(--text-secondary);min-width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s}</span><div style="flex:1;height:6px;background:rgba(148,163,184,.15);border-radius:999px;overflow:hidden"><div style="width:${Math.round(n/max*100)}%;height:100%;background:${c};border-radius:999px"></div></div><span style="font-size:.63rem;font-weight:700;color:var(--text-muted);min-width:18px;text-align:right">${n}</span></div>`;
+  }).join('');
+}
+
+// ── AKTİVİTE ──
+async function refreshAct(){
+  try{
+    const data=await OPT.aktivite.list(actFilter);
+    const el=document.getElementById('actList');
+    const cnt=document.getElementById('actCnt');
+    if(cnt)cnt.textContent=data.length+' kayıt';
+    const ACT_C={tasarim:'#8b5cf6',uretim:'#ec4899',stok:'#10b981',sistem:'#64748b'};
+    const ACT_L={tasarim:'Tasarım',uretim:'Üretim',stok:'Stok',sistem:'Sistem'};
+    if(!data.length){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:.74rem">Hareket yok</div>';return;}
+    el.innerHTML=data.slice(0,60).map(a=>{
+      const col=ACT_C[a.modul]||'#6366f1';const lbl=ACT_L[a.modul]||a.modul;
+      const t=a.created_at?new Date(a.created_at).toLocaleString('tr-TR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
+      return `<div class="act-row"><div class="act-dot" style="background:${col}"></div><div class="act-body"><div class="act-ttl">${a.baslik||'—'}</div><div class="act-sub">${a.alt_baslik||''}</div></div><span class="act-badge" style="background:${col}18;color:${col}">${lbl}</span><span class="act-time">${t}</span></div>`;
+    }).join('');
+  }catch(e){console.error('refreshAct',e);}
+}
+function setActFilter(f,btn){
+  actFilter=f;
+  document.querySelectorAll('.act-tab').forEach(b=>{b.classList.remove('on');b.style.background='';b.style.color='';b.style.borderColor='';});
+  btn.classList.add('on');
+  const c={all:'#6366f1',tasarim:'#8b5cf6',uretim:'#ec4899',stok:'#10b981',sistem:'#64748b'};
+  btn.style.background=c[f]||'#6366f1';btn.style.color='#fff';btn.style.borderColor='transparent';
+  refreshAct();
+}
+
+// ── FİNANS MERKEZİ ──
+async function openFP(id){
+  fpId=id;
+  const o=allOrders.find(x=>x.id===id);if(!o)return;
+  const stc=stCol(o.siparis_durumu);
+  document.getElementById('fpTitle').textContent=`${o.siparis_no||'—'} — ${o.musteri_adi||'—'}`;
+  document.getElementById('fpStatusBadge').innerHTML=`<span class="badge" style="background:${stc}18;color:${stc}"><span class="badge-dot" style="background:${stc}"></span>${o.siparis_durumu||'—'}</span>`;
+  document.getElementById('fpOrdInfo').textContent=(o.siparis_tarihi?fmt(o.siparis_tarihi)+' · ':'')+'Oluşturan: '+(o.olusturan_adi||'—');
+  document.getElementById('fpStatusBtns').innerHTML=durumlar.map(s=>`<button class="status-btn${o.siparis_durumu===s.kod?' cur':''}" style="${o.siparis_durumu===s.kod?`border-color:${s.renk};color:${s.renk};background:${s.renk}18`:''}" onclick="changeStatus('${id}','${s.kod}')">${s.kod}</button>`).join('');
+  const est=o.tahmini_maliyetler?.est_total||0;
+  const items=(await OPT.siparisler.get(id).catch(()=>({tahmini_maliyetler:{est_items:{hm:[],is:[],dg:[]}}}))).tahmini_maliyetler?.est_items||{hm:[],is:[],dg:[]};
+  const catL={hm:'Hammadde',is:'İşçilik',dg:'Diğer'};
+  let rows=[],tot=0;
+  ['hm','is','dg'].forEach(cat=>(items[cat]||[]).forEach(item=>{rows.push(`<tr><td style="color:var(--text-muted);padding:3px 5px;font-size:.68rem">${catL[cat]}</td><td style="padding:3px 5px;font-size:.7rem">${item.label||item.isim||''}</td><td style="text-align:right;padding:3px 5px;font-weight:700;font-size:.7rem">${money(item.amount||item.maliyet)}</td></tr>`);tot+=Number(item.amount||item.maliyet)||0;}));
+  document.getElementById('fpEstBody').innerHTML=rows.length?rows.join(''):'<tr><td colspan="3" style="text-align:center;padding:10px;color:var(--text-muted);font-size:.66rem">Tahmini maliyet girilmemiş</td></tr>';
+  document.getElementById('fpEstTot').textContent=money(tot||est);
+  document.getElementById('fpEst').textContent=money(est);
+  const satisTL=o.satis_tutar?toTL(o.satis_tutar,o.satis_birim):0;
+  document.getElementById('fpSatis').textContent=satisTL?money(satisTL):'—';
+  document.getElementById('fpAct').textContent='—';
+  const karEl=document.getElementById('fpKar');
+  if(satisTL>0&&est>0){const kar=satisTL-est;const p=Math.round(kar/satisTL*100);karEl.textContent=money(kar)+` (${p>0?'+':''}${p}%)`;karEl.style.color=kar>=0?'#10b981':'#ef4444';}
+  else{karEl.textContent='—';karEl.style.color='';}
+  document.getElementById('fpActBody').innerHTML='<div class="inline-alert inline-alert-warning"><svg data-lucide="clock" style="width:14px;height:14px"></svg><div style="font-size:.74rem"><strong>Üretim verisi bekleniyor</strong><br><span style="font-size:.67rem">Üretimci veri girdikçe bu alan otomatik güncellenir.</span></div></div>';
+  document.getElementById('fpPopup').style.display='flex';
+  setTimeout(()=>{renderFPCharts(o,est,satisTL);lucide.createIcons();},80);
+}
+function closeFP(){
+  document.getElementById('fpPopup').style.display='none';
+  if(fpBarChart){fpBarChart.destroy();fpBarChart=null;}
+  if(fpDonutChart){fpDonutChart.destroy();fpDonutChart=null;}
+  fpId=null;
+}
+function openEditFromFP(){closeFP();if(fpId)openEdit(fpId);}
+function deleteOrderFromFP(){
+  if(!fpId)return;
+  const o=allOrders.find(x=>x.id===fpId);if(!o)return;
+  showConfirm(`"${o.siparis_no}" kalıcı olarak silinecek.`,async()=>{
+    try{await OPT.siparisler.delete(fpId);toast('success','Silindi',o.siparis_no);closeFP();await refreshOrders();}
+    catch(e){toast('error','Hata',e.message);}
+  },'Siparişi Sil','Evet, Sil');
+}
+function renderFPCharts(o,est,satisTL){
+  const dark=document.documentElement.classList.contains('dark');
+  const tc=dark?'#94a3b8':'#64748b';const gc=dark?'rgba(255,255,255,.04)':'rgba(0,0,0,.04)';
+  const bc=document.getElementById('fpBarChart');
+  if(fpBarChart){fpBarChart.destroy();fpBarChart=null;}
+  if(bc){fpBarChart=new Chart(bc,{type:'bar',data:{labels:['Tahmini','Satış'],datasets:[{data:[est,satisTL],backgroundColor:['rgba(99,102,241,.7)','rgba(59,130,246,.7)'],borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:cx=>money(cx.raw)}}},scales:{y:{ticks:{color:tc,font:{size:10},callback:v=>v>=1000?Math.round(v/1000)+'K':v},grid:{color:gc}},x:{ticks:{color:tc,font:{size:10}},grid:{display:false}}}}});}
+}
+async function changeStatus(ordId,newStatus){
+  try{
+    await OPT.siparisler.changeDurum(ordId,newStatus);
+    await refreshOrders();
+    const o=allOrders.find(x=>x.id===ordId);
+    if(o&&fpId===ordId){
+      const stc=stCol(newStatus);
+      document.getElementById('fpStatusBadge').innerHTML=`<span class="badge" style="background:${stc}18;color:${stc}"><span class="badge-dot" style="background:${stc}"></span>${newStatus}</span>`;
+      document.getElementById('fpStatusBtns').innerHTML=durumlar.map(s=>`<button class="status-btn${newStatus===s.kod?' cur':''}" style="${newStatus===s.kod?`border-color:${s.renk};color:${s.renk};background:${s.renk}18`:''}" onclick="changeStatus('${ordId}','${s.kod}')">${s.kod}</button>`).join('');
+    }
+    toast('success','Durum Güncellendi',newStatus);
+  }catch(e){toast('error','Hata',e.message);}
+}
+async function deleteOrder(id){
+  const o=allOrders.find(x=>x.id===id);if(!o)return;
+  showConfirm(`"${o.siparis_no}" silinecek?`,async()=>{
+    try{await OPT.siparisler.delete(id);toast('success','Silindi',o.siparis_no);await refreshOrders();}
+    catch(e){toast('error','Hata',e.message);}
+  },'Sil','Evet, Sil');
+}
+
+// ── WIZARD ──
+function openWizard(){
+  editingId=null;
+  document.getElementById('wizTitle').textContent='Yeni Sipariş';
+  document.getElementById('wSaveLbl').textContent='Oluştur';
+  document.getElementById('wizEditBadge').style.display='none';
+  wizCosts={hm:[],is:[],dg:[]};
+  const yr=new Date().getFullYear();
+  document.getElementById('wNo').value='SIP-'+yr+'-'+String(allOrders.length+1).padStart(3,'0');
+  document.getElementById('wTarih').value=new Date().toISOString().split('T')[0];
+  ['wMus','wKontak','wKonu','wUser','wNotlar','wHatir'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('wSatisTutar').value='';
+  document.getElementById('wSatisBirim').value='TRY';
+  document.getElementById('kurGoster').textContent='';
+  const sel=document.getElementById('wDurum');
+  sel.innerHTML=durumlar.map(d=>`<option value="${d.kod}">${d.kod}</option>`).join('');
+  const cu=window._optCurrentUser;
+  if(cu)document.getElementById('wUser').value=cu.name||'';
+  renderEstUI();wizGoStep(1);
+  document.getElementById('wizModal').style.display='flex';lucide.createIcons();
+}
+async function openEdit(id){
+  editingId=id;
+  const full=await OPT.siparisler.get(id).catch(()=>null);
+  const o=allOrders.find(x=>x.id===id);if(!o)return;
+  document.getElementById('wizTitle').textContent='Siparişi Düzenle';
+  document.getElementById('wSaveLbl').textContent='Kaydet';
+  document.getElementById('wizEditBadge').style.display='inline-flex';
+  wizCosts=JSON.parse(JSON.stringify(full?.tahmini_maliyetler?.est_items||{hm:[],is:[],dg:[]}));
+  document.getElementById('wNo').value=o.siparis_no||'';
+  document.getElementById('wMus').value=o.musteri_adi||'';
+  document.getElementById('wKontak').value=o.kontak_adi||'';
+  document.getElementById('wKonu').value=o.siparis_konusu||'';
+  document.getElementById('wTarih').value=o.siparis_tarihi||'';
+  document.getElementById('wHatir').value=o.hatirlatma_tarihi||'';
+  document.getElementById('wUser').value=o.olusturan_adi||'';
+  document.getElementById('wNotlar').value=o.notlar||'';
+  document.getElementById('wSatisTutar').value=o.satis_tutar?Number(o.satis_tutar).toLocaleString('tr-TR',{minimumFractionDigits:2}).replace('.',','):'';
+  document.getElementById('wSatisBirim').value=o.satis_birim||'TRY';
+  const sel=document.getElementById('wDurum');
+  sel.innerHTML=durumlar.map(d=>`<option value="${d.kod}"${d.kod===o.siparis_durumu?' selected':''}>${d.kod}</option>`).join('');
+  updateKurGoster();renderEstUI();wizGoStep(1);
+  document.getElementById('wizModal').style.display='flex';lucide.createIcons();
+}
+function closeWizard(){document.getElementById('wizModal').style.display='none';editingId=null;}
+function wizGoStep(s){
+  wizStep=s;
+  [1,2,3].forEach(i=>{const el=document.getElementById('ws'+i);if(el)el.style.display=i===s?'block':'none';});
+  document.getElementById('wizStepLbl').textContent=`Adım ${s} — ${['Temel Bilgiler','Tahmini Maliyetler','Satış & Detaylar'][s-1]}`;
+  ['wsp1','wsp2','wsp3'].forEach((id,i)=>{const p=document.getElementById(id);if(!p)return;p.className='wiz-step'+(i+1===s?' active':i+1<s?' done':'');});
+  document.getElementById('wBtnPrev').style.display=s>1?'inline-flex':'none';
+  document.getElementById('wBtnNext').style.display=s<3?'inline-flex':'none';
+  document.getElementById('wBtnSave').style.display=s===3?'inline-flex':'none';
+  lucide.createIcons();
+}
+async function wizNext(){
+  if(wizStep===1){
+    if(!(document.getElementById('wNo').value||'').trim()||!(document.getElementById('wMus').value||'').trim()){showAlert('Sipariş No ve Müşteri Adı zorunludur.','Eksik Bilgi');return;}
+    if(!editingId){
+      const r=allOrders.find(x=>x.siparis_no===document.getElementById('wNo').value.trim());
+      if(r){showAlert('Bu sipariş numarası zaten kullanımda.','Mükerrer Sipariş No');return;}
+    }
+    // Pre-fill adam saat
+    if(window._adamSaatRate>0){const h=document.getElementById('asAutoHint');if(h){h.textContent='✓ Personel yönetiminden: '+money(window._adamSaatRate)+'/sa';h.style.display='block';}document.getElementById('asRate').value=window._adamSaatRate;calcAs();}
+  }
+  if(wizStep<3)wizGoStep(wizStep+1);
+}
+function wizPrev(){if(wizStep>1)wizGoStep(wizStep-1);}
+function fmtTutarInput(el){let v=el.value.replace(/[^0-9,]/g,'');const p=v.split(',');if(p.length>2)v=p[0]+','+p.slice(1).join('');el.value=v;}
+function updateKurGoster(){
+  const birim=document.getElementById('wSatisBirim').value;
+  const tutar=parseTutar(document.getElementById('wSatisTutar').value);
+  const el=document.getElementById('kurGoster');
+  if(tutar>0&&birim!=='TRY'){const tl=toTL(tutar,birim);el.textContent=`≈ ${money(tl)} TL (güncel ${birim} kuru ile)`;}
+  else el.textContent='';
+}
+function renderEstUI(){
+  const ids={hm:'eHm',is:'eIs',dg:'eDg'};
+  Object.keys(ids).forEach(cat=>{
+    const items=wizCosts[cat]||[];const el=document.getElementById(ids[cat]);if(!el)return;
+    if(!items.length){el.innerHTML='<div class="empty-msg">Henüz giriş yok</div>';return;}
+    el.innerHTML=items.map((item,i)=>`<div class="est-item"><span class="est-item-lbl">${item.label}</span><span class="est-item-val">${money(item.amount)}</span><button class="btn-icon" style="padding:1px 2px" onclick="remCost('${cat}',${i})"><svg data-lucide="x" style="width:11px;height:11px"></svg></button></div>`).join('');
+  });
+  let t=0;Object.values(wizCosts).forEach(arr=>arr.forEach(x=>t+=Number(x.amount)||0));
+  const el=document.getElementById('wEstTotal');if(el)el.textContent=money(t);
+  lucide.createIcons();
+}
+function remCost(cat,i){wizCosts[cat].splice(i,1);renderEstUI();}
+async function saveOrder(){
+  const no=(document.getElementById('wNo').value||'').trim();
+  const mus=(document.getElementById('wMus').value||'').trim();
+  if(!no||!mus){showAlert('Sipariş No ve Müşteri Adı zorunludur.','Eksik Bilgi');return;}
+  let estTotal=0;Object.values(wizCosts).forEach(arr=>arr.forEach(x=>estTotal+=Number(x.amount)||0));
+  const satisTutar=parseTutar(document.getElementById('wSatisTutar').value);
+  const ordData={siparis_no:no,musteri_adi:mus,kontak_adi:(document.getElementById('wKontak').value||'').trim(),
+    siparis_konusu:(document.getElementById('wKonu').value||'').trim(),siparis_tarihi:document.getElementById('wTarih').value||null,
+    hatirlatma_tarihi:document.getElementById('wHatir').value||null,olusturan_adi:(document.getElementById('wUser').value||'').trim(),
+    siparis_durumu:document.getElementById('wDurum').value||'Taslak',satis_tutar:satisTutar,
+    satis_birim:document.getElementById('wSatisBirim').value,notlar:(document.getElementById('wNotlar').value||'').trim()};
+  try{
+    const btn=document.getElementById('wBtnSave');if(btn){btn.disabled=true;btn.innerHTML='<div style="width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div>';}
+    let savedId;
+    if(editingId){
+      await OPT.siparisler.update(editingId,ordData);
+      await OPT.siparisler.updateMaliyet(editingId,{est_items:wizCosts,est_total:estTotal});
+      toast('success','Güncellendi',`"${no}" güncellendi.`);savedId=editingId;
+    } else {
+      const newOrd=await OPT.siparisler.create(ordData);
+      await OPT.siparisler.updateMaliyet(newOrd.id,{est_items:wizCosts,est_total:estTotal});
+      toast('success','Oluşturuldu',`"${no}" başarıyla oluşturuldu.`);savedId=newOrd.id;
+    }
+    closeWizard();await refreshOrders();await refreshAct();
+  }catch(e){
+    toast('error','Hata',e.message);
+    const btn=document.getElementById('wBtnSave');if(btn){btn.disabled=false;btn.innerHTML='<svg data-lucide="check" style="width:12px;height:12px"></svg><span id="wSaveLbl">'+document.getElementById('wSaveLbl').textContent+'</span>';lucide.createIcons();}
+  }
+}
+
+// ── STOK MODAL ──
+function openStokModal(){
+  stokSel=null;
+  document.getElementById('stokSearch').value='';
+  document.getElementById('stokQtyRow').style.display='none';
+  document.getElementById('stokQty').value='';
+  renderStokList(stokList);
+  document.getElementById('stokModal').style.display='flex';lucide.createIcons();
+}
+function closeStokModal(){document.getElementById('stokModal').style.display='none';stokSel=null;}
+function filterStok(q){const fl=q?stokList.filter(s=>(s.isim||'').toLowerCase().includes(q.toLowerCase())||(s.stok_kategorileri?.ad||'').toLowerCase().includes(q.toLowerCase())):stokList;renderStokList(fl);}
+function renderStokList(items){
+  const el=document.getElementById('stokList');
+  if(!items.length){el.innerHTML='<div style="text-align:center;padding:16px;color:var(--text-muted)">Bulunamadı</div>';return;}
+  el.innerHTML=items.map(s=>`<div class="stok-item${stokSel?.id===s.id?' sel':''}" onclick="selectStok('${s.id}')">
+    <div style="width:26px;height:26px;border-radius:6px;background:rgba(99,102,241,.12);display:flex;align-items:center;justify-content:center"><svg data-lucide="layers" style="width:13px;height:13px;color:#6366f1"></svg></div>
+    <div style="flex:1;min-width:0"><div style="font-size:.76rem;font-weight:700;color:var(--text-primary)">${s.isim}</div><div style="font-size:.62rem;color:var(--text-muted)">Stok: ${s.stok_miktari} ${s.birim} · ${s.stok_kategorileri?.ad||'—'}</div></div>
+    <div style="font-size:.72rem;font-weight:800;color:#6366f1;white-space:nowrap">${money(s.birim_fiyat)}/${s.birim}</div>
+  </div>`).join('');
+  lucide.createIcons();
+}
+function selectStok(id){
+  stokSel=stokList.find(s=>s.id===id);
+  document.querySelectorAll('.stok-item').forEach(el=>el.classList.remove('sel'));
+  event.currentTarget.classList.add('sel');
+  if(stokSel){const row=document.getElementById('stokQtyRow');row.style.display='flex';document.getElementById('stokQtyLbl').textContent=`Miktar (${stokSel.birim}):`;document.getElementById('stokQty').focus();}
+}
+function confirmStok(){
+  if(!stokSel){showAlert('Malzeme seçin.');return;}
+  const qty=parseFloat(document.getElementById('stokQty').value)||0;
+  if(qty<=0){showAlert('Geçerli miktar girin.');return;}
+  const maliyet=Math.round(qty*stokSel.birim_fiyat);
+  wizCosts.hm.push({label:`${stokSel.isim} (${qty} ${stokSel.birim})`,amount:maliyet,stok_id:stokSel.id,miktar:qty});
+  renderEstUI();closeStokModal();toast('success','Eklendi',`${stokSel.isim} — ${money(maliyet)}`);
+}
+
+// ADAM SAAT
+function openAdamSaatModal(){
+  document.getElementById('asLbl').value='';document.getElementById('asSaat').value='';
+  const rate=window._adamSaatRate||0;
+  document.getElementById('asRate').value=rate||'';
+  const hint=document.getElementById('asAutoHint');
+  if(hint&&rate>0){hint.textContent='✓ Personel yönetiminden: '+money(rate)+'/sa';hint.style.display='block';}else if(hint)hint.style.display='none';
+  document.getElementById('asTotal').textContent='₺0';
+  if(rate>0)calcAs();
+  document.getElementById('asModal').style.display='flex';lucide.createIcons();
+}
+function calcAs(){const s=parseFloat(document.getElementById('asSaat').value)||0;const r=parseFloat(document.getElementById('asRate').value)||0;document.getElementById('asTotal').textContent=money(s*r);}
+function confirmAs(){
+  const lbl=(document.getElementById('asLbl').value||'').trim()||'İşçilik';
+  const s=parseFloat(document.getElementById('asSaat').value)||0;
+  const r=parseFloat(document.getElementById('asRate').value)||0;
+  if(s<=0||r<=0){showAlert('Adam saat ve saatlik ücret gerekli.');return;}
+  const tot=Math.round(s*r);
+  wizCosts.is.push({label:`${lbl} (${s} sa × ${money(r)}/sa)`,amount:tot});
+  renderEstUI();document.getElementById('asModal').style.display='none';toast('success','Eklendi',`${lbl} — ${money(tot)}`);
+}
+function openDigerModal(){document.getElementById('dgLbl').value='';document.getElementById('dgAmt').value='';document.getElementById('dgModal').style.display='flex';lucide.createIcons();}
+function confirmDg(){
+  const lbl=(document.getElementById('dgLbl').value||'').trim();
+  const amt=parseFloat(document.getElementById('dgAmt').value)||0;
+  if(!lbl){showAlert('Kalem adı girin.');return;}
+  if(amt<=0){showAlert('Geçerli tutar girin.');return;}
+  wizCosts.dg.push({label:lbl,amount:amt});
+  renderEstUI();document.getElementById('dgModal').style.display='none';toast('success','Eklendi',`${lbl} — ${money(amt)}`);
+}
+
+// Add spin keyframe
+const style=document.createElement('style');style.textContent='@keyframes spin{to{transform:rotate(360deg)}}';document.head.appendChild(style);
+
+// ── PAGE INIT ──
+loadPage();
+</script>
+<script>
+// ── SIDEBAR AKTİF SAYFA ──
+(function() {
+  const path = window.location.pathname;
+  const page = path.split('/').pop().replace('.html','') || 'genel-durum';
+  
+  // Active link
+  document.querySelectorAll('.sb-link[data-page], .sb-sublink[data-page]').forEach(el => {
+    el.classList.remove('active');
+    if (el.getAttribute('data-page') === page) {
+      el.classList.add('active');
+      // Parent submenu'yu aç
+      const submenu = el.closest('.sb-submenu');
+      if (submenu) {
+        submenu.classList.add('open');
+        const menuId = submenu.id;
+        const chv = document.getElementById('chv_' + menuId);
+        if (chv) chv.style.transform = 'rotate(180deg)';
+      }
+    }
+  });
+})();
+</script>
+</body>
+</html>
