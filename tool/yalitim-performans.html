@@ -742,7 +742,7 @@
     const {PIPES, VALVE_FACTORS, PHYSICS, getSurfaceCoeff} = OPTIMIZI;
     // yalitim-performans kendi MATS'ini kullanır (camyunu key'i + limit property)
     const MATS = {
-        rockwool:   {a:0.035, b:0.00017, c:0,       limit:650},
+        rockwool:   {a:0.031, b:0.00013, c:3.14e-7, limit:650},
         camyunu:    {a:0.032, b:0.00018, c:0,       limit:250, name:"Cam Yünü"},
         needlemat:  {a:0.033, b:0.00015, c:0,       limit:650, name:"İğnelenmiş Cam Elyaf"},
         ceramic:    {a:0.025, b:0.00012, c:1.2e-7,  limit:1200},
