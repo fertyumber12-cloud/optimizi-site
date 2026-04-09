@@ -272,11 +272,23 @@
                         <label class="text-[10px] text-slate-500 font-bold uppercase mb-2 block flex items-center gap-1">Potansiyel Tasarruf Hesabı İçin:</label>
                         <div class="mb-2"><select id="calcStd" class="glass-input text-[10px] !py-1 !h-7 text-slate-500 dark:text-slate-300"><option value="iso">ISO 12241 (Standard)</option><option value="astm">ASTM C680 (USA)</option><option value="vdi">VDI 2055 (German)</option></select></div>
                         <select id="matSelect" class="glass-input text-xs mb-2">
-                            <option value="rockwool">Taş Yünü (Sanayi)</option>
-                            <option value="glasswool">İğnelenmiş Cam Elyaf</option> 
-                            <option value="rubber">Elastomerik Kauçuk</option>
-                            <option value="aerogel">Aerogel</option>
-                            <option value="ceramic">Seramik Yünü</option>
+                            <optgroup label="Taş Yünü — İzocam">
+                                <option value="rockwool_650" selected>İzocam Sanayi Şiltesi Tip 650</option>
+                                <option value="rockwool_700">İzocam Sanayi Şiltesi Tip 700</option>
+                                <option value="rockwool_750">İzocam Sanayi Şiltesi Tip 750</option>
+                            </optgroup>
+                            <optgroup label="Cam Elyaf">
+                                <option value="needlemat_valmiera">Valmiera İğnelenmiş Cam Elyaf (600°C)</option>
+                                <option value="glasswool">Cam Yünü (Genel, 250°C)</option>
+                            </optgroup>
+                            <optgroup label="Aerogel">
+                                <option value="armagel_xgh">ArmaGel XGH Aerojel (650°C)</option>
+                                <option value="pyrogel_xte">Pyrogel XTE Aerojel (650°C)</option>
+                            </optgroup>
+                            <optgroup label="Diğer">
+                                <option value="rubber">Elastomerik Kauçuk (105°C)</option>
+                                <option value="ceramic">Seramik Yünü (1260°C)</option>
+                            </optgroup>
                         </select>
                         <div class="grid grid-cols-2 gap-2 mt-2 mb-2">
                             <input type="number" id="thk" class="glass-input text-xs" value="50" placeholder="Ref. Kalınlık (mm)">
@@ -292,10 +304,13 @@
                             </label>
                             <div id="layer2Box" class="hidden">
                                 <select id="matSelect2" class="glass-input text-xs mb-2">
-                                    <option value="rubber" selected>Elastomerik Kauçuk</option>
-                                    <option value="rockwool">Taş Yünü</option>
-                                    <option value="glasswool">Cam Elyaf</option>
-                                    <option value="aerogel">Aerogel</option>
+                                    <option value="rubber" selected>Elastomerik Kauçuk (105°C)</option>
+                                    <option value="rockwool_650">İzocam Sanayi Şiltesi Tip 650</option>
+                                    <option value="rockwool_700">İzocam Sanayi Şiltesi Tip 700</option>
+                                    <option value="needlemat_valmiera">Valmiera İğnelenmiş Cam Elyaf</option>
+                                    <option value="armagel_xgh">ArmaGel XGH Aerojel</option>
+                                    <option value="pyrogel_xte">Pyrogel XTE Aerojel</option>
+                                    <option value="glasswool">Cam Yünü (Genel)</option>
                                     <option value="ceramic">Seramik Yünü</option>
                                 </select>
                                 <input type="number" id="thk2" class="glass-input text-xs" value="19" placeholder="Kalınlık (mm)">
