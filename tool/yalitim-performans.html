@@ -93,6 +93,11 @@
   .queue-item-badge { font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 99px; background: #e0e7ff; color: #4338ca; flex-shrink: 0; }
   .queue-item-del { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 6px; color: #cbd5e1; cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
   .queue-item-del:hover { background: #fee2e2; color: #ef4444; }
+  #queueList { max-height: 384px; overflow-y: auto; padding-right: 2px; }
+  #queueList::-webkit-scrollbar { width: 4px; }
+  #queueList::-webkit-scrollbar-track { background: transparent; }
+  #queueList::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+  #queueList::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
   /* --- IN-PAGE TOAST --- */
   #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
@@ -810,14 +815,23 @@
         let eClass = 'G'; const activeBar = document.querySelector('.eiif-row.active .eiif-label'); if(activeBar) eClass = activeBar.innerText;
         let icon = 'box'; let qtyDisplay = ""; let sysType = ""; let sysTypeEN = "";
         const dnVal = document.getElementById('dn') ? document.getElementById('dn').value : '';
+        const VALVE_NAMES_EN = {
+            gate: 'Gate Valve', globe: 'Globe Valve', ball: 'Ball Valve',
+            butterfly: 'Butterfly Valve', check: 'Check Valve',
+            trap_float: 'Steam Trap (Float)', trap_thermo: 'Steam Trap (Thermostatic)',
+            trap_bimetal: 'Steam Trap (Bimetal)', trap_bucket: 'Steam Trap (Bucket)',
+            strainer: 'Strainer', flange: 'Flange Set'
+        };
         if(type === 'pipe') {
             icon = 'circle-dot'; qtyDisplay = qtyVal + " m";
             sysType = `Boru Hat (DN${dnVal})`; sysTypeEN = `Pipe Line (DN${dnVal})`;
         } else if(type === 'equipment') {
             icon = 'settings-2'; qtyDisplay = qtyVal;
             const vTypeSelect = document.getElementById('valveType');
-            const vLabel = vTypeSelect.options[vTypeSelect.selectedIndex].text;
-            sysType = `${vLabel} (DN${dnVal})`; sysTypeEN = `${vLabel} (DN${dnVal})`;
+            const vKey = vTypeSelect.value;
+            const vLabelTR = vTypeSelect.options[vTypeSelect.selectedIndex].text;
+            const vLabelEN = VALVE_NAMES_EN[vKey] || vLabelTR;
+            sysType = `${vLabelTR} (DN${dnVal})`; sysTypeEN = `${vLabelEN} (DN${dnVal})`;
         } else if(type === 'flat') {
             icon = 'square'; qtyDisplay = document.getElementById('resArea').innerText;
             const shape = document.querySelector('input[name="flatShape"]:checked').value;
