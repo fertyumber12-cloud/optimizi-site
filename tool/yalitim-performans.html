@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -30,52 +31,23 @@
 </script>
 
 <style>
-  /* ── LIGHT (default) ── */
   :root {
-    --bg-color: #f1f5f9;
-    --bg-dot: #cbd5e1;
-    --glass-bg: rgba(255,255,255,0.97);
-    --glass-border: rgba(203,213,225,0.9);
+    --bg-color: #f8fafc; 
+    --glass-bg: rgba(255, 255, 255, 0.95);
+    --glass-border: rgba(226, 232, 240, 0.8);
     --input-bg: #ffffff;
-    --input-border: #cbd5e1;
-    --text-main: #0f172a;
-    --text-sub: #64748b;
-    --card-shadow: 0 4px 20px -4px rgba(0,0,0,0.08);
-    --nav-bg: rgba(255,255,255,0.97);
-    --nav-border: rgba(203,213,225,0.8);
-    --section-bg: #f8fafc;
-    --section-border: #e2e8f0;
-    --label-color: #475569;
-    --eiif-val-color: #64748b;
-    --c-A:#348d00;--c-B:#6bb600;--c-C:#b4d600;--c-D:#ffd600;--c-E:#ffaa00;--c-F:#ff5500;--c-G:#d40000;
-  }
-
-  /* ── DARK ── */
-  [data-theme="dark"] {
-    --bg-color: #0d1117;
-    --bg-dot: #1e2a3a;
-    --glass-bg: rgba(15,23,42,0.97);
-    --glass-border: rgba(51,65,85,0.8);
-    --input-bg: #111827;
-    --input-border: #334155;
-    --text-main: #e2e8f0;
-    --text-sub: #94a3b8;
-    --card-shadow: 0 4px 20px -4px rgba(0,0,0,0.4);
-    --nav-bg: rgba(13,17,23,0.98);
-    --nav-border: rgba(51,65,85,0.7);
-    --section-bg: #111827;
-    --section-border: #1e293b;
-    --label-color: #94a3b8;
-    --eiif-val-color: #94a3b8;
+    --text-main: #0f172a; 
+    --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+    /* EiiF COLORS */
+    --c-A: #348d00; --c-B: #6bb600; --c-C: #b4d600; --c-D: #ffd600; --c-E: #ffaa00; --c-F: #ff5500; --c-G: #d40000;
   }
 
   body { 
       background-color: var(--bg-color);
-      background-image: radial-gradient(var(--bg-dot) 1px, transparent 1px);
+      background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
       background-size: 24px 24px;
       color: var(--text-main); 
-      overflow-x: hidden;
-      transition: background-color 0.25s, color 0.25s;
+      overflow-x: hidden; 
   }
 
   .glass-card { 
@@ -83,83 +55,37 @@
       backdrop-filter: blur(20px); 
       border: 1px solid var(--glass-border); 
       box-shadow: var(--card-shadow);
-      transition: background-color 0.25s, border-color 0.25s, box-shadow 0.25s;
+      transition: all 0.3s ease;
   }
 
   .glass-input { 
-      transition: all 0.2s; border-radius: 0.5rem; padding: 0.45rem 0.65rem; width: 100%; 
-      background-color: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-main);
-      font-size: 0.8rem; font-weight: 500;
+      transition: all 0.2s; border-radius: 0.75rem; padding: 0.6rem 0.8rem; width: 100%; 
+      background-color: var(--input-bg); border: 1px solid #cbd5e1; color: var(--text-main);
+      font-size: 0.85rem; font-weight: 500;
   }
-  .glass-input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,0.15); }
-  [data-theme="dark"] .glass-input { color-scheme: dark; }
-  [data-theme="dark"] select.glass-input option { background: #1e293b; color: #e2e8f0; }
+  .glass-input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); }
 
-  /* Label genel rengi */
-  .field-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--label-color); display: block; margin-bottom: 3px; }
-
-  /* Accordion */
+  /* Accordion Transition */
   .accordion-content { transition: max-height 0.3s ease-out, opacity 0.3s ease-out; max-height: 500px; opacity: 1; overflow: hidden; }
   .accordion-content.collapsed { max-height: 0; opacity: 0; }
   .rotate-icon { transition: transform 0.3s ease; }
   .rotate-icon.collapsed { transform: rotate(-90deg); }
 
-  /* EiiF Chart */
-  .eiif-row { display: flex; align-items: center; margin-bottom: 5px; height: 26px; }
-  .eiif-label { width: 24px; font-weight: 800; font-size: 10px; color: var(--text-sub); text-align: right; margin-right: 8px; }
+  /* EiiF Chart Styles */
+  .eiif-row { display: flex; align-items: center; margin-bottom: 6px; height: 28px; }
+  .eiif-label { width: 30px; font-weight: 800; font-size: 11px; color: #64748b; text-align: right; margin-right: 10px; }
   .eiif-bar-container { flex: 1; height: 100%; position: relative; display: flex; align-items: center; }
-  .eiif-bar { height: 100%; clip-path: polygon(0% 0%, 94% 0%, 100% 50%, 94% 100%, 0% 100%); opacity: 0.3; transition: all 0.4s ease; display: flex; align-items: center; padding-left: 10px; color: white; font-weight: 900; font-size: 11px; text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
-  .eiif-row.active .eiif-bar { opacity: 1; transform: scale(1.02); filter: drop-shadow(0 3px 5px rgba(0,0,0,0.15)); }
-  .eiif-val { width: 64px; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--eiif-val-color); margin-left: 8px; }
-  .w-a{width:35%;background:var(--c-A)} .w-b{width:45%;background:var(--c-B)} .w-c{width:55%;background:var(--c-C)} .w-d{width:65%;background:var(--c-D)} .w-e{width:75%;background:var(--c-E)} .w-f{width:85%;background:var(--c-F)} .w-g{width:100%;background:var(--c-G)}
-
-  /* Std buttons */
-  .std-btn { border: 1px solid var(--section-border); border-radius: 0.4rem; padding: 0.4rem; text-align: center; font-size: 9px; font-weight: 700; color: var(--text-sub); cursor: pointer; transition: all 0.2s; background-color: var(--input-bg); }
+  .eiif-bar { height: 100%; clip-path: polygon(0% 0%, 94% 0%, 100% 50%, 94% 100%, 0% 100%); opacity: 0.3; transition: all 0.4s ease; display: flex; align-items: center; padding-left: 12px; color: white; font-weight: 900; font-size: 12px; text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
+  .eiif-row.active .eiif-bar { opacity: 1; transform: scale(1.02); filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+  .eiif-val { width: 70px; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #64748b; margin-left: 10px; }
+  .w-a { width: 35%; background: var(--c-A); } .w-b { width: 45%; background: var(--c-B); } .w-c { width: 55%; background: var(--c-C); } .w-d { width: 65%; background: var(--c-D); } .w-e { width: 75%; background: var(--c-E); } .w-f { width: 85%; background: var(--c-F); } .w-g { width: 100%; background: var(--c-G); }
+  
+  .std-btn { border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.5rem; text-align: center; font-size: 10px; font-weight: 700; color: #64748b; cursor: pointer; transition: all 0.2s; background-color: #fff; }
   .std-btn:hover { border-color: #a5b4fc; color: #4f46e5; }
-  .std-btn.active { background-color: #eef2ff; border-color: #6366f1; color: #4338ca; }
-  [data-theme="dark"] .std-btn.active { background-color: rgba(99,102,241,0.15); border-color: #6366f1; color: #a5b4fc; }
-
-  /* Dark mode nav */
-  [data-theme="dark"] nav { background-color: var(--nav-bg) !important; border-color: var(--nav-border) !important; }
-  [data-theme="dark"] .glass-card { background-color: var(--glass-bg); border-color: var(--glass-border); }
-
-  /* Dark mode text overrides */
-  [data-theme="dark"] .text-slate-800 { color: #e2e8f0 !important; }
-  [data-theme="dark"] .text-slate-700 { color: #cbd5e1 !important; }
-  [data-theme="dark"] .text-slate-600 { color: #94a3b8 !important; }
-  [data-theme="dark"] .text-slate-500 { color: #64748b !important; }
-  [data-theme="dark"] .text-slate-400 { color: #475569 !important; }
-  [data-theme="dark"] .border-slate-100 { border-color: #1e293b !important; }
-  [data-theme="dark"] .border-slate-200 { border-color: #1e293b !important; }
-  [data-theme="dark"] .bg-white { background-color: #0f172a !important; }
-  [data-theme="dark"] .bg-slate-50 { background-color: #111827 !important; }
-  [data-theme="dark"] .bg-slate-100 { background-color: #1e293b !important; }
-  [data-theme="dark"] .bg-white\/80 { background-color: rgba(15,23,42,0.92) !important; }
-  [data-theme="dark"] .bg-white\/50 { background-color: rgba(15,23,42,0.5) !important; }
-  [data-theme="dark"] .bg-indigo-50\/50 { background-color: rgba(49,46,129,0.15) !important; }
-  [data-theme="dark"] .border-indigo-100 { border-color: rgba(99,102,241,0.25) !important; }
-  [data-theme="dark"] .text-indigo-900 { color: #a5b4fc !important; }
-  [data-theme="dark"] .border-dashed { border-color: #334155 !important; }
-
-  /* Dark mode toggle button */
-  #themeToggle { width: 34px; height: 19px; position: relative; cursor: pointer; }
-  #themeToggle input { opacity: 0; width: 0; height: 0; }
-  .toggle-track { position: absolute; inset: 0; background: #334155; border-radius: 19px; transition: background 0.25s; }
-  .toggle-thumb { position: absolute; top: 2px; left: 2px; width: 15px; height: 15px; background: #94a3b8; border-radius: 50%; transition: transform 0.25s, background 0.25s; display: flex; align-items: center; justify-content: center; }
-  input:checked + .toggle-track { background: #4f46e5; }
-  input:checked + .toggle-track .toggle-thumb { transform: translateX(15px); background: #ffffff; }
-
-  /* EiiF sabit parametreler bandı */
-  .eiif-lock-strip { display: none; }
-  .eiif-lock-strip.active { display: flex; }
+  .std-btn.active { background-color: #eef2ff; border-color: #6366f1; color: #4338ca; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
 
   /* --- PRINT OPTIMIZATION --- */
   @media print {
-      [data-theme="dark"] body { background: white !important; color: #0f172a !important; }
-      [data-theme="dark"] .glass-card, [data-theme="dark"] .bg-white { background: white !important; color: #0f172a !important; border-color: #e2e8f0 !important; }
-      [data-theme="dark"] .text-slate-800 { color: #0f172a !important; }
-      [data-theme="dark"] .text-slate-400 { color: #64748b !important; }
-      #themeToggle, #themeLbl { display: none !important; }
       @page { margin: 0; size: A4; } 
       html, body { height: 100%; background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       .main-interface, nav, #langModal, #sysNotificationModal { display: none !important; }
@@ -278,77 +204,76 @@
     </div>
 
 <div class="relative z-10 flex flex-col min-h-screen main-interface">
-    <nav class="sticky top-0 z-50 glass-card !bg-[var(--nav-bg)] !border-x-0 !border-t-0 !rounded-none border-b backdrop-blur-xl" style="border-color:var(--nav-border);">
-      <div class="container mx-auto px-5 h-13 flex items-center justify-between max-w-[1400px]" style="height:52px;">
-          <a href="../dashboard.html" class="flex items-center gap-2.5 group">
-              <div><h1 class="text-sm font-bold tracking-wide" style="color:var(--text-main);">Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600">.Yalıtım Performansı</span></h1></div>
+    <nav class="sticky top-0 z-50 glass-card !bg-white/95 !border-x-0 !border-t-0 !rounded-none border-b border-slate-200 backdrop-blur-xl">
+      <div class="container mx-auto px-6 h-16 flex items-center justify-between max-w-[1400px]">
+          <a href="../dashboard.html" class="flex items-center gap-3 group">
+              <div><h1 class="text-lg font-bold text-slate-800 tracking-wide">Optimizi<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600">.Yalıtım Performansı</span></h1></div>
           </a>
-          <div class="flex items-center gap-2.5">
-              <div class="text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border" style="color:var(--text-sub);background:var(--section-bg);border-color:var(--section-border);" id="stdBadge">TS EN ISO 12241</div>
-              <!-- Dark mode toggle -->
-              <div class="flex items-center gap-1.5" id="themeLbl">
-                  <i data-lucide="sun" class="w-3 h-3" style="color:var(--text-sub);"></i>
-                  <label id="themeToggle">
-                      <input type="checkbox" id="darkToggle" onchange="toggleDark(this.checked)">
-                      <span class="toggle-track"><span class="toggle-thumb"></span></span>
-                  </label>
-                  <i data-lucide="moon" class="w-3 h-3" style="color:var(--text-sub);"></i>
-              </div>
-              <button id="topReportBtn" onclick="handleReportClick()" class="text-[11px] bg-indigo-600 text-white px-3 py-1.5 rounded-md font-bold hover:bg-indigo-500 transition shadow-md shadow-indigo-200/50 flex items-center gap-1.5 cursor-pointer">
-                  <i data-lucide="printer" class="w-3 h-3"></i> Rapor Al
-              </button>
+          <div class="flex items-center gap-3">
+             <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200" id="stdBadge">
+                TS EN ISO 12241
+             </div>
+             <button id="topReportBtn" onclick="handleReportClick()" class="text-xs bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-indigo-500 transition shadow-lg shadow-indigo-200 flex items-center gap-2 cursor-pointer ml-2">
+                <i data-lucide="printer" class="w-3 h-3"></i> Rapor Al
+             </button>
           </div>
       </div>
     </nav>
 
-    <main class="flex-1 container mx-auto px-5 py-5 max-w-[1400px]">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+    <main class="flex-1 container mx-auto p-6 lg:p-8 max-w-[1400px]">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
-            <!-- ═══ SOL PANEL — %30 daha dar ═══ -->
-            <div class="lg:col-span-4 space-y-3">
+            <div class="lg:col-span-5 space-y-6">
                 
-                <!-- Proje Bilgileri -->
-                <div class="glass-card rounded-xl overflow-hidden">
-                    <button onclick="toggleProjectInfo()" class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-slate-50 transition cursor-pointer" style="background:var(--section-bg);">
-                        <h3 class="text-[10px] font-bold uppercase flex items-center gap-2" style="color:var(--text-sub);">
-                            <i data-lucide="building" class="w-3.5 h-3.5 text-indigo-500"></i> Proje Bilgileri
+                <div class="glass-card rounded-2xl relative overflow-hidden bg-white">
+                    <button onclick="toggleProjectInfo()" class="w-full p-6 flex items-center justify-between text-left hover:bg-slate-50 transition cursor-pointer">
+                        <h3 class="text-slate-800 text-xs font-bold uppercase flex items-center gap-2">
+                            <i data-lucide="building" class="w-4 h-4 text-indigo-500"></i> Proje Bilgileri
                         </h3>
-                        <i data-lucide="chevron-down" id="projInfoIcon" class="w-3.5 h-3.5 rotate-icon" style="color:var(--text-sub);"></i>
+                        <i data-lucide="chevron-down" id="projInfoIcon" class="w-4 h-4 text-slate-400 rotate-icon"></i>
                     </button>
-                    <div id="projectInfoContent" class="accordion-content px-4 pb-4 pt-1" style="border-top:1px solid var(--section-border);">
-                        <div class="space-y-2 pt-2">
-                            <div class="grid grid-cols-2 gap-2">
-                                <div><label class="field-label">Firma Adı</label><input type="text" id="inp-company" placeholder="ABC Tekstil" class="glass-input"></div>
-                                <div><label class="field-label">Yetkili</label><input type="text" id="inp-rep" placeholder="İsim Soyisim" class="glass-input"></div>
+                    
+                    <div id="projectInfoContent" class="accordion-content px-6 pb-6">
+                        <div class="space-y-4 pt-2 border-t border-slate-100">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Firma Adı</label>
+                                    <input type="text" id="inp-company" placeholder="Örn: ABC Tekstil" class="glass-input text-xs font-bold text-slate-700">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Firma Yetkilisi</label>
+                                    <input type="text" id="inp-rep" placeholder="İsim Soyisim" class="glass-input text-xs">
+                                </div>
                             </div>
-                            <div><label class="field-label" style="color:#6366f1;">Hazırlayan</label><input type="text" id="inp-provider" value="Optimizi Engineering" class="glass-input"></div>
+                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                <label class="text-[10px] font-bold text-indigo-400 uppercase block mb-1">Raporu Hazırlayan Kurum</label>
+                                <input type="text" id="inp-provider" value="Optimizi Engineering" class="glass-input text-xs bg-white text-slate-600 border-indigo-100">
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Hesaplama Parametreleri -->
-                <div class="glass-card p-4 rounded-xl">
-                    <h3 class="text-[10px] font-bold uppercase mb-3 flex items-center gap-2 pb-2" style="color:#6366f1;border-bottom:1px solid var(--section-border);">
-                        <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i> Hesaplama Parametreleri
+                <div class="glass-card p-6 rounded-2xl relative overflow-hidden bg-white">
+                    <h3 class="text-indigo-600 text-xs font-bold uppercase mb-4 flex items-center gap-2 pb-2 border-b border-slate-100">
+                        <i data-lucide="sliders-horizontal" class="w-4 h-4"></i> Hesaplama Parametreleri
                     </h3>
                     
-                    <div class="space-y-3">
-                        <!-- Tip butonları — ayrık, küçük -->
-                        <div class="flex gap-2">
-                            <button onclick="setType('pipe')" id="btn-pipe" class="flex-1 py-1.5 text-[10px] font-bold rounded-md transition-all text-white bg-indigo-600 shadow-sm cursor-pointer">Boru</button>
-                            <button onclick="setType('equipment')" id="btn-equipment" class="flex-1 py-1.5 text-[10px] font-bold rounded-md transition-all cursor-pointer" style="background:var(--section-bg);color:var(--text-sub);border:1px solid var(--section-border);">Ekipman</button>
-                            <button onclick="setType('flat')" id="btn-flat" class="flex-1 py-1.5 text-[10px] font-bold rounded-md transition-all cursor-pointer" style="background:var(--section-bg);color:var(--text-sub);border:1px solid var(--section-border);">Düz Yüzey</button>
+                    <div class="space-y-5">
+                        <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+                            <button onclick="setType('pipe')" id="btn-pipe" class="flex-1 py-2 text-[10px] font-bold rounded-lg transition-all text-white bg-indigo-600 shadow-md">Boru</button>
+                            <button onclick="setType('equipment')" id="btn-equipment" class="flex-1 py-2 text-[10px] font-bold rounded-lg transition-all text-slate-500 hover:text-slate-800">Ekipman</button>
+                            <button onclick="setType('flat')" id="btn-flat" class="flex-1 py-2 text-[10px] font-bold rounded-lg transition-all text-slate-500 hover:text-slate-800">Düz Yüzey</button>
                         </div>
                         <input type="hidden" id="type" value="pipe">
 
-                        <div id="row-dn" class="grid grid-cols-2 gap-2">
+                        <div id="row-dn" class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="field-label">Çap (DN)</label>
-                                <select id="dn" class="glass-input" onchange="calc()"></select>
+                                <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Çap (DN)</label>
+                                <select id="dn" class="glass-input text-xs" onchange="calc()"></select>
                             </div>
                             <div id="box-valve" class="hidden">
-                                <label class="field-label">Ekipman Tipi</label>
-                                <select id="valveType" class="glass-input" onchange="calc()">
+                                <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Ekipman Tipi</label>
+                                <select id="valveType" class="glass-input text-xs" onchange="calc()">
                                     <optgroup label="Vanalar">
                                         <option value="gate">Sürgülü Vana</option>
                                         <option value="globe">Glob Vana</option>
@@ -369,59 +294,57 @@
                                 </select>
                             </div>
                             <div id="box-qty">
-                                <label class="field-label" id="lblQty">Metraj (m)</label>
-                                <input type="number" id="qty" value="1" class="glass-input" oninput="calc()">
+                                <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block" id="lblQty">Metraj (m)</label>
+                                <input type="number" id="qty" value="1" class="glass-input text-xs" oninput="calc()">
                             </div>
                         </div>
                         
-                        <div id="row-dims" class="hidden space-y-2">
-                            <div class="flex items-center gap-3 p-2 rounded-md" style="background:var(--section-bg);border:1px solid var(--section-border);">
-                                <label class="flex items-center gap-1.5 cursor-pointer">
-                                    <input type="radio" name="flatShape" value="rect" checked onchange="toggleFlatShape()" class="text-indigo-600">
-                                    <span class="text-[9px] font-bold uppercase" style="color:var(--text-main);">Dikdörtgen</span>
+                        <div id="row-dims" class="hidden space-y-3">
+                            <div class="flex items-center gap-4 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="flatShape" value="rect" checked onchange="toggleFlatShape()" class="text-indigo-600 focus:ring-indigo-500">
+                                    <span class="text-[10px] font-bold text-slate-600 uppercase">Dikdörtgen</span>
                                 </label>
-                                <label class="flex items-center gap-1.5 cursor-pointer">
-                                    <input type="radio" name="flatShape" value="circle" onchange="toggleFlatShape()" class="text-indigo-600">
-                                    <span class="text-[9px] font-bold uppercase" style="color:var(--text-main);">Daire</span>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="flatShape" value="circle" onchange="toggleFlatShape()" class="text-indigo-600 focus:ring-indigo-500">
+                                    <span class="text-[10px] font-bold text-slate-600 uppercase">Daire</span>
                                 </label>
                             </div>
-                            <div id="box-rect" class="grid grid-cols-2 gap-2">
-                                <div><label class="field-label">Genişlik (cm)</label><input type="number" id="dimW" value="100" class="glass-input" oninput="calc()"></div>
-                                <div><label class="field-label">Yükseklik (cm)</label><input type="number" id="dimH" value="100" class="glass-input" oninput="calc()"></div>
+                            <div id="box-rect" class="grid grid-cols-2 gap-4">
+                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Genişlik (cm)</label><input type="number" id="dimW" value="100" class="glass-input text-xs" oninput="calc()"></div>
+                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Yükseklik (cm)</label><input type="number" id="dimH" value="100" class="glass-input text-xs" oninput="calc()"></div>
                             </div>
                             <div id="box-circle" class="hidden">
-                                <label class="field-label">Çap (cm)</label>
-                                <input type="number" id="dimD" value="100" class="glass-input" oninput="calc()">
+                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Çap (cm)</label><input type="number" id="dimD" value="100" class="glass-input text-xs" oninput="calc()"></div>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-3 gap-2">
-                            <div>
-                                <label class="field-label">İç Sıc. (°C)</label>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div class="col-span-1">
+                                <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">İç Sıc. (°C)</label>
                                 <div class="relative">
-                                    <input type="number" id="tProc" value="150" class="glass-input pl-6 font-bold text-indigo-500" oninput="calc()">
-                                    <i data-lucide="thermometer" class="w-3 h-3 text-indigo-400 absolute left-2 top-[7px]"></i>
+                                    <input type="number" id="tProc" value="150" class="glass-input text-xs pl-7 font-bold text-indigo-600" oninput="calc()">
+                                    <i data-lucide="thermometer" class="w-3 h-3 text-indigo-400 absolute left-2.5 top-2.5"></i>
                                 </div>
                             </div>
-                            <div>
-                                <label class="field-label">Ortam (°C)</label>
-                                <input type="number" id="tAmb" value="25" class="glass-input" oninput="calc()">
+                            <div class="col-span-1">
+                                <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Ortam (°C)</label>
+                                <input type="number" id="tAmb" value="25" class="glass-input text-xs" oninput="calc()">
                             </div>
-                            <div>
-                                <label class="field-label">Rüzgar (m/s)</label>
-                                <input type="number" id="vWind" value="1" step="0.5" class="glass-input" oninput="calc()">
+                            <div class="col-span-1">
+                                <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Rüzgar (m/s)</label>
+                                <input type="number" id="vWind" value="1" step="0.5" class="glass-input text-xs" oninput="calc()">
                             </div>
                         </div>
                     </div>
 
-                    <!-- Katman 1 -->
-                    <div class="mt-3 pt-3" style="border-top:1px solid var(--section-border);">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="text-[9px] font-bold px-2 py-0.5 rounded" style="background:rgba(99,102,241,0.1);color:#6366f1;border:1px solid rgba(99,102,241,0.2);">1. KATMAN</span>
+                    <div class="mt-6 pt-4 border-t border-slate-100">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-[10px] font-bold text-indigo-700 uppercase bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">1. Katman</h4>
                         </div>
-                        <div class="grid grid-cols-3 gap-2">
+                        <div class="grid grid-cols-3 gap-3">
                             <div class="col-span-2">
-                                <select id="mat1" class="glass-input" onchange="calc()">
+                                <select id="mat1" class="glass-input text-xs" onchange="calc()">
                                     <option value="rockwool" selected>Taş Yünü (Sanayi)</option>
                                     <option value="camyunu">Cam Yünü (İzocam)</option>
                                     <option value="needlemat">İğnelenmiş Cam Elyaf (650°C)</option>
@@ -432,22 +355,23 @@
                                 </select>
                             </div>
                             <div>
-                                <input type="number" id="thk1" value="50" class="glass-input font-mono" placeholder="mm" oninput="calc()">
+                                <input type="number" id="thk1" value="50" class="glass-input text-xs" placeholder="mm" oninput="calc()">
                             </div>
                         </div>
                     </div>
 
-                    <!-- Katman 2 -->
-                    <div class="mt-2 pt-2" style="border-top:1px dashed var(--section-border);">
-                        <label class="flex items-center gap-2 cursor-pointer mb-2 group select-none">
-                            <input type="checkbox" id="useL2" onchange="toggleL2()" class="w-3.5 h-3.5 rounded text-indigo-600">
-                            <span class="text-[9px] font-bold uppercase group-hover:text-indigo-500 transition" style="color:var(--text-sub);">2. Katman Ekle (Kompozit)</span>
+                    <div class="mt-4 pt-2 border-t border-dashed border-slate-200">
+                        <label class="flex items-center gap-3 cursor-pointer mb-2 group select-none">
+                            <input type="checkbox" id="useL2" onchange="toggleL2()" class="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                            <span class="text-[10px] font-bold text-slate-500 group-hover:text-indigo-600 transition">2. Katman Ekle (Kompozit)</span>
                         </label>
-                        <div id="layer2Box" class="hidden p-2.5 rounded-lg" style="background:var(--section-bg);border:1px solid var(--section-border);">
-                            <span class="text-[9px] font-bold block mb-2" style="color:#8b5cf6;">2. KATMAN</span>
-                            <div class="grid grid-cols-3 gap-2">
+                        <div id="layer2Box" class="hidden mt-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                             <div class="flex items-center justify-between mb-2">
+                                <h4 class="text-[10px] font-bold text-indigo-700 uppercase">2. Katman</h4>
+                             </div>
+                             <div class="grid grid-cols-3 gap-3">
                                 <div class="col-span-2">
-                                    <select id="mat2" class="glass-input" onchange="calc()">
+                                    <select id="mat2" class="glass-input text-xs" onchange="calc()">
                                         <option value="rubber">Elastomerik Kauçuk</option>
                                         <option value="camyunu">Cam Yünü</option>
                                         <option value="aerogel">Aerogel (Pyrogel XT)</option>
@@ -457,116 +381,115 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <input type="number" id="thk2" value="19" class="glass-input font-mono" placeholder="mm" oninput="calc()">
+                                    <input type="number" id="thk2" value="19" class="glass-input text-xs" placeholder="mm" oninput="calc()">
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Rapora Ekle — kompakt -->
-                    <div class="mt-3 pt-3" style="border-top:1px solid var(--section-border);">
-                        <button id="btnAdd" onclick="addToQueue()" class="w-full py-2 rounded-lg bg-slate-800 text-white font-bold text-[10px] hover:bg-slate-700 transition flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer">
-                            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Bu Senaryoyu Rapora Ekle
+                    <div class="mt-6 pt-4 border-t border-indigo-50">
+                        <button id="btnAdd" onclick="addToQueue()" class="w-full py-3.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 shadow-lg shadow-slate-200 transition-all flex items-center justify-center gap-2 group active:scale-95 cursor-pointer">
+                            <span class="bg-white/10 p-1 rounded group-hover:bg-white/20 transition"><i data-lucide="plus" class="w-4 h-4"></i></span>
+                            BU SENARYOYU RAPORA EKLE
                         </button>
                     </div>
                 </div>
 
-                <!-- Hesaplama Standardı -->
-                <div class="glass-card p-3 rounded-xl" style="border-left:3px solid #8b5cf6;">
-                    <h3 class="text-[10px] font-bold uppercase mb-2 flex items-center gap-2" style="color:var(--text-sub);">
-                        <i data-lucide="book-open" class="w-3.5 h-3.5 text-purple-500"></i> Hesaplama Standardı
-                    </h3>
-                    <div class="grid grid-cols-3 gap-1.5">
-                        <div onclick="setStd('iso')" id="std-iso" class="std-btn active">ISO 12241</div>
-                        <div onclick="setStd('astm')" id="std-astm" class="std-btn">ASTM C680</div>
-                        <div onclick="setStd('vdi')" id="std-vdi" class="std-btn">VDI 2055</div>
-                    </div>
-                    <input type="hidden" id="calcStd" value="iso">
+                <div class="glass-card p-4 rounded-xl border-l-4 border-l-purple-500 bg-white">
+                     <h3 class="text-slate-800 text-xs font-bold uppercase mb-3 flex items-center gap-2">
+                         <i data-lucide="book-open" class="w-4 h-4 text-purple-500"></i> Hesaplama Standardı
+                     </h3>
+                     <div class="grid grid-cols-3 gap-2">
+                         <div onclick="setStd('iso')" id="std-iso" class="std-btn active">ISO 12241</div>
+                         <div onclick="setStd('astm')" id="std-astm" class="std-btn">ASTM C680</div>
+                         <div onclick="setStd('vdi')" id="std-vdi" class="std-btn">VDI 2055</div>
+                     </div>
+                     <input type="hidden" id="calcStd" value="iso">
                 </div>
             </div>
 
-            <!-- ═══ SAĞ PANEL ═══ -->
-            <div class="lg:col-span-8">
-                <div class="glass-card p-6 rounded-xl relative overflow-hidden" style="background:var(--glass-bg);">
-                    <div class="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl pointer-events-none opacity-40" style="background:radial-gradient(circle,rgba(99,102,241,0.15),transparent);transform:translate(30%,-30%);"></div>
+            <div class="lg:col-span-7">
+                <div class="glass-card p-8 rounded-2xl h-full flex flex-col justify-between relative overflow-hidden bg-white/80">
+                    <div class="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none opacity-60"></div>
 
-                    <!-- Sonuç satırı -->
-                    <div class="flex items-start justify-between mb-5 relative z-10">
+                    <div class="flex items-start justify-between mb-8 relative z-10">
                         <div>
-                            <div class="text-[9px] font-bold uppercase tracking-widest mb-1" style="color:var(--text-sub);">Dış Yüzey Sıcaklığı</div>
-                            <div class="flex items-baseline gap-1.5">
-                                <div class="text-6xl font-black tracking-tighter font-mono" style="color:var(--text-main);" id="resTs">--</div>
-                                <div class="text-xl font-medium pb-1" style="color:var(--text-sub);">°C</div>
+                            <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Dış Yüzey Sıcaklığı</div>
+                            <div class="flex items-baseline gap-2">
+                                <div class="text-7xl font-black text-slate-800 tracking-tighter" id="resTs">--</div>
+                                <div class="text-2xl text-slate-400 font-medium pb-2">°C</div>
                             </div>
-                            <div class="mt-2" id="badgeContainer">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-green-100 text-green-700 border border-green-200">GÜVENLİ</span>
+                            <div class="mt-3" id="badgeContainer">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-green-100 text-green-700 border border-green-200 shadow-sm">GÜVENLİ</span>
                             </div>
                         </div>
                         <div class="text-right">
-                            <div class="text-[9px] font-bold uppercase tracking-widest mb-1" style="color:var(--text-sub);">Birim Isı Kaybı</div>
-                            <div class="flex items-baseline justify-end gap-1">
-                                <div class="text-5xl font-black text-indigo-500 font-mono" id="resQUnitVal">--</div>
-                                <div class="text-lg font-bold text-indigo-400 pb-0.5" id="resQUnitLabel">W/m</div>
-                            </div>
-                            <div class="text-[10px] mt-1.5 font-medium px-2 py-0.5 rounded inline-block" style="background:var(--section-bg);color:var(--text-sub);border:1px solid var(--section-border);">Toplam: <span id="resQTotal" class="font-bold" style="color:var(--text-main);">--</span> W</div>
+                             <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Birim Isı Kaybı</div>
+                             <div class="flex items-baseline justify-end gap-1">
+                                <div class="text-6xl font-black text-indigo-600" id="resQUnitVal">--</div>
+                                <div class="text-xl font-bold text-indigo-400 pb-1" id="resQUnitLabel">W/m</div>
+                             </div>
+                             <div class="text-xs text-slate-500 mt-2 font-medium bg-white/50 px-2 py-1 rounded inline-block border border-slate-100">Toplam: <span id="resQTotal" class="text-slate-800 font-bold">--</span> W</div>
                         </div>
                     </div>
                     
-                    <!-- Alert -->
-                    <div id="alertBox" class="hidden mb-4 p-3 rounded-lg flex items-start gap-2.5" style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);">
-                        <i data-lucide="alert-octagon" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+                    <div id="alertBox" class="hidden mb-6 p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3 shadow-sm">
+                        <div class="bg-red-100 p-2 rounded-lg text-red-500"><i data-lucide="alert-octagon" class="w-5 h-5"></i></div>
                         <div>
-                            <h4 class="text-[9px] font-bold text-red-500 uppercase mb-0.5">KRİTİK UYARI</h4>
-                            <p class="text-[10px] text-red-500/80 font-medium leading-relaxed" id="alertMsg">...</p>
+                            <h4 class="text-xs font-bold text-red-600 uppercase mb-1">KRİTİK UYARI</h4>
+                            <p class="text-[11px] text-red-600/80 leading-relaxed font-medium" id="alertMsg">...</p>
                         </div>
                     </div>
 
-                    <!-- EiiF paneli — sabit gösterim, SVG yok -->
-                    <div class="rounded-xl p-4 relative z-10 mb-4" style="border:1px solid var(--section-border);background:var(--section-bg);">
+                    <div class="bg-white rounded-2xl p-6 border border-slate-200 relative z-10 mb-6 shadow-sm">
+                         <!-- BAŞLIK — moda göre değişir -->
+                         <div id="panelHeaderThermal" class="flex justify-between items-end mb-4 border-b border-slate-100 pb-3">
+                             <h4 class="text-xs font-black text-slate-700 uppercase flex items-center gap-2"><i data-lucide="layers" class="w-4 h-4 text-orange-500"></i> Termal Kesit Görünümü</h4>
+                             <span class="text-[9px] text-slate-400 font-bold bg-orange-50 px-2 py-1 rounded border border-orange-100">GERÇEK KOŞULLAR</span>
+                         </div>
+                         <div id="panelHeaderEiif" class="hidden flex justify-between items-end mb-4 border-b border-slate-100 pb-3">
+                             <h4 class="text-xs font-black text-slate-700 uppercase flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-4 h-4 text-green-600"></i> Enerji Verimlilik Sınıfı</h4>
+                             <span class="text-[9px] text-slate-400 font-bold bg-green-50 px-2 py-1 rounded border border-green-100">EN 17956</span>
+                         </div>
 
-                        <!-- Panel başlık -->
-                        <div class="flex justify-between items-center mb-3 pb-2.5" style="border-bottom:1px solid var(--section-border);">
-                            <h4 class="text-[10px] font-black uppercase flex items-center gap-2" style="color:var(--text-main);">
-                                <i data-lucide="bar-chart-3" class="w-3.5 h-3.5 text-green-500"></i> EN 17956 Enerji Verimlilik Sınıfı
-                            </h4>
-                            <span class="text-[9px] font-bold px-2 py-0.5 rounded" style="background:rgba(34,197,94,0.1);color:#16a34a;border:1px solid rgba(34,197,94,0.2);">EN 17956</span>
-                        </div>
+                         <!-- TERMAL KESİT SVG — DİKEY (EiiF kapalıyken) -->
+                         <div id="thermalCrossSection">
+                             <svg id="thermalSvg" viewBox="0 0 360 320" class="w-full" style="max-height:320px;"></svg>
+                         </div>
 
-                        <!-- Sabit parametreler bandı — EiiF modu aktifken gösterilir -->
-                        <div id="eiifLockStrip" class="eiif-lock-strip items-center gap-3 mb-3 px-3 py-2 rounded-lg text-[9px] font-bold" style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);color:#15803d;">
-                            <i data-lucide="lock" class="w-3 h-3 shrink-0"></i>
-                            <span>EN 17956 referans koşulları sabit:</span>
-                            <span class="px-2 py-0.5 rounded font-mono" style="background:rgba(34,197,94,0.15);">Ortam 15°C</span>
-                            <span class="px-2 py-0.5 rounded font-mono" style="background:rgba(34,197,94,0.15);">Rüzgar 0 m/s</span>
-                            <span class="ml-auto text-[8px] opacity-70">Gerçek koşullar için modu kapatın</span>
-                        </div>
+                         <!-- EiiF CHART (EiiF açıkken) -->
+                         <div id="eiifChartWrap" class="hidden">
+                             <div id="eiifChart"></div>
+                         </div>
 
-                        <!-- EiiF chart -->
-                        <div id="eiifChart"></div>
+                         <div id="eiifModeActive" class="hidden mt-3 text-center">
+                             <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold bg-green-100 text-green-700 border border-green-200">
+                                 <i data-lucide="shield-check" class="w-3 h-3"></i> EN 17956 Referans Modu Aktif · Ortam 15°C · Rüzgar 0 m/s
+                             </span>
+                         </div>
 
-                        <!-- Toggle butonu -->
-                        <div class="mt-3 pt-2.5 flex justify-end" style="border-top:1px solid var(--section-border);">
-                            <input type="checkbox" id="eiifMode" onchange="toggleEiifMode()" class="hidden">
-                            <button onclick="document.getElementById('eiifMode').checked=!document.getElementById('eiifMode').checked; toggleEiifMode();" id="eiifToggleBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[9px] font-bold transition-all border cursor-pointer bg-transparent text-green-600 hover:bg-green-50" style="border-color:rgba(34,197,94,0.4);">
-                                <i data-lucide="shield-check" class="w-3 h-3"></i>
-                                <span id="eiifBtnLabel">EN 17956 Referans Moduna Geç</span>
-                            </button>
-                        </div>
+                         <!-- EiiF MODU BUTON — sağ alt -->
+                         <div class="mt-4 pt-3 border-t border-slate-100 flex justify-end">
+                             <input type="checkbox" id="eiifMode" onchange="toggleEiifMode()" class="hidden">
+                             <button onclick="document.getElementById('eiifMode').checked=!document.getElementById('eiifMode').checked; toggleEiifMode();" id="eiifToggleBtn" class="flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-bold transition-all border cursor-pointer bg-white text-green-700 border-green-300 hover:bg-green-50 hover:border-green-400 shadow-sm">
+                                 <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                                 <span id="eiifBtnLabel">EN 17956 Moduna Geç</span>
+                             </button>
+                         </div>
                     </div>
 
-                    <!-- Alt istatistikler -->
-                    <div class="grid grid-cols-2 gap-3 relative z-10">
-                        <div class="p-3.5 rounded-lg" style="border:1px solid var(--section-border);background:var(--section-bg);">
-                            <div class="text-[9px] font-bold uppercase mb-1" style="color:var(--text-sub);">Hesaplanan Alan</div>
-                            <div class="text-xl font-bold font-mono tracking-tight" style="color:var(--text-main);" id="resArea">-- m²</div>
-                        </div>
-                        <div class="p-3.5 rounded-lg hidden" id="rowInter" style="border:1px solid rgba(99,102,241,0.25);background:rgba(99,102,241,0.05);">
-                            <div class="text-[9px] font-bold uppercase mb-1 flex items-center gap-1" style="color:#6366f1;">
-                                <i data-lucide="layers" class="w-3 h-3"></i> Ara Yüzey Sıcaklığı
-                            </div>
-                            <div class="text-xl font-bold font-mono tracking-tight text-indigo-600" id="resTInter">-- °C</div>
-                            <div class="text-[9px] mt-0.5" style="color:var(--text-sub);">Katman 1–2 arası</div>
-                        </div>
+                    <div class="grid grid-cols-2 gap-4 relative z-10">
+                         <div class="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm">
+                             <div class="text-[9px] text-slate-400 font-bold uppercase mb-2">Hesaplanan Alan</div>
+                             <div class="text-2xl font-bold text-slate-800 font-mono tracking-tight" id="resArea">-- m²</div>
+                         </div>
+                         <div class="p-5 rounded-2xl border border-indigo-100 bg-indigo-50/50 hidden" id="rowInter">
+                             <div class="text-[9px] text-indigo-400 font-bold uppercase mb-2 flex items-center gap-1">
+                                 <i data-lucide="layers" class="w-3 h-3"></i> Ara Yüzey Sıcaklığı
+                             </div>
+                             <div class="text-2xl font-bold text-indigo-900 font-mono tracking-tight" id="resTInter">-- °C</div>
+                             <div class="text-[9px] text-indigo-400 mt-1 font-medium">Katman 1 ve 2 arası</div>
+                         </div>
                     </div>
                 </div>
             </div>
@@ -835,58 +758,51 @@
         const cb = document.getElementById('eiifMode');
         const tAmb = document.getElementById('tAmb');
         const vWind = document.getElementById('vWind');
-        const lockStrip = document.getElementById('eiifLockStrip');
+        const indicator = document.getElementById('eiifModeActive');
+        const thermalPanel = document.getElementById('thermalCrossSection');
+        const eiifPanel = document.getElementById('eiifChartWrap');
+        const headerThermal = document.getElementById('panelHeaderThermal');
+        const headerEiif = document.getElementById('panelHeaderEiif');
         const toggleBtn = document.getElementById('eiifToggleBtn');
         const btnLabel = document.getElementById('eiifBtnLabel');
         if (cb.checked) {
             eiifPrevAmb = tAmb.value;
             eiifPrevWind = vWind.value;
-            tAmb.value = 15; vWind.value = 0;
-            tAmb.disabled = true; vWind.disabled = true;
-            tAmb.classList.add('!bg-green-50','!border-green-300','!text-green-700');
-            vWind.classList.add('!bg-green-50','!border-green-300','!text-green-700');
-            lockStrip.classList.add('active');
-            toggleBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[9px] font-bold transition-all border cursor-pointer bg-green-600 text-white border-green-700 hover:bg-green-700';
-            btnLabel.textContent = 'Gerçek Koşullara Dön';
+            tAmb.value = 15;
+            vWind.value = 0;
+            tAmb.disabled = true;
+            vWind.disabled = true;
+            tAmb.classList.add('!bg-green-50', '!border-green-300', '!text-green-700');
+            vWind.classList.add('!bg-green-50', '!border-green-300', '!text-green-700');
+            thermalPanel.classList.add('hidden');
+            eiifPanel.classList.remove('hidden');
+            headerThermal.classList.add('hidden');
+            headerEiif.classList.remove('hidden');
+            indicator.classList.remove('hidden');
+            toggleBtn.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-bold transition-all border cursor-pointer bg-green-600 text-white border-green-700 hover:bg-green-700 shadow-md';
+            btnLabel.textContent = 'Termal Görünüme Dön';
         } else {
-            tAmb.value = eiifPrevAmb || 25; vWind.value = eiifPrevWind || 1;
-            tAmb.disabled = false; vWind.disabled = false;
-            tAmb.classList.remove('!bg-green-50','!border-green-300','!text-green-700');
-            vWind.classList.remove('!bg-green-50','!border-green-300','!text-green-700');
-            lockStrip.classList.remove('active');
-            toggleBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[9px] font-bold transition-all border cursor-pointer bg-transparent text-green-600 hover:bg-green-50';
-            toggleBtn.style.borderColor = 'rgba(34,197,94,0.4)';
-            btnLabel.textContent = 'EN 17956 Referans Moduna Geç';
+            tAmb.value = eiifPrevAmb || 25;
+            vWind.value = eiifPrevWind || 1;
+            tAmb.disabled = false;
+            vWind.disabled = false;
+            tAmb.classList.remove('!bg-green-50', '!border-green-300', '!text-green-700');
+            vWind.classList.remove('!bg-green-50', '!border-green-300', '!text-green-700');
+            thermalPanel.classList.remove('hidden');
+            eiifPanel.classList.add('hidden');
+            headerThermal.classList.remove('hidden');
+            headerEiif.classList.add('hidden');
+            indicator.classList.add('hidden');
+            toggleBtn.className = 'flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-bold transition-all border cursor-pointer bg-white text-green-700 border-green-300 hover:bg-green-50 hover:border-green-400 shadow-sm';
+            btnLabel.textContent = 'EN 17956 Moduna Geç';
         }
         lucide.createIcons();
         calc();
     }
-    function toggleDark(on) {
-        document.documentElement.setAttribute('data-theme', on ? 'dark' : 'light');
-        localStorage.setItem('optimizi-theme', on ? 'dark' : 'light');
-    }
-    function initApp(){ 
-        // Tema yükle
-        const saved = localStorage.getItem('optimizi-theme') || 'light';
-        document.documentElement.setAttribute('data-theme', saved);
-        if(saved === 'dark') { const t = document.getElementById('darkToggle'); if(t) t.checked = true; }
-        fillDN('dn'); setType('pipe'); lucide.createIcons(); calc(); toggleProjectInfo(); 
-    }
+    function initApp(){ fillDN('dn'); setType('pipe'); lucide.createIcons(); calc(); toggleProjectInfo(); }
     function setStd(val){ document.getElementById('calcStd').value = val; document.querySelectorAll('.std-btn').forEach(b=>b.classList.remove('active')); document.getElementById('std-'+val).classList.add('active'); const n={iso:'TS EN ISO 12241',astm:'ASTM C680',vdi:'VDI 2055'}; document.getElementById('stdBadge').innerText=n[val]; calc(); }
     function fillDN(id){ const el=document.getElementById(id); el.innerHTML=''; for(const[k,v]of Object.entries(PIPES)){let o=document.createElement('option'); o.value=k; o.text=`DN ${k} (${v}mm)`; el.add(o);} el.value='100'; }
-    function setType(t){ 
-        document.getElementById('type').value=t; 
-        const inact = `flex-1 py-1.5 text-[10px] font-bold rounded-md transition-all cursor-pointer`;
-        document.querySelectorAll('[id^="btn-"]').forEach(b=>{ b.className=inact; b.style.background='var(--section-bg)'; b.style.color='var(--text-sub)'; b.style.border='1px solid var(--section-border)'; });
-        const ab = document.getElementById('btn-'+t);
-        ab.className=inact+' text-white bg-indigo-600 shadow-sm'; ab.style.background=''; ab.style.color=''; ab.style.border='';
-        document.getElementById('box-valve').classList.add('hidden'); document.getElementById('row-dn').classList.remove('hidden'); document.getElementById('row-dims').classList.add('hidden'); 
-        const lbl=document.getElementById('lblQty'); 
-        if(t==='flat'){document.getElementById('row-dn').classList.add('hidden');document.getElementById('row-dims').classList.remove('hidden');}
-        else if(t==='equipment'){document.getElementById('box-valve').classList.remove('hidden');lbl.innerText="Adet";}
-        else{lbl.innerText="Metraj (m)";} 
-        calc(); 
-    }
+    function setType(t){ document.getElementById('type').value=t; document.querySelectorAll('[id^="btn-"]').forEach(b=>b.className="flex-1 py-2 text-[10px] font-bold rounded-lg transition-all text-slate-500 hover:text-slate-800 bg-white shadow-sm"); document.getElementById('btn-'+t).className="flex-1 py-2 text-[10px] font-bold rounded-lg transition-all text-white bg-indigo-600 shadow-md"; document.getElementById('box-valve').classList.add('hidden'); document.getElementById('row-dn').classList.remove('hidden'); document.getElementById('row-dims').classList.add('hidden'); const lbl=document.getElementById('lblQty'); if(t==='flat'){document.getElementById('row-dn').classList.add('hidden');document.getElementById('row-dims').classList.remove('hidden');}else if(t==='equipment'){document.getElementById('box-valve').classList.remove('hidden');lbl.innerText="Adet";}else{lbl.innerText="Metraj (m)";} calc(); }
     function toggleFlatShape(){ const s=document.querySelector('input[name="flatShape"]:checked').value; if(s==='rect'){document.getElementById('box-rect').classList.remove('hidden');document.getElementById('box-circle').classList.add('hidden');}else{document.getElementById('box-rect').classList.add('hidden');document.getElementById('box-circle').classList.remove('hidden');} calc(); }
     function toggleL2(){ const c=document.getElementById('useL2').checked; if(c){document.getElementById('layer2Box').classList.remove('hidden');document.getElementById('rowInter').classList.remove('hidden');}else{document.getElementById('layer2Box').classList.add('hidden');document.getElementById('rowInter').classList.add('hidden');} calc(); }
     function getK(m,T){ return MATS[m].a+(MATS[m].b*T)+(MATS[m].c*T*T); }
