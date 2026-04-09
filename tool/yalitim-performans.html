@@ -361,12 +361,17 @@
             </div>
           </div>
 
-          <!-- Katman 2 -->
+          <!-- Katman 2 + Ekle butonu yan yana -->
           <div class="border-t border-dashed border-slate-200 pt-2">
-            <label class="flex items-center gap-2 cursor-pointer mb-2 select-none">
-              <input type="checkbox" id="useL2" onchange="toggleL2()" class="w-3.5 h-3.5 rounded text-indigo-600">
-              <span class="text-[10px] font-bold text-slate-500">2. Katman Ekle (Kompozit)</span>
-            </label>
+            <div class="flex items-center justify-between mb-2">
+              <label class="flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" id="useL2" onchange="toggleL2()" class="w-3.5 h-3.5 rounded text-indigo-600">
+                <span class="text-[10px] font-bold text-slate-500">2. Katman Ekle (Kompozit)</span>
+              </label>
+              <button id="btnAdd" onclick="addToQueue()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-[10px] font-bold transition cursor-pointer active:scale-95 shrink-0">
+                <i data-lucide="plus" class="w-3 h-3"></i> Rapora Ekle
+              </button>
+            </div>
             <div id="layer2Box" class="hidden p-3 bg-slate-50 rounded-lg border border-slate-100">
               <div class="text-[10px] font-bold text-indigo-600 uppercase mb-2">2. Katman</div>
               <div class="grid grid-cols-3 gap-2">
@@ -388,14 +393,6 @@
                 </div>
               </div>
             </div>
-          </div>
-
-          <!-- Ekle butonu -->
-          <div class="mt-3 pt-3 border-t border-slate-100">
-            <button id="btnAdd" onclick="addToQueue()" class="btn-primary">
-              <span class="bg-white/10 p-0.5 rounded"><i data-lucide="plus" class="w-3.5 h-3.5"></i></span>
-              BU SENARYOYU RAPORA EKLE
-            </button>
           </div>
         </div>
 
@@ -514,7 +511,7 @@
             Henüz senaryo eklenmedi.
           </div>
 
-          <div id="queueList" class="hidden"></div>
+          <div id="queueList" class="hidden" style="max-height: calc(5 * 57px); overflow-y: auto;"></div>
         </div>
 
       </div>
@@ -705,7 +702,7 @@
     renderQueueList();
     const btn = document.getElementById('btnAdd');
     const old = btn.innerHTML;
-    btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i> EKLENDİ (${reportQueue.length})`;
+    btn.innerHTML = `<i data-lucide="check" class="w-3 h-3"></i> Eklendi (${reportQueue.length})`;
     btn.style.background = '#16a34a';
     setTimeout(() => { btn.innerHTML = old; btn.style.background = ''; lucide.createIcons(); }, 1200);
     const topBtn = document.getElementById('topReportBtn');
