@@ -7,7 +7,7 @@
 const PIPES = {
     15:21.3, 20:26.7, 25:33.7, 32:42.4, 40:48.3, 50:60.3,
     65:76.1, 80:88.9, 100:114.3, 125:139.7, 150:168.3,
-    200:219.1, 250:273.0, 300:323.9, 350:355.6, 400:406.4, 500:508.0, 600:610.0
+    200:219.1, 250:273.0, 300:323.9, 350:355.6, 400:406.4, 500:508.0
 };
 
 const SEPARATORS = {
@@ -16,14 +16,33 @@ const SEPARATORS = {
 };
 
 const MATS = {
-    rockwool:   { a: 0.031, b: 0.00013, c: 3.14e-7, maxTemp: 650,  name: "Taş Yünü" },
-    glasswool:  { a: 0.032, b: 0.00018, c: 0,       maxTemp: 250,  name: "Cam Yünü" },
-    needlemat:  { a: 0.033, b: 0.00015, c: 0,       maxTemp: 650,  name: "İğnelenmiş Cam Elyaf" },
-    ceramic:    { a: 0.025, b: 0.00012, c: 1.2e-7,  maxTemp: 1200, name: "Seramik Elyaf" },
-    aerogel:    { a: 0.019, b: 0.00004, c: 5e-8,    maxTemp: 650,  name: "Aerogel" },
-    rubber:     { a: 0.034, b: 0.000075, c: 0,      maxTemp: 105,  name: "Elastomerik Kauçuk" },
-    pu:         { a: 0.024, b: 0.000075, c: 0,      maxTemp: 100,  name: "Poliüretan" },
-    bare:       { a: 25,    b: 0,        c: 0,      maxTemp: 9999, name: "Yalıtımsız" }
+    // ── Marka bazlı, datasheet'ten least-squares fit (2026-04) ──────────
+    // İzocam Sanayi Şiltesi (TS EN 14303 / TS EN 12667)
+    // Tip 650 → λ @ 50…350°C: 0.038/0.047/0.058/0.069/0.083/0.098/0.115  max hata %1.0
+    rockwool_650:       { a: 0.030857, b: 0.00013000, c: 3.143e-7, maxTemp: 650,  name: "İzocam Sanayi Şiltesi Tip 650",  brand: "İzocam" },
+    // Tip 700 → 0.038/0.046/0.057/0.066/0.079/0.093/0.108  max hata %2.0
+    rockwool_700:       { a: 0.031286, b: 0.00012238, c: 2.762e-7, maxTemp: 700,  name: "İzocam Sanayi Şiltesi Tip 700",  brand: "İzocam" },
+    // Tip 750 → 0.037/0.044/0.052/0.061/0.071/0.082/0.094  max hata %0.0
+    rockwool_750:       { a: 0.031000, b: 0.00011000, c: 2.000e-7, maxTemp: 650,  name: "İzocam Sanayi Şiltesi Tip 750",  brand: "İzocam" },
+    // Valmiera Glass AF Needled Mat (ASTM C177)
+    // λ @ 50…550°C: 0.039/0.043/0.055/0.072/0.083/0.095/0.109/0.124/0.140  max hata %0.4
+    needlemat_valmiera: { a: 0.036649, b: 0.00003497, c: 2.786e-7, maxTemp: 600,  name: "Valmiera İğnelenmiş Cam Elyaf",   brand: "Valmiera Glass" },
+    // ArmaGel XGH (Armacell) — ASTM C177
+    // λ @ 24…371°C: 0.021/0.022/0.023/0.025/0.029/0.032/0.036/0.043  max hata %2.6
+    armagel_xgh:        { a: 0.021162, b: 0.00000695, c: 1.359e-7, maxTemp: 650,  name: "ArmaGel XGH Aerojel",             brand: "Armacell" },
+    // Pyrogel XTE (Aspen Aerogels) — ASTM C177
+    // λ @ 0…600°C: 0.020/0.023/0.028/0.035/0.046/0.064/0.089  max hata %7.9 (0°C'de, sanayi >100°C'de %3)
+    pyrogel_xte:        { a: 0.021571, b: -0.00002107, c: 2.179e-7, maxTemp: 650, name: "Pyrogel XTE Aerojel",             brand: "Aspen Aerogels" },
+    // ── Geriye dönük uyumluluk — eski frontend/ROI araçları için ────────
+    rockwool:   { a: 0.030857, b: 0.00013000, c: 3.143e-7, maxTemp: 650,  name: "Taş Yünü" },
+    glasswool:  { a: 0.032,    b: 0.00018,    c: 0,        maxTemp: 250,  name: "Cam Yünü" },
+    camyunu:    { a: 0.032,    b: 0.00018,    c: 0,        maxTemp: 250,  name: "Cam Yünü" },
+    needlemat:  { a: 0.036649, b: 0.00003497, c: 2.786e-7, maxTemp: 600,  name: "İğnelenmiş Cam Elyaf" },
+    ceramic:    { a: 0.025,    b: 0.00012,    c: 1.2e-7,   maxTemp: 1200, name: "Seramik Elyaf" },
+    aerogel:    { a: 0.021162, b: 0.00000695, c: 1.359e-7, maxTemp: 650,  name: "Aerogel" },
+    rubber:     { a: 0.034,    b: 0.000075,   c: 0,        maxTemp: 105,  name: "Elastomerik Kauçuk" },
+    pu:         { a: 0.024,    b: 0.000075,   c: 0,        maxTemp: 100,  name: "Poliüretan" },
+    bare:       { a: 25,       b: 0,          c: 0,        maxTemp: 9999, name: "Yalıtımsız" }
 };
 
 const VALVE_FACTORS = {
