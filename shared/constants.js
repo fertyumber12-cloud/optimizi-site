@@ -11,7 +11,7 @@ root.OPTIMIZI = (function() {
     var PIPES = {
         15:21.3, 20:26.7, 25:33.7, 32:42.4, 40:48.3, 50:60.3,
         65:76.1, 80:88.9, 100:114.3, 125:139.7, 150:168.3,
-        200:219.1, 250:273.0, 300:323.9, 350:355.6, 400:406.4, 500:508.0, 600:610.0
+        200:219.1, 250:273.0, 300:323.9, 350:355.6, 400:406.4, 500:508.0
     };
 
     var SEPARATORS = {
@@ -20,8 +20,17 @@ root.OPTIMIZI = (function() {
     };
 
     var MATS = {
-        rockwool:   { a: 0.031, b: 0.00013, c: 3.14e-7, maxTemp: 650,  name: "Taş Yünü" },
+        // Marka bazlı tanımlar (yalitim-performans.html ile senkronize)
+        rockwool_650:       { a: 0.03272, b: 0.0001228, c: 4.0e-7,  maxTemp: 650,  name: "İzocam Sanayi Şiltesi Tip 650", brand: "İzocam" },
+        rockwool_700:       { a: 0.03260, b: 0.0001100, c: 3.7e-7,  maxTemp: 700,  name: "İzocam Sanayi Şiltesi Tip 700", brand: "İzocam" },
+        rockwool_750:       { a: 0.03210, b: 0.0000920, c: 3.0e-7,  maxTemp: 650,  name: "İzocam Sanayi Şiltesi Tip 750", brand: "İzocam" },
+        needlemat_valmiera: { a: 0.03540, b: 0.0001380, c: 4.8e-7,  maxTemp: 600,  name: "Valmiera İğnelenmiş Cam Elyaf", brand: "Valmiera Glass" },
+        armagel_xgh:        { a: 0.021162, b: 0.00000695, c: 1.359e-7,  maxTemp: 650,  name: "ArmaGel XGH Aerojel",           brand: "Armacell" },
+        pyrogel_xte:        { a: 0.021571, b: -0.00002107, c: 2.179e-7, maxTemp: 650,  name: "Pyrogel XTE Aerojel",            brand: "Aspen Aerogels" },
+        // Geriye dönük uyumluluk için eski anahtarlar korunuyor
+        rockwool:   { a: 0.035, b: 0.00017, c: 0,       maxTemp: 650,  name: "Taş Yünü" },
         glasswool:  { a: 0.032, b: 0.00018, c: 0,       maxTemp: 250,  name: "Cam Yünü" },
+        camyunu:    { a: 0.032, b: 0.00018, c: 0,       maxTemp: 250,  name: "Cam Yünü" },
         needlemat:  { a: 0.033, b: 0.00015, c: 0,       maxTemp: 650,  name: "İğnelenmiş Cam Elyaf" },
         ceramic:    { a: 0.025, b: 0.00012, c: 1.2e-7,  maxTemp: 1200, name: "Seramik Elyaf" },
         aerogel:    { a: 0.019, b: 0.00004, c: 5e-8,    maxTemp: 650,  name: "Aerogel" },
