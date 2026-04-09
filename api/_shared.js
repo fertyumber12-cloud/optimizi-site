@@ -16,7 +16,7 @@ const SEPARATORS = {
 };
 
 const MATS = {
-    rockwool:   { a: 0.035, b: 0.00017, c: 0,       maxTemp: 650,  name: "Taş Yünü" },
+    rockwool:   { a: 0.031, b: 0.00013, c: 3.14e-7, maxTemp: 650,  name: "Taş Yünü" },
     glasswool:  { a: 0.032, b: 0.00018, c: 0,       maxTemp: 250,  name: "Cam Yünü" },
     needlemat:  { a: 0.033, b: 0.00015, c: 0,       maxTemp: 650,  name: "İğnelenmiş Cam Elyaf" },
     ceramic:    { a: 0.025, b: 0.00012, c: 1.2e-7,  maxTemp: 1200, name: "Seramik Elyaf" },
