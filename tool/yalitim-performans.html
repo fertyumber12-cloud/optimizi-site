@@ -345,6 +345,7 @@
                             <div class="col-span-2">
                                 <select id="mat1" class="glass-input text-xs" onchange="calc()">
                                     <option value="rockwool" selected>Taş Yünü (Sanayi)</option>
+                                    <option value="armagel">ArmaGel XGH (650°C)</option>
                                     <option value="camyunu">Cam Yünü (İzocam)</option>
                                     <option value="needlemat">İğnelenmiş Cam Elyaf (650°C)</option>
                                     <option value="ceramic">Seramik Yünü (1260°C)</option>
@@ -372,6 +373,7 @@
                                 <div class="col-span-2">
                                     <select id="mat2" class="glass-input text-xs" onchange="calc()">
                                         <option value="rubber">Elastomerik Kauçuk</option>
+                                        <option value="armagel">ArmaGel XGH (650°C)</option>
                                         <option value="camyunu">Cam Yünü</option>
                                         <option value="aerogel">Aerogel (Pyrogel XT)</option>
                                         <option value="needlemat">İğnelenmiş Cam Elyaf</option>
@@ -588,7 +590,7 @@
             safeSet('cover-provider', provider);
             safeSet('cover-date', dateStr);
             
-            renderPrintTable();
+            renderPrintTable(lang);
             
             setTimeout(() => {
                 lucide.createIcons();
@@ -601,7 +603,8 @@
         }
     }
 
-    function renderPrintTable() {
+    function renderPrintTable(lang) {
+        const isEN = (lang === 'en');
         const printWrapper = document.getElementById('print-wrapper');
         
         // 1. Mevcut Ön Kapağı (Front Cover) Sakla, Gerisini Temizle
@@ -629,8 +632,8 @@
                         <div class="flex items-center gap-3 mb-2">
                             <div class="w-12 h-12 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-500 shrink-0"><i data-lucide="${item.typeIcon}" class="w-6 h-6"></i></div>
                             <div>
-                                <div class="font-bold text-slate-800 text-sm uppercase leading-tight">${item.sysType}</div>
-                                <div class="text-[10px] text-slate-400 mt-1 font-medium">${item.tAmb}°C Ortam • ${item.vWind} m/s Rüzgar</div>
+                                <div class="font-bold text-slate-800 text-sm uppercase leading-tight">${isEN ? (item.sysTypeEN||item.sysType) : item.sysType}</div>
+                                <div class="text-[10px] text-slate-400 mt-1 font-medium">${item.tAmb}°C ${isEN?'Ambient':'Ortam'} • ${item.vWind} m/s ${isEN?'Wind':'Rüzgar'}</div>
                             </div>
                         </div>
                         <div class="inline-block self-start bg-slate-800 text-white text-[10px] font-bold px-3 py-1 rounded-full">${item.quantity}</div>
@@ -638,7 +641,7 @@
                     <div class="w-5/12 flex flex-col justify-center px-6">
                         <div class="flex justify-between items-center mb-3">
                             <span class="bg-indigo-50 text-indigo-700 px-2 py-1 rounded text-[10px] font-bold border border-indigo-100">${item.matName}</span>
-                            <span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-[10px] font-bold border border-slate-200">Toplam: ${item.thkTotal}mm</span>
+                            <span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-[10px] font-bold border border-slate-200">${isEN?'Total':'Toplam'}: ${item.thkTotal}mm</span>
                         </div>
                         <div class="flex items-center gap-3">
                             <span class="text-red-600 font-bold text-sm min-w-[40px] text-right">${item.tProc}°C</span>
@@ -650,11 +653,11 @@
                     </div>
                     <div class="w-3/12 border-l border-slate-100 pl-4 text-right">
                         <div class="flex items-center justify-end gap-2 mb-1">
-                            <span class="text-[9px] font-bold text-slate-400 uppercase">Enerji Sınıfı</span>
+                            <span class="text-[9px] font-bold text-slate-400 uppercase">${isEN?'Energy Class':'Enerji Sınıfı'}</span>
                             <div class="w-6 h-6 flex items-center justify-center rounded text-xs font-bold text-white shadow-sm" style="background-color: var(--c-${item.eClass})">${item.eClass}</div>
                         </div>
                         <div class="text-2xl font-black text-slate-800 tracking-tight">${item.qUnit}</div>
-                        <div class="text-[9px] text-slate-400 font-bold">Isı Kaybı (W/m)</div>
+                        <div class="text-[9px] text-slate-400 font-bold">${isEN?'Heat Loss (W/m)':'Isı Kaybı (W/m)'}</div>
                     </div>
                 </div>`;
             });
@@ -667,9 +670,9 @@
                 </div>
                 
                 <div class="flex items-center px-6 py-2 mb-4 bg-slate-900 text-white rounded-lg text-[9px] font-bold uppercase tracking-wider shadow-sm">
-                    <div class="w-4/12">Sistem Bileşenleri</div>
-                    <div class="w-5/12 text-center">Yalıtım Konfigürasyonu & Termal Profil</div>
-                    <div class="w-3/12 text-right">Performans</div>
+                    <div class="w-4/12">${isEN?'System Components':'Sistem Bileşenleri'}</div>
+                    <div class="w-5/12 text-center">${isEN?'Insulation Configuration & Thermal Profile':'Yalıtım Konfigürasyonu & Termal Profil'}</div>
+                    <div class="w-3/12 text-right">${isEN?'Performance':'Performans'}</div>
                 </div>
 
                 <div class="space-y-4 flex-1">
@@ -682,7 +685,7 @@
                             ENGINEERING SOLUTIONS
                         </span>
                         <span class="text-[9px] text-slate-400 font-bold">
-                            Sayfa ${i + 1} / ${totalPages}
+                            ${isEN?'Page':'Sayfa'} ${i + 1} / ${totalPages}
                         </span>
                     </div>
                 </div>
@@ -709,7 +712,7 @@
             </div>
             
             <div class="absolute bottom-12 text-center">
-                <p class="text-[10px] text-slate-500 font-mono mb-1">TS EN ISO 12241 STANDARTLARINA UYGUNDUR</p>
+                <p class="text-[10px] text-slate-500 font-mono mb-1">TS EN ISO 12241 ${isEN?'COMPLIANT':'STANDARTLARINA UYGUNDUR'}</p>
                 <p class="text-xs text-slate-400 font-bold">Engineering Solutions © ${new Date().getFullYear()}</p>
             </div>
         </div>`;
@@ -731,11 +734,23 @@
         let thkText = thk1;
         if(useL2) { matText += " + " + mat2.options[mat2.selectedIndex].text.split('(')[0]; thkText += `+${parseInt(thk2)}`; }
         let eClass = 'G'; const activeBar = document.querySelector('.eiif-row.active .eiif-label'); if(activeBar) eClass = activeBar.innerText;
-        let icon = 'box'; let qtyDisplay = ""; let sysLabel = "";
-        if(type === 'pipe') { icon = 'circle-dot'; qtyDisplay = qtyVal + " m"; sysLabel = `Boru Hat (DN${document.getElementById('dn').value})`; }
-        else if(type === 'equipment') { icon = 'settings-2'; qtyDisplay = qtyVal + " Adet"; const vTypeSelect = document.getElementById('valveType'); sysLabel = `${vTypeSelect.options[vTypeSelect.selectedIndex].text} (DN${document.getElementById('dn').value})`; }
-        else if(type === 'flat') { icon = 'square'; qtyDisplay = document.getElementById('resArea').innerText; const shape = document.querySelector('input[name="flatShape"]:checked').value; sysLabel = shape === 'rect' ? 'Düz Yüzey (Dikdörtgen)' : 'Düz Yüzey (Daire/Tank)'; }
-        return { sysType: sysLabel, typeIcon: icon, quantity: qtyDisplay, tProc: document.getElementById('tProc').value, tAmb: document.getElementById('tAmb').value, vWind: document.getElementById('vWind').value, matName: matText, thkTotal: thkText, Ts: document.getElementById('resTs').innerText, qUnit: document.getElementById('resQUnitVal').innerText, eClass: eClass };
+        let icon = 'box'; let qtyDisplay = ""; let sysType = ""; let sysTypeEN = "";
+        const dnVal = document.getElementById('dn') ? document.getElementById('dn').value : '';
+        if(type === 'pipe') {
+            icon = 'circle-dot'; qtyDisplay = qtyVal + " m";
+            sysType = `Boru Hat (DN${dnVal})`; sysTypeEN = `Pipe Line (DN${dnVal})`;
+        } else if(type === 'equipment') {
+            icon = 'settings-2'; qtyDisplay = qtyVal;
+            const vTypeSelect = document.getElementById('valveType');
+            const vLabel = vTypeSelect.options[vTypeSelect.selectedIndex].text;
+            sysType = `${vLabel} (DN${dnVal})`; sysTypeEN = `${vLabel} (DN${dnVal})`;
+        } else if(type === 'flat') {
+            icon = 'square'; qtyDisplay = document.getElementById('resArea').innerText;
+            const shape = document.querySelector('input[name="flatShape"]:checked').value;
+            sysType = shape === 'rect' ? 'Düz Yüzey (Dikdörtgen)' : 'Düz Yüzey (Daire/Tank)';
+            sysTypeEN = shape === 'rect' ? 'Flat Surface (Rectangular)' : 'Flat Surface (Circle/Tank)';
+        }
+        return { sysType, sysTypeEN, typeIcon: icon, quantity: qtyDisplay, tProc: document.getElementById('tProc').value, tAmb: document.getElementById('tAmb').value, vWind: document.getElementById('vWind').value, matName: matText, thkTotal: thkText, Ts: document.getElementById('resTs').innerText, qUnit: document.getElementById('resQUnitVal').innerText, eClass: eClass };
     }
     
     // Sabitler shared/constants.js'den geliyor
@@ -743,6 +758,7 @@
     // yalitim-performans kendi MATS'ini kullanır (camyunu key'i + limit property)
     const MATS = {
         rockwool:   {a:0.031, b:0.00013, c:3.14e-7, limit:650},
+        armagel:    {a:0.021, b:0.0000070, c:1.36e-7, limit:650, name:"ArmaGel XGH"},
         camyunu:    {a:0.032, b:0.00018, c:0,       limit:250, name:"Cam Yünü"},
         needlemat:  {a:0.033, b:0.00015, c:0,       limit:650, name:"İğnelenmiş Cam Elyaf"},
         ceramic:    {a:0.025, b:0.00012, c:1.2e-7,  limit:1200},
